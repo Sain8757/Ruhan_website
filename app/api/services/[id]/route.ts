@@ -42,15 +42,18 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     },
   });
 
-  await prisma.activityLog.create({
-    data: {
-      userId: (session.user as any).id,
-      action: "UPDATE_SERVICE_STATUS",
-      entity: "Service",
-      entityId: service.id,
-      details: `Updated service status to ${service.status}`,
-    },
-  });
+  const userId = (session.user as any).id;
+  if (userId !== "admin-hardcoded") {
+    await prisma.activityLog.create({
+      data: {
+        userId: userId,
+        action: "UPDATE_SERVICE_STATUS",
+        entity: "Service",
+        entityId: service.id,
+        details: `Updated service status to ${service.status}`,
+      },
+    });
+  }
 
   return NextResponse.json(service);
 }

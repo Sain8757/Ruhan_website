@@ -20,11 +20,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           credentials?.email === "Ruhanahmadxyz123@" && 
           credentials?.password === "Ruhanxyz@123"
         ) {
+          let hardcodedUser = await prisma.user.findFirst({ where: { email: "admin@raseva.com" } });
+          if (!hardcodedUser) {
+            hardcodedUser = await prisma.user.create({
+              data: {
+                name: "Ruhan Ahmad",
+                email: "admin@raseva.com",
+                password: await bcrypt.hash("Ruhanxyz@123", 10),
+                role: "ADMIN",
+                isActive: true
+              }
+            });
+          }
           return {
-            id: "admin-hardcoded",
-            name: "Ruhan Ahmad",
-            email: "admin@raseva.com", // Used as a standard email for session
-            role: "ADMIN",
+            id: hardcodedUser.id,
+            name: hardcodedUser.name,
+            email: hardcodedUser.email,
+            role: hardcodedUser.role,
           };
         }
 
