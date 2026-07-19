@@ -10,7 +10,8 @@ import {
   RefreshCw, 
   Trash2, 
   Download, 
-  ListOrdered 
+  ListOrdered,
+  PenTool
 } from "lucide-react";
 
 export type PdfToolId = 
@@ -25,7 +26,8 @@ export type PdfToolId =
   | "rotate" 
   | "delete-pages" 
   | "extract-pages" 
-  | "reorder-pages";
+  | "reorder-pages"
+  | "add-signature";
 
 export interface PdfToolDefinition {
   id: PdfToolId;
@@ -132,5 +134,13 @@ export const PDF_TOOLS: PdfToolDefinition[] = [
     icon: Unlock,
     color: "bg-emerald-500",
     category: "Security"
+  },
+  {
+    id: "add-signature",
+    title: "Add Signature",
+    description: "Place a signature or image on your PDF pages.",
+    icon: PenTool,
+    color: "bg-pink-500",
+    category: "Organize"
   }
 ];

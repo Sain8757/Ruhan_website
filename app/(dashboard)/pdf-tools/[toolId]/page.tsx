@@ -18,6 +18,7 @@ import RotatePdfTool from "./components/RotatePdfTool";
 import DeletePagesTool from "./components/DeletePagesTool";
 import ExtractPagesTool from "./components/ExtractPagesTool";
 import ReorderPagesTool from "./components/ReorderPagesTool";
+import AddSignatureTool from "./components/AddSignatureTool";
 
 export default function ToolPage() {
   const params = useParams();
@@ -43,6 +44,7 @@ export default function ToolPage() {
       case "delete-pages": return <DeletePagesTool />;
       case "extract-pages": return <ExtractPagesTool />;
       case "reorder-pages": return <ReorderPagesTool />;
+      case "add-signature": return <AddSignatureTool />;
       case "word-to-pdf":
         return (
           <div className="text-center py-20 animate-fade-in">
