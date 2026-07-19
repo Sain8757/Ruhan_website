@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, Menu, Bell, AlertTriangle, Clock, MessageCircle, Mail, FolderOpen } from "lucide-react";
+import { Search, Menu, Bell, AlertTriangle, Clock, MessageCircle, Mail, FolderOpen, Sparkles } from "lucide-react";
 import { useWorkspace } from "@/components/workspace/WorkspaceProvider";
+import AIAssistant from "@/components/ai/AIAssistant";
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -12,6 +13,7 @@ interface HeaderProps {
 export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
   const { openSearch } = useWorkspace();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showAI, setShowAI] = useState(false);
   const [notifications, setNotifications] = useState<{
     pendingServices: any[];
     lowStockItems: any[];
@@ -102,6 +104,14 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
           
           <button className="header-icon-button text-[#25D366] hover:bg-green-50 dark:hover:bg-green-900/20" onClick={openWhatsApp} title="WhatsApp Web">
             <MessageCircle size={18} />
+          </button>
+
+          <button 
+            className="header-icon-button text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20" 
+            onClick={() => setShowAI(true)} 
+            title="RA Seva AI Assistant"
+          >
+            <Sparkles size={18} className="animate-pulse" />
           </button>
 
           <div className="relative" ref={notifRef}>
@@ -203,6 +213,9 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
       
       {/* Empty right div to keep grid balance if app-header grid relies on 3 columns */}
       <div className="app-header-right"></div>
+      
+      {/* AI Assistant Modal */}
+      <AIAssistant isOpen={showAI} onClose={() => setShowAI(false)} />
     </header>
   );
 }
