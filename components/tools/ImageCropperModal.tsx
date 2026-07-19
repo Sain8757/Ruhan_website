@@ -71,18 +71,19 @@ export default function ImageCropperModal({
           </button>
         </div>
 
-        <div className="flex-1 overflow-auto p-4 flex items-center justify-center bg-slate-100 dark:bg-slate-950">
+        <div className="flex-1 overflow-auto p-4 bg-slate-100 dark:bg-slate-950 text-center">
           <ReactCrop
             crop={crop}
             onChange={(c) => setCrop(c)}
             onComplete={(c) => setCompletedCrop(c)}
+            className="inline-block"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               ref={imgRef} 
               src={imageSrc} 
               alt="Crop me" 
-              className="max-h-[60vh] object-contain"
+              className="max-w-full h-auto"
             />
           </ReactCrop>
         </div>
