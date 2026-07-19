@@ -112,6 +112,7 @@ model Invoice {
   discount       Float         @default(0)
   gst            Float         @default(0)
   total          Float
+  amountPaid     Float         @default(0)
   paymentMode    PaymentMode   @default(CASH)
   paymentStatus  PaymentStatus @default(UNPAID)
   notes          String?
@@ -237,4 +238,17 @@ model ShopSettings {
   key         String   @unique
   value       String
   updatedAt   DateTime @updatedAt
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  category    String
+  amount      Float
+  description String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([date])
 }
