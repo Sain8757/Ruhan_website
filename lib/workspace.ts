@@ -104,6 +104,14 @@ export const WORKSPACE_MODULES: WorkspaceModule[] = [
     keywords: ["merge", "image to pdf", "compress", "documents"],
   },
   {
+    id: "multi-id-cropper",
+    label: "Multi-ID Cropper",
+    href: "/multi-id-cropper",
+    icon: "ScanLine",
+    section: "Tools",
+    keywords: ["crop", "id", "aadhaar", "pan", "documents"],
+  },
+  {
     id: "online-work",
     label: "Online Work",
     href: "/online-work",
