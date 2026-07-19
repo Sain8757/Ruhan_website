@@ -68,6 +68,7 @@ export async function POST(req: NextRequest) {
       discount,
       gst,
       total,
+      amountPaid: Number(body.amountPaid) || 0,
       paymentMode: body.paymentMode || "CASH",
       paymentStatus: body.paymentStatus || "UNPAID",
       notes: body.notes || null,

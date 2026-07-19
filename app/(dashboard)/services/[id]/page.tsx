@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Loader2, User, FileText } from "lucide-react";
+import { Save, Loader2, User, FileText, MessageSquare } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import PageHeader from "@/components/layout/PageHeader";
@@ -63,6 +63,12 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSendWhatsApp = () => {
+    if (!service || !service.customer.mobile) return;
+    const msg = encodeURIComponent(`Hi ${service.customer.name},\n\nYour service request for *${service.serviceType}* is currently marked as *${status}*.\n\nThank you,\nRA Seva Point`);
+    window.open(`https://wa.me/91${service.customer.mobile}?text=${msg}`, '_blank');
   };
 
   if (loading) {
@@ -129,6 +135,15 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
                 </p>
               )}
             </div>
+            
+            <button
+              onClick={handleSendWhatsApp}
+              className="btn-secondary w-full mt-4 flex items-center justify-center gap-2"
+              style={{ color: "#16a34a", borderColor: "#16a34a" }}
+            >
+              <MessageSquare size={16} />
+              Send WhatsApp Update
+            </button>
           </div>
         </div>
 
