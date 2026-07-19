@@ -6,17 +6,13 @@ import { useToast } from "@/contexts/ToastContext";
 import jsPDF from "jspdf";
 import PageHeader from "@/components/layout/PageHeader";
 import type { PDFDocumentProxy, PageViewport } from "pdfjs-dist";
+import ImageCropperModal from "@/components/tools/ImageCropperModal";
 
 type CropSide = "front" | "back";
-type ResizeDirection = "n" | "e" | "s" | "w" | "nw" | "ne" | "sw" | "se";
-type DragType = "move" | `resize-${ResizeDirection}` | null;
-type CropBox = { x: number; y: number; w: number; h: number };
 
 const CARD_WIDTH_MM = 85.6;
 const CARD_HEIGHT_MM = 53.98;
-const CARD_RATIO = CARD_WIDTH_MM / CARD_HEIGHT_MM;
 const ACCEPTED_FORMATS = "image/*,.jpg,.jpeg,.png,.webp,.bmp,.gif,.pdf,application/pdf";
-const MIN_BOX_SIZE = 0.05;
 const PDF_RENDER_MAX_SIDE = 3600;
 const PDF_RENDER_MIN_SCALE = 2;
 const PDF_RENDER_MAX_SCALE = 5;
@@ -29,26 +25,6 @@ const loadImage = (src: string) =>
     img.src = src;
   });
 
-const clampBox = (box: CropBox): CropBox => {
-  const w = Math.max(MIN_BOX_SIZE, Math.min(1, box.w));
-  const h = Math.max(MIN_BOX_SIZE, Math.min(1, box.h));
-  return {
-    x: Math.max(0, Math.min(1 - w, box.x)),
-    y: Math.max(0, Math.min(1 - h, box.y)),
-    w,
-    h,
-  };
-};
-
-const getResizeCursor = (dragType: DragType) => {
-  if (dragType === "move") return "grabbing";
-  if (dragType === "resize-n" || dragType === "resize-s") return "ns-resize";
-  if (dragType === "resize-e" || dragType === "resize-w") return "ew-resize";
-  if (dragType === "resize-ne" || dragType === "resize-sw") return "nesw-resize";
-  if (dragType === "resize-nw" || dragType === "resize-se") return "nwse-resize";
-  return "crosshair";
-};
-
 type CustomerResult = { id: string; name: string; mobile: string };
 
 export default function AadhaarPanCropPage() {
@@ -59,13 +35,13 @@ export default function AadhaarPanCropPage() {
   const [pdfPage, setPdfPage] = useState(1);
   const [pdfPageCount, setPdfPageCount] = useState(0);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
+  
   const [croppedFront, setCroppedFront] = useState<string | null>(null);
   const [croppedBack, setCroppedBack] = useState<string | null>(null);
   const [activeSide, setActiveSide] = useState<CropSide>("front");
-  const [box, setBox] = useState<CropBox>({ x: 0.1, y: 0.2, w: 0.8, h: 0.8 / CARD_RATIO });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [dragType, setDragType] = useState<DragType>(null);
+
+  // Cropper Modal state
+  const [cropperOpen, setCropperOpen] = useState(false);
 
   // Customer search state
   const [customerQuery, setCustomerQuery] = useState<string>("");
@@ -76,13 +52,7 @@ export default function AadhaarPanCropPage() {
   const [showDropdown, setShowDropdown] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imageRef = useRef<HTMLImageElement | null>(null);
   const pdfDocumentRef = useRef<PDFDocumentProxy | null>(null);
-
-  const resetSelectionBox = useCallback(() => {
-    setBox({ x: 0.1, y: 0.2, w: 0.8, h: 0.8 / CARD_RATIO });
-  }, []);
 
   // Debounced customer search
   useEffect(() => {
@@ -166,13 +136,10 @@ export default function AadhaarPanCropPage() {
     await page.render({ canvasContext: ctx, viewport }).promise;
 
     const preview = renderCanvas.toDataURL("image/png");
-    const img = await loadImage(preview);
-    imageRef.current = img;
     setSourcePreview(preview);
     setSourceType("pdf");
     setPdfPage(pageNumber);
-    resetSelectionBox();
-  }, [resetSelectionBox]);
+  }, []);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -181,7 +148,6 @@ export default function AadhaarPanCropPage() {
     setIsLoadingFile(true);
     setSourceName(file.name);
     setSourcePreview(null);
-    imageRef.current = null;
     pdfDocumentRef.current = null;
 
     try {
@@ -192,7 +158,7 @@ export default function AadhaarPanCropPage() {
         pdfDocumentRef.current = pdf;
         setPdfPageCount(pdf.numPages);
         await renderPdfPage(pdf, 1);
-        toast.success("PDF loaded. Page select karke manually crop karein.");
+        toast.success("PDF loaded. Side choose karke crop start karein.");
         return;
       }
 
@@ -202,177 +168,17 @@ export default function AadhaarPanCropPage() {
         reader.onerror = () => reject(new Error("Image read nahi ho payi"));
         reader.readAsDataURL(file);
       });
-      const img = await loadImage(dataUrl);
-      imageRef.current = img;
       setSourcePreview(dataUrl);
       setSourceType("image");
       setPdfPage(1);
       setPdfPageCount(0);
-      resetSelectionBox();
-      toast.success("Image loaded. Crop box adjust karein.");
+      toast.success("Image loaded. Side choose karke crop start karein.");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "File load nahi ho payi");
     } finally {
       setIsLoadingFile(false);
       e.target.value = "";
     }
-  };
-
-  const drawWorkspace = useCallback(() => {
-    const canvas = canvasRef.current;
-    const img = imageRef.current;
-    if (!canvas || !img) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const wrapperWidth = canvas.parentElement?.clientWidth || 600;
-    const displayWidth = Math.min(wrapperWidth, img.width);
-    const displayHeight = (displayWidth * img.height) / img.width;
-    const ratio = window.devicePixelRatio || 1;
-
-    canvas.style.width = `${displayWidth}px`;
-    canvas.style.height = `${displayHeight}px`;
-    canvas.width = Math.round(displayWidth * ratio);
-    canvas.height = Math.round(displayHeight * ratio);
-    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-    ctx.clearRect(0, 0, displayWidth, displayHeight);
-    ctx.drawImage(img, 0, 0, displayWidth, displayHeight);
-
-    const bx = box.x * displayWidth;
-    const by = box.y * displayHeight;
-    const bw = box.w * displayWidth;
-    const bh = box.h * displayHeight;
-
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.fillRect(0, 0, displayWidth, by);
-    ctx.fillRect(0, by, bx, bh);
-    ctx.fillRect(bx + bw, by, displayWidth - (bx + bw), bh);
-    ctx.fillRect(0, by + bh, displayWidth, displayHeight - (by + bh));
-
-    ctx.strokeStyle = "#4f6ef7";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(bx, by, bw, bh);
-
-    const handles: Array<[number, number, number]> = [
-      [bx, by, 20],
-      [bx + bw, by, 20],
-      [bx, by + bh, 20],
-      [bx + bw, by + bh, 20],
-      [bx + bw / 2, by, 14],
-      [bx + bw, by + bh / 2, 14],
-      [bx + bw / 2, by + bh, 14],
-      [bx, by + bh / 2, 14],
-    ];
-    handles.forEach(([hx, hy, size]) => {
-      ctx.fillStyle = "#ffffff";
-      ctx.strokeStyle = "#4f6ef7";
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.roundRect(hx - size / 2, hy - size / 2, size, size, 5);
-      ctx.fill();
-      ctx.stroke();
-    });
-  }, [box]);
-
-  useEffect(() => {
-    if (sourcePreview) drawWorkspace();
-  }, [drawWorkspace, sourcePreview]);
-
-  const pointerToCanvas = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return null;
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-      width: rect.width,
-      height: rect.height,
-    };
-  };
-
-  const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    const point = pointerToCanvas(e);
-    if (!point) return;
-
-    const bx = box.x * point.width;
-    const by = box.y * point.height;
-    const bw = box.w * point.width;
-    const bh = box.h * point.height;
-    const handles: Array<{ type: DragType; x: number; y: number; radius: number }> = [
-      { type: "resize-nw", x: bx, y: by, radius: 24 },
-      { type: "resize-ne", x: bx + bw, y: by, radius: 24 },
-      { type: "resize-sw", x: bx, y: by + bh, radius: 24 },
-      { type: "resize-se", x: bx + bw, y: by + bh, radius: 24 },
-      { type: "resize-n", x: bx + bw / 2, y: by, radius: 18 },
-      { type: "resize-e", x: bx + bw, y: by + bh / 2, radius: 18 },
-      { type: "resize-s", x: bx + bw / 2, y: by + bh, radius: 18 },
-      { type: "resize-w", x: bx, y: by + bh / 2, radius: 18 },
-    ];
-    const handle = handles.find((item) => Math.hypot(point.x - item.x, point.y - item.y) < item.radius);
-
-    e.currentTarget.setPointerCapture(e.pointerId);
-    if (handle?.type) {
-      setDragType(handle.type);
-      setIsDragging(true);
-      setDragStart({ x: point.x, y: point.y });
-      return;
-    }
-
-    if (point.x >= bx && point.x <= bx + bw && point.y >= by && point.y <= by + bh) {
-      setDragType("move");
-      setIsDragging(true);
-      setDragStart({ x: point.x - bx, y: point.y - by });
-    }
-  };
-
-  const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!isDragging) return;
-    const point = pointerToCanvas(e);
-    if (!point) return;
-
-    if (dragType === "move") {
-      const nextX = Math.max(0, Math.min(point.width - box.w * point.width, point.x - dragStart.x)) / point.width;
-      const nextY = Math.max(0, Math.min(point.height - box.h * point.height, point.y - dragStart.y)) / point.height;
-      setBox((current) => ({ ...current, x: nextX, y: nextY }));
-      return;
-    }
-
-    if (dragType?.startsWith("resize")) {
-      const nx = Math.max(0, Math.min(1, point.x / point.width));
-      const ny = Math.max(0, Math.min(1, point.y / point.height));
-
-      setBox((current) => {
-        const right = current.x + current.w;
-        const bottom = current.y + current.h;
-        const direction = dragType.replace("resize-", "") as ResizeDirection;
-        let nextX = current.x;
-        let nextY = current.y;
-        let nextRight = right;
-        let nextBottom = bottom;
-
-        if (direction.includes("w")) {
-          nextX = Math.min(right - MIN_BOX_SIZE, nx);
-        }
-        if (direction.includes("e")) {
-          nextRight = Math.max(current.x + MIN_BOX_SIZE, nx);
-        }
-        if (direction.includes("n")) {
-          nextY = Math.min(bottom - MIN_BOX_SIZE, ny);
-        }
-        if (direction.includes("s")) {
-          nextBottom = Math.max(current.y + MIN_BOX_SIZE, ny);
-        }
-
-        return clampBox({ x: nextX, y: nextY, w: nextRight - nextX, h: nextBottom - nextY });
-      });
-    }
-  };
-
-  const handlePointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    setIsDragging(false);
-    setDragType(null);
-    e.currentTarget.releasePointerCapture(e.pointerId);
   };
 
   const changePdfPage = async (direction: -1 | 1) => {
@@ -392,40 +198,24 @@ export default function AadhaarPanCropPage() {
     }
   };
 
-  const handleCrop = () => {
-    const img = imageRef.current;
-    if (!img) {
+  const openCropper = () => {
+    if (!sourcePreview) {
       toast.error("Pehle PDF ya image upload karein");
       return;
     }
+    setCropperOpen(true);
+  };
 
-    const tempCanvas = document.createElement("canvas");
-    const ctx = tempCanvas.getContext("2d");
-    if (!ctx) return;
-
-    const sx = Math.round(box.x * img.width);
-    const sy = Math.round(box.y * img.height);
-    const sw = Math.round(box.w * img.width);
-    const sh = Math.round(box.h * img.height);
-
-    tempCanvas.width = sw;
-    tempCanvas.height = sh;
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, sw, sh);
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
-
-    const croppedData = tempCanvas.toDataURL("image/png");
-
+  const handleCropComplete = (croppedImageBase64: string) => {
     if (activeSide === "front") {
-      setCroppedFront(croppedData);
+      setCroppedFront(croppedImageBase64);
       setActiveSide("back");
       toast.success("Front cropped. Ab back side select/crop karein.");
     } else {
-      setCroppedBack(croppedData);
+      setCroppedBack(croppedImageBase64);
       toast.success("Back cropped. PDF/PNG export ready hai.");
     }
+    setCropperOpen(false);
   };
 
   const downloadCroppedImage = (side: CropSide, dataUrl: string) => {
@@ -472,19 +262,7 @@ export default function AadhaarPanCropPage() {
     setCroppedFront(null);
     setCroppedBack(null);
     setActiveSide("front");
-    imageRef.current = null;
     pdfDocumentRef.current = null;
-    resetSelectionBox();
-  };
-
-  const updateBoxSize = (axis: "w" | "h", value: number) => {
-    setBox((current) => {
-      if (axis === "w") {
-        return clampBox({ ...current, w: value, x: Math.min(current.x, 1 - value) });
-      }
-
-      return clampBox({ ...current, h: value, y: Math.min(current.y, 1 - value) });
-    });
   };
 
   return (
@@ -589,24 +367,19 @@ export default function AadhaarPanCropPage() {
       <div className="tool-workspace">
         <div className="tool-preview-panel">
           {sourcePreview ? (
-            <div className="tool-preview-inner">
-              <div className="tool-canvas-frame w-full">
-                <canvas
-                  ref={canvasRef}
-                  onPointerDown={handlePointerDown}
-                  onPointerMove={handlePointerMove}
-                  onPointerUp={handlePointerUp}
-                  onPointerCancel={handlePointerUp}
-                  className="touch-none max-w-full block"
-                  style={{ cursor: getResizeCursor(dragType) }}
-                  title="Drag inside to move. Corner and side handles se resize karein."
-                />
-              </div>
-              <div className="text-xs" style={{ color: "var(--text-muted)" }}>
-                {sourceName} {sourceType === "pdf" ? `- PDF page ${pdfPage} of ${pdfPageCount}` : ""}
-              </div>
-              <div className="text-xs" style={{ color: "var(--text-muted)" }}>
-                Box ke andar drag karke move karein. White corner/side handles ya sliders se chhota-bada karein.
+            <div className="tool-preview-inner h-full flex flex-col items-center justify-center relative overflow-hidden">
+              <img 
+                src={sourcePreview} 
+                alt="Source Document" 
+                className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-md border border-slate-200 dark:border-slate-800" 
+              />
+              <div className="mt-4 text-center">
+                <div className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+                  {sourceName} {sourceType === "pdf" ? `- PDF page ${pdfPage} of ${pdfPageCount}` : ""}
+                </div>
+                <div className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+                  Click 'Crop Image' to open the interactive cropper.
+                </div>
               </div>
             </div>
           ) : (
@@ -700,54 +473,11 @@ export default function AadhaarPanCropPage() {
             </div>
 
             <button
-              onClick={handleCrop}
+              onClick={openCropper}
               className="btn-primary w-full"
               disabled={!sourcePreview || isLoadingFile}
             >
               Crop Selected Area ({activeSide === "front" ? "Front" : "Back"})
-            </button>
-
-            <div className="space-y-4 rounded-xl p-3" style={{ background: "var(--bg-secondary)", border: "1px solid var(--border-primary)" }}>
-              <div>
-                <div className="flex justify-between text-xs mb-2">
-                  <span className="label mb-0">Crop Width</span>
-                  <span className="font-semibold" style={{ color: "var(--text-primary)" }}>{Math.round(box.w * 100)}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="5"
-                  max="100"
-                  value={Math.round(box.w * 100)}
-                  onChange={(e) => updateBoxSize("w", parseInt(e.target.value) / 100)}
-                  className="range-field"
-                  disabled={!sourcePreview}
-                />
-              </div>
-
-              <div>
-                <div className="flex justify-between text-xs mb-2">
-                  <span className="label mb-0">Crop Height</span>
-                  <span className="font-semibold" style={{ color: "var(--text-primary)" }}>{Math.round(box.h * 100)}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="5"
-                  max="100"
-                  value={Math.round(box.h * 100)}
-                  onChange={(e) => updateBoxSize("h", parseInt(e.target.value) / 100)}
-                  className="range-field"
-                  disabled={!sourcePreview}
-                />
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={resetSelectionBox}
-              className="btn-secondary w-full"
-              disabled={!sourcePreview}
-            >
-              Reset Crop Box
             </button>
           </div>
 
@@ -834,6 +564,15 @@ export default function AadhaarPanCropPage() {
           </div>
         </div>
       </div>
+
+      {sourcePreview && (
+        <ImageCropperModal
+          isOpen={cropperOpen}
+          imageSrc={sourcePreview}
+          onClose={() => setCropperOpen(false)}
+          onCropComplete={handleCropComplete}
+        />
+      )}
     </div>
   );
 }
