@@ -6,7 +6,7 @@ import { Plus, Upload, Trash2, Printer, CheckCircle2, ScanLine } from "lucide-re
 import jsPDF from "jspdf";
 import ImageCropperModal from "@/components/tools/ImageCropperModal";
 
-type DocType = "Aadhaar Card" | "PAN Card" | "Voter ID" | "Driving License" | "Ration Card" | "Ayushman Card" | "Other";
+type DocType = "Aadhaar Card" | "PAN Card" | "Voter ID" | "Driving License" | "Ration Card" | "Ayushman Card" | "Single Document" | "Other";
 
 interface DocumentItem {
   id: string;
@@ -49,9 +49,36 @@ export default function MultiIdCropperPage() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (!file) return;
+
+    if (file.type === "application/pdf") {
+      try {
+        const pdfjsLib = await import("pdfjs-dist");
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const page = await pdf.getPage(1);
+        
+        const viewport = page.getViewport({ scale: 2.0 });
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        
+        if (ctx) {
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          await page.render({ canvasContext: ctx, viewport }).promise;
+          const base64Image = canvas.toDataURL("image/jpeg", 0.95);
+          setImageToCrop(base64Image);
+          setCropperOpen(true);
+        }
+      } catch (error) {
+        console.error("Error reading PDF:", error);
+        alert("Failed to read PDF file.");
+      }
+    } else {
       const reader = new FileReader();
       reader.onload = () => {
         setImageToCrop(reader.result as string);
@@ -188,7 +215,7 @@ export default function MultiIdCropperPage() {
       {/* Hidden File Input */}
       <input 
         type="file" 
-        accept="image/*" 
+        accept="image/*,application/pdf" 
         ref={fileInputRef} 
         onChange={handleFileChange} 
         className="hidden" 
@@ -200,7 +227,7 @@ export default function MultiIdCropperPage() {
           <div className="glass-card p-5">
             <h3 className="font-semibold mb-4" style={{ color: "var(--text-primary)" }}>Add Document</h3>
             <div className="space-y-2">
-              {(["Aadhaar Card", "PAN Card", "Voter ID", "Driving License", "Ration Card", "Ayushman Card", "Other"] as DocType[]).map((type) => (
+              {(["Aadhaar Card", "PAN Card", "Voter ID", "Driving License", "Ration Card", "Ayushman Card", "Single Document", "Other"] as DocType[]).map((type) => (
                 <button
                   key={type}
                   onClick={() => addDocument(type)}
@@ -296,35 +323,37 @@ export default function MultiIdCropperPage() {
                   </div>
 
                   {/* Back Side */}
-                  <div className="flex flex-col">
-                    <span className="text-sm font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>Back Side (Optional)</span>
-                    {doc.backImage ? (
-                      <div className="relative group rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 aspect-video flex items-center justify-center">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={doc.backImage} alt={`${doc.type} Back`} className="max-h-full object-contain" />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <button 
-                            onClick={() => triggerUpload(doc.id, "back")}
-                            className="bg-white text-slate-800 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2"
-                          >
-                            <Upload size={16} /> Recrop
-                          </button>
+                  {doc.type !== "Single Document" && (
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>Back Side (Optional)</span>
+                      {doc.backImage ? (
+                        <div className="relative group rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 aspect-video flex items-center justify-center">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={doc.backImage} alt={`${doc.type} Back`} className="max-h-full object-contain" />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <button 
+                              onClick={() => triggerUpload(doc.id, "back")}
+                              className="bg-white text-slate-800 px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2"
+                            >
+                              <Upload size={16} /> Recrop
+                            </button>
+                          </div>
+                          <div className="absolute top-2 right-2 bg-green-500 text-white p-1 rounded-full shadow-md">
+                            <CheckCircle2 size={16} />
+                          </div>
                         </div>
-                        <div className="absolute top-2 right-2 bg-green-500 text-white p-1 rounded-full shadow-md">
-                          <CheckCircle2 size={16} />
-                        </div>
-                      </div>
-                    ) : (
-                      <button 
-                        onClick={() => triggerUpload(doc.id, "back")}
-                        className="w-full aspect-video rounded-xl border-2 border-dashed flex flex-col items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
-                        style={{ borderColor: "var(--border-secondary)", color: "var(--text-muted)" }}
-                      >
-                        <Upload size={24} className="mb-2 opacity-60" />
-                        <span className="text-sm font-medium">Upload Back Image</span>
-                      </button>
-                    )}
-                  </div>
+                      ) : (
+                        <button 
+                          onClick={() => triggerUpload(doc.id, "back")}
+                          className="w-full aspect-video rounded-xl border-2 border-dashed flex flex-col items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                          style={{ borderColor: "var(--border-secondary)", color: "var(--text-muted)" }}
+                        >
+                          <Upload size={24} className="mb-2 opacity-60" />
+                          <span className="text-sm font-medium">Upload Back Image</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             ))

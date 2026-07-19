@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "browser": {
+    "canvas": false
+  },
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
@@ -38,7 +41,7 @@
     "next-auth": "^5.0.0-beta.31",
     "onnxruntime-web": "^1.21.0",
     "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^6.1.200",
+    "pdfjs-dist": "^3.11.174",
     "prisma": "^5.18.0",
     "qrcode.react": "^4.2.0",
     "react": "19.2.4",

@@ -163,7 +163,7 @@ export default function AadhaarPanCropPage() {
 
     renderCanvas.width = Math.round(viewport.width);
     renderCanvas.height = Math.round(viewport.height);
-    await page.render({ canvas: renderCanvas, canvasContext: ctx, viewport }).promise;
+    await page.render({ canvasContext: ctx, viewport }).promise;
 
     const preview = renderCanvas.toDataURL("image/png");
     const img = await loadImage(preview);
@@ -187,7 +187,7 @@ export default function AadhaarPanCropPage() {
     try {
       if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
         const pdfjs = await import("pdfjs-dist");
-        pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.mjs", import.meta.url).toString();
+        pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
         const pdf = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
         pdfDocumentRef.current = pdf;
         setPdfPageCount(pdf.numPages);

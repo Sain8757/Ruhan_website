@@ -26,11 +26,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  serverExternalPackages: ["pdfjs-dist", "canvas"],
   experimental: {
     serverActions: {
       allowedOrigins: ["localhost:3000"],
     },
   },
+  turbopack: {},
 };
 
 export default nextConfig;
