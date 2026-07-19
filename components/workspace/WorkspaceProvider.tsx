@@ -23,6 +23,7 @@ import {
   Layers,
   LayoutDashboard,
   Loader2,
+  QrCode,
   MessageSquare,
   Package,
   Receipt,
@@ -87,6 +88,7 @@ const iconMap = {
   WalletCards,
   Bell,
   DatabaseBackup,
+  QrCode,
 } satisfies Record<WorkspaceIcon, React.ComponentType<{ size?: number; className?: string }>>;
 
 const recordIconMap = {

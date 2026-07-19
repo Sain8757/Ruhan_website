@@ -15,7 +15,8 @@ export type WorkspaceIcon =
   | "Settings"
   | "WalletCards"
   | "Bell"
-  | "DatabaseBackup";
+  | "DatabaseBackup"
+  | "QrCode";
 
 export type WorkspaceSection = "Core" | "Tools" | "Inventory" | "Business";
 
@@ -126,6 +127,14 @@ export const WORKSPACE_MODULES: WorkspaceModule[] = [
     icon: "WalletCards",
     section: "Tools",
     keywords: ["rate list", "documents", "whatsapp", "print queue", "cash closing", "credentials", "backup"],
+  },
+  {
+    id: "payment-qr",
+    label: "Payment QR",
+    href: "/payment-qr",
+    icon: "QrCode",
+    section: "Tools",
+    keywords: ["payment", "qr", "upi", "locked", "amount", "receive"],
   },
   {
     id: "inventory",
