@@ -5,8 +5,6 @@ import { Plus, Trash2, Search, CalendarDays, Loader2, ArrowUpCircle, Download } 
 import { useToast } from "@/contexts/ToastContext";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 
 interface Income {
   id: string;
@@ -136,24 +134,32 @@ export default function IncomeTab() {
     XLSX.writeFile(wb, `Income_${month}.xlsx`);
   };
 
-  const exportPDF = () => {
-    const doc = new jsPDF();
-    doc.text(`Income Report (${month})`, 14, 15);
-    
-    autoTable(doc, {
-      startY: 20,
-      head: [["Date", "Category", "Description", "Amount"]],
-      body: incomes.map(inc => [
-        formatDate(inc.date),
-        inc.category,
-        inc.description || "-",
-        inc.amount.toFixed(2)
-      ]),
-      foot: [["", "", "Total", totalIncome.toFixed(2)]],
-      theme: 'grid'
-    });
-    
-    doc.save(`Income_${month}.pdf`);
+  const exportPDF = async () => {
+    try {
+      const { jsPDF } = await import("jspdf");
+      const { default: autoTable } = await import("jspdf-autotable");
+
+      const doc = new jsPDF();
+      doc.text(`Income Report (${month})`, 14, 15);
+      
+      autoTable(doc, {
+        startY: 20,
+        head: [["Date", "Category", "Description", "Amount"]],
+        body: incomes.map(inc => [
+          formatDate(inc.date),
+          inc.category,
+          inc.description || "-",
+          inc.amount.toFixed(2)
+        ]),
+        foot: [["", "", "Total", totalIncome.toFixed(2)]],
+        theme: 'grid'
+      });
+      
+      doc.save(`Income_${month}.pdf`);
+    } catch (error) {
+      console.error("Failed to generate PDF", error);
+      toast.error("Failed to generate PDF");
+    }
   };
 
   return (
