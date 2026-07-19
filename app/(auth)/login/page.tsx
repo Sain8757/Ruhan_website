@@ -134,36 +134,25 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* Submit Button */}
+            {/* Login Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full relative group overflow-hidden bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white font-semibold py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-900/30"
+              className="w-full relative group overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 p-[1px] mt-2 transition-all hover:shadow-glow focus:outline-none focus:ring-2 focus:ring-blue-500/50"
             >
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-in-out" />
-              <span className="relative flex items-center gap-2">
+              <div className="absolute inset-0 bg-white/20 group-hover:bg-white/0 transition-colors" />
+              <div className="relative flex items-center justify-center space-x-2 bg-slate-950/40 backdrop-blur-sm px-4 py-3.5 rounded-xl transition-all group-hover:bg-transparent">
                 {loading ? (
-                  <Loader2 size={18} className="animate-spin" />
+                  <Loader2 className="w-5 h-5 text-white animate-spin" />
                 ) : (
                   <>
-                    Sign In <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                    <span className="font-semibold text-white tracking-wide">Sign In</span>
+                    <ArrowRight size={18} className="text-white/80 group-hover:text-white group-hover:translate-x-1 transition-all" />
                   </>
                 )}
-              </span>
+              </div>
             </button>
           </form>
-
-          {/* Demo Credentials */}
-          <div className="mt-8 pt-6 border-t border-slate-700/50">
-            <div className="flex items-center justify-center gap-2 mb-3 text-slate-400">
-              <ShieldCheck size={14} className="text-emerald-400" />
-              <span className="text-xs font-bold uppercase tracking-widest text-slate-300">Admin Access</span>
-            </div>
-            <div className="bg-slate-950/50 rounded-lg p-3 text-sm text-center border border-slate-800/50">
-              <div className="text-slate-300 font-medium">Ruhanahmadxyz123@</div>
-              <div className="text-slate-500 mt-1 font-mono text-xs">Ruhanxyz@123</div>
-            </div>
-          </div>
         </div>
 
         {/* Footer */}
