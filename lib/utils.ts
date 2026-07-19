@@ -85,15 +85,37 @@ export const PAYMENT_STATUS_COLORS: Record<string, string> = {
 };
 
 export const INVENTORY_CATEGORIES = [
-  "Pens & Pencils",
+  // Stationery - Writing & Books
+  "Pens & Markers",
+  "Pencils & Erasers",
   "Registers & Notebooks",
   "Files & Folders",
   "Paper & Sheets",
+  // Stationery - Craft & Office
+  "Envelopes & Packaging",
+  "Adhesives & Tapes",
+  "Staplers & Pins",
+  "Scissors & Cutters",
+  "Art & Craft Supplies",
+  "Geometry & Math Kits",
+  // CSC & Print Supplies
   "PVC Cards",
   "Lamination Sheets",
   "Ink & Cartridge",
-  "Accessories",
+  "Printers & Scanners Accessories",
   "Stamps & Seals",
+  // Electronics
+  "Calculators & Electronics",
+  "Computer Accessories (Mouse, Keyboard, Pen Drive)",
+  "Mobile Accessories (Chargers, Cables, Earphones)",
+  "Batteries & Power",
+  // General Store
+  "General Store Items (Snacks, Biscuits, Chocolates)",
+  "Beverages & Cold Drinks",
+  "Cleaning Supplies",
+  "Personal Care Items",
+  "Festive & Decoration",
+  "Daily Needs & Groceries",
   "Other",
 ] as const;
 
