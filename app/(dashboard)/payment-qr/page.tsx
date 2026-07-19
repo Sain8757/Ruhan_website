@@ -113,48 +113,50 @@ export default function PaymentQrPage() {
             )}
           </div>
 
-          {/* QR White Square */}
-          <div className="mx-auto mt-8 flex aspect-square w-64 flex-col items-center justify-center rounded-3xl bg-white p-6 shadow-xl relative z-10">
-            {selectedAccount ? (
-              <QRCodeSVG 
-                value={upiUrl} 
-                size={208}
-                level="H"
-                includeMargin={false}
-                style={{ width: "100%", height: "100%" }}
-                imageSettings={{
-                  src: "/icon.png", // Ensure this exists or omit
-                  x: undefined,
-                  y: undefined,
-                  height: 36,
-                  width: 36,
-                  excavate: true,
-                }}
-              />
-            ) : (
-              <div className="flex flex-col items-center text-slate-300">
-                <QrCodeIcon size={48} className="mb-2 opacity-50" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Select Account</span>
-              </div>
-            )}
-          </div>
+          {/* QR and Icons Container */}
+          <div className="mt-8 flex w-full flex-col items-center justify-center">
+            {/* QR White Square */}
+            <div className="relative z-10 flex w-fit items-center justify-center rounded-3xl bg-white p-4 shadow-xl">
+              {selectedAccount ? (
+                <QRCodeSVG 
+                  value={upiUrl} 
+                  size={220}
+                  level="H"
+                  includeMargin={false}
+                  imageSettings={{
+                    src: "/icon.png",
+                    x: undefined,
+                    y: undefined,
+                    height: 40,
+                    width: 40,
+                    excavate: true,
+                  }}
+                />
+              ) : (
+                <div className="flex h-[220px] w-[220px] flex-col items-center justify-center text-slate-300">
+                  <QrCodeIcon size={48} className="mb-2 opacity-50" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Select Account</span>
+                </div>
+              )}
+            </div>
 
-          {/* Payment Icons */}
-          <div className="mt-8 flex justify-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg">
-              <span className="font-black text-[#5f259f] text-lg leading-none">Pe</span>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg">
-              <div className="flex items-center">
-                <span className="font-bold text-blue-500 text-xl leading-none">G</span>
-                <span className="text-[10px] font-bold text-slate-600 leading-none ml-0.5">Pay</span>
+            {/* Payment Icons */}
+            <div className="mt-6 flex justify-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg">
+                <span className="text-lg font-black leading-none text-[#5f259f]">Pe</span>
               </div>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg">
-              <span className="text-xs font-bold text-[#00baf2] leading-none tracking-tighter">Paytm</span>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg">
-              <span className="text-[9px] font-bold text-[#f27429] leading-tight text-center">BHIM<br/>UPI</span>
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg">
+                <div className="flex items-center">
+                  <span className="text-xl font-bold leading-none text-blue-500">G</span>
+                  <span className="ml-0.5 text-[10px] font-bold leading-none text-slate-600">Pay</span>
+                </div>
+              </div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg">
+                <span className="text-xs font-bold leading-none tracking-tighter text-[#00baf2]">Paytm</span>
+              </div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-lg">
+                <span className="text-center text-[9px] font-bold leading-tight text-[#f27429]">BHIM<br/>UPI</span>
+              </div>
             </div>
           </div>
         </div>
@@ -254,15 +256,15 @@ export default function PaymentQrPage() {
             <div className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
               <h3 className="mb-2 text-center text-[11px] font-bold uppercase tracking-widest text-slate-400">Enter Amount (Fixed)</h3>
               
-              <div className="relative mx-auto mb-2 flex max-w-[200px] items-center justify-center">
-                <span className="text-3xl font-medium text-slate-300">₹</span>
+              <div className="relative mx-auto mb-2 flex items-center justify-center">
+                <span className="mr-2 text-3xl font-medium text-slate-300">₹</span>
                 <input
                   type="number"
                   min="0"
                   value={amount}
                   onChange={e => setAmount(e.target.value)}
                   placeholder="0"
-                  className="w-full border-none bg-transparent py-2 pl-2 pr-0 text-center text-5xl font-black text-slate-800 placeholder-slate-200 focus:outline-none focus:ring-0"
+                  className="w-40 border-none bg-transparent p-0 text-left text-5xl font-black text-slate-800 placeholder-slate-200 focus:outline-none focus:ring-0"
                   style={{ MozAppearance: 'textfield' }}
                 />
               </div>
