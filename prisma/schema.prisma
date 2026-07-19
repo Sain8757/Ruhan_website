@@ -1,0 +1,240 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  OPERATOR
+}
+
+enum ServiceStatus {
+  PENDING
+  SUBMITTED
+  PROCESSING
+  APPROVED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMode {
+  CASH
+  UPI
+  CARD
+  PENDING
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIAL
+  PAID
+}
+
+model User {
+  id             String        @id @default(cuid())
+  name           String
+  email          String        @unique
+  password       String
+  role           UserRole      @default(OPERATOR)
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  activityLogs   ActivityLog[]
+  services       Service[]
+  invoices       Invoice[]
+}
+
+model Customer {
+  id             String        @id @default(cuid())
+  name           String
+  mobile         String        @unique
+  email          String?
+  address        String?
+  aadhaarNumber  String?
+  panNumber      String?
+  photoUrl       String?
+  signatureUrl   String?
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  services       Service[]
+  invoices       Invoice[]
+  documents      Document[]
+
+  @@index([name])
+  @@index([aadhaarNumber])
+  @@index([panNumber])
+  @@index([createdAt])
+}
+
+model Service {
+  id             String        @id @default(cuid())
+  serviceType    String
+  status         ServiceStatus @default(PENDING)
+  customerId     String
+  customer       Customer      @relation(fields: [customerId], references: [id])
+  assignedToId   String?
+  assignedTo     User?         @relation(fields: [assignedToId], references: [id])
+  fees           Float         @default(0)
+  paymentStatus  PaymentStatus @default(UNPAID)
+  paymentMode    PaymentMode   @default(PENDING)
+  notes          String?
+  requiredDocs   String[]
+  submittedAt    DateTime?
+  approvedAt     DateTime?
+  deliveredAt    DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([serviceType])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([customerId])
+  @@index([createdAt])
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  invoiceNumber  String        @unique
+  customerId     String
+  customer       Customer      @relation(fields: [customerId], references: [id])
+  createdById    String
+  createdBy      User          @relation(fields: [createdById], references: [id])
+  items          InvoiceItem[]
+  subtotal       Float
+  discount       Float         @default(0)
+  gst            Float         @default(0)
+  total          Float
+  paymentMode    PaymentMode   @default(CASH)
+  paymentStatus  PaymentStatus @default(UNPAID)
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([customerId])
+  @@index([paymentStatus])
+  @@index([paymentMode])
+  @@index([createdAt])
+}
+
+model InvoiceItem {
+  id             String   @id @default(cuid())
+  invoiceId      String
+  invoice        Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  name           String
+  quantity       Int
+  price          Float
+  total          Float
+
+  @@index([name])
+}
+
+model Book {
+  id             String     @id @default(cuid())
+  name           String
+  author         String?
+  category       String?
+  isbn           String?
+  purchasePrice  Float
+  sellingPrice   Float
+  quantity       Int        @default(0)
+  minStock       Int        @default(5)
+  barcode        String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  sales          BookSale[]
+
+  @@index([name])
+  @@index([category])
+  @@index([isbn])
+  @@index([barcode])
+  @@index([updatedAt])
+}
+
+model BookSale {
+  id         String   @id @default(cuid())
+  bookId     String
+  book       Book     @relation(fields: [bookId], references: [id])
+  quantity   Int
+  price      Float
+  total      Float
+  createdAt  DateTime @default(now())
+
+  @@index([bookId])
+  @@index([createdAt])
+}
+
+model InventoryItem {
+  id             String                  @id @default(cuid())
+  name           String
+  category       String
+  purchasePrice  Float
+  sellingPrice   Float
+  quantity       Int                     @default(0)
+  minStock       Int                     @default(5)
+  unit           String                  @default("piece")
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+  transactions   InventoryTransaction[]
+
+  @@index([name])
+  @@index([category])
+  @@index([updatedAt])
+}
+
+model InventoryTransaction {
+  id          String        @id @default(cuid())
+  itemId      String
+  item        InventoryItem @relation(fields: [itemId], references: [id])
+  type        String        // PURCHASE | SALE
+  quantity    Int
+  price       Float
+  notes       String?
+  createdAt   DateTime      @default(now())
+
+  @@index([itemId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+  name        String
+  url         String
+  type        String
+  createdAt   DateTime @default(now())
+
+  @@index([customerId])
+  @@index([type])
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  action      String
+  entity      String?
+  entityId    String?
+  details     String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+model ShopSettings {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  updatedAt   DateTime @updatedAt
+}
