@@ -9,10 +9,6 @@ export const metadata: Metadata = {
   description: "One Stop for Books, Print & Digital Services — Complete Shop Management System",
   keywords: ["seva point", "digital services", "government services", "print shop", "management"],
   manifest: "/manifest.json",
-  icons: {
-    icon: "/favicon.ico",
-    apple: "/icons/apple-icon.png",
-  },
 };
 
 export const viewport: Viewport = {
