@@ -26,10 +26,16 @@ import {
   Zap,
 } from "lucide-react";
 
+type SubLink = {
+  title: string;
+  href: string;
+};
+
 type OnlineService = {
   title: string;
   description: string;
-  href: string;
+  href?: string;
+  subLinks?: SubLink[];
   tag: string;
   popular?: boolean;
   aliases?: string[];
@@ -537,27 +543,44 @@ const serviceGroups: ServiceGroup[] = [
     subtitle: "Sanchar Saathi, Udyam, Surya Ghar, APAAR aur anya jaruri portals.",
     services: [
       {
-        title: "Lost/Found Mobile (CEIR)",
+        title: "Lost/Found Mobile & Internet",
         description: "Mobile block/unblock, IMEI check aur Sanchar Saathi services.",
-        href: "https://sancharsaathi.gov.in/",
+        subLinks: [
+          { title: "IMEI Verification", href: "https://ceir.sancharsaathi.gov.in/DeviceDetails/DeviceDetails.jsp" },
+          { title: "Blocking Lost/Stolen Mobile", href: "https://ceir.sancharsaathi.gov.in/Request/CeirUserBlockRequestDirect.jsp" },
+          { title: "Un-Blocking Recovered Mobile", href: "https://ceir.sancharsaathi.gov.in/Request/CeirUserUnblockRequestDirect.jsp" },
+          { title: "Check Request Status", href: "https://ceir.sancharsaathi.gov.in/Request/CeirRequestStatus.jsp" },
+          { title: "Know Mobile Connections in Your Name", href: "https://tafcop.sancharsaathi.gov.in/telecomUser/" },
+        ],
         tag: "CEIR",
         popular: true,
         aliases: ["stolen mobile", "lost phone", "sanchar saathi", "imei"],
         icon: ShieldCheck,
       },
       {
-        title: "Udyam Aadhaar (MSME)",
+        title: "Udyam Aadhaar Service (MSME)",
         description: "New MSME registration, print certificate aur Udyam update.",
-        href: "https://udyamregistration.gov.in/",
+        subLinks: [
+          { title: "UDYAM REGISTRATION (For New)", href: "https://udyamregistration.gov.in/Udyam_Registration.aspx" },
+          { title: "Print Udyam Certificate", href: "https://udyamregistration.gov.in/PrintUdyamCertificate.aspx" },
+          { title: "Verify Udyam Registration Number", href: "https://udyamregistration.gov.in/Udyam_Verify.aspx" },
+          { title: "Update/Cancel Udyam Registration", href: "https://udyamregistration.gov.in/Udyam_Login1.aspx" },
+        ],
         tag: "MSME",
         popular: true,
         aliases: ["msme", "udyam", "business registration"],
         icon: Store,
       },
       {
-        title: "PM Surya Ghar Yojana",
+        title: "PM Surya Ghar Yojana (Muft Bijli Yojana)",
         description: "Muft Bijli Yojana apply, vendor registration aur benefits check.",
-        href: "https://pmsuryaghar.gov.in/",
+        subLinks: [
+          { title: "Apply/Login", href: "https://pmsuryaghar.gov.in/consumerLogin" },
+          { title: "Benefits Details", href: "https://pmsuryaghar.gov.in/scheme_details" },
+          { title: "Consumer Financing Options", href: "https://pmsuryaghar.gov.in/Consumer_financing" },
+          { title: "Find Registered Vendors", href: "https://pmsuryaghar.gov.in/vendor_listing" },
+          { title: "Vendor Registration", href: "https://pmsuryaghar.gov.in/vendorLogin" },
+        ],
         tag: "Surya Ghar",
         aliases: ["muft bijli", "solar", "rooftop solar"],
         icon: Zap,
@@ -565,7 +588,10 @@ const serviceGroups: ServiceGroup[] = [
       {
         title: "APAAR ID Card",
         description: "Students ke liye One Nation One Student ID (APAAR/ABC) portal.",
-        href: "https://apaar.education.gov.in/",
+        subLinks: [
+          { title: "New Apply / ABC Portal", href: "https://abc.gov.in/" },
+          { title: "APAAR Login", href: "https://apaar.education.gov.in/" },
+        ],
         tag: "APAAR",
         popular: true,
         aliases: ["student id", "abc portal", "education"],
@@ -581,9 +607,15 @@ const serviceGroups: ServiceGroup[] = [
         icon: HeartPulse,
       },
       {
-        title: "Railway Services (IRCTC)",
+        title: "Railway Service",
         description: "Train check, PNR status, seat availability aur fare enquiry.",
-        href: "https://www.irctc.co.in/",
+        subLinks: [
+          { title: "PNR Check", href: "https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html?locale=en" },
+          { title: "Train Check", href: "https://www.indianrail.gov.in/enquiry/TBIS/TrainBetweenImportantStations.html?locale=en" },
+          { title: "Train Seat Check", href: "https://www.indianrail.gov.in/enquiry/SEAT/SeatAvailability.html?locale=en" },
+          { title: "Fare Enquiry", href: "https://www.indianrail.gov.in/enquiry/FARE/FareEnquiry.html?locale=en" },
+          { title: "Train Number Track", href: "https://www.indianrail.gov.in/enquiry/SCHEDULE/TrainSchedule.html?locale=en" }
+        ],
         tag: "IRCTC",
         aliases: ["train", "pnr", "railway", "ticket"],
         icon: ExternalLink,
@@ -731,14 +763,20 @@ export default function OnlineWorkPage() {
                               </div>
                               <div>
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <a
-                                    href={service.href}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="text-[14px] font-bold text-[#001a78] hover:underline"
-                                  >
-                                    {service.title}
-                                  </a>
+                                  {service.href ? (
+                                    <a
+                                      href={service.href}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="text-[14px] font-bold text-[#001a78] hover:underline"
+                                    >
+                                      {service.title}
+                                    </a>
+                                  ) : (
+                                    <span className="text-[14px] font-bold text-[#001a78]">
+                                      {service.title}
+                                    </span>
+                                  )}
                                   {service.popular && (
                                     <span className="bg-[#fff5bf] px-1.5 py-0.5 text-[10px] font-bold text-[#7b5200]">
                                       Popular
@@ -752,16 +790,41 @@ export default function OnlineWorkPage() {
                               </div>
                             </div>
 
-                            <a
-                              href={service.href}
-                              target="_blank"
-                              rel="noreferrer"
-                            className="inline-flex h-[28px] items-center justify-center gap-1 border border-[#777] bg-[#eeeeee] px-3 text-[12px] font-normal text-black hover:bg-white"
-                            >
-                              Click Here
-                              <ExternalLink size={12} />
-                            </a>
+                            {service.href && (
+                              <a
+                                href={service.href}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex h-[28px] items-center justify-center gap-1 border border-[#777] bg-[#eeeeee] px-3 text-[12px] font-normal text-black hover:bg-white"
+                              >
+                                Click Here
+                                <ExternalLink size={12} />
+                              </a>
+                            )}
                           </div>
+                          
+                          {service.subLinks && service.subLinks.length > 0 && (
+                            <div className="mt-4 border-t border-[#e0e0e0] pt-4">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                                {service.subLinks.map((subLink, i) => (
+                                  <a
+                                    key={i}
+                                    href={subLink.href}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="flex items-center gap-2 rounded-lg border border-[#d2d2d2] bg-[#f9fbff] p-2 hover:border-[#5f97c8] hover:bg-[#eaf3fc] transition-colors group"
+                                  >
+                                    <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                      <ExternalLink size={12} />
+                                    </div>
+                                    <span className="text-[12px] font-bold text-[#003580] leading-tight">
+                                      {subLink.title}
+                                    </span>
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
