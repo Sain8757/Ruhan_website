@@ -161,6 +161,14 @@ export const WORKSPACE_MODULES: WorkspaceModule[] = [
     keywords: ["follow up", "customer relationship", "lead"],
   },
   {
+    id: "khata-book",
+    label: "Khata Book",
+    href: "/khata-book",
+    icon: "BookOpen",
+    section: "Business",
+    keywords: ["expenses", "profit", "ledger", "kharcha"],
+  },
+  {
     id: "reports",
     label: "Reports",
     href: "/reports",
