@@ -31,12 +31,12 @@ export default function PdfToolsPage() {
                     <Link
                       key={tool.id}
                       href={`/pdf-tools/${tool.id}`}
-                      className="group flex flex-col items-center text-center bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden"
+                      className="group flex flex-col items-center text-center bg-white border border-gray-200 rounded-2xl p-5 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden"
                     >
                       <div className="absolute top-0 left-0 w-full h-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundColor: "var(--accent)" }} />
                       
-                      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-white mb-4 shadow-lg transform group-hover:scale-110 transition-transform duration-300 ${tool.color}`}>
-                        <Icon size={28} />
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white mb-3 shadow-md transform group-hover:scale-110 transition-transform duration-300 ${tool.color}`}>
+                        <Icon size={24} />
                       </div>
                       
                       <h3 className="text-lg font-bold mb-2 group-hover:text-blue-600 transition-colors" style={{ color: "var(--text-primary)" }}>
