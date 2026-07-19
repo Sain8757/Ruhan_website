@@ -252,3 +252,42 @@ model Expense {
   @@index([category])
   @@index([date])
 }
+
+model Income {
+  id          String   @id @default(cuid())
+  category    String
+  amount      Float
+  description String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([date])
+}
+
+model Vendor {
+  id          String   @id @default(cuid())
+  name        String
+  phone       String?
+  company     String?
+  balance     Float    @default(0) // Positive means we owe them, negative means they owe us
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  transactions VendorTransaction[]
+}
+
+model VendorTransaction {
+  id          String   @id @default(cuid())
+  vendorId    String
+  vendor      Vendor   @relation(fields: [vendorId], references: [id])
+  type        String   // PURCHASE (Adds to Udhaar/Balance) | PAYMENT (Reduces Balance)
+  amount      Float
+  description String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  @@index([vendorId])
+  @@index([type])
+  @@index([date])
+}
