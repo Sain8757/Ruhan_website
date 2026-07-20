@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
-import { User, Phone, Mail, MapPin, Loader2, ChevronRight, FileText, Plus, Trash2, Edit, X } from "lucide-react";
+import { User, Phone, Mail, MapPin, Loader2, ChevronRight, FileText, Plus, Trash2, Edit, X, MessageCircle, Check } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 import { formatCurrency, formatDate, SERVICE_STATUS_COLORS, PAYMENT_STATUS_COLORS } from "@/lib/utils";
 import PageHeader from "@/components/layout/PageHeader";
@@ -122,6 +122,31 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     toast.success("Document deleted");
   };
 
+  const sendWhatsApp = (text?: string) => {
+    if (!customer?.mobile) return toast.error("Mobile number not found");
+    const message = text || `Hello ${customer.name},\n`;
+    const url = `https://wa.me/91${customer.mobile}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
+  };
+
+  const handleSettleInvoice = async (invoiceId: string) => {
+    const amount = prompt("Enter amount paid by customer:");
+    if (!amount || isNaN(Number(amount))) return;
+    
+    try {
+      const res = await fetch(`/api/invoices/${invoiceId}/settle`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amountPaid: Number(amount) })
+      });
+      if (!res.ok) throw new Error("Failed to settle payment");
+      toast.success("Payment settled");
+      await refreshCustomer();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -138,6 +163,12 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
         backHref="/customers"
         actions={
           <div className="flex gap-2">
+            <button 
+              onClick={() => sendWhatsApp()} 
+              className="btn-secondary text-green-600 border-green-200 bg-green-50 hover:bg-green-100"
+            >
+              <MessageCircle size={16} /> WhatsApp
+            </button>
             <button onClick={() => setShowEditModal(true)} className="btn-secondary text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100">
               <Edit size={16} /> Edit
             </button>
@@ -254,6 +285,16 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                       <span className={`badge ${SERVICE_STATUS_COLORS[s.status]}`}>
                         {s.status}
                       </span>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          sendWhatsApp(`Hello ${customer.name}, your service application for ${s.serviceType} is currently ${s.status}.`);
+                        }}
+                        className="p-2 text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-full transition-colors"
+                        title="Send WhatsApp update"
+                      >
+                        <MessageCircle size={16} />
+                      </button>
                       <ChevronRight size={16} style={{ color: "var(--text-muted)" }} />
                     </div>
                   </div>
@@ -288,9 +329,40 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                       <span className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>
                         {formatCurrency(inv.total)}
                       </span>
+                      {inv.paymentStatus !== "PAID" && (
+                        <div className="flex flex-col text-right">
+                          <span className="text-xs text-red-500 font-medium">
+                            Due: {formatCurrency(inv.total - (inv.amountPaid || 0))}
+                          </span>
+                        </div>
+                      )}
                       <span className={`badge ${PAYMENT_STATUS_COLORS[inv.paymentStatus]}`}>
                         {inv.paymentStatus}
                       </span>
+                      
+                      {inv.paymentStatus !== "PAID" && (
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSettleInvoice(inv.id);
+                          }}
+                          className="px-2 py-1 text-xs font-semibold bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 border border-emerald-200"
+                        >
+                          Settle
+                        </button>
+                      )}
+                      
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          sendWhatsApp(`Hello ${customer.name}, your invoice #${inv.invoiceNumber} for amount ${formatCurrency(inv.total)} has a pending due of ${formatCurrency(inv.total - (inv.amountPaid || 0))}. Please settle it at your earliest convenience.`);
+                        }}
+                        className="p-1 text-green-500 hover:bg-green-50 rounded"
+                        title="Send Reminder"
+                      >
+                        <MessageCircle size={14} />
+                      </button>
+                      
                       <ChevronRight size={16} style={{ color: "var(--text-muted)" }} />
                     </div>
                   </div>

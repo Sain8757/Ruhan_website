@@ -23,7 +23,13 @@ export default function DailyClosingTab() {
       setLoading(true);
       try {
         const res = await fetch(`/api/reports/daily-closing?date=${date}`);
+        if (!res.ok) {
+          throw new Error("API response not ok");
+        }
         const data = await res.json();
+        if (data.error) {
+          throw new Error(data.error);
+        }
         setReport(data);
       } catch (err) {
         toast.error("Failed to load daily closing report");
