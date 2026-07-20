@@ -291,3 +291,31 @@ model VendorTransaction {
   @@index([type])
   @@index([date])
 }
+
+model OnlineServiceCategory {
+  id          String              @id @default(cuid())
+  title       String
+  description String?
+  tag         String?
+  icon        String?             // e.g. "HeartPulse"
+  order       Int                 @default(0)
+  links       OnlineServiceLink[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  @@index([order])
+}
+
+model OnlineServiceLink {
+  id          String                @id @default(cuid())
+  categoryId  String
+  category    OnlineServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  title       String
+  href        String
+  order       Int                   @default(0)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  @@index([categoryId])
+  @@index([order])
+}

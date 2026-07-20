@@ -136,6 +136,10 @@ export default function SettingsPage() {
               <Database size={16} />
               Backup & Database
             </a>
+            <a href="/settings/online-services" className="settings-nav-item">
+              <Store size={16} />
+              Online Services Admin
+            </a>
           </nav>
         </aside>
 

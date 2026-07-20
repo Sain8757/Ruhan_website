@@ -1,22 +1,36 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Search, ExternalLink } from "lucide-react";
-import { allServicesData } from "./data";
+import { useMemo, useState, useEffect } from "react";
+import { Search, ExternalLink, Link as LinkIcon, Loader2 } from "lucide-react";
 
 export default function OnlineWorkPage() {
   const [query, setQuery] = useState("");
   const [activeGroupIndex, setActiveGroupIndex] = useState(0);
+  const [servicesData, setServicesData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const normalizedQuery = query.trim().toLowerCase();
 
-  // Create 44 groups from the 44 services
+  useEffect(() => {
+    fetch("/api/online-services")
+      .then(res => res.json())
+      .then(data => {
+        setServicesData(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  // Create groups from the DB services
   const serviceGroups = useMemo(() => {
-    return allServicesData.map(service => ({
-      title: service.title,
+    return servicesData.map(service => ({
+      title: `${service.order}. ${service.title}`,
       subtitle: service.description,
       services: [service]
     }));
-  }, []);
+  }, [servicesData]);
 
   const totalServices = serviceGroups.length;
 
@@ -29,8 +43,8 @@ export default function OnlineWorkPage() {
         services: group.services.filter((service) => {
           const haystack = [
             service.title,
-            service.description,
-            service.tag,
+            service.description || "",
+            service.tag || "",
           ].join(" ").toLowerCase();
 
           return haystack.includes(normalizedQuery);
@@ -40,8 +54,16 @@ export default function OnlineWorkPage() {
   }, [normalizedQuery, serviceGroups]);
 
   const visibleServices = filteredGroups.reduce((count, group) => count + group.services.length, 0);
-  const displayedGroups = normalizedQuery ? filteredGroups : [serviceGroups[activeGroupIndex]];
+  const displayedGroups = normalizedQuery ? filteredGroups : (serviceGroups.length > 0 ? [serviceGroups[activeGroupIndex]] : []);
   const activeGroup = serviceGroups[activeGroupIndex] || serviceGroups[0];
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="animate-spin text-blue-500" size={32} />
+      </div>
+    );
+  }
 
   return (
     <div className="page-shell page-shell-list" id="service-list">
@@ -117,17 +139,15 @@ export default function OnlineWorkPage() {
 
                 <div className="space-y-3">
                   {group.services.map((service) => {
-                    const Icon = service.icon;
-
                     return (
                       <div
-                        key={service.title}
+                        key={service.id}
                         className="border border-[#d2d2d2] bg-white px-3 py-3 text-[#003580]"
                       >
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
                           <div className="flex items-start gap-3">
                             <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center border border-[#9bbfe0] bg-[#dcecf9] text-[#00428c]">
-                              <Icon size={17} />
+                              <LinkIcon size={17} />
                             </div>
                             <div>
                               <div className="flex flex-wrap items-center gap-2">
@@ -142,12 +162,12 @@ export default function OnlineWorkPage() {
                           </div>
                         </div>
                         
-                        {service.subLinks && service.subLinks.length > 0 && (
+                        {service.links && service.links.length > 0 && (
                           <div className="mt-4 border-t border-[#e0e0e0] pt-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                              {service.subLinks.map((subLink, i) => (
+                              {service.links.map((subLink: any, i: number) => (
                                 <a
-                                  key={i}
+                                  key={subLink.id || i}
                                   href={subLink.href}
                                   target="_blank"
                                   rel="noreferrer"
