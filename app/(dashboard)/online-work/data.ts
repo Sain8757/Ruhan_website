@@ -135,26 +135,27 @@ export const allServicesData = [
     tag: "PAN",
     icon: CreditCard,
     subLinks: [
-      {
-            "title": "NSDL PAN Apply / Correction",
-            "href": "https://tinpan.proteantech.in/services/pan/pan-index.html"
-      },
-      {
-            "title": "NSDL e-PAN Download",
-            "href": "https://onlineservices.proteantech.in/paam/requestAndDownloadEPAN.html"
-      },
-      {
-            "title": "UTIITSL PAN Services",
-            "href": "https://www.pan.utiitsl.com/"
-      },
-      {
-            "title": "Instant e-PAN (Income Tax)",
-            "href": "https://www.incometax.gov.in/iec/foportal/"
-      },
-      {
-            "title": "Link Aadhaar to PAN",
-            "href": "https://eportal.incometax.gov.in/iec/foservices/#/pre-login/bl-link-aadhaar"
-      }
+      { "title": "Mobile & Mail Update (NSDL)", "href": "https://onlineservices.proteantech.in/paam/endUserAddressUpdate.html" },
+      { "title": "Address Update Free (NSDL)", "href": "https://onlineservices.proteantech.in/paam/endUserAddressUpdate.html" },
+      { "title": "Link Aadhaar Status", "href": "https://eportal.incometax.gov.in/iec/foservices/#/pre-login/link-aadhaar-status" },
+      { "title": "Aadhaar to PAN link", "href": "https://eportal.incometax.gov.in/iec/foservices/#/pre-login/bl-link-aadhaar" },
+      { "title": "New Pan Apply (NSDL)", "href": "https://onlineservices.proteantech.in/paam/endUserRegisterContact.html" },
+      { "title": "PAN Correction (NSDL)", "href": "https://onlineservices.proteantech.in/paam/endUserRegisterContact.html" },
+      { "title": "E-Pan Download (NSDL)", "href": "https://onlineservices.proteantech.in/paam/requestAndDownloadEPAN.html" },
+      { "title": "PAN Track (NSDL)", "href": "https://tin.tin.proteantech.in/pantan/StatusTrack.html" },
+      { "title": "Pan Card PVC Order (NSDL)", "href": "https://onlineservices.proteantech.in/paam/ReprintEPan.html" },
+      { "title": "Mobile & Mail Update (UTI)", "href": "https://www.pan.utiitsl.com/PAN_ONLINE/addresschangeHome.action" },
+      { "title": "Address Update Free (UTI)", "href": "https://www.pan.utiitsl.com/PAN_ONLINE/addresschangeHome.action" },
+      { "title": "New Pan Apply (UTI)", "href": "https://www.pan.utiitsl.com/newA.html" },
+      { "title": "PAN Correction (UTI)", "href": "https://www.pan.utiitsl.com/PAN/csf.html" },
+      { "title": "E-Pan Download (UTI)", "href": "https://www.pan.utiitsl.com/PAN_ONLINE/ePANCardHome" },
+      { "title": "PAN Track (UTI)", "href": "https://www.trackpan.utiitsl.com/PANONLINE/forms/TrackPan/trackApp#forward" },
+      { "title": "Pan Card PVC Order (UTI)", "href": "https://www.pan.utiitsl.com/PAN_ONLINE/reprintHome.action" },
+      { "title": "Instant PAN Apply", "href": "https://eportal.incometax.gov.in/iec/foservices/#/pre-login/instant-e-pan/getNewEpan" },
+      { "title": "Instant PAN Download", "href": "https://eportal.incometax.gov.in/iec/foservices/#/pre-login/instant-e-pan/checkStatusDownloadEpan" },
+      { "title": "Instant PAN Check Status", "href": "https://eportal.incometax.gov.in/iec/foservices/#/pre-login/instant-e-pan/checkStatusDownloadEpan" },
+      { "title": "Minor PAN Apply", "href": "https://onlineservices.proteantech.in/paam/endUserRegisterContact.html" },
+      { "title": "PVC PAN/Home Delivery Check Status", "href": "https://www.indiapost.gov.in/home" }
     ]
   },
   {
