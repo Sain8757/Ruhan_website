@@ -436,18 +436,7 @@ export default function NewInvoicePage() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="section-title mb-0">Invoice Items</h2>
-                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                  Item naam type karo — inventory se suggestions aayenge ↓
-                </p>
               </div>
-              <button
-                type="button"
-                onClick={handleAddItem}
-                className="btn-secondary py-1.5 px-3 flex items-center gap-1.5 text-xs"
-              >
-                <Plus size={14} />
-                Add Item
-              </button>
             </div>
 
             <div className="space-y-3">
@@ -533,6 +522,17 @@ export default function NewInvoicePage() {
                   </button>
                 </div>
               ))}
+            </div>
+
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={handleAddItem}
+                className="btn-secondary py-2 px-4 flex items-center gap-2 text-sm"
+              >
+                <Plus size={16} />
+                Add New Item
+              </button>
             </div>
           </div>
         </div>

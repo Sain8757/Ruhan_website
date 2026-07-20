@@ -4,7 +4,7 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft, Printer, Loader2, CheckCircle, Clock, XCircle,
-  IndianRupee, Phone, MapPin, Mail
+  IndianRupee, Phone, MapPin, Mail, MessageCircle
 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/contexts/ToastContext";
@@ -85,6 +85,26 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
 
   const handlePrint = () => window.print();
 
+  const handleWhatsApp = () => {
+    let message = "";
+    const customerName = invoice.customer.name;
+    const invNumber = invoice.invoiceNumber;
+    const total = formatCurrency(invoice.total);
+    const paid = formatCurrency(invoice.amountPaid || 0);
+    const balance = formatCurrency(invoice.total - (invoice.amountPaid || 0));
+
+    if (invoice.paymentStatus === "PAID") {
+      message = `Hello ${customerName},\n\nThank you for visiting ${shopName}! 🙏\nYour payment of ${total} for Invoice #${invNumber} has been successfully received.\n\nWe appreciate your business. Please visit again!`;
+    } else if (invoice.paymentStatus === "PARTIAL") {
+      message = `Hello ${customerName},\n\nThank you for visiting ${shopName}! 🙏\nYour Invoice #${invNumber} total is ${total}. We have received your partial payment of ${paid}.\n\nPending Balance: ${balance}\nPlease clear the pending balance at your earliest convenience.`;
+    } else {
+      message = `Hello ${customerName},\n\nGreetings from ${shopName}! 🙏\nYour Invoice #${invNumber} has been generated for a total of ${total}.\n\nCurrently, the invoice is UNPAID. Please clear the payment at your earliest convenience.\n\nThank you!`;
+    }
+
+    const whatsappUrl = `https://wa.me/91${invoice.customer.mobile.replace(/\D/g, '').slice(-10)}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   return (
     <div className="max-w-3xl mx-auto pb-12">
       {/* Action Buttons — hidden on print via .no-print */}
@@ -103,6 +123,10 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             {paymentStyle.icon}
             {paymentStyle.label}
           </div>
+          <button onClick={handleWhatsApp} className="btn-secondary px-3 py-1.5 flex items-center gap-1.5 text-sm" style={{ color: "#16a34a", backgroundColor: "rgba(22, 163, 74, 0.1)", borderColor: "rgba(22, 163, 74, 0.2)" }}>
+            <MessageCircle size={16} />
+            WhatsApp
+          </button>
           <button onClick={handlePrint} className="btn-primary">
             <Printer size={16} />
             Print Invoice
