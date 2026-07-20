@@ -164,18 +164,11 @@ export const allServicesData = [
     tag: "Voter",
     icon: Vote,
     subLinks: [
-      {
-            "title": "Voter Registration & Correction",
-            "href": "https://voters.eci.gov.in/"
-      },
-      {
-            "title": "Search in Electoral Roll",
-            "href": "https://electoralsearch.eci.gov.in/"
-      },
-      {
-            "title": "e-EPIC Download",
-            "href": "https://voters.eci.gov.in/"
-      }
+      { "title": "Find Voter Number", "href": "https://electoralsearch.eci.gov.in/" },
+      { "title": "Search your name in last SIR E-Roll - 2026", "href": "https://voters.eci.gov.in/searchInSIR/S2UA4DPDF-JK4QWODSE" },
+      { "title": "Voter List Download", "href": "https://voters.eci.gov.in/download-eroll" },
+      { "title": "SIR Roll Download", "href": "https://voters.eci.gov.in/download-eroll" },
+      { "title": "Voter Login", "href": "https://voters.eci.gov.in/" }
     ]
   },
   {
@@ -184,14 +177,11 @@ export const allServicesData = [
     tag: "Health",
     icon: HeartPulse,
     subLinks: [
-      {
-            "title": "PMJAY Beneficiary Portal",
-            "href": "https://beneficiary.nha.gov.in/"
-      },
-      {
-            "title": "Official PMJAY Website",
-            "href": "https://pmjay.gov.in/"
-      }
+      { "title": "Ayushman Card Apply", "href": "https://beneficiary.nha.gov.in/" },
+      { "title": "Ayushman Card Status", "href": "https://beneficiary.nha.gov.in/" },
+      { "title": "Ayushman Card Download", "href": "https://beneficiary.nha.gov.in/" },
+      { "title": "Ayushman Card List Download", "href": "https://beneficiary.nha.gov.in/" },
+      { "title": "Ayushman Hospital Find", "href": "https://hem.nha.gov.in/search" }
     ]
   },
   {
@@ -200,18 +190,13 @@ export const allServicesData = [
     tag: "Transport",
     icon: Car,
     subLinks: [
-      {
-            "title": "Sarathi Parivahan (DL)",
-            "href": "https://sarathi.parivahan.gov.in/"
-      },
-      {
-            "title": "Apply Learner Licence",
-            "href": "https://sarathi.parivahan.gov.in/"
-      },
-      {
-            "title": "Application Status",
-            "href": "https://sarathi.parivahan.gov.in/"
-      }
+      { "title": "DL Mobile Number Update", "href": "https://sarathi.parivahan.gov.in/sarathiservice/mobNumUpdpub.do" },
+      { "title": "New DL Apply", "href": "https://sarathi.parivahan.gov.in/sarathiservice/stateSelection.do" },
+      { "title": "DL Status", "href": "https://parivahan.gov.in/rcdlstatus/?pur_cd=101" },
+      { "title": "DL Download", "href": "https://parivahan.gov.in/rcdlstatus/?pur_cd=101" },
+      { "title": "Find DL Number", "href": "https://sarathi.parivahan.gov.in/sarathiservice/stateSelection.do" },
+      { "title": "Find DL Application Number", "href": "https://sarathi.parivahan.gov.in/sarathiservice/stateSelection.do" },
+      { "title": "Official Website", "href": "https://sarathi.parivahan.gov.in/sarathiservice/stateSelection.do" }
     ]
   },
   {
@@ -220,14 +205,11 @@ export const allServicesData = [
     tag: "Transport",
     icon: Car,
     subLinks: [
-      {
-            "title": "Vahan Parivahan (RC Services)",
-            "href": "https://vahan.parivahan.gov.in/"
-      },
-      {
-            "title": "RC Status Check",
-            "href": "https://vahan.parivahan.gov.in/"
-      }
+      { "title": "RC Mobile Number Update", "href": "https://vahan.parivahan.gov.in/mobileupdate/vahan/ui/statevalidation/editMobileNumber.xhtml" },
+      { "title": "Owner Details", "href": "https://vahan.parivahan.gov.in/nrservices/faces/user/citizen/citizenlogin.xhtml" },
+      { "title": "Print Registration Certificate", "href": "https://vahan.parivahan.gov.in/vahanservice/vahan/ui/statevalidation/homepage.xhtml" },
+      { "title": "Know Vehicle Details", "href": "https://vahan.parivahan.gov.in/vahanservice/vahan/ui/statevalidation/homepage.xhtml" },
+      { "title": "Add Nominee Details", "href": "https://vahan.parivahan.gov.in/vahanservice/vahan/ui/statevalidation/homepage.xhtml" }
     ]
   },
   {
