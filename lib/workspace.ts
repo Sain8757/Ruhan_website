@@ -16,7 +16,8 @@ export type WorkspaceIcon =
   | "WalletCards"
   | "Bell"
   | "DatabaseBackup"
-  | "QrCode";
+  | "QrCode"
+  | "FileImage";
 
 export type WorkspaceSection = "Core" | "Tools" | "Inventory" | "Business";
 
@@ -79,6 +80,14 @@ export const WORKSPACE_MODULES: WorkspaceModule[] = [
     icon: "Camera",
     section: "Tools",
     keywords: ["passport photo", "print", "crop", "studio"],
+  },
+  {
+    id: "resize-signature",
+    label: "Resize Signature",
+    href: "/resize-signature",
+    icon: "FileImage",
+    section: "Tools",
+    keywords: ["resize", "signature", "image", "compress", "pi7"],
   },
   {
     id: "aadhaar-pan",

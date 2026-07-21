@@ -227,7 +227,7 @@ export default function SignatureResizer() {
           <Settings size={20} />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-900 m-0">Resize Signature - Pi7 Image Resizer</h2>
+          <h2 className="text-xl font-bold text-gray-900 m-0">Resize Signature</h2>
           <p className="text-sm text-gray-500 m-0">Crop, resize, compress to specific KB and download.</p>
         </div>
       </div>

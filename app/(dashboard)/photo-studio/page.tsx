@@ -6,7 +6,6 @@ import { useToast } from "@/contexts/ToastContext";
 import jsPDF from "jspdf";
 import PageHeader from "@/components/layout/PageHeader";
 import ManualEraserModal from "@/components/photo-studio/ManualEraserModal";
-import SignatureResizer from "@/components/photo-studio/SignatureResizer";
 import type { Config } from "@imgly/background-removal";
 
 const PHOTO_SIZES = [
@@ -988,9 +987,6 @@ export default function PhotoStudioPage() {
           onClose={() => setIsEraserMode(false)}
         />
       )}
-
-      {/* Signature Resizer Tool */}
-      <SignatureResizer />
     </div>
   );
 }

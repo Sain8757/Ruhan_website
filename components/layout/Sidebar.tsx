@@ -23,6 +23,7 @@ import {
   Sparkles,
   WalletCards,
   QrCode,
+  FileImage,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WORKSPACE_MODULES, type WorkspaceIcon } from "@/lib/workspace";
@@ -43,6 +44,7 @@ const iconColors: Partial<Record<WorkspaceIcon, string>> = {
   BarChart3: "#22c55e",
   Settings: "#6b7280",
   QrCode: "#4f46e5",
+  FileImage: "#ec4899",
 };
 
 const iconMap: Partial<Record<WorkspaceIcon, React.ComponentType<{ size?: number; className?: string }>>> = {
@@ -60,6 +62,7 @@ const iconMap: Partial<Record<WorkspaceIcon, React.ComponentType<{ size?: number
   BarChart3,
   Settings,
   QrCode,
+  FileImage,
 };
 
 const NAV_SECTIONS = ["Core", "Tools", "Inventory", "Business"] as const;
