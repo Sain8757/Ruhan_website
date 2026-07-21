@@ -10,7 +10,7 @@ export async function POST(
   try {
     const resolvedParams = await params;
     const body = await req.json();
-    const { amountPaid } = body;
+    const { amountPaid, paymentMode } = body;
 
     if (amountPaid === undefined || amountPaid === null) {
       return NextResponse.json({ error: "amountPaid is required" }, { status: 400 });
@@ -38,6 +38,7 @@ export async function POST(
       data: {
         amountPaid: newAmountPaid,
         paymentStatus: paymentStatus as any,
+        paymentMode: paymentMode || invoice.paymentMode,
       },
     });
 

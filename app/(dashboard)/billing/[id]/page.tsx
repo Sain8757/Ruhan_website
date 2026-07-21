@@ -10,6 +10,7 @@ import Link from "next/link";
 import { useToast } from "@/contexts/ToastContext";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { QRCodeSVG } from "qrcode.react";
+import SettleModal, { SettleInvoiceData } from "../SettleModal";
 
 const PAYMENT_STATUS_STYLES: Record<string, { className: string; icon: React.ReactNode; label: string }> = {
   PAID: {
@@ -44,6 +45,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [settleInvoiceData, setSettleInvoiceData] = useState<SettleInvoiceData | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -91,22 +93,14 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
     document.title = originalTitle;
   };
 
-  const handleSettleInvoice = async () => {
-    const amount = prompt("Enter amount paid by customer:");
-    if (!amount || isNaN(Number(amount))) return;
-    try {
-      const res = await fetch(`/api/invoices/${invoice.id}/settle`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amountPaid: Number(amount) })
-      });
-      if (!res.ok) throw new Error("Failed to settle payment");
-      toast.success("Payment settled");
-      const inv = await fetch(`/api/invoices/${invoice.id}`).then(r => r.json());
-      setInvoice(inv);
-    } catch (err: any) {
-      toast.error(err.message);
-    }
+  const handleSettleInvoice = () => {
+    setSettleInvoiceData({
+      id: invoice.id,
+      invoiceNumber: invoice.invoiceNumber,
+      customerName: invoice.customer.name,
+      total: invoice.total,
+      amountPaid: invoice.amountPaid || 0,
+    });
   };
 
   const handleWhatsApp = async () => {
@@ -333,6 +327,14 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                   {PAYMENT_MODE_LABELS[invoice.paymentMode] || invoice.paymentMode}
                 </span>
               </div>
+              {(invoice.paymentStatus === "PAID" || invoice.paymentStatus === "PARTIAL") && (
+                <div>
+                  <span style={{ color: "var(--text-muted)" }}>Date: </span>
+                  <span className="font-semibold" style={{ color: "var(--text-primary)" }}>
+                    {formatDate(invoice.updatedAt)}
+                  </span>
+                </div>
+              )}
               <div>
                 <span style={{ color: "var(--text-muted)" }}>UPI: </span>
                 <span className="font-mono font-semibold" style={{ color: "#4f6ef7" }}>{upiId}</span>
@@ -487,6 +489,17 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
           <p className="mt-1">Please retain this invoice for your records. This is a computer-generated invoice.</p>
         </div>
       </div>
+
+      <SettleModal 
+        isOpen={!!settleInvoiceData}
+        onClose={() => setSettleInvoiceData(null)}
+        invoice={settleInvoiceData}
+        onSuccess={async () => {
+          toast.success("Payment settled successfully");
+          const inv = await fetch(`/api/invoices/${invoice.id}`).then(r => r.json());
+          setInvoice(inv);
+        }}
+      />
     </div>
   );
 }

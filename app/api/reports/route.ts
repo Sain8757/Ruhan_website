@@ -37,7 +37,8 @@ export async function GET(req: NextRequest) {
     topServices,
     invoicesByPaymentStatus,
     recentLargeInvoices,
-    inventorySalesTotal,
+    invoicesWithItems,
+    inventoryItems,
     serviceSalesTotalInRange,
   ] = await Promise.all([
     // Total all-time invoice revenue
@@ -134,11 +135,13 @@ export async function GET(req: NextRequest) {
         customer: { select: { name: true, mobile: true } },
       },
     }),
-    // Inventory sales total in range
-    prisma.invoice.aggregate({
+    // Invoices with items for accurate Product vs POS Service separation
+    prisma.invoice.findMany({
       where: { paymentStatus: { in: ["PAID", "PARTIAL"] }, createdAt: { gte: startRange, lte: endRange } },
-      _sum: { amountPaid: true },
-      _count: true,
+      include: { items: true },
+    }),
+    prisma.inventoryItem.findMany({
+      select: { name: true, category: true }
     }),
     // Service sales total in range
     prisma.service.aggregate({
@@ -147,6 +150,37 @@ export async function GET(req: NextRequest) {
       _count: true,
     }),
   ]);
+
+  // Separate Product vs Service revenue for POS Invoices
+  const inventoryMap = new Map(inventoryItems.map(i => [i.name, i.category]));
+  let posProductRevenue = 0;
+  let posServiceRevenue = 0;
+  let posProductCount = 0;
+
+  for (const inv of invoicesWithItems) {
+    let invProductTotal = 0;
+    let invServiceTotal = 0;
+    
+    for (const item of inv.items) {
+      const category = inventoryMap.get(item.name);
+      if (category === "Service") {
+        invServiceTotal += item.total;
+      } else {
+        invProductTotal += item.total;
+        posProductCount += item.quantity; // approximate product sales count
+      }
+    }
+
+    if (inv.paymentStatus === "PAID") {
+      posProductRevenue += invProductTotal;
+      posServiceRevenue += invServiceTotal;
+    } else if (inv.paymentStatus === "PARTIAL") {
+      // distribute amountPaid proportionally
+      const ratio = inv.total > 0 ? (inv.amountPaid / inv.total) : 0;
+      posProductRevenue += (invProductTotal * ratio);
+      posServiceRevenue += (invServiceTotal * ratio);
+    }
+  }
 
   // Build daily chart data
   const revenueByDate: Record<string, number> = {};
@@ -186,9 +220,9 @@ export async function GET(req: NextRequest) {
       todayRevenue: (todaySalesAgg._sum.amountPaid || 0) + (todayServiceSalesAgg._sum.fees || 0),
       todayInvoices: todaySalesAgg._count,
       totalCustomers,
-      inventorySalesRevenue: inventorySalesTotal._sum.amountPaid || 0,
-      inventorySalesCount: inventorySalesTotal._count,
-      serviceSalesRevenue: serviceSalesTotalInRange._sum.fees || 0,
+      inventorySalesRevenue: Math.round(posProductRevenue),
+      inventorySalesCount: posProductCount,
+      serviceSalesRevenue: Math.round((serviceSalesTotalInRange._sum.fees || 0) + posServiceRevenue),
       serviceSalesCount: serviceSalesTotalInRange._count,
     },
     chartData,

@@ -7,6 +7,7 @@ import { formatCurrency, formatDate, PAYMENT_STATUS_COLORS } from "@/lib/utils";
 import { useToast } from "@/contexts/ToastContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import PageHeader from "@/components/layout/PageHeader";
+import SettleModal, { SettleInvoiceData } from "./SettleModal";
 
 interface Invoice {
   id: string;
@@ -37,6 +38,7 @@ function BillingContent() {
   const [page, setPage] = useState(1);
   const searchParams = useSearchParams();
   const [statusFilter, setStatusFilter] = useState(searchParams.get("paymentStatus") || "");
+  const [settleInvoice, setSettleInvoice] = useState<SettleInvoiceData | null>(null);
   const toast = useToast();
   const router = useRouter();
   const limit = 20;
@@ -62,21 +64,14 @@ function BillingContent() {
     }
   }, [query, page, statusFilter, toast]);
 
-  const handleSettleInvoice = async (invoiceId: string) => {
-    const amount = prompt("Enter amount paid by customer:");
-    if (!amount || isNaN(Number(amount))) return;
-    try {
-      const res = await fetch(`/api/invoices/${invoiceId}/settle`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amountPaid: Number(amount) })
-      });
-      if (!res.ok) throw new Error("Failed to settle payment");
-      toast.success("Payment settled");
-      fetchInvoices();
-    } catch (err: any) {
-      toast.error(err.message);
-    }
+  const handleSettleInvoice = (invoice: Invoice) => {
+    setSettleInvoice({
+      id: invoice.id,
+      invoiceNumber: invoice.invoiceNumber,
+      customerName: invoice.customer.name,
+      total: invoice.total,
+      amountPaid: invoice.amountPaid || 0,
+    });
   };
 
   useEffect(() => {
@@ -219,7 +214,7 @@ function BillingContent() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleSettleInvoice(inv.id);
+                              handleSettleInvoice(inv);
                             }}
                             className="btn-secondary px-2 py-1 text-xs flex items-center gap-1"
                             style={{ color: "#059669", backgroundColor: "rgba(5, 150, 105, 0.1)", borderColor: "rgba(5, 150, 105, 0.2)" }}
@@ -275,6 +270,16 @@ function BillingContent() {
           )}
         </>
       )}
+
+      <SettleModal 
+        isOpen={!!settleInvoice}
+        onClose={() => setSettleInvoice(null)}
+        invoice={settleInvoice}
+        onSuccess={() => {
+          toast.success("Payment settled successfully");
+          fetchInvoices();
+        }}
+      />
     </div>
   );
 }
