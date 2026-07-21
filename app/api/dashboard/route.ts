@@ -31,9 +31,9 @@ export async function GET() {
     prisma.invoice.aggregate({
       where: {
         createdAt: { gte: startToday, lte: endToday },
-        paymentStatus: "PAID",
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
       },
-      _sum: { total: true },
+      _sum: { amountPaid: true },
       _count: true,
     }),
     // Today's services fees
@@ -62,9 +62,9 @@ export async function GET() {
     prisma.invoice.aggregate({
       where: {
         createdAt: { gte: startMonth },
-        paymentStatus: "PAID",
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
       },
-      _sum: { total: true },
+      _sum: { amountPaid: true },
     }),
     // Monthly service revenue
     prisma.service.aggregate({
@@ -98,9 +98,9 @@ export async function GET() {
     prisma.invoice.findMany({
       where: {
         createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
-        paymentStatus: "PAID",
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
       },
-      select: { total: true, createdAt: true },
+      select: { amountPaid: true, createdAt: true },
     }),
     // Last 7 days services
     prisma.service.findMany({
@@ -122,7 +122,7 @@ export async function GET() {
   for (const inv of invoicesLast7) {
     const d = format(new Date(inv.createdAt), "yyyy-MM-dd");
     if (d in revenueByDate) {
-      revenueByDate[d].revenue += inv.total;
+      revenueByDate[d].revenue += inv.amountPaid || 0;
       revenueByDate[d].invoices += 1;
     }
   }
@@ -141,13 +141,13 @@ export async function GET() {
   }));
 
   return NextResponse.json({
-    todayIncome: (todayInvoices._sum.total || 0) + (todayServicesRevenue._sum.fees || 0),
+    todayIncome: (todayInvoices._sum.amountPaid || 0) + (todayServicesRevenue._sum.fees || 0),
     todayTransactions: todayInvoices._count,
     todayCustomers,
     pendingServices,
     completedToday,
     totalCustomers,
-    monthlyRevenue: (monthlyInvoices._sum.total || 0) + (monthlyServicesRevenue._sum.fees || 0),
+    monthlyRevenue: (monthlyInvoices._sum.amountPaid || 0) + (monthlyServicesRevenue._sum.fees || 0),
     recentServices,
     recentActivities,
     lowStockItems,

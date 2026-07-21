@@ -225,6 +225,7 @@ export default function NewInvoicePage() {
   const [discount, setDiscount] = useState(0);
   const [gst, setGst] = useState(0);
   const [paymentMode, setPaymentMode] = useState("CASH");
+  const [paymentStatus, setPaymentStatus] = useState("PAID");
   const [amountPaid, setAmountPaid] = useState<number | "">("");
   const [notes, setNotes] = useState("");
 
@@ -305,6 +306,15 @@ export default function NewInvoicePage() {
       return;
     }
     setLoading(true);
+    let finalAmountPaid = 0;
+    if (paymentStatus === "PAID") {
+      finalAmountPaid = total;
+    } else if (paymentStatus === "PARTIAL") {
+      finalAmountPaid = Number(amountPaid) || 0;
+    } else {
+      finalAmountPaid = 0;
+    }
+
     try {
       const res = await fetch("/api/invoices", {
         method: "POST",
@@ -315,8 +325,8 @@ export default function NewInvoicePage() {
           discount,
           gst,
           paymentMode,
-          paymentStatus: Number(amountPaid) >= total ? "PAID" : Number(amountPaid) > 0 ? "PARTIAL" : "UNPAID",
-          amountPaid: Number(amountPaid) || 0,
+          paymentStatus: paymentStatus,
+          amountPaid: finalAmountPaid,
           notes,
         }),
       });
@@ -621,20 +631,46 @@ export default function NewInvoicePage() {
               <hr style={{ borderColor: "var(--border-primary)" }} />
               
               <div>
-                <label className="label text-emerald-600">Amount Paid (₹)</label>
-                <input
-                  type="number"
-                  className="input-field font-bold text-emerald-600 border-emerald-200 bg-emerald-50 focus:border-emerald-500 focus:ring-emerald-500/20"
-                  placeholder="0.00"
-                  value={amountPaid}
-                  onChange={(e) => setAmountPaid(e.target.value === "" ? "" : parseFloat(e.target.value))}
-                />
+                <label className="label">Payment Status</label>
+                <select
+                  className="input-field font-semibold"
+                  value={paymentStatus}
+                  onChange={(e) => {
+                    setPaymentStatus(e.target.value);
+                    if (e.target.value !== "PARTIAL") {
+                      setAmountPaid("");
+                    }
+                  }}
+                >
+                  <option value="PAID">Paid</option>
+                  <option value="UNPAID">Unpaid</option>
+                  <option value="PARTIAL">Partially Paid</option>
+                </select>
               </div>
 
-              {Number(amountPaid) < total && (
+              {paymentStatus === "PARTIAL" && (
+                <div>
+                  <label className="label text-emerald-600">Amount Paid (₹)</label>
+                  <input
+                    type="number"
+                    className="input-field font-bold text-emerald-600 border-emerald-200 bg-emerald-50 focus:border-emerald-500 focus:ring-emerald-500/20"
+                    placeholder="Enter amount paid"
+                    value={amountPaid}
+                    onChange={(e) => setAmountPaid(e.target.value === "" ? "" : parseFloat(e.target.value))}
+                  />
+                </div>
+              )}
+
+              {paymentStatus === "PARTIAL" && Number(amountPaid) < total && (
                 <div className="flex justify-between text-red-500 font-semibold text-sm">
                   <span>Balance Due</span>
                   <span>{formatCurrency(total - (Number(amountPaid) || 0))}</span>
+                </div>
+              )}
+              {paymentStatus === "UNPAID" && (
+                <div className="flex justify-between text-red-500 font-semibold text-sm mt-2">
+                  <span>Balance Due</span>
+                  <span>{formatCurrency(total)}</span>
                 </div>
               )}
             </div>

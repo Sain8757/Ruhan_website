@@ -83,7 +83,12 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
   const upiLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(shopName)}&am=${invoice.total}&cu=INR&tn=Invoice%20${invoice.invoiceNumber}`;
   const paymentStyle = PAYMENT_STATUS_STYLES[invoice.paymentStatus] || PAYMENT_STATUS_STYLES.UNPAID;
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    const originalTitle = document.title;
+    document.title = `${invoice.customer.name.replace(/[^a-zA-Z0-9 ]/g, "")}_Invoice_${invoice.invoiceNumber}`;
+    window.print();
+    document.title = originalTitle;
+  };
 
   const handleWhatsApp = () => {
     let message = "";
@@ -94,11 +99,11 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
     const balance = formatCurrency(invoice.total - (invoice.amountPaid || 0));
 
     if (invoice.paymentStatus === "PAID") {
-      message = `Hello ${customerName},\n\nThank you for visiting ${shopName}! 🙏\nYour payment of ${total} for Invoice #${invNumber} has been successfully received.\n\nWe appreciate your business. Please visit again!`;
+      message = `Hello ${customerName},\n\nGreetings from ${shopName}! 🙏\n\nYour payment of ${total} for Invoice #${invNumber} has been successfully received.\n\nThank you for your business. We look forward to serving you again!`;
     } else if (invoice.paymentStatus === "PARTIAL") {
-      message = `Hello ${customerName},\n\nThank you for visiting ${shopName}! 🙏\nYour Invoice #${invNumber} total is ${total}. We have received your partial payment of ${paid}.\n\nPending Balance: ${balance}\nPlease clear the pending balance at your earliest convenience.`;
+      message = `Hello ${customerName},\n\nGreetings from ${shopName}! 🙏\n\nYour Invoice #${invNumber} for a total of ${total} has been generated. We have received your partial payment of ${paid}.\n\nPending Balance: ${balance}\n\nPlease clear the pending balance at your earliest convenience. Thank you!`;
     } else {
-      message = `Hello ${customerName},\n\nGreetings from ${shopName}! 🙏\nYour Invoice #${invNumber} has been generated for a total of ${total}.\n\nCurrently, the invoice is UNPAID. Please clear the payment at your earliest convenience.\n\nThank you!`;
+      message = `Hello ${customerName},\n\nGreetings from ${shopName}! 🙏\n\nYour Invoice #${invNumber} has been generated for a total of ${total}.\n\nCurrently, the invoice is UNPAID. Please clear the payment at your earliest convenience. Thank you!`;
     }
 
     const whatsappUrl = `https://wa.me/91${invoice.customer.mobile.replace(/\D/g, '').slice(-10)}?text=${encodeURIComponent(message)}`;
@@ -370,12 +375,30 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
               className="flex justify-between font-bold text-lg border-t pt-3 mt-2"
               style={{ color: "var(--text-primary)", borderColor: "var(--border-primary)" }}
             >
-              <span>Total:</span>
+              <span>Grand Total:</span>
               <span className="flex items-center gap-1 text-blue-600">
                 <IndianRupee size={15} />
                 {invoice.total.toLocaleString("en-IN")}
               </span>
             </div>
+            {(invoice.paymentStatus === "PARTIAL" || invoice.paymentStatus === "UNPAID") && (
+              <>
+                <div className="flex justify-between font-semibold mt-1" style={{ color: "var(--text-primary)" }}>
+                  <span>Amount Paid:</span>
+                  <span className="flex items-center gap-0.5 text-emerald-600">
+                    <IndianRupee size={11} />
+                    {(invoice.amountPaid || 0).toLocaleString("en-IN")}
+                  </span>
+                </div>
+                <div className="flex justify-between font-bold text-red-500 mt-1">
+                  <span>Balance Due:</span>
+                  <span className="flex items-center gap-0.5">
+                    <IndianRupee size={12} />
+                    {Math.max(0, invoice.total - (invoice.amountPaid || 0)).toLocaleString("en-IN")}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
