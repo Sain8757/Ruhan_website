@@ -16,6 +16,7 @@ interface Invoice {
   discount: number;
   gst: number;
   total: number;
+  amountPaid: number;
   paymentMode: string;
   paymentStatus: string;
   createdAt: string;

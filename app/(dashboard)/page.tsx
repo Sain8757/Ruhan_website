@@ -51,13 +51,13 @@ interface DashboardData {
 }
 
 const MOCK_CHART = [
-  { date: "Mon", revenue: 2400, invoices: 4 },
-  { date: "Tue", revenue: 1398, invoices: 3 },
-  { date: "Wed", revenue: 3200, invoices: 6 },
-  { date: "Thu", revenue: 2800, invoices: 5 },
-  { date: "Fri", revenue: 4200, invoices: 8 },
-  { date: "Sat", revenue: 5100, invoices: 10 },
-  { date: "Sun", revenue: 1900, invoices: 3 },
+  { date: "Mon", revenue: 0, invoices: 0 },
+  { date: "Tue", revenue: 0, invoices: 0 },
+  { date: "Wed", revenue: 0, invoices: 0 },
+  { date: "Thu", revenue: 0, invoices: 0 },
+  { date: "Fri", revenue: 0, invoices: 0 },
+  { date: "Sat", revenue: 0, invoices: 0 },
+  { date: "Sun", revenue: 0, invoices: 0 },
 ];
 
 // Animated counter hook
@@ -240,14 +240,7 @@ const QUICK_ACTIONS = [
   },
 ];
 
-const RECENT_ACTIVITIES = [
-  { action: "New customer registered", detail: "Ramesh Kumar added", time: "2m ago", color: "#4f6ef7", icon: UserPlus },
-  { action: "Service #1042 delivered", detail: "Aadhaar Card", time: "15m ago", color: "#10b981", icon: CheckCircle },
-  { action: "Invoice #RA2506001 paid", detail: "₹1,200 received", time: "1h ago", color: "#a78bfa", icon: IndianRupee },
-  { action: "New service: PAN Card", detail: "Priya Sharma", time: "2h ago", color: "#f97316", icon: Briefcase },
-  { action: "Aadhaar updated for Ravi", detail: "Address change", time: "3h ago", color: "#06b6d4", icon: Activity },
-  { action: "Monthly report generated", detail: "July 2025", time: "5h ago", color: "#f59e0b", icon: FileText },
-];
+// Replaced with real data from API
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -302,6 +295,22 @@ const BarTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
+// Helper to calculate time ago
+function timeAgo(dateString: string) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.round((now.getTime() - date.getTime()) / 1000);
+  
+  if (seconds < 60) return "Just now";
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  return format(date, "MMM d, yyyy");
+}
+
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -325,16 +334,16 @@ export default function DashboardPage() {
       })
       .catch(() => {
         setData({
-          todayIncome: 4250,
-          todayTransactions: 8,
-          todayCustomers: 5,
-          pendingServices: 12,
-          completedToday: 6,
-          totalCustomers: 284,
-          monthlyRevenue: 87500,
+          todayIncome: 0,
+          todayTransactions: 0,
+          todayCustomers: 0,
+          pendingServices: 0,
+          completedToday: 0,
+          totalCustomers: 0,
+          monthlyRevenue: 0,
           recentServices: [],
           recentActivities: [],
-          chartData: MOCK_CHART,
+          chartData: [],
           partialInvoicesCount: 0,
         });
         setLoading(false);
@@ -672,43 +681,62 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-3 flex-1 overflow-y-auto pr-1">
-            {RECENT_ACTIVITIES.map((item, i) => {
-              const ItemIcon = item.icon;
-              return (
-                <div
-                  key={i}
-                  className="flex items-start gap-3 p-2.5 rounded-xl transition-all cursor-default animate-slide-up"
-                  style={{
-                    animationDelay: `${i * 50}ms`,
-                    animationFillMode: "both",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.background = "var(--bg-secondary)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.background = "transparent";
-                  }}
-                >
-                  <div
-                    className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                    style={{ background: `${item.color}18` }}
+            {(!data?.recentActivities || data.recentActivities.length === 0) ? (
+              <div className="flex flex-col items-center justify-center h-full opacity-50 py-10">
+                <Activity size={24} className="mb-2" />
+                <p className="text-xs">No recent activity</p>
+              </div>
+            ) : (
+              data.recentActivities.map((item: any, i: number) => {
+                let color = "#4f6ef7";
+                let ItemIcon = Activity;
+                let href = "#";
+                
+                if (item.entity === "CUSTOMER") {
+                  color = "#10b981";
+                  ItemIcon = UserPlus;
+                  href = item.entityId ? `/customers/${item.entityId}` : "/customers";
+                } else if (item.entity === "SERVICE") {
+                  color = "#f97316";
+                  ItemIcon = Briefcase;
+                  href = item.entityId ? `/services/${item.entityId}` : "/services";
+                } else if (item.entity === "INVOICE") {
+                  color = "#a78bfa";
+                  ItemIcon = IndianRupee;
+                  href = item.entityId ? `/billing/${item.entityId}` : "/billing";
+                }
+                
+                return (
+                  <Link
+                    href={href}
+                    key={item.id}
+                    className="flex items-start gap-3 p-2.5 rounded-xl transition-all hover:bg-[var(--bg-secondary)] animate-slide-up"
+                    style={{
+                      animationDelay: `${i * 50}ms`,
+                      animationFillMode: "both",
+                    }}
                   >
-                    <ItemIcon size={13} style={{ color: item.color }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className="text-[13px] font-semibold truncate"
-                      style={{ color: "var(--text-primary)" }}
+                    <div
+                      className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ background: `${color}18` }}
                     >
-                      {item.action}
-                    </p>
-                    <p className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
-                      {item.detail} · {item.time}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+                      <ItemIcon size={13} style={{ color }} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className="text-[13px] font-semibold truncate"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        {item.action}
+                      </p>
+                      <p className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+                        {item.details || item.entity} · {timeAgo(item.createdAt)}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })
+            )}
           </div>
 
           <Link
@@ -806,51 +834,13 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {(data?.recentServices?.length
-                  ? data.recentServices
-                  : [
-                      {
-                        id: "1",
-                        customer: { name: "Rajesh Kumar", mobile: "9876543210" },
-                        serviceType: "Aadhaar Card",
-                        status: "PROCESSING",
-                        createdAt: new Date(),
-                        fees: 150,
-                      },
-                      {
-                        id: "2",
-                        customer: { name: "Priya Sharma", mobile: "9765432109" },
-                        serviceType: "PAN Card",
-                        status: "DELIVERED",
-                        createdAt: new Date(),
-                        fees: 120,
-                      },
-                      {
-                        id: "3",
-                        customer: { name: "Mohan Patel", mobile: "9654321098" },
-                        serviceType: "Passport",
-                        status: "PENDING",
-                        createdAt: new Date(),
-                        fees: 500,
-                      },
-                      {
-                        id: "4",
-                        customer: { name: "Sunita Devi", mobile: "9543210987" },
-                        serviceType: "Caste Certificate",
-                        status: "SUBMITTED",
-                        createdAt: new Date(),
-                        fees: 80,
-                      },
-                      {
-                        id: "5",
-                        customer: { name: "Vikram Singh", mobile: "9432109876" },
-                        serviceType: "Income Certificate",
-                        status: "APPROVED",
-                        createdAt: new Date(),
-                        fees: 100,
-                      },
-                    ]
-                ).map((service: any, i: number) => (
+                {(!data?.recentServices || data.recentServices.length === 0) ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-10 opacity-50 text-sm">
+                      No recent services found
+                    </td>
+                  </tr>
+                ) : data.recentServices.map((service: any, i: number) => (
                   <tr key={service.id} className="animate-slide-up" style={{ animationDelay: `${i * 50}ms`, animationFillMode: "both" }}>
                     <td>
                       <div className="flex items-center gap-2.5">
