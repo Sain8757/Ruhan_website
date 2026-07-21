@@ -43,6 +43,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
   const [invoice, setInvoice] = useState<any>(null);
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -90,7 +91,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
     document.title = originalTitle;
   };
 
-  const handleWhatsApp = () => {
+  const handleWhatsApp = async () => {
     let message = "";
     const customerName = invoice.customer.name;
     const invNumber = invoice.invoiceNumber;
@@ -106,8 +107,46 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
       message = `Hello ${customerName},\n\nGreetings from ${shopName}! 🙏\n\nYour Invoice #${invNumber} has been generated for a total of ${total}.\n\nCurrently, the invoice is UNPAID. Please clear the payment at your earliest convenience. Thank you!`;
     }
 
-    const whatsappUrl = `https://wa.me/91${invoice.customer.mobile.replace(/\D/g, '').slice(-10)}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    try {
+      setIsGeneratingPdf(true);
+      const element = document.querySelector(".invoice-print-card") as HTMLElement;
+      if (!element) throw new Error("Invoice element not found");
+
+      // Dynamically import to avoid SSR issues
+      const html2canvas = (await import("html2canvas")).default;
+      const { jsPDF } = await import("jspdf");
+
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL("image/png");
+
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      
+      const pdfBlob = pdf.output("blob");
+      const fileName = `${invoice.customer.name.replace(/[^a-zA-Z0-9 ]/g, "")}_Invoice_${invoice.invoiceNumber}.pdf`;
+      const file = new File([pdfBlob], fileName, { type: "application/pdf" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          text: message,
+          files: [file],
+        });
+      } else {
+        // Fallback to standard WhatsApp link
+        const whatsappUrl = `https://wa.me/91${invoice.customer.mobile.replace(/\D/g, '').slice(-10)}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+      }
+    } catch (error) {
+      console.error("Error sharing PDF:", error);
+      toast.error("Opening WhatsApp directly...");
+      const whatsappUrl = `https://wa.me/91${invoice.customer.mobile.replace(/\D/g, '').slice(-10)}?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
   };
 
   return (
@@ -128,9 +167,9 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             {paymentStyle.icon}
             {paymentStyle.label}
           </div>
-          <button onClick={handleWhatsApp} className="btn-secondary px-3 py-1.5 flex items-center gap-1.5 text-sm" style={{ color: "#16a34a", backgroundColor: "rgba(22, 163, 74, 0.1)", borderColor: "rgba(22, 163, 74, 0.2)" }}>
-            <MessageCircle size={16} />
-            WhatsApp
+          <button onClick={handleWhatsApp} disabled={isGeneratingPdf} className="btn-secondary px-3 py-1.5 flex items-center gap-1.5 text-sm disabled:opacity-70" style={{ color: "#16a34a", backgroundColor: "rgba(22, 163, 74, 0.1)", borderColor: "rgba(22, 163, 74, 0.2)" }}>
+            {isGeneratingPdf ? <Loader2 size={16} className="animate-spin" /> : <MessageCircle size={16} />}
+            {isGeneratingPdf ? "Generating..." : "WhatsApp"}
           </button>
           <button onClick={handlePrint} className="btn-primary">
             <Printer size={16} />
