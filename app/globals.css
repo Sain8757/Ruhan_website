@@ -2478,6 +2478,7 @@ textarea.input-field {
     border-top-width: 6px;
     border-bottom-width: 10px;
     padding: 6px 10px;
+    grid-template-columns: auto 1fr auto;
   }
 
   .app-header-left {
