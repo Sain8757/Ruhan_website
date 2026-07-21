@@ -91,6 +91,24 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
     document.title = originalTitle;
   };
 
+  const handleSettleInvoice = async () => {
+    const amount = prompt("Enter amount paid by customer:");
+    if (!amount || isNaN(Number(amount))) return;
+    try {
+      const res = await fetch(`/api/invoices/${invoice.id}/settle`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amountPaid: Number(amount) })
+      });
+      if (!res.ok) throw new Error("Failed to settle payment");
+      toast.success("Payment settled");
+      const inv = await fetch(`/api/invoices/${invoice.id}`).then(r => r.json());
+      setInvoice(inv);
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
   const handleWhatsApp = async () => {
     let message = "";
     const customerName = invoice.customer.name;
@@ -167,6 +185,12 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             {paymentStyle.icon}
             {paymentStyle.label}
           </div>
+          {invoice.paymentStatus !== "PAID" && (
+            <button onClick={handleSettleInvoice} className="btn-secondary px-3 py-1.5 flex items-center gap-1.5 text-sm no-print" style={{ color: "#059669", backgroundColor: "rgba(5, 150, 105, 0.1)", borderColor: "rgba(5, 150, 105, 0.2)" }}>
+              <IndianRupee size={16} />
+              Settle
+            </button>
+          )}
           <button onClick={handleWhatsApp} disabled={isGeneratingPdf} className="btn-secondary px-3 py-1.5 flex items-center gap-1.5 text-sm disabled:opacity-70" style={{ color: "#16a34a", backgroundColor: "rgba(22, 163, 74, 0.1)", borderColor: "rgba(22, 163, 74, 0.2)" }}>
             {isGeneratingPdf ? <Loader2 size={16} className="animate-spin" /> : <MessageCircle size={16} />}
             {isGeneratingPdf ? "Generating..." : "WhatsApp"}

@@ -61,6 +61,23 @@ export default function BillingPage() {
     }
   }, [query, page, statusFilter, toast]);
 
+  const handleSettleInvoice = async (invoiceId: string) => {
+    const amount = prompt("Enter amount paid by customer:");
+    if (!amount || isNaN(Number(amount))) return;
+    try {
+      const res = await fetch(`/api/invoices/${invoiceId}/settle`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amountPaid: Number(amount) })
+      });
+      if (!res.ok) throw new Error("Failed to settle payment");
+      toast.success("Payment settled");
+      fetchInvoices();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
   useEffect(() => {
     const timer = setTimeout(fetchInvoices, 300);
     return () => clearTimeout(timer);
@@ -197,6 +214,18 @@ export default function BillingPage() {
                     </td>
                     <td>
                       <div className="flex items-center gap-2">
+                        {inv.paymentStatus !== "PAID" && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSettleInvoice(inv.id);
+                            }}
+                            className="btn-ghost p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50"
+                            title="Settle Payment"
+                          >
+                            <IndianRupee size={16} />
+                          </button>
+                        )}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
