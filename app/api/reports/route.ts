@@ -38,6 +38,7 @@ export async function GET(req: NextRequest) {
     invoicesByPaymentStatus,
     recentLargeInvoices,
     inventorySalesTotal,
+    serviceSalesTotalInRange,
   ] = await Promise.all([
     // Total all-time invoice revenue
     prisma.invoice.aggregate({
@@ -139,6 +140,12 @@ export async function GET(req: NextRequest) {
       _sum: { amountPaid: true },
       _count: true,
     }),
+    // Service sales total in range
+    prisma.service.aggregate({
+      where: { paymentStatus: "PAID", createdAt: { gte: startRange, lte: endRange } },
+      _sum: { fees: true },
+      _count: true,
+    }),
   ]);
 
   // Build daily chart data
@@ -181,6 +188,8 @@ export async function GET(req: NextRequest) {
       totalCustomers,
       inventorySalesRevenue: inventorySalesTotal._sum.amountPaid || 0,
       inventorySalesCount: inventorySalesTotal._count,
+      serviceSalesRevenue: serviceSalesTotalInRange._sum.fees || 0,
+      serviceSalesCount: serviceSalesTotalInRange._count,
     },
     chartData,
     serviceStats,

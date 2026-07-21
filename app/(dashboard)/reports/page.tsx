@@ -22,6 +22,8 @@ interface ReportData {
     totalCustomers: number;
     inventorySalesRevenue: number;
     inventorySalesCount: number;
+    serviceSalesRevenue: number;
+    serviceSalesCount: number;
   };
   chartData: { date: string; revenue: number }[];
   serviceStats: Record<string, number>;
@@ -405,13 +407,13 @@ export default function ReportsPage() {
         >
           <div className="flex items-center gap-2 mb-1">
             <Briefcase size={14} style={{ color: "#14b8a6" }} />
-            <span className="label" style={{ color: "#14b8a6" }}>Services</span>
+            <span className="label" style={{ color: "#14b8a6" }}>Services Revenue</span>
           </div>
           <div className="text-2xl font-extrabold tracking-tight" style={{ color: "var(--text-primary)" }}>
-            {Object.values(data.serviceStats).reduce((a, b) => a + b, 0)}
+            {formatCurrency(summary.serviceSalesRevenue)}
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            {data.serviceStats["PENDING"] || 0} pending, {data.serviceStats["DELIVERED"] || 0} delivered
+            {summary.serviceSalesCount} paid services (selected period)
           </p>
         </div>
       </div>

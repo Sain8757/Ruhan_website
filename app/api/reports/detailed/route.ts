@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     // 1. Get all PAID invoices within range
     const invoices = await prisma.invoice.findMany({
       where: {
-        paymentStatus: "PAID",
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
         createdAt: { gte: startRange },
       },
       include: { items: true },
