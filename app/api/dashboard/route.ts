@@ -26,6 +26,7 @@ export async function GET() {
     lowStockItems,
     invoicesLast7,
     servicesLast7,
+    partialInvoicesCount,
   ] = await Promise.all([
     // Today's invoices
     prisma.invoice.aggregate({
@@ -110,6 +111,10 @@ export async function GET() {
       },
       select: { fees: true, createdAt: true },
     }),
+    // Partial Invoices Count
+    prisma.invoice.count({
+      where: { paymentStatus: "PARTIAL" }
+    }),
   ]);
 
   // Build daily chart data for last 7 days
@@ -152,5 +157,6 @@ export async function GET() {
     recentActivities,
     lowStockItems,
     chartData,
+    partialInvoicesCount,
   });
 }

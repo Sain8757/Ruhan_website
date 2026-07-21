@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
 import { Plus, Search, FileText, Loader2, Printer, IndianRupee } from "lucide-react";
 import { formatCurrency, formatDate, PAYMENT_STATUS_COLORS } from "@/lib/utils";
 import { useToast } from "@/contexts/ToastContext";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import PageHeader from "@/components/layout/PageHeader";
 
 interface Invoice {
@@ -29,13 +29,14 @@ const PAYMENT_MODE_LABELS: Record<string, string> = {
   PENDING: "Pending",
 };
 
-export default function BillingPage() {
+function BillingContent() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState("");
+  const searchParams = useSearchParams();
+  const [statusFilter, setStatusFilter] = useState(searchParams.get("paymentStatus") || "");
   const toast = useToast();
   const router = useRouter();
   const limit = 20;
@@ -220,10 +221,11 @@ export default function BillingPage() {
                               e.stopPropagation();
                               handleSettleInvoice(inv.id);
                             }}
-                            className="btn-ghost p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50"
+                            className="btn-secondary px-2 py-1 text-xs flex items-center gap-1"
+                            style={{ color: "#059669", backgroundColor: "rgba(5, 150, 105, 0.1)", borderColor: "rgba(5, 150, 105, 0.2)" }}
                             title="Settle Payment"
                           >
-                            <IndianRupee size={16} />
+                            <IndianRupee size={12} /> Settle
                           </button>
                         )}
                         <button
@@ -274,5 +276,13 @@ export default function BillingPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function BillingPage() {
+  return (
+    <Suspense fallback={<div className="p-8 flex justify-center"><Loader2 className="animate-spin text-emerald-600" /></div>}>
+      <BillingContent />
+    </Suspense>
   );
 }

@@ -47,6 +47,7 @@ interface DashboardData {
   recentServices: any[];
   recentActivities: any[];
   chartData: any[];
+  partialInvoicesCount: number;
 }
 
 const MOCK_CHART = [
@@ -334,6 +335,7 @@ export default function DashboardPage() {
           recentServices: [],
           recentActivities: [],
           chartData: MOCK_CHART,
+          partialInvoicesCount: 0,
         });
         setLoading(false);
       });
@@ -417,14 +419,14 @@ export default function DashboardPage() {
       href: "/reports",
     },
     {
-      title: "Total Customers",
-      value: data?.totalCustomers || 0,
-      subtitle: "Registered profiles",
-      icon: Users,
-      gradient: "linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)",
-      accentColor: "#f43f5e",
+      title: "Partial Pending",
+      value: data?.partialInvoicesCount || 0,
+      subtitle: "Invoices to settle",
+      icon: IndianRupee,
+      gradient: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+      accentColor: "#f59e0b",
       delay: 300,
-      href: "/customers",
+      href: "/billing?paymentStatus=PARTIAL",
     },
   ];
 
