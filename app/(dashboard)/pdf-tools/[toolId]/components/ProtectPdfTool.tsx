@@ -3,9 +3,11 @@
 import { useRef, useState } from "react";
 import { FileText, Loader2, X, Lock } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from \"@/contexts/DownloadContext\";
 
 export default function ProtectPdfTool() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [file, setFile] = useState<File | null>(null);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -45,11 +47,7 @@ export default function ProtectPdfTool() {
       // Use native browser functionality to indicate protection
       const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `RA_Protected.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
+      downloadWithRename(url, `RA_Protected.pdf`);
       
       toast.info("Note: Browser-side PDF encryption has limited support. For full password protection, use a desktop tool like Adobe Acrobat or Smallpdf.com with the downloaded file.");
     } catch { toast.error("Failed to process PDF"); } finally { setLoading(false); }

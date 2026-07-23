@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { PDFDocument } from "pdf-lib";
 import { FileText, Image as ImageIcon, Loader2, X, PenTool, Move } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from "@/contexts/DownloadContext";
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Define workerSrc so pdf.js works properly
@@ -13,6 +14,7 @@ if (typeof window !== "undefined" && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
 
 export default function AddSignatureTool() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [sigFile, setSigFile] = useState<File | null>(null);
   
@@ -231,11 +233,7 @@ export default function AddSignatureTool() {
       const modifiedPdfBytes = await pdfDoc.save();
       const blob = new Blob([new Uint8Array(modifiedPdfBytes)], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); 
-      a.href = url; 
-      a.download = `Signed_${pdfFile.name}`; 
-      a.click();
-      URL.revokeObjectURL(url);
+      downloadWithRename(url, `Signed_${pdfFile.name}`); 
       
       toast.success("Signature added and PDF downloaded!");
     } catch (error) {

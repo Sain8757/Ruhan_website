@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Camera, Download, RotateCw, Trash2, Sliders, Layout, Printer, Move, Plus, Minus, Eraser } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from "@/contexts/DownloadContext";
 import jsPDF from "jspdf";
 import PageHeader from "@/components/layout/PageHeader";
 import AdvancedRetouchModal from "@/components/photo-studio/AdvancedRetouchModal";
@@ -144,6 +145,7 @@ const refineForegroundEdges = async (foreground: Blob) => {
 
 export default function PhotoStudioPage() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [processedForeground, setProcessedForeground] = useState<string | null>(null);
   const [size, setSize] = useState(PHOTO_SIZES[0]);
@@ -440,10 +442,7 @@ export default function PhotoStudioPage() {
     const extension = transparent ? "png" : "jpg";
     const quality = transparent ? undefined : downloadQuality / 100;
     
-    const link = document.createElement("a");
-    link.href = canvas.toDataURL(mime, quality);
-    link.download = `RA_Seva_Photo_${Date.now()}.${extension}`;
-    link.click();
+    downloadWithRename(canvas.toDataURL(mime, quality), `RA_Seva_Photo_${Date.now()}.${extension}`);
     toast.success("Photo downloaded successfully!");
   };
 
@@ -494,7 +493,8 @@ export default function PhotoStudioPage() {
         }
       }
 
-      pdf.save(`RA_Seva_Passport_Photos_${Date.now()}.pdf`);
+      const pdfUrl = pdf.output('bloburl');
+      downloadWithRename(pdfUrl, `RA_Seva_Passport_Photos_${Date.now()}.pdf`);
       toast.success(`PDF downloaded at exact ${activeSize.width}mm x ${activeSize.height}mm size`);
     } catch {
       toast.error("Failed to generate PDF");

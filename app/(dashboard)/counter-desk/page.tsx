@@ -20,6 +20,7 @@ import PageHeader from "@/components/layout/PageHeader";
 import { SERVICE_CATALOG, type ServiceCatalogItem } from "@/lib/serviceCatalog";
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from "@/contexts/DownloadContext";
 
 type PrintJob = {
   id: string;
@@ -68,6 +69,8 @@ const buildWhatsAppText = (service: ServiceCatalogItem, customerName: string) =>
 
 export default function CounterDeskPage() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
+  const [activeTab, setActiveTab] = useState<"favorites" | "print" | "credentials" | "cash">("favorites");
   const importInputRef = useRef<HTMLInputElement>(null);
 
   const [query, setQuery] = useState("");
@@ -160,11 +163,8 @@ export default function CounterDeskPage() {
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `RA_Counter_Backup_${Date.now()}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadWithRename(url, `RA_Counter_Backup_${Date.now()}.json`);
+    // URL will be revoked later or handled by the system
   };
 
   const importCounterData = (event: React.ChangeEvent<HTMLInputElement>) => {

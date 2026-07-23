@@ -4,9 +4,11 @@ import { useRef, useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { Download, FileText, Loader2, X, CheckSquare, Square } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from \"@/contexts/DownloadContext\";
 
 export default function ExtractPagesTool() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [file, setFile] = useState<File | null>(null);
   const [totalPages, setTotalPages] = useState(0);
   const [selectedPages, setSelectedPages] = useState<Set<number>>(new Set());
@@ -45,8 +47,7 @@ export default function ExtractPagesTool() {
       const bytes = await newDoc.save();
       const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = `RA_Extracted.pdf`; a.click();
-      URL.revokeObjectURL(url);
+      downloadWithRename(url, `RA_Extracted.pdf`);
       toast.success(`${selectedPages.size} page(s) extracted!`);
     } catch { toast.error("Failed to extract pages"); } finally { setLoading(false); }
   };

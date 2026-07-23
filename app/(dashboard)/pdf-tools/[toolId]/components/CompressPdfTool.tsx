@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { PDFDocument } from "pdf-lib";
 import { Minimize, FileText, Loader2, X } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from \"@/contexts/DownloadContext\";
 
 declare const pdfjsLib: any;
 
@@ -28,6 +29,7 @@ function formatSize(n: number) {
 
 export default function CompressPdfTool() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -98,8 +100,7 @@ export default function CompressPdfTool() {
 
       const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = `RA_Compressed_${quality}q.pdf`; a.click();
-      URL.revokeObjectURL(url);
+      downloadWithRename(url, `RA_Compressed_${quality}q.pdf`);
       
       if (compressedSize < originalSize) {
         toast.success(`Success! Saved ${((1 - compressedSize / originalSize) * 100).toFixed(1)}% space.`);

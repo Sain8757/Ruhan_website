@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Database, Download, Loader2, Printer, RotateCcw, Save, Store } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from "@/contexts/DownloadContext";
 import PageHeader from "@/components/layout/PageHeader";
 
 const DEFAULT_SETTINGS = {
@@ -17,6 +18,7 @@ const DEFAULT_SETTINGS = {
 
 export default function SettingsPage() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [backupLoading, setBackupLoading] = useState(false);
@@ -92,11 +94,7 @@ export default function SettingsPage() {
       const data = await response.json();
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `RA_Seva_Backup_${Date.now()}.json`;
-      link.click();
-      URL.revokeObjectURL(url);
+      downloadWithRename(url, `RA_Seva_Backup_${Date.now()}.json`);
       toast.success("Database backup downloaded successfully!");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Backup failed");

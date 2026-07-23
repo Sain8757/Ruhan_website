@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { PDFDocument, rgb } from "pdf-lib";
 import { FileText, Loader2, Eraser, Trash2, ArrowLeft, ArrowRight, MousePointer2 } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from \"@/contexts/DownloadContext\";
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Define workerSrc so pdf.js works properly
@@ -20,6 +21,7 @@ interface Rect {
 
 export default function RedactPdfTool() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [pageNum, setPageNum] = useState<number>(1);
@@ -190,11 +192,7 @@ export default function RedactPdfTool() {
       const modifiedPdfBytes = await pdfDoc.save();
       const blob = new Blob([new Uint8Array(modifiedPdfBytes)], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); 
-      a.href = url; 
-      a.download = `Redacted_${pdfFile.name}`; 
-      a.click();
-      URL.revokeObjectURL(url);
+      downloadWithRename(url, `Redacted_${pdfFile.name}`);
       
       toast.success("Redactions applied and PDF downloaded!");
     } catch (error) {

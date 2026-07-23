@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { PDFDocument, rgb } from "pdf-lib";
 import { FileText, Loader2, Edit, Trash2, ArrowLeft, ArrowRight, Type, Image as ImageIcon, Move } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from \"@/contexts/DownloadContext\";
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Define workerSrc so pdf.js works properly
@@ -34,6 +35,7 @@ interface ImageOverlay {
 
 export default function EditPdfTool() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   
@@ -275,11 +277,7 @@ export default function EditPdfTool() {
       const modifiedPdfBytes = await pdfDoc.save();
       const blob = new Blob([new Uint8Array(modifiedPdfBytes)], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); 
-      a.href = url; 
-      a.download = `Edited_${pdfFile.name}`; 
-      a.click();
-      URL.revokeObjectURL(url);
+      downloadWithRename(url, `Edited_${pdfFile.name}`);
       
       toast.success("PDF saved successfully!");
     } catch (error) {

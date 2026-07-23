@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { FileText, Download, Sliders, Trash2, Camera } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from "@/contexts/DownloadContext";
 import jsPDF from "jspdf";
 import PageHeader from "@/components/layout/PageHeader";
 import ScanningModal from "@/components/doc-scanner/ScanningModal";
@@ -23,6 +24,7 @@ const loadPdfJs = async () => {
 
 export default function DocumentScannerPage() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [image, setImage] = useState<string | null>(null);
   const [scanningFileUrl, setScanningFileUrl] = useState<string | null>(null);
   const [mode, setMode] = useState<"color" | "bw" | "original">("color");
@@ -151,11 +153,12 @@ export default function DocumentScannerPage() {
         format: "a4",
       });
 
-      // Fit to A4
       const printW = w > h ? 297 : 210;
       const printH = w > h ? 210 : 297;
       pdf.addImage(croppedData, "JPEG", 0, 0, printW, printH);
-      pdf.save(`RA_Scanned_Document_${Date.now()}.pdf`);
+      
+      const pdfUrl = pdf.output('bloburl');
+      downloadWithRename(pdfUrl, `RA_Scanned_Document_${Date.now()}.pdf`);
       toast.success("Document downloaded as PDF!");
     } catch {
       toast.error("Failed to generate PDF");
@@ -185,10 +188,7 @@ export default function DocumentScannerPage() {
       
       ctx.drawImage(img, 0, 0, w, h);
       
-      const link = document.createElement("a");
-      link.href = tempCanvas.toDataURL("image/png");
-      link.download = `RA_Scanned_Document_${Date.now()}.png`;
-      link.click();
+      downloadWithRename(tempCanvas.toDataURL("image/png"), `RA_Scanned_Document_${Date.now()}.png`);
       toast.success("Document saved as PNG!");
     } catch {
       toast.error("Failed to generate PNG");

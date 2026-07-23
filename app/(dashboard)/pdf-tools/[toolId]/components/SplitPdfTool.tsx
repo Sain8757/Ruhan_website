@@ -4,9 +4,11 @@ import { useRef, useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { Scissors, FileText, Loader2, X } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from \"@/contexts/DownloadContext\";
 
 export default function SplitPdfTool() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [file, setFile] = useState<File | null>(null);
   const [totalPages, setTotalPages] = useState(0);
   const [splitMode, setSplitMode] = useState<"range" | "all">("range");
@@ -44,8 +46,7 @@ export default function SplitPdfTool() {
           const bytes = await newDoc.save();
           const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
           const url = URL.createObjectURL(blob);
-          const a = document.createElement("a"); a.href = url; a.download = `RA_Page_${i + 1}.pdf`; a.click();
-          URL.revokeObjectURL(url);
+          downloadWithRename(url, `RA_Page_${i + 1}.pdf`);
         }
         toast.success(`Split into ${totalPages} individual PDF files!`);
       } else {
@@ -56,8 +57,7 @@ export default function SplitPdfTool() {
         const bytes = await newDoc.save();
         const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement("a"); a.href = url; a.download = `RA_Split_P${from}-${to}.pdf`; a.click();
-        URL.revokeObjectURL(url);
+        downloadWithRename(url, `RA_Split_P${from}-${to}.pdf`);
         toast.success(`Pages ${from}–${to} extracted!`);
       }
     } catch { toast.error("Failed to split PDF"); } finally { setLoading(false); }

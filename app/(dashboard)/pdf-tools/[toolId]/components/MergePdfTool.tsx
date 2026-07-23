@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { GripVertical, X, FileText, Combine, Loader2 } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from \"@/contexts/DownloadContext\";
 
 function formatFileSize(size: number) {
   if (size >= 1024 * 1024) return `${(size / 1024 / 1024).toFixed(2)} MB`;
@@ -12,6 +13,7 @@ function formatFileSize(size: number) {
 
 export default function MergePdfTool() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
@@ -55,8 +57,7 @@ export default function MergePdfTool() {
       const bytes = await mergedPdf.save();
       const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = "RA_Merged.pdf"; a.click();
-      URL.revokeObjectURL(url);
+      downloadWithRename(url, "RA_Merged.pdf");
       toast.success("PDF merged and downloaded!");
     } catch (e) {
       toast.error("Failed to merge PDFs. Please check if the files are valid.");

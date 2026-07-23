@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { Image as ImageIcon, Loader2, X, FileText } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from \"@/contexts/DownloadContext\";
 
 declare const pdfjsLib: any;
 
@@ -23,6 +24,7 @@ async function loadPdfJs(): Promise<any> {
 
 export default function PdfToJpgTool() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState<string>("");
@@ -62,10 +64,7 @@ export default function PdfToJpgTool() {
         const mimeType = format === "jpg" ? "image/jpeg" : "image/png";
         const quality = format === "jpg" ? 1.0 : undefined;
         const dataUrl = canvas.toDataURL(mimeType, quality);
-        const a = document.createElement("a");
-        a.href = dataUrl;
-        a.download = `RA_Page_${i}.${format}`;
-        a.click();
+        downloadWithRename(dataUrl, `RA_Page_${i}.${format}`);
         await new Promise((r) => setTimeout(r, 200)); // Small delay between downloads
       }
       toast.success(`${totalPages} page(s) converted to ${format.toUpperCase()}!`);

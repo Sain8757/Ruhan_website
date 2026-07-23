@@ -4,9 +4,11 @@ import { useRef, useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { Trash2, FileText, Loader2, X, CheckSquare, Square } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from \"@/contexts/DownloadContext\";
 
 export default function DeletePagesTool() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [file, setFile] = useState<File | null>(null);
   const [totalPages, setTotalPages] = useState(0);
   const [selectedPages, setSelectedPages] = useState<Set<number>>(new Set());
@@ -46,8 +48,7 @@ export default function DeletePagesTool() {
       const bytes = await newDoc.save();
       const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = `RA_Deleted.pdf`; a.click();
-      URL.revokeObjectURL(url);
+      downloadWithRename(url, `RA_Deleted.pdf`);
       toast.success(`${selectedPages.size} page(s) deleted!`);
     } catch { toast.error("Failed to delete pages"); } finally { setLoading(false); }
   };

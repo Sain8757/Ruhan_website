@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { CreditCard, Download, Trash2, Sparkles, FileImage, ChevronLeft, ChevronRight, Search, UserCheck, Loader2 } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from "@/contexts/DownloadContext";
 import jsPDF from "jspdf";
 import PageHeader from "@/components/layout/PageHeader";
 import type { PDFDocumentProxy, PageViewport } from "pdfjs-dist";
@@ -29,6 +30,7 @@ type CustomerResult = { id: string; name: string; mobile: string };
 
 export default function AadhaarPanCropPage() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [sourcePreview, setSourcePreview] = useState<string | null>(null);
   const [sourceName, setSourceName] = useState<string>("");
   const [sourceType, setSourceType] = useState<"image" | "pdf" | null>(null);
@@ -219,10 +221,7 @@ export default function AadhaarPanCropPage() {
   };
 
   const downloadCroppedImage = (side: CropSide, dataUrl: string) => {
-    const link = document.createElement("a");
-    link.href = dataUrl;
-    link.download = `RA_Seva_${side === "front" ? "Front" : "Back"}_${Date.now()}.png`;
-    link.click();
+    downloadWithRename(dataUrl, `RA_Seva_${side === "front" ? "Front" : "Back"}_${Date.now()}.png`);
   };
 
   const handleDownloadPDF = () => {
@@ -246,7 +245,8 @@ export default function AadhaarPanCropPage() {
         pdf.addImage(croppedBack, "PNG", x, currentY, CARD_WIDTH_MM, CARD_HEIGHT_MM);
       }
 
-      pdf.save(`RA_Seva_Card_Print_${Date.now()}.pdf`);
+      const pdfUrl = pdf.output("bloburl");
+      downloadWithRename(pdfUrl, `RA_Seva_Card_Print_${Date.now()}.pdf`);
       toast.success("PDF created successfully!");
     } catch {
       toast.error("Error creating layout PDF");

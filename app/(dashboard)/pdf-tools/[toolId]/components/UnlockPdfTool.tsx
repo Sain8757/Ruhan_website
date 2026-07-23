@@ -4,9 +4,11 @@ import { useRef, useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { FileText, Loader2, X, Unlock } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from \"@/contexts/DownloadContext\";
 
 export default function UnlockPdfTool() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [file, setFile] = useState<File | null>(null);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,8 +33,7 @@ export default function UnlockPdfTool() {
       const bytes = await doc.save();
       const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = `RA_Unlocked.pdf`; a.click();
-      URL.revokeObjectURL(url);
+      downloadWithRename(url, `RA_Unlocked.pdf`);
       toast.success("PDF unlocked and downloaded!");
     } catch (e: any) {
       if (e?.message?.toLowerCase().includes("password")) {

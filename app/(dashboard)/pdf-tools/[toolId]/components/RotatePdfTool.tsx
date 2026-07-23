@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { PDFDocument, degrees } from "pdf-lib";
 import { RefreshCw, FileText, Loader2, X } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from \"@/contexts/DownloadContext\";
 
 declare const pdfjsLib: any;
 
@@ -30,6 +31,7 @@ const ROTATION_OPTIONS = [
 
 export default function RotatePdfTool() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [file, setFile] = useState<File | null>(null);
   const [totalPages, setTotalPages] = useState(0);
   const [rotation, setRotation] = useState(90);
@@ -109,8 +111,7 @@ export default function RotatePdfTool() {
       const bytes = await doc.save();
       const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = `RA_Rotated.pdf`; a.click();
-      URL.revokeObjectURL(url);
+      downloadWithRename(url, `RA_Rotated.pdf`);
       toast.success("PDF rotated and downloaded!");
     } catch { toast.error("Failed to rotate PDF"); } finally { setLoading(false); }
   };

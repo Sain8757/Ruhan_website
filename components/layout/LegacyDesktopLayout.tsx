@@ -13,6 +13,7 @@ import Providers from "@/components/Providers";
 import { WORKSPACE_MODULES, type WorkspaceIcon } from "@/lib/workspace";
 import { LogOut } from 'lucide-react';
 import { signOut } from "next-auth/react";
+import { DownloadProvider } from "@/contexts/DownloadContext";
 
 const iconMap: Record<string, React.ComponentType<{ size?: number; color?: string; className?: string }>> = {
   LayoutDashboard,
@@ -141,7 +142,9 @@ export default function LegacyDesktopLayout({ children }: { children: React.Reac
 
               {/* Main Content Pane */}
               <div className="legacy-tab-content" style={{ flex: 1, overflowY: 'auto', background: '#d4d0c8' }}>
-                {children}
+                <DownloadProvider>
+                  {children}
+                </DownloadProvider>
               </div>
             </div>
 

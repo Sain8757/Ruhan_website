@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { FileDown, Image, GripVertical, X, Loader2 } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from \"@/contexts/DownloadContext\";
 
 function formatFileSize(size: number) {
   if (size >= 1024 * 1024) return `${(size / 1024 / 1024).toFixed(2)} MB`;
@@ -12,6 +13,7 @@ function formatFileSize(size: number) {
 
 export default function JpgToPdfTool() {
   const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
@@ -62,8 +64,7 @@ export default function JpgToPdfTool() {
       const bytes = await pdfDoc.save();
       const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = "RA_Images.pdf"; a.click();
-      URL.revokeObjectURL(url);
+      downloadWithRename(url, "RA_Images.pdf");
       toast.success(`${files.length} image(s) converted to PDF!`);
     } catch { toast.error("Failed to convert images to PDF"); } finally { setLoading(false); }
   };

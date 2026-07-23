@@ -2,7 +2,9 @@
 
 import { useState, useRef } from "react";
 import PageHeader from "@/components/layout/PageHeader";
-import { Plus, Upload, Trash2, Printer, CheckCircle2, ScanLine, Image as ImageIcon } from "lucide-react";
+import { Plus, Upload, Trash2, Printer, CheckCircle2, ScanLine, Image as ImageIcon, Download } from "lucide-react";
+import { useToast } from "@/contexts/ToastContext";
+import { useDownload } from "@/contexts/DownloadContext";
 import jsPDF from "jspdf";
 import ImageCropperModal from "@/components/tools/ImageCropperModal";
 
@@ -16,6 +18,8 @@ interface DocumentItem {
 }
 
 export default function MultiIdCropperPage() {
+  const toast = useToast();
+  const { downloadWithRename } = useDownload();
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   
   // Cropper State
@@ -237,10 +241,7 @@ export default function MultiIdCropperPage() {
     }
 
     const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
-    const link = document.createElement("a");
-    link.href = dataUrl;
-    link.download = `Customer_Documents_Merged_${Date.now()}.jpg`;
-    link.click();
+    downloadWithRename(dataUrl, `Customer_Documents_Merged_${Date.now()}.jpg`);
   };
 
   const printDirectly = () => {
