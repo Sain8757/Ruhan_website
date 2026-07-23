@@ -64,9 +64,7 @@ export default function LegacyDesktopLayout({ children }: { children: React.Reac
               </div>
             </div>
 
-            {/* Menu Bar - Removed Dummy Text */}
-            <div style={{ background: '#d4d0c8', padding: '2px 4px', display: 'flex', gap: '8px', borderBottom: '1px solid #808080', height: '24px' }}>
-            </div>
+
 
             {/* Toolbar - Dynamic Modules */}
             <div className="legacy-toolbar" style={{ overflowX: 'auto', whiteSpace: 'nowrap' }}>
@@ -89,46 +87,7 @@ export default function LegacyDesktopLayout({ children }: { children: React.Reac
             {/* Inner Content Area */}
             <div style={{ background: '#d4d0c8', flex: 1, display: 'flex', overflow: 'hidden', padding: '4px' }}>
               
-              {/* Classic Left Sidebar */}
-              <div style={{ 
-                width: '200px', 
-                background: '#fff', 
-                borderTop: '2px solid #808080', 
-                borderLeft: '2px solid #808080', 
-                borderRight: '2px solid #fff', 
-                borderBottom: '2px solid #fff',
-                marginRight: '6px',
-                display: 'flex',
-                flexDirection: 'column'
-              }}>
-                <div style={{ background: '#000080', color: '#fff', padding: '2px 4px', fontWeight: 'bold' }}>
-                  Navigation
-                </div>
-                <div style={{ padding: '4px', display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto' }}>
-                  {WORKSPACE_MODULES.map((module) => {
-                    const isActive = module.href === '/' ? pathname === '/' : pathname.startsWith(module.href);
-                    return (
-                      <div 
-                        key={module.id}
-                        className="legacy-tree-item" 
-                        onClick={() => router.push(module.href)}
-                        style={{ 
-                          cursor: 'pointer', 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: '6px', 
-                          background: isActive ? '#000080' : 'transparent', 
-                          color: isActive ? '#fff' : '#000',
-                          padding: '2px 4px'
-                        }}
-                      >
-                        <span style={{ color: '#d4d0c8', fontSize: '12px' }}>📁</span> 
-                        <span style={{ fontSize: '12px', whiteSpace: 'nowrap' }}>{module.label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+
 
               {/* Main Content Pane */}
               <div className="legacy-tab-content" style={{ flex: 1, overflowY: 'auto', background: '#d4d0c8' }}>
