@@ -11,6 +11,7 @@ import {
 import { WorkspaceProvider } from "@/components/workspace/WorkspaceProvider";
 import Providers from "@/components/Providers";
 import { WORKSPACE_MODULES, type WorkspaceIcon } from "@/lib/workspace";
+import { LogOut } from 'lucide-react';
 
 const iconMap: Record<string, React.ComponentType<{ size?: number; color?: string; className?: string }>> = {
   LayoutDashboard,
@@ -40,6 +41,13 @@ export default function LegacyDesktopLayout({ children }: { children: React.Reac
     return activeModule ? activeModule.label : 'Agency Information Manager';
   };
 
+  const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
+
+  const handleLogout = async () => {
+    // Basic signout logic - adapt to your auth provider
+    window.location.href = '/login';
+  };
+
   return (
     <Providers>
       <WorkspaceProvider>
@@ -48,8 +56,12 @@ export default function LegacyDesktopLayout({ children }: { children: React.Reac
           <div 
             className="legacy-window"
             style={{ 
-              top: 0, left: 0, right: 0, bottom: 0,
-              width: '100%', height: '100%'
+              position: 'relative',
+              width: '100%', 
+              maxWidth: '1440px',
+              margin: '0 auto',
+              height: '100vh',
+              boxShadow: '0 0 50px rgba(0,0,0,0.3)'
             }}
           >
             {/* Title Bar */}
@@ -86,10 +98,16 @@ export default function LegacyDesktopLayout({ children }: { children: React.Reac
                 </div>
               </div>
 
-              <div className="legacy-window-controls" style={{ flex: 1, justifyContent: 'flex-end' }}>
-                <button className="legacy-btn-sys">_</button>
-                <button className="legacy-btn-sys">□</button>
-                <button className="legacy-btn-close"><X size={10} /></button>
+              <div className="legacy-window-controls" style={{ flex: 1, justifyContent: 'flex-end', display: 'flex' }}>
+                <button 
+                  className="legacy-btn-sys" 
+                  style={{ width: 'auto', padding: '0 8px', display: 'flex', gap: '4px' }}
+                  onClick={() => setShowLogoutConfirm(true)}
+                  title="Logout"
+                >
+                  <LogOut size={12} />
+                  <span>Logout</span>
+                </button>
               </div>
             </div>
 
@@ -125,6 +143,108 @@ export default function LegacyDesktopLayout({ children }: { children: React.Reac
                 {children}
               </div>
             </div>
+
+            {/* Logout Confirmation Modal (Windows 95 Style) */}
+            {showLogoutConfirm && (
+              <div style={{
+                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                zIndex: 9999
+              }}>
+                <div style={{
+                  backgroundColor: '#d4d0c8',
+                  borderTop: '2px solid #fff',
+                  borderLeft: '2px solid #fff',
+                  borderRight: '2px solid #404040',
+                  borderBottom: '2px solid #404040',
+                  padding: '2px',
+                  width: '300px',
+                  boxShadow: '2px 2px 5px rgba(0,0,0,0.5)'
+                }}>
+                  <div style={{
+                    background: 'linear-gradient(to right, #000080 0%, #1084d0 100%)',
+                    color: 'white',
+                    padding: '2px 4px',
+                    fontWeight: 'bold',
+                    fontSize: '12px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <span>Log Off Windows</span>
+                    <button 
+                      onClick={() => setShowLogoutConfirm(false)}
+                      style={{
+                        background: '#d4d0c8',
+                        borderTop: '1px solid #fff',
+                        borderLeft: '1px solid #fff',
+                        borderRight: '1px solid #404040',
+                        borderBottom: '1px solid #404040',
+                        color: 'black',
+                        width: '16px',
+                        height: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer'
+                      }}
+                    >X</button>
+                  </div>
+                  
+                  <div style={{ padding: '16px', display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                    <div style={{ color: '#000080' }}>
+                      <LogOut size={32} />
+                    </div>
+                    <div>
+                      <p style={{ margin: 0, fontSize: '12px', fontFamily: 'Tahoma, sans-serif' }}>
+                        Are you sure you want to log off?
+                      </p>
+                    </div>
+                  </div>
+
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    gap: '8px', 
+                    padding: '8px 16px 16px',
+                  }}>
+                    <button 
+                      onClick={handleLogout}
+                      style={{
+                        padding: '4px 16px',
+                        background: '#d4d0c8',
+                        borderTop: '1px solid #fff',
+                        borderLeft: '1px solid #fff',
+                        borderRight: '1px solid #404040',
+                        borderBottom: '1px solid #404040',
+                        fontFamily: 'Tahoma, sans-serif',
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                        width: '75px'
+                      }}
+                    >Yes</button>
+                    <button 
+                      onClick={() => setShowLogoutConfirm(false)}
+                      style={{
+                        padding: '4px 16px',
+                        background: '#d4d0c8',
+                        borderTop: '1px solid #fff',
+                        borderLeft: '1px solid #fff',
+                        borderRight: '1px solid #404040',
+                        borderBottom: '1px solid #404040',
+                        fontFamily: 'Tahoma, sans-serif',
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                        width: '75px'
+                      }}
+                    >No</button>
+                  </div>
+                </div>
+              </div>
+            )}
 
           </div>
         </div>
