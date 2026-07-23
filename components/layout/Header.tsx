@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, Menu, Bell, AlertTriangle, Clock, MessageCircle, Mail, FolderOpen, Sparkles } from "lucide-react";
+import { Search, Menu, Bell, AlertTriangle, Clock, MessageCircle, Mail, FolderOpen, Sparkles, LogOut, X, Key } from "lucide-react";
 import { useWorkspace } from "@/components/workspace/WorkspaceProvider";
 import AIAssistant from "@/components/ai/AIAssistant";
+import { signOut } from "next-auth/react";
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -14,6 +15,7 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
   const { openSearch } = useWorkspace();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAI, setShowAI] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [notifications, setNotifications] = useState<{
     pendingServices: any[];
     lowStockItems: any[];
@@ -219,10 +221,80 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
       </div>
       
       {/* Empty right div to keep grid balance if app-header grid relies on 3 columns */}
-      <div className="app-header-right"></div>
+      <div className="app-header-right" style={{ display: 'flex', justifyContent: 'flex-end', paddingRight: '4px' }}>
+        <button 
+          className="legacy-button" 
+          style={{ padding: '2px 8px', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 'bold', color: '#000' }}
+          onClick={() => setShowLogoutConfirm(true)}
+          title="Log Off"
+        >
+          <LogOut size={14} /> Log Off
+        </button>
+      </div>
       
       {/* AI Assistant Modal */}
       <AIAssistant isOpen={showAI} onClose={() => setShowAI(false)} />
+
+      {/* Logout Confirmation */}
+      {showLogoutConfirm && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'transparent', zIndex: 9999,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{
+              width: '350px',
+              backgroundColor: '#d4d0c8',
+              borderTop: '2px solid #fff',
+              borderLeft: '2px solid #fff',
+              borderRight: '2px solid #404040',
+              borderBottom: '2px solid #404040',
+              boxShadow: '1px 1px 4px rgba(0,0,0,0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              fontSize: '11px',
+              color: 'black'
+          }}>
+            <div style={{
+                background: 'linear-gradient(to right, #0a246a 0%, #a6caf0 100%)',
+                color: 'white',
+                fontWeight: 'bold',
+                padding: '3px 2px 3px 4px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                userSelect: 'none',
+                margin: '2px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Key size={14} color="#ffd700" style={{ filter: 'drop-shadow(1px 1px 1px #000)' }} />
+                Log Off Windows
+              </div>
+              <button className="legacy-btn-close" type="button" onClick={() => setShowLogoutConfirm(false)} title="Close">
+                <X size={12} strokeWidth={3} />
+              </button>
+            </div>
+            <div style={{ padding: '16px', display: 'flex', gap: '16px' }}>
+              <div style={{ width: '48px', display: 'flex', justifyContent: 'center' }}>
+                <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, #008080, #004040)', border: '2px solid #fff', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Key size={20} color="#ffd700" />
+                </div>
+              </div>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <p style={{ margin: '0 0 16px 0', fontSize: '11px' }}>Are you sure you want to log off?</p>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                  <button className="legacy-button" style={{ width: '70px', fontWeight: 'bold' }} onClick={() => signOut()}>
+                    Yes
+                  </button>
+                  <button className="legacy-button" style={{ width: '70px' }} onClick={() => setShowLogoutConfirm(false)}>
+                    No
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
