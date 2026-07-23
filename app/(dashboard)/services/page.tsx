@@ -285,8 +285,6 @@ export default function ServicesPage() {
         </div>
       )}
 
-      )}
-
       <NewServiceDialog
         isOpen={isNewServiceOpen}
         onClose={() => setIsNewServiceOpen(false)}
