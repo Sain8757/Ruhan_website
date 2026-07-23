@@ -4,6 +4,8 @@ import { useToast } from "@/contexts/ToastContext";
 import { formatCurrency } from "@/lib/utils";
 import LegacyDialog from "@/components/layout/LegacyDialog";
 
+import AddCustomerDialog from "@/components/customers/AddCustomerDialog";
+
 interface InvoiceItemInput {
   name: string;
   quantity: number;
@@ -152,6 +154,7 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess }: NewBillDia
   const [customerSearch, setCustomerSearch] = useState("");
   const [customers, setCustomers] = useState<any[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   
   const [items, setItems] = useState<InvoiceItemInput[]>([{ name: "", quantity: 1, price: 0 }]);
   const [discount, setDiscount] = useState(0);
@@ -203,8 +206,6 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess }: NewBillDia
       toast.success("Invoice created successfully!");
       if (onSuccess) onSuccess();
       onClose();
-      // Optional: open the newly created invoice page in the background or show a view button.
-      // We will just close the modal for now since they wanted to stay on the same page.
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -213,50 +214,66 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess }: NewBillDia
   };
 
   return (
-    <LegacyDialog isOpen={isOpen} onClose={onClose} title="New Invoice / Bill" width="600px">
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        
-        {/* Customer Fieldset */}
-        <div className="legacy-fieldset" style={{ marginTop: '12px' }}>
-          <div className="legacy-legend">Customer Selection</div>
+    <>
+      <LegacyDialog isOpen={isOpen} onClose={onClose} title="New Invoice / Bill" width="600px">
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           
-          {selectedCustomer ? (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <strong>{selectedCustomer.name}</strong> - {selectedCustomer.mobile}
-              </div>
-              <button type="button" className="legacy-button" onClick={() => setSelectedCustomer(null)}>Change</button>
-            </div>
-          ) : (
-            <div style={{ position: 'relative' }}>
-              <div style={{ display: 'flex', alignItems: 'center' }}>
-                <label style={{ width: '60px' }}>Search:</label>
-                <input
-                  type="text"
-                  className="legacy-input"
-                  style={{ flex: 1 }}
-                  placeholder="Name or Mobile..."
-                  value={customerSearch}
-                  onChange={(e) => setCustomerSearch(e.target.value)}
-                  autoComplete="off"
-                />
-              </div>
-              {customers.length > 0 && (
-                <div style={{ position: 'absolute', zIndex: 10, width: 'calc(100% - 60px)', left: '60px', top: '100%', background: '#fff', border: '1px solid black', maxHeight: '100px', overflowY: 'auto' }}>
-                  {customers.map((c) => (
-                    <div
-                      key={c.id}
-                      style={{ padding: '2px 4px', cursor: 'pointer', borderBottom: '1px solid #dfdfdf' }}
-                      onClick={() => { setSelectedCustomer(c); setCustomerSearch(""); setCustomers([]); }}
-                    >
-                      {c.name} ({c.mobile})
-                    </div>
-                  ))}
+          {/* Customer Fieldset */}
+          <div className="legacy-fieldset" style={{ marginTop: '12px' }}>
+            <div className="legacy-legend">Customer Selection</div>
+            
+            {selectedCustomer ? (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <strong>{selectedCustomer.name}</strong> - {selectedCustomer.mobile}
                 </div>
-              )}
-            </div>
-          )}
-        </div>
+                <button type="button" className="legacy-button" onClick={() => setSelectedCustomer(null)}>Change</button>
+              </div>
+            ) : (
+              <div style={{ position: 'relative' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <label style={{ width: '50px' }}>Search:</label>
+                  <input
+                    type="text"
+                    className="legacy-input"
+                    style={{ flex: 1 }}
+                    placeholder="Name or Mobile..."
+                    value={customerSearch}
+                    onChange={(e) => setCustomerSearch(e.target.value)}
+                    autoComplete="off"
+                  />
+                  <button
+                    type="button"
+                    className="legacy-button"
+                    onClick={() => setIsAddCustomerOpen(true)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '3px', fontWeight: 'bold', whiteSpace: 'nowrap', padding: '2px 8px' }}
+                    title="Add New Customer"
+                  >
+                    <span style={{ color: 'green', fontWeight: 'bold', fontSize: '12px' }}>+</span> Add New Customer
+                  </button>
+                </div>
+                {(customers.length > 0 || customerSearch.trim().length > 0) && (
+                  <div style={{ position: 'absolute', zIndex: 10, width: 'calc(100% - 56px)', left: '56px', top: '100%', background: '#fff', border: '1px solid black', maxHeight: '140px', overflowY: 'auto', boxShadow: '2px 2px 5px rgba(0,0,0,0.2)' }}>
+                    {customers.map((c) => (
+                      <div
+                        key={c.id}
+                        style={{ padding: '4px 6px', cursor: 'pointer', borderBottom: '1px solid #dfdfdf' }}
+                        onClick={() => { setSelectedCustomer(c); setCustomerSearch(""); setCustomers([]); }}
+                      >
+                        <strong>{c.name}</strong> ({c.mobile})
+                      </div>
+                    ))}
+                    <div
+                      style={{ padding: '4px 6px', cursor: 'pointer', background: '#f0f4ff', color: '#0a246a', fontWeight: 'bold', borderTop: customers.length > 0 ? '1px solid #0a246a' : 'none' }}
+                      onClick={() => { setIsAddCustomerOpen(true); }}
+                    >
+                      + Create "{customerSearch}" as New Customer
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
         {/* Invoice Items Fieldset */}
         <div className="legacy-fieldset">
@@ -366,5 +383,20 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess }: NewBillDia
 
       </form>
     </LegacyDialog>
+
+    <AddCustomerDialog
+      isOpen={isAddCustomerOpen}
+      onClose={() => setIsAddCustomerOpen(false)}
+      initialSearch={customerSearch}
+      onSuccess={(newCust) => {
+        if (newCust) {
+          setSelectedCustomer(newCust);
+          setCustomerSearch("");
+          setCustomers([]);
+        }
+      }}
+      zIndex={10050}
+    />
+    </>
   );
 }

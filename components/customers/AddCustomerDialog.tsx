@@ -5,10 +5,12 @@ import { useToast } from '@/contexts/ToastContext';
 interface AddCustomerDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (customer?: any) => void;
+  zIndex?: number;
+  initialSearch?: string;
 }
 
-export default function AddCustomerDialog({ isOpen, onClose, onSuccess }: AddCustomerDialogProps) {
+export default function AddCustomerDialog({ isOpen, onClose, onSuccess, zIndex, initialSearch }: AddCustomerDialogProps) {
   const toast = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -19,6 +21,22 @@ export default function AddCustomerDialog({ isOpen, onClose, onSuccess }: AddCus
     aadhaarNumber: '',
     panNumber: ''
   });
+
+  // Pre-fill initial input if provided when opened
+  React.useEffect(() => {
+    if (isOpen) {
+      const search = initialSearch?.trim() || '';
+      const isMobile = /^[0-9]{1,10}$/.test(search);
+      setFormData({
+        name: isMobile ? '' : search,
+        mobile: isMobile ? search : '',
+        email: '',
+        address: '',
+        aadhaarNumber: '',
+        panNumber: ''
+      });
+    }
+  }, [isOpen, initialSearch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,12 +50,19 @@ export default function AddCustomerDialog({ isOpen, onClose, onSuccess }: AddCus
       });
 
       if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error || 'Failed to create customer');
+        const errorText = await response.text();
+        let errorMsg = 'Failed to create customer';
+        try {
+          const json = JSON.parse(errorText);
+          if (json.error) errorMsg = json.error;
+        } catch {}
+        throw new Error(errorMsg);
       }
 
+      const createdCustomer = await response.json();
       toast.success('Customer created successfully');
-      if (onSuccess) onSuccess();
+      setFormData({ name: '', mobile: '', email: '', address: '', aadhaarNumber: '', panNumber: '' });
+      if (onSuccess) onSuccess(createdCustomer);
       onClose();
     } catch (error: any) {
       toast.error(error.message || 'Something went wrong');
@@ -47,7 +72,7 @@ export default function AddCustomerDialog({ isOpen, onClose, onSuccess }: AddCus
   };
 
   return (
-    <LegacyDialog isOpen={isOpen} onClose={onClose} title="Add New Customer" width="450px">
+    <LegacyDialog isOpen={isOpen} onClose={onClose} title="Add New Customer" width="450px" zIndex={zIndex}>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         
         {/* Customer Details Fieldset */}

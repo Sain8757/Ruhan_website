@@ -9,9 +9,10 @@ interface LegacyDialogProps {
   title: string;
   children: React.ReactNode;
   width?: string;
+  zIndex?: number;
 }
 
-export default function LegacyDialog({ isOpen, onClose, title, children, width = '500px' }: LegacyDialogProps) {
+export default function LegacyDialog({ isOpen, onClose, title, children, width = '500px', zIndex = 9999 }: LegacyDialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function LegacyDialog({ isOpen, onClose, title, children, width =
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 9999,
+        zIndex,
       }}
       onClick={onClose}
     >

@@ -3,6 +3,7 @@ import LegacyDialog from "@/components/layout/LegacyDialog";
 import { useToast } from "@/contexts/ToastContext";
 import { SERVICE_TYPES } from "@/lib/utils";
 import { findCatalogItem } from "@/lib/serviceCatalog";
+import AddCustomerDialog from "@/components/customers/AddCustomerDialog";
 
 interface NewServiceDialogProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ export default function NewServiceDialog({ isOpen, onClose, onSuccess }: NewServ
   const [customerSearch, setCustomerSearch] = useState("");
   const [customers, setCustomers] = useState<any[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   
   const [form, setForm] = useState({
     serviceType: "",
@@ -102,100 +104,137 @@ export default function NewServiceDialog({ isOpen, onClose, onSuccess }: NewServ
   };
 
   return (
-    <LegacyDialog isOpen={isOpen} onClose={onClose} title="New Service Request" width="500px">
-      <form onSubmit={handleSubmit} style={{ padding: '8px' }}>
-        
-        <fieldset className="legacy-fieldset" style={{ marginBottom: '8px' }}>
-          <legend>Customer Details</legend>
-          {selectedCustomer ? (
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <strong>{selectedCustomer.name}</strong> ({selectedCustomer.mobile})
-              </div>
-              <button type="button" onClick={() => setSelectedCustomer(null)}>✕</button>
-            </div>
-          ) : (
-            <div style={{ position: 'relative' }}>
-              <input
-                type="text"
-                placeholder="Search by name or mobile..."
-                style={{ width: '100%' }}
-                value={customerSearch}
-                onChange={(e) => setCustomerSearch(e.target.value)}
-              />
-              {customers.length > 0 && (
-                <div style={{ position: 'absolute', background: '#fff', border: '1px solid #000', width: '100%', zIndex: 10 }}>
-                  {customers.map((c) => (
-                    <div
-                      key={c.id}
-                      style={{ padding: '4px', cursor: 'pointer', borderBottom: '1px solid #eee' }}
-                      onClick={() => {
-                        setSelectedCustomer(c);
-                        setCustomerSearch("");
-                        setCustomers([]);
-                      }}
-                    >
-                      {c.name} - {c.mobile}
-                    </div>
-                  ))}
+    <>
+      <LegacyDialog isOpen={isOpen} onClose={onClose} title="New Service Request" width="500px">
+        <form onSubmit={handleSubmit} style={{ padding: '8px' }}>
+          
+          <fieldset className="legacy-fieldset" style={{ marginBottom: '8px' }}>
+            <legend>Customer Details</legend>
+            {selectedCustomer ? (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <strong>{selectedCustomer.name}</strong> ({selectedCustomer.mobile})
                 </div>
-              )}
-            </div>
-          )}
-        </fieldset>
+                <button type="button" className="legacy-button" onClick={() => setSelectedCustomer(null)}>Change</button>
+              </div>
+            ) : (
+              <div style={{ position: 'relative' }}>
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    className="legacy-input"
+                    placeholder="Search by name or mobile..."
+                    style={{ flex: 1 }}
+                    value={customerSearch}
+                    onChange={(e) => setCustomerSearch(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="legacy-button"
+                    onClick={() => setIsAddCustomerOpen(true)}
+                    style={{ display: 'flex', alignItems: 'center', gap: '3px', fontWeight: 'bold', whiteSpace: 'nowrap', padding: '2px 8px' }}
+                    title="Add New Customer"
+                  >
+                    <span style={{ color: 'green', fontWeight: 'bold', fontSize: '12px' }}>+</span> Add New Customer
+                  </button>
+                </div>
+                {(customers.length > 0 || customerSearch.trim().length > 0) && (
+                  <div style={{ position: 'absolute', background: '#fff', border: '1px solid #000', width: '100%', zIndex: 10, maxHeight: '140px', overflowY: 'auto', boxShadow: '2px 2px 5px rgba(0,0,0,0.2)' }}>
+                    {customers.map((c) => (
+                      <div
+                        key={c.id}
+                        style={{ padding: '4px', cursor: 'pointer', borderBottom: '1px solid #eee' }}
+                        onClick={() => {
+                          setSelectedCustomer(c);
+                          setCustomerSearch("");
+                          setCustomers([]);
+                        }}
+                      >
+                        <strong>{c.name}</strong> - {c.mobile}
+                      </div>
+                    ))}
+                    <div
+                      style={{ padding: '4px 6px', cursor: 'pointer', background: '#f0f4ff', color: '#0a246a', fontWeight: 'bold', borderTop: customers.length > 0 ? '1px solid #0a246a' : 'none' }}
+                      onClick={() => setIsAddCustomerOpen(true)}
+                    >
+                      + Create "{customerSearch}" as New Customer
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </fieldset>
 
-        <fieldset className="legacy-fieldset" style={{ marginBottom: '8px' }}>
-          <legend>Service Configuration</legend>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-            <div style={{ gridColumn: 'span 2' }}>
-              <label>Service Type:</label>
-              <select
-                style={{ width: '100%' }}
-                value={form.serviceType}
-                onChange={(e) => applyServicePreset(e.target.value)}
-                required
-              >
-                <option value="">-- Select --</option>
-                {SERVICE_TYPES.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
+          <fieldset className="legacy-fieldset" style={{ marginBottom: '8px' }}>
+            <legend>Service Configuration</legend>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div style={{ gridColumn: 'span 2' }}>
+                <label>Service Type:</label>
+                <select
+                  className="legacy-input"
+                  style={{ width: '100%' }}
+                  value={form.serviceType}
+                  onChange={(e) => applyServicePreset(e.target.value)}
+                  required
+                >
+                  <option value="">-- Select --</option>
+                  {SERVICE_TYPES.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label>Fees (₹):</label>
+                <input
+                  type="number"
+                  className="legacy-input"
+                  style={{ width: '100%' }}
+                  value={form.fees}
+                  onChange={(e) => setForm({ ...form, fees: e.target.value })}
+                />
+              </div>
+              <div>
+                <label>Payment Status:</label>
+                <select className="legacy-input" style={{ width: '100%' }} value={form.paymentStatus} onChange={(e) => setForm({ ...form, paymentStatus: e.target.value })}>
+                  <option value="UNPAID">Unpaid</option>
+                  <option value="PARTIAL">Partial</option>
+                  <option value="PAID">Paid</option>
+                </select>
+              </div>
             </div>
-            <div>
-              <label>Fees (₹):</label>
-              <input
-                type="number"
-                style={{ width: '100%' }}
-                value={form.fees}
-                onChange={(e) => setForm({ ...form, fees: e.target.value })}
-              />
-            </div>
-            <div>
-              <label>Payment Status:</label>
-              <select style={{ width: '100%' }} value={form.paymentStatus} onChange={(e) => setForm({ ...form, paymentStatus: e.target.value })}>
-                <option value="UNPAID">Unpaid</option>
-                <option value="PARTIAL">Partial</option>
-                <option value="PAID">Paid</option>
-              </select>
-            </div>
+          </fieldset>
+
+          <fieldset className="legacy-fieldset" style={{ marginBottom: '8px' }}>
+            <legend>Notes</legend>
+            <textarea
+              className="legacy-input"
+              style={{ width: '100%' }}
+              rows={2}
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            />
+          </fieldset>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '12px' }}>
+            <button type="button" className="legacy-button" onClick={onClose}>Cancel</button>
+            <button type="submit" className="legacy-button" disabled={loading} style={{ fontWeight: 'bold' }}>{loading ? 'Saving...' : 'OK'}</button>
           </div>
-        </fieldset>
+        </form>
+      </LegacyDialog>
 
-        <fieldset className="legacy-fieldset" style={{ marginBottom: '8px' }}>
-          <legend>Notes</legend>
-          <textarea
-            style={{ width: '100%' }}
-            rows={2}
-            value={form.notes}
-            onChange={(e) => setForm({ ...form, notes: e.target.value })}
-          />
-        </fieldset>
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '12px' }}>
-          <button type="button" onClick={onClose}>Cancel</button>
-          <button type="submit" disabled={loading}>{loading ? 'Saving...' : 'OK'}</button>
-        </div>
-      </form>
-    </LegacyDialog>
+      <AddCustomerDialog
+        isOpen={isAddCustomerOpen}
+        onClose={() => setIsAddCustomerOpen(false)}
+        initialSearch={customerSearch}
+        onSuccess={(newCust) => {
+          if (newCust) {
+            setSelectedCustomer(newCust);
+            setCustomerSearch("");
+            setCustomers([]);
+          }
+        }}
+        zIndex={10050}
+      />
+    </>
   );
 }
