@@ -1,0 +1,285 @@
+@import url('https://fonts.googleapis.com/css2?family=Tahoma&display=swap');
+
+.legacy-desktop {
+  background-color: #3a6ea5; /* Classic desktop background */
+  min-height: 100vh;
+  width: 100vw;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+  font-size: 11px;
+  color: #000;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Classic Windows 98/2000 style Window */
+.legacy-window {
+  background-color: #d4d0c8;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px #808080, 1px 1px 2px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+}
+
+/* Specific styling to match the screenshot which seems more like Windows 7 Classic theme or XP */
+.legacy-window-titlebar {
+  background: linear-gradient(to right, #0a246a 0%, #a6caf0 100%);
+  color: white;
+  font-weight: bold;
+  padding: 3px 2px 3px 3px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+
+.legacy-window-titlebar .title-text {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legacy-window-controls {
+  display: flex;
+  gap: 2px;
+}
+
+.legacy-btn-close, .legacy-btn-sys {
+  background-color: #d4d0c8;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  width: 16px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: black;
+  font-size: 10px;
+  line-height: 1;
+  cursor: default;
+}
+
+.legacy-btn-close:active, .legacy-btn-sys:active {
+  border-top: 1px solid #404040;
+  border-left: 1px solid #404040;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+  padding-top: 1px;
+  padding-left: 1px;
+}
+
+.legacy-content {
+  padding: 8px;
+}
+
+/* Classic Button */
+.legacy-button {
+  background-color: #d4d0c8;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px #808080;
+  padding: 3px 12px;
+  font-family: inherit;
+  font-size: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: default;
+  color: black;
+}
+.legacy-button:active {
+  border-top: 1px solid #404040;
+  border-left: 1px solid #404040;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+  box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf;
+  padding: 4px 11px 2px 13px; /* shift text down-right */
+}
+
+/* Inputs */
+.legacy-input {
+  background: white;
+  border-top: 1px solid #404040;
+  border-left: 1px solid #404040;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+  box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf;
+  padding: 2px 4px;
+  font-family: inherit;
+  font-size: inherit;
+  color: black;
+  outline: none;
+}
+.legacy-input:disabled {
+  background: #d4d0c8;
+  color: #808080;
+}
+
+/* Select */
+.legacy-select {
+  background: white;
+  border-top: 1px solid #404040;
+  border-left: 1px solid #404040;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
+  box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf;
+  padding: 1px 2px;
+  font-family: inherit;
+  font-size: inherit;
+  color: black;
+}
+
+/* Fieldset */
+.legacy-fieldset {
+  border: 1px solid #d4d0c8; 
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #808080;
+  border-bottom: 1px solid #808080;
+  border-radius: 0;
+  padding: 6px;
+  margin: 0;
+  box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf;
+  position: relative;
+  background: transparent;
+}
+.legacy-fieldset > legend {
+  color: #0000bd;
+  padding: 0 4px;
+  margin-left: 6px;
+}
+
+.legacy-group-box {
+  border: 1px solid #dfdfdf;
+  border-right-color: white;
+  border-bottom-color: white;
+  box-shadow: -1px -1px #808080, 1px 1px #fff;
+  padding: 8px;
+  position: relative;
+  margin-top: 6px;
+}
+.legacy-group-box-title {
+  position: absolute;
+  top: -7px;
+  left: 6px;
+  background: #d4d0c8;
+  padding: 0 4px;
+  color: #0000bd;
+}
+
+/* Toolbars */
+.legacy-toolbar {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background-color: #d4d0c8;
+  border-bottom: 1px solid #808080;
+  box-shadow: 0 1px 0 #fff;
+}
+.legacy-toolbar-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 10px;
+  gap: 2px;
+}
+.legacy-toolbar-btn:hover {
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #808080;
+  border-bottom: 1px solid #808080;
+}
+.legacy-toolbar-btn img {
+  width: 16px;
+  height: 16px;
+}
+
+/* Tabs */
+.legacy-tabs-container {
+  display: flex;
+  margin-bottom: -1px;
+  padding-left: 2px;
+  z-index: 2;
+  position: relative;
+}
+.legacy-tab {
+  background: #d4d0c8;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #404040;
+  padding: 3px 8px;
+  margin-right: 1px;
+  cursor: default;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+  box-shadow: inset -1px 0 #808080;
+}
+.legacy-tab.active {
+  background: #fff;
+  border-bottom: 1px solid #fff; /* cover the container border */
+  padding-top: 5px;
+  margin-top: -2px;
+}
+.legacy-tab-content {
+  background: #fff;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #808080;
+  border-bottom: 1px solid #808080;
+  box-shadow: -1px -1px 0 #dfdfdf, 1px 1px 0 #404040;
+  padding: 8px;
+  min-height: 200px;
+}
+
+/* Data Grid */
+.legacy-grid {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border: 1px solid #808080;
+}
+.legacy-grid th {
+  background: #d4d0c8;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #808080;
+  border-bottom: 1px solid #808080;
+  padding: 2px 4px;
+  font-weight: normal;
+  text-align: left;
+}
+.legacy-grid td {
+  border: 1px solid #dfdfdf;
+  padding: 2px 4px;
+}
+.legacy-grid tr:nth-child(even) td {
+  background: #f8f8f8;
+}
+.legacy-grid tr.selected td {
+  background: #0a246a;
+  color: white;
+}
+
+/* Checkbox */
+.legacy-checkbox {
+  margin: 0 4px 0 0;
+  vertical-align: middle;
+}
+
+/* Small input variant */
+.legacy-input.small {
+  width: 60px;
+  text-align: right;
+}
