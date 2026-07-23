@@ -1051,7 +1051,6 @@ export default function PhotoStudioPage() {
             })();
             setIsEraserMode(false);
           }}
-          onClose={() => setIsEraserMode(false)}
         />
       )}
     </div>
