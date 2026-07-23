@@ -12,6 +12,7 @@ import { WorkspaceProvider } from "@/components/workspace/WorkspaceProvider";
 import Providers from "@/components/Providers";
 import { WORKSPACE_MODULES, type WorkspaceIcon } from "@/lib/workspace";
 import { LogOut } from 'lucide-react';
+import { signOut } from "next-auth/react";
 
 const iconMap: Record<string, React.ComponentType<{ size?: number; color?: string; className?: string }>> = {
   LayoutDashboard,
@@ -45,7 +46,7 @@ export default function LegacyDesktopLayout({ children }: { children: React.Reac
 
   const handleLogout = async () => {
     // Basic signout logic - adapt to your auth provider
-    window.location.href = '/login';
+    await signOut({ callbackUrl: '/login' });
   };
 
   return (

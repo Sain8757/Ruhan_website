@@ -283,7 +283,7 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                 <p style={{ margin: '0 0 16px 0', fontSize: '11px' }}>Are you sure you want to log off?</p>
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                  <button className="legacy-button" style={{ width: '70px', fontWeight: 'bold' }} onClick={() => signOut()}>
+                  <button className="legacy-button" style={{ width: '70px', fontWeight: 'bold' }} onClick={() => signOut({ callbackUrl: '/login' })}>
                     Yes
                   </button>
                   <button className="legacy-button" style={{ width: '70px' }} onClick={() => setShowLogoutConfirm(false)}>
