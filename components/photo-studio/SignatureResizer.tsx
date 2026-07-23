@@ -176,8 +176,8 @@ export default function SignatureResizer() {
             const r = data[i];
             const g = data[i + 1];
             const b = data[i + 2];
-            // Threshold for white
-            if (r > 200 && g > 200 && b > 200) {
+            // Threshold for white (adjusted to 230 to be safer and avoid deleting light signature parts)
+            if (r > 230 && g > 230 && b > 230) {
               data[i + 3] = 0; // Set alpha to 0
             }
           }
