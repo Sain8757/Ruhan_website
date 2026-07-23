@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { X, File, FilePlus, ArrowUpCircle, MousePointer2, Settings, FileText, Phone, Pause, LayoutDashboard, Users, Briefcase, Receipt, Camera, ScanLine } from 'lucide-react';
 import { WorkspaceProvider } from "@/components/workspace/WorkspaceProvider";
 import Providers from "@/components/Providers";
+import { WORKSPACE_MODULES } from "@/lib/workspace";
 
 export default function LegacyDesktopLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -121,48 +122,28 @@ export default function LegacyDesktopLayout({ children }: { children: React.Reac
                   Navigation
                 </div>
                 <div style={{ padding: '4px', display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto' }}>
-                  <div 
-                    className="legacy-tree-item" 
-                    onClick={() => router.push('/')}
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', background: pathname === '/' ? '#000080' : 'transparent', color: pathname === '/' ? '#fff' : '#000' }}
-                  >
-                    <span style={{ color: '#d4d0c8' }}>📁</span> Dashboard
-                  </div>
-                  <div 
-                    className="legacy-tree-item" 
-                    onClick={() => router.push('/customers')}
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', background: pathname.startsWith('/customers') ? '#000080' : 'transparent', color: pathname.startsWith('/customers') ? '#fff' : '#000' }}
-                  >
-                    <span style={{ color: '#d4d0c8' }}>📁</span> Customers
-                  </div>
-                  <div 
-                    className="legacy-tree-item" 
-                    onClick={() => router.push('/services')}
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', background: pathname.startsWith('/services') ? '#000080' : 'transparent', color: pathname.startsWith('/services') ? '#fff' : '#000' }}
-                  >
-                    <span style={{ color: '#d4d0c8' }}>📁</span> Services
-                  </div>
-                  <div 
-                    className="legacy-tree-item" 
-                    onClick={() => router.push('/billing')}
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', background: pathname.startsWith('/billing') ? '#000080' : 'transparent', color: pathname.startsWith('/billing') ? '#fff' : '#000' }}
-                  >
-                    <span style={{ color: '#d4d0c8' }}>📁</span> Billing
-                  </div>
-                  <div 
-                    className="legacy-tree-item" 
-                    onClick={() => router.push('/photo-studio')}
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', background: pathname.startsWith('/photo-studio') ? '#000080' : 'transparent', color: pathname.startsWith('/photo-studio') ? '#fff' : '#000' }}
-                  >
-                    <span style={{ color: '#d4d0c8' }}>📁</span> Photo Studio
-                  </div>
-                  <div 
-                    className="legacy-tree-item" 
-                    onClick={() => router.push('/aadhaar-pan')}
-                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', background: pathname.startsWith('/aadhaar-pan') ? '#000080' : 'transparent', color: pathname.startsWith('/aadhaar-pan') ? '#fff' : '#000' }}
-                  >
-                    <span style={{ color: '#d4d0c8' }}>📁</span> Aadhaar / PAN
-                  </div>
+                  {WORKSPACE_MODULES.map((module) => {
+                    const isActive = module.href === '/' ? pathname === '/' : pathname.startsWith(module.href);
+                    return (
+                      <div 
+                        key={module.id}
+                        className="legacy-tree-item" 
+                        onClick={() => router.push(module.href)}
+                        style={{ 
+                          cursor: 'pointer', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '6px', 
+                          background: isActive ? '#000080' : 'transparent', 
+                          color: isActive ? '#fff' : '#000',
+                          padding: '2px 4px'
+                        }}
+                      >
+                        <span style={{ color: '#d4d0c8', fontSize: '12px' }}>📁</span> 
+                        <span style={{ fontSize: '12px', whiteSpace: 'nowrap' }}>{module.label}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
