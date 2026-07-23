@@ -320,7 +320,10 @@
 .legacy-tab-content .bg-card,
 .legacy-tab-content .stat-card,
 .legacy-tab-content section,
-.legacy-tab-content .glass-panel {
+.legacy-tab-content .glass-panel,
+.legacy-tab-content .glass-card,
+.legacy-tab-content .toolbar,
+.legacy-tab-content .page-shell {
   background: #d4d0c8 !important;
   border-top: 2px solid #fff !important;
   border-left: 2px solid #fff !important;
@@ -411,3 +414,44 @@
   color: black !important;
 }
 .legacy-tab-content * { font-family: 'Tahoma', 'MS Sans Serif', sans-serif !important; }
+
+/* Windows 95 Search Field and Button */
+.legacy-tab-content .search-field {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+}
+
+.legacy-tab-content .search-field svg {
+  position: static !important;
+  transform: none !important;
+  order: 2 !important;
+  background: #d4d0c8 !important;
+  border-top: 2px solid #fff !important;
+  border-left: 2px solid #fff !important;
+  border-right: 2px solid #404040 !important;
+  border-bottom: 2px solid #404040 !important;
+  box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px #808080 !important;
+  padding: 2px 8px !important;
+  margin-left: 4px !important;
+  color: black !important;
+  width: 16px !important;
+  height: 16px !important;
+  box-sizing: content-box !important;
+  cursor: pointer !important;
+}
+
+.legacy-tab-content .search-field svg:active {
+  border-top: 2px solid #404040 !important;
+  border-left: 2px solid #404040 !important;
+  border-right: 2px solid #fff !important;
+  border-bottom: 2px solid #fff !important;
+  box-shadow: none !important;
+  padding: 3px 7px 1px 9px !important;
+}
+
+.legacy-tab-content .search-field .input-field {
+  padding-left: 4px !important;
+  order: 1 !important;
+  flex: 1 !important;
+}
