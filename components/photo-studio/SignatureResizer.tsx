@@ -16,6 +16,7 @@ interface SignatureItem {
   crop?: Crop;
   status: "pending" | "processing" | "done" | "error";
   cropDimensions?: { width: number; height: number };
+  croppedPreviewUrl?: string;
 }
 
 const DPI = 300; // Standard print DPI for conversions
@@ -153,7 +154,7 @@ export default function SignatureResizer() {
       
       const { removeBackground } = await import("@imgly/background-removal");
       
-      const response = await fetch(item.previewUrl);
+      const response = await fetch(item.croppedPreviewUrl || item.previewUrl);
       const blob = await response.blob();
       
       const supportsWebGpu = typeof navigator !== "undefined" && Boolean((navigator as any).gpu);
@@ -175,7 +176,12 @@ export default function SignatureResizer() {
       const newUrl = URL.createObjectURL(foregroundBlob);
       
       setItems((prev) => 
-        prev.map(i => i.id === item.id ? { ...i, previewUrl: newUrl } : i)
+        prev.map(i => i.id === item.id ? { 
+          ...i, 
+          previewUrl: newUrl,
+          croppedPreviewUrl: undefined,
+          crop: undefined 
+        } : i)
       );
       toast.success("AI Background removed successfully!");
     } catch (error: any) {
@@ -187,20 +193,44 @@ export default function SignatureResizer() {
     }
   };
 
-  const saveCrop = () => {
+  const saveCrop = async () => {
     if (croppingItem) {
       let cropDimensions = croppingItem.cropDimensions;
+      let croppedPreviewUrl = croppingItem.croppedPreviewUrl;
+      
       if (tempCrop && tempCrop.width > 0 && tempCrop.height > 0 && imageRef.current) {
         const isPercent = tempCrop.unit === '%';
         const img = imageRef.current;
         const cropW = isPercent ? (tempCrop.width / 100) * img.naturalWidth : tempCrop.width;
         const cropH = isPercent ? (tempCrop.height / 100) * img.naturalHeight : tempCrop.height;
         cropDimensions = { width: Math.round(cropW), height: Math.round(cropH) };
+        
+        // Generate cropped preview
+        const canvas = document.createElement('canvas');
+        canvas.width = cropW;
+        canvas.height = cropH;
+        const ctx = canvas.getContext('2d');
+        const cropX = isPercent ? (tempCrop.x / 100) * img.naturalWidth : tempCrop.x;
+        const cropY = isPercent ? (tempCrop.y / 100) * img.naturalHeight : tempCrop.y;
+        
+        ctx?.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+        
+        croppedPreviewUrl = await new Promise<string>((resolve) => {
+          canvas.toBlob((blob) => {
+            if (blob) {
+              resolve(URL.createObjectURL(blob));
+            } else {
+              resolve(croppingItem.previewUrl);
+            }
+          }, "image/png");
+        });
+      } else {
+        croppedPreviewUrl = undefined;
       }
 
       setItems((prev) =>
         prev.map((item) =>
-          item.id === croppingItem.id ? { ...item, crop: tempCrop, cropDimensions } : item
+          item.id === croppingItem.id ? { ...item, crop: tempCrop, cropDimensions, croppedPreviewUrl } : item
         )
       );
       setItemFilters(prev => ({
@@ -402,7 +432,7 @@ export default function SignatureResizer() {
                   
                   <div className="relative aspect-[4/3] bg-gray-50/50 rounded-lg border border-gray-100 overflow-hidden mb-4 flex items-center justify-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={item.previewUrl} alt="preview" className="max-h-full max-w-full object-contain p-2" />
+                    <img src={item.croppedPreviewUrl || item.previewUrl} alt="preview" className="max-h-full max-w-full object-contain p-2" />
                     
                     {item.cropDimensions && (
                       <div className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm tracking-wider">
