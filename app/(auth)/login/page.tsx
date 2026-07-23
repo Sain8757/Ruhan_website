@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { X, Key } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -33,84 +34,120 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-[#f7f9fc] font-sans">
-      <div className="w-full max-w-[500px] bg-white p-8 shadow-sm border border-gray-200">
-        
-        {/* Header */}
-        <div className="border-b border-gray-200 pb-2 mb-2">
-          <h1 className="text-[26px] text-gray-800 font-medium">Login</h1>
-        </div>
-        
-        {/* Mandatory Text */}
-        <div className="flex justify-end mb-6">
-          <div className="flex items-center text-sm text-gray-700">
-            <span className="w-1.5 h-1.5 bg-red-600 rounded-full mr-1.5 inline-block"></span>
-            indicates mandatory fields
+    <div className="legacy-tab-content" style={{ 
+      minHeight: '100vh', 
+      width: '100%', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      backgroundColor: '#008080', 
+      fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif" 
+    }}>
+      <div style={{
+          width: '450px',
+          backgroundColor: '#d4d0c8',
+          borderTop: '2px solid #fff',
+          borderLeft: '2px solid #fff',
+          borderRight: '2px solid #404040',
+          borderBottom: '2px solid #404040',
+          boxShadow: '1px 1px 4px rgba(0,0,0,0.5)',
+          display: 'flex',
+          flexDirection: 'column',
+          fontSize: '11px',
+          color: 'black'
+      }}>
+        {/* Title Bar */}
+        <div style={{
+            background: 'linear-gradient(to right, #0a246a 0%, #a6caf0 100%)',
+            color: 'white',
+            fontWeight: 'bold',
+            padding: '3px 2px 3px 4px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            userSelect: 'none',
+            margin: '2px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Key size={14} color="#ffd700" style={{ filter: 'drop-shadow(1px 1px 1px #000)' }} />
+            Enter Network Password
+          </div>
+          <div style={{ display: 'flex', gap: '2px' }}>
+            <button className="legacy-btn-close" type="button" onClick={() => {}} title="Close">
+              <X size={12} strokeWidth={3} />
+            </button>
           </div>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-sm">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
+        {/* Content Area */}
+        <div style={{ padding: '16px', display: 'flex', gap: '16px' }}>
           
-          {/* Username */}
-          <div className="mb-5">
-            <label className="flex items-center text-[15px] text-gray-800 mb-1.5">
-              Username 
-              <span className="w-1.5 h-1.5 bg-red-600 rounded-full ml-1 inline-block"></span>
-            </label>
-            <input
-              type="text"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="Enter Username"
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 text-[15px] text-gray-800 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 shadow-sm"
-            />
+          <div style={{ width: '48px', display: 'flex', justifyContent: 'center' }}>
+            <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, #008080, #004040)', border: '2px solid #fff', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Key size={20} color="#ffd700" />
+            </div>
           </div>
 
-          {/* Password */}
-          <div className="mb-6">
-            <label className="flex items-center text-[15px] text-gray-800 mb-1.5">
-              Password
-              <span className="w-1.5 h-1.5 bg-red-600 rounded-full ml-1 inline-block"></span>
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="Enter Password"
-              className="w-full px-3 py-2.5 bg-white border border-gray-300 text-[15px] text-gray-800 focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 shadow-sm"
-            />
-          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ marginBottom: '16px', fontSize: '11px' }}>
+              Type your user name and password to log on to the RA Seva Point network.
+            </div>
 
-          {/* Login Button */}
-          <div className="mb-6">
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-8 py-2.5 bg-[#2c497f] hover:bg-[#203a68] text-white font-medium text-[15px] transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {loading ? "LOGGING IN..." : "LOGIN"}
-            </button>
-          </div>
+            {error && (
+              <div style={{ marginBottom: '12px', padding: '4px 8px', backgroundColor: '#ffcccc', border: '1px solid #cc0000', color: '#cc0000', fontSize: '11px' }}>
+                {error}
+              </div>
+            )}
 
-          {/* Footer Links */}
-          <div className="flex items-center justify-between mt-8 pt-4">
-            <button type="button" className="text-[#2575b6] hover:underline text-[15px]">
-              Forgot Username
-            </button>
-            <button type="button" className="text-[#2575b6] hover:underline text-[15px]">
-              Forgot Password
-            </button>
-          </div>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              
+              {/* Username */}
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <label style={{ width: '90px' }}>User name:</label>
+                <input
+                  type="text"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  style={{ flex: 1 }}
+                />
+              </div>
 
-        </form>
+              {/* Password */}
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <label style={{ width: '90px' }}>Password:</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  style={{ flex: 1 }}
+                />
+              </div>
+
+              {/* Buttons */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="legacy-button"
+                  style={{ width: '80px', fontWeight: 'bold' }}
+                >
+                  {loading ? "Please wait" : "OK"}
+                </button>
+                <button
+                  type="button"
+                  className="legacy-button"
+                  style={{ width: '80px' }}
+                  onClick={() => { setEmail(""); setPassword(""); setError(""); }}
+                >
+                  Cancel
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );
