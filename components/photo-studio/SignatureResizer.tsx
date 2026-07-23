@@ -4,7 +4,7 @@ import React, { useState, useRef, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import ReactCrop, { Crop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
-import { UploadCloud, X, Crop as CropIcon, Settings, Sliders, Download, Wand2 } from "lucide-react";
+import { UploadCloud, X, Crop as CropIcon, Settings, Sliders, Download, Wand2, RotateCw, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 import { useDownload } from "@/contexts/DownloadContext";
 
@@ -26,7 +26,7 @@ export default function SignatureResizer() {
   const toast = useToast();
   const { downloadWithRename } = useDownload();
   const [items, setItems] = useState<SignatureItem[]>([]);
-  const [unit, setUnit] = useState<"px" | "cm">("px");
+  const [unit, setUnit] = useState<"px" | "cm" | "original">("px");
   const [width, setWidth] = useState<number>(140);
   const [height, setHeight] = useState<number>(60);
   const [targetKb, setTargetKb] = useState<number>(20);
@@ -34,6 +34,7 @@ export default function SignatureResizer() {
   
   // Store advanced filters
   const [itemFilters, setItemFilters] = useState<Record<string, { brightness: number, contrast: number, removeBg: boolean }>>({});
+  const [globalRemoveBg, setGlobalRemoveBg] = useState(false);
   
   // Crop Modal state
   const [croppingItem, setCroppingItem] = useState<SignatureItem | null>(null);
@@ -41,6 +42,7 @@ export default function SignatureResizer() {
   const [tempBrightness, setTempBrightness] = useState(100);
   const [tempContrast, setTempContrast] = useState(100);
   const [tempRemoveBg, setTempRemoveBg] = useState(false);
+  const [tempZoom, setTempZoom] = useState(1);
   
   const imageRef = useRef<HTMLImageElement>(null);
 
@@ -94,6 +96,37 @@ export default function SignatureResizer() {
     setTempBrightness(filters.brightness);
     setTempContrast(filters.contrast);
     setTempRemoveBg(filters.removeBg);
+    setTempZoom(1);
+  };
+
+  const handleRotate = async (angle: number) => {
+    if (!croppingItem) return;
+    const img = new Image();
+    img.src = croppingItem.previewUrl;
+    await new Promise((resolve) => (img.onload = resolve));
+    
+    const canvas = document.createElement("canvas");
+    if (angle === 90 || angle === 270 || angle === -90) {
+      canvas.width = img.naturalHeight;
+      canvas.height = img.naturalWidth;
+    } else {
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+    }
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate((angle * Math.PI) / 180);
+    ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+    
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const newUrl = URL.createObjectURL(blob);
+        setCroppingItem(prev => prev ? { ...prev, previewUrl: newUrl } : null);
+        setItems(prev => prev.map(i => i.id === croppingItem.id ? { ...i, previewUrl: newUrl } : i));
+        setTempCrop(undefined); // Reset crop
+      }
+    }, "image/png");
   };
 
   const saveCrop = () => {
@@ -144,8 +177,14 @@ export default function SignatureResizer() {
         }
 
         // Now resize to target dimensions
-        const targetPxWidth = unit === "cm" ? cmToPx(width) : width;
-        const targetPxHeight = unit === "cm" ? cmToPx(height) : height;
+        let targetPxWidth, targetPxHeight;
+        if (unit === "original") {
+          targetPxWidth = sourceCanvas.width;
+          targetPxHeight = sourceCanvas.height;
+        } else {
+          targetPxWidth = unit === "cm" ? cmToPx(width) : width;
+          targetPxHeight = unit === "cm" ? cmToPx(height) : height;
+        }
 
         const resizeCanvas = document.createElement("canvas");
         resizeCanvas.width = targetPxWidth;
@@ -168,7 +207,7 @@ export default function SignatureResizer() {
         resizeCtx!.filter = 'none';
 
         // Background removal (Make white/near-white transparent)
-        if (filters.removeBg && format === "image/png") {
+        if ((filters.removeBg || globalRemoveBg) && format === "image/png") {
           const imageData = resizeCtx!.getImageData(0, 0, targetPxWidth, targetPxHeight);
           const data = imageData.data;
           // Loop through pixels
@@ -377,30 +416,38 @@ export default function SignatureResizer() {
                   >
                     CM
                   </button>
+                  <button
+                    onClick={() => setUnit("original")}
+                    className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${unit === 'original' ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    Original Crop Size
+                  </button>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="flex-1">
-                  <label className="text-xs font-bold text-gray-400 mb-1.5 block uppercase tracking-wider">Width</label>
-                  <input
-                    type="number"
-                    className="w-full py-2 px-3 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
-                    value={width}
-                    onChange={(e) => setWidth(Number(e.target.value))}
-                  />
+              {unit !== "original" && (
+                <div className="flex items-center gap-3">
+                  <div className="flex-1">
+                    <label className="text-xs font-bold text-gray-400 mb-1.5 block uppercase tracking-wider">Width</label>
+                    <input
+                      type="number"
+                      className="w-full py-2 px-3 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                      value={width}
+                      onChange={(e) => setWidth(Number(e.target.value))}
+                    />
+                  </div>
+                  <div className="text-gray-300 font-bold mt-6 text-sm">✕</div>
+                  <div className="flex-1">
+                    <label className="text-xs font-bold text-gray-400 mb-1.5 block uppercase tracking-wider">Height</label>
+                    <input
+                      type="number"
+                      className="w-full py-2 px-3 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
+                      value={height}
+                      onChange={(e) => setHeight(Number(e.target.value))}
+                    />
+                  </div>
                 </div>
-                <div className="text-gray-300 font-bold mt-6 text-sm">✕</div>
-                <div className="flex-1">
-                  <label className="text-xs font-bold text-gray-400 mb-1.5 block uppercase tracking-wider">Height</label>
-                  <input
-                    type="number"
-                    className="w-full py-2 px-3 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
-                    value={height}
-                    onChange={(e) => setHeight(Number(e.target.value))}
-                  />
-                </div>
-              </div>
+              )}
             </div>
 
             <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-6 space-y-4">
@@ -435,6 +482,24 @@ export default function SignatureResizer() {
                   </p>
                 )}
               </div>
+
+              {/* Global Remove Background */}
+              {format === "image/png" && (
+                <div className="pt-2 border-t border-gray-100">
+                  <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-gray-200 bg-gray-50 hover:bg-indigo-50 transition-colors">
+                    <input 
+                      type="checkbox" 
+                      checked={globalRemoveBg}
+                      onChange={(e) => setGlobalRemoveBg(e.target.checked)}
+                      className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-gray-800">Auto-Remove Background</span>
+                      <span className="text-[11px] text-gray-500 mt-0.5">Applies to all downloaded signatures</span>
+                    </div>
+                  </label>
+                </div>
+              )}
             </div>
 
             <button
@@ -466,30 +531,60 @@ export default function SignatureResizer() {
             <div className="flex flex-col md:flex-row h-full max-h-[60vh]">
               {/* Crop Area */}
               <div className="p-6 flex-1 overflow-auto bg-gray-100/50 flex items-center justify-center min-h-[300px] border-r">
-                <ReactCrop
-                  crop={tempCrop}
-                  onChange={(_, percentCrop) => setTempCrop(percentCrop)}
-                  className="max-w-full rounded-lg shadow-sm overflow-hidden"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    ref={imageRef}
-                    src={croppingItem.previewUrl}
-                    alt="Crop preview"
-                    className="max-h-[50vh] object-contain transition-all"
-                    style={{
-                      filter: `brightness(${tempBrightness}%) contrast(${tempContrast}%)`
-                    }}
-                  />
-                </ReactCrop>
+                <div style={{ transform: `scale(${tempZoom})`, transformOrigin: 'center', transition: 'transform 0.2s' }}>
+                  <ReactCrop
+                    crop={tempCrop}
+                    onChange={(_, percentCrop) => setTempCrop(percentCrop)}
+                    className="max-w-full rounded-lg shadow-sm overflow-hidden"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      ref={imageRef}
+                      src={croppingItem.previewUrl}
+                      alt="Crop preview"
+                      className="max-h-[50vh] object-contain transition-all"
+                      style={{
+                        filter: `brightness(${tempBrightness}%) contrast(${tempContrast}%)`
+                      }}
+                    />
+                  </ReactCrop>
+                </div>
               </div>
 
               {/* Toolbar Area */}
               <div className="w-full md:w-64 bg-white p-5 space-y-6 overflow-y-auto">
                 <div>
-                  <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-1.5"><Wand2 size={16} className="text-indigo-600" /> Enhancements</h4>
+                  <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-1.5"><Wand2 size={16} className="text-indigo-600" /> Image Tools</h4>
                   
                   <div className="space-y-4">
+                    {/* Rotation */}
+                    <div className="flex gap-2">
+                      <button onClick={() => handleRotate(-90)} className="flex-1 py-1.5 flex justify-center items-center gap-1 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors">
+                        <RotateCcw size={14} /> Left
+                      </button>
+                      <button onClick={() => handleRotate(90)} className="flex-1 py-1.5 flex justify-center items-center gap-1 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded transition-colors">
+                        <RotateCw size={14} /> Right
+                      </button>
+                    </div>
+
+                    {/* Zoom */}
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <label className="text-xs font-semibold text-gray-600 flex items-center gap-1"><ZoomIn size={12} /> Zoom</label>
+                        <span className="text-xs text-gray-400">{Math.round(tempZoom * 100)}%</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="0.5" max="3" step="0.1"
+                        value={tempZoom}
+                        onChange={(e) => setTempZoom(Number(e.target.value))}
+                        className="w-full accent-indigo-600"
+                      />
+                    </div>
+
+                    <hr className="border-gray-100" />
+
+                    {/* Brightness */}
                     <div>
                       <div className="flex justify-between mb-1">
                         <label className="text-xs font-semibold text-gray-600">Brightness</label>
