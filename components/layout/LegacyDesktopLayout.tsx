@@ -54,11 +54,39 @@ export default function LegacyDesktopLayout({ children }: { children: React.Reac
           >
             {/* Title Bar */}
             <div className="legacy-window-titlebar">
-              <div className="title-text">
+              <div className="title-text" style={{ flex: 1 }}>
                 <span style={{ fontSize: '14px', lineHeight: 1 }}>🔹</span>
                 {getWindowTitle()} - RA Seva Point
               </div>
-              <div className="legacy-window-controls">
+
+              {/* Universal Search & Icons centered in Title Bar */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 2 }}>
+                {/* Universal Search */}
+                <div style={{ display: 'flex', alignItems: 'center', background: '#fff', borderTop: '2px solid #808080', borderLeft: '2px solid #808080', borderRight: '2px solid #fff', borderBottom: '2px solid #fff', padding: '1px', marginRight: '16px', width: '250px', flexShrink: 0 }}>
+                  <input type="text" placeholder="Search..." style={{ border: 'none', outline: 'none', background: 'transparent', width: '100%', fontSize: '11px', padding: '0 4px', color: '#000' }} />
+                  <button style={{ padding: '2px 4px', background: '#d4d0c8', borderTop: '2px solid #fff', borderLeft: '2px solid #fff', borderRight: '2px solid #404040', borderBottom: '2px solid #404040', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Search size={12} color="#000" />
+                  </button>
+                </div>
+
+                {/* Utility Icons */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                  <button className="legacy-toolbar-btn" title="Notifications" style={{ background: '#d4d0c8', padding: '2px 4px' }}>
+                    <Bell size={16} color="#d4af37" />
+                  </button>
+                  <button className="legacy-toolbar-btn" title="WhatsApp" style={{ background: '#d4d0c8', padding: '2px 4px' }}>
+                    <MessageCircle size={16} color="#25D366" />
+                  </button>
+                  <button className="legacy-toolbar-btn" title="Email" style={{ background: '#d4d0c8', padding: '2px 4px' }}>
+                    <Mail size={16} color="#D44638" />
+                  </button>
+                  <button className="legacy-toolbar-btn" title="Gemini AI" style={{ background: '#d4d0c8', padding: '2px 4px' }}>
+                    <Sparkles size={16} color="#4285F4" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="legacy-window-controls" style={{ flex: 1, justifyContent: 'flex-end' }}>
                 <button className="legacy-btn-sys">_</button>
                 <button className="legacy-btn-sys">□</button>
                 <button className="legacy-btn-close"><X size={10} /></button>
@@ -84,33 +112,6 @@ export default function LegacyDesktopLayout({ children }: { children: React.Reac
                     </React.Fragment>
                   );
                 })}
-              </div>
-
-              {/* Spacer to push search and icons to the right */}
-              <div style={{ flex: 1, minWidth: '20px' }}></div>
-
-              {/* Universal Search */}
-              <div style={{ display: 'flex', alignItems: 'center', background: '#fff', borderTop: '2px solid #808080', borderLeft: '2px solid #808080', borderRight: '2px solid #fff', borderBottom: '2px solid #fff', padding: '1px', marginRight: '8px', width: '200px', flexShrink: 0 }}>
-                <input type="text" placeholder="Search..." style={{ border: 'none', outline: 'none', background: 'transparent', width: '100%', fontSize: '11px', padding: '0 4px', color: '#000' }} />
-                <button style={{ padding: '2px 4px', background: '#d4d0c8', borderTop: '2px solid #fff', borderLeft: '2px solid #fff', borderRight: '2px solid #404040', borderBottom: '2px solid #404040', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Search size={12} color="#000" />
-                </button>
-              </div>
-
-              {/* Utility Icons */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '2px', paddingRight: '8px', flexShrink: 0 }}>
-                <button className="legacy-toolbar-btn" title="Notifications">
-                  <Bell size={16} color="#d4af37" />
-                </button>
-                <button className="legacy-toolbar-btn" title="WhatsApp">
-                  <MessageCircle size={16} color="#25D366" />
-                </button>
-                <button className="legacy-toolbar-btn" title="Email">
-                  <Mail size={16} color="#D44638" />
-                </button>
-                <button className="legacy-toolbar-btn" title="Gemini AI">
-                  <Sparkles size={16} color="#4285F4" />
-                </button>
               </div>
             </div>
 
