@@ -33,8 +33,7 @@ export default function SignatureResizer() {
   const [format, setFormat] = useState<"image/jpeg" | "image/png">("image/jpeg");
   
   // Store advanced filters
-  const [itemFilters, setItemFilters] = useState<Record<string, { brightness: number, contrast: number, removeBg: boolean }>>({});
-  const [globalRemoveBg, setGlobalRemoveBg] = useState(false);
+  const [itemFilters, setItemFilters] = useState<Record<string, { brightness: number, contrast: number }>>({});
   
   // Crop Modal state
   const [croppingItem, setCroppingItem] = useState<SignatureItem | null>(null);
