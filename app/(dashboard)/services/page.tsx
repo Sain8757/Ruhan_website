@@ -16,6 +16,9 @@ import { formatCurrency, formatDate, SERVICE_STATUS_COLORS, PAYMENT_STATUS_COLOR
 import { useToast } from "@/contexts/ToastContext";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/layout/PageHeader";
+import NewServiceDialog from "@/components/services/NewServiceDialog";
+import ServiceDetailsDialog from "@/components/services/ServiceDetailsDialog";
+import LegacyDialog from "@/components/layout/LegacyDialog";
 
 interface Service {
   id: string;
@@ -111,6 +114,8 @@ export default function ServicesPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [query, setQuery] = useState("");
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [isNewServiceOpen, setIsNewServiceOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const toast = useToast();
   const router = useRouter();
 
@@ -169,10 +174,10 @@ export default function ServicesPage() {
                 <List size={16} />
               </button>
             </div>
-            <Link href="/services/new" className="btn-primary">
+            <button className="btn-primary" onClick={() => setIsNewServiceOpen(true)}>
               <Plus size={16} />
               New Service
-            </Link>
+            </button>
           </>
         }
       />
@@ -213,10 +218,10 @@ export default function ServicesPage() {
           <Briefcase size={56} className="empty-state-icon" />
           <div className="empty-state-title">No services found</div>
           <div className="empty-state-desc">Add your first service to get started</div>
-          <Link href="/services/new" className="btn-primary mt-4">
+          <button className="btn-primary mt-4" onClick={() => setIsNewServiceOpen(true)}>
             <Plus size={16} />
             New Service
-          </Link>
+          </button>
         </div>
       ) : view === "kanban" ? (
         <KanbanBoard services={filtered} onSelect={setSelectedService} />
@@ -280,57 +285,58 @@ export default function ServicesPage() {
         </div>
       )}
 
-      {selectedService && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="glass-card rounded-2xl p-6 max-w-sm w-full shadow-2xl relative" style={{ background: "var(--bg-primary)" }}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-lg" style={{ color: "var(--text-primary)" }}>Service Status</h3>
-              <button 
-                onClick={() => setSelectedService(null)}
-                className="p-1 hover:bg-[var(--bg-secondary)] rounded-full transition-colors"
-                style={{ color: "var(--text-muted)" }}
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>Customer Name</p>
-                <p className="font-semibold text-lg" style={{ color: "var(--text-primary)" }}>{selectedService.customer.name}</p>
-                <p className="text-xs" style={{ color: "var(--text-muted)" }}>{selectedService.customer.mobile}</p>
-              </div>
-              
-              <div className="pt-2 border-t" style={{ borderColor: "var(--border-primary)" }}>
-                <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>Service Request</p>
-                <p className="font-medium" style={{ color: "var(--text-secondary)" }}>{selectedService.serviceType}</p>
-              </div>
-              
-              <div className="pt-2 border-t" style={{ borderColor: "var(--border-primary)" }}>
-                <p className="text-xs mb-2" style={{ color: "var(--text-muted)" }}>Current Status</p>
-                <span className={`badge ${SERVICE_STATUS_COLORS[selectedService.status]} text-sm px-3 py-1`}>
-                  {STATUS_LABELS[selectedService.status]}
-                </span>
-              </div>
-            </div>
+      )}
 
-            <div className="mt-8 flex gap-3">
-              <button 
-                className="btn-secondary flex-1"
-                onClick={() => setSelectedService(null)}
-              >
-                Close
-              </button>
-              <Link 
-                href={`/services/${selectedService.id}`} 
-                className="btn-primary flex-1 text-center justify-center"
-              >
-                View Full Details
-              </Link>
+      <NewServiceDialog
+        isOpen={isNewServiceOpen}
+        onClose={() => setIsNewServiceOpen(false)}
+        onSuccess={fetchServices}
+      />
+
+      <LegacyDialog
+        isOpen={!!selectedService && !isDetailsOpen}
+        onClose={() => setSelectedService(null)}
+        title="Service Status"
+        width="350px"
+      >
+        {selectedService && (
+          <div style={{ padding: '8px' }}>
+            <fieldset className="legacy-fieldset" style={{ marginBottom: '8px' }}>
+              <legend>Customer</legend>
+              <div className="font-semibold text-lg" style={{ color: "black" }}>{selectedService.customer.name}</div>
+              <div className="text-xs" style={{ color: "black" }}>{selectedService.customer.mobile}</div>
+            </fieldset>
+
+            <fieldset className="legacy-fieldset" style={{ marginBottom: '8px' }}>
+              <legend>Service Request</legend>
+              <div className="font-medium" style={{ color: "black" }}>{selectedService.serviceType}</div>
+            </fieldset>
+
+            <fieldset className="legacy-fieldset" style={{ marginBottom: '12px' }}>
+              <legend>Current Status</legend>
+              <span className={`badge ${SERVICE_STATUS_COLORS[selectedService.status]} text-sm px-3 py-1`}>
+                {STATUS_LABELS[selectedService.status]}
+              </span>
+            </fieldset>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <button onClick={() => setSelectedService(null)}>Close</button>
+              <button onClick={() => setIsDetailsOpen(true)}>View Full Details</button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </LegacyDialog>
+
+      <ServiceDetailsDialog
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        serviceId={selectedService?.id || null}
+        onSuccess={() => {
+          setIsDetailsOpen(false);
+          setSelectedService(null);
+          fetchServices();
+        }}
+      />
     </div>
   );
 }
