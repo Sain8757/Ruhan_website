@@ -283,3 +283,112 @@
   width: 60px;
   text-align: right;
 }
+
+/* =========================================
+   GLOBAL OVERRIDES FOR INNER PAGE CONTENTS
+   ========================================= */
+
+/* Strip all modern rounding and animations */
+.legacy-tab-content * {
+  border-radius: 0 !important;
+  transition: none !important;
+  animation-name: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Force gray background on modern cards and sections */
+.legacy-tab-content .bg-white,
+.legacy-tab-content .bg-card,
+.legacy-tab-content .stat-card,
+.legacy-tab-content section,
+.legacy-tab-content .glass-panel {
+  background: #d4d0c8 !important;
+  border-top: 2px solid #fff !important;
+  border-left: 2px solid #fff !important;
+  border-right: 2px solid #808080 !important;
+  border-bottom: 2px solid #808080 !important;
+  box-shadow: none !important;
+  color: black !important;
+}
+
+/* Modern inputs and textareas to classic inset 3D */
+.legacy-tab-content input,
+.legacy-tab-content select,
+.legacy-tab-content textarea {
+  background: #fff !important;
+  border-top: 2px solid #808080 !important;
+  border-left: 2px solid #808080 !important;
+  border-right: 2px solid #fff !important;
+  border-bottom: 2px solid #fff !important;
+  box-shadow: none !important;
+  color: black !important;
+  padding: 2px 4px !important;
+  outline: none !important;
+}
+
+/* Modern buttons to classic outset 3D */
+.legacy-tab-content button {
+  background: #d4d0c8 !important;
+  border-top: 2px solid #fff !important;
+  border-left: 2px solid #fff !important;
+  border-right: 2px solid #404040 !important;
+  border-bottom: 2px solid #404040 !important;
+  box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px #808080 !important;
+  color: black !important;
+  padding: 4px 12px !important;
+  cursor: default !important;
+}
+
+.legacy-tab-content button:active {
+  border-top: 2px solid #404040 !important;
+  border-left: 2px solid #404040 !important;
+  border-right: 2px solid #fff !important;
+  border-bottom: 2px solid #fff !important;
+  padding: 5px 11px 3px 13px !important; /* shift content down/right */
+  box-shadow: none !important;
+}
+
+/* Remove gradient texts and weird modern font colors */
+.legacy-tab-content h1,
+.legacy-tab-content h2,
+.legacy-tab-content h3,
+.legacy-tab-content h4,
+.legacy-tab-content p,
+.legacy-tab-content span,
+.legacy-tab-content div {
+  background-clip: border-box !important;
+  -webkit-text-fill-color: currentcolor !important;
+}
+
+/* Data tables */
+.legacy-tab-content table {
+  border-collapse: collapse !important;
+  background: #fff !important;
+  border: 2px solid #808080 !important;
+}
+
+.legacy-tab-content th {
+  background: #d4d0c8 !important;
+  border-top: 1px solid #fff !important;
+  border-left: 1px solid #fff !important;
+  border-right: 1px solid #808080 !important;
+  border-bottom: 1px solid #808080 !important;
+  color: black !important;
+  font-weight: normal !important;
+  padding: 2px 4px !important;
+}
+
+.legacy-tab-content td {
+  border: 1px solid #c0c0c0 !important;
+  color: black !important;
+  padding: 2px 4px !important;
+}
+
+/* Badges / Tags */
+.legacy-tab-content .badge,
+.legacy-tab-content [class*="bg-"][class*="text-"] {
+  background: transparent !important;
+  border: 1px solid black !important;
+  color: black !important;
+}
+.legacy-tab-content * { font-family: 'Tahoma', 'MS Sans Serif', sans-serif !important; }
