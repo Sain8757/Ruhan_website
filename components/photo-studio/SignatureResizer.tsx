@@ -4,7 +4,7 @@ import React, { useState, useRef, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import ReactCrop, { Crop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
-import { UploadCloud, X, Crop as CropIcon, Settings, Sliders, Download, Wand2, RotateCw, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
+import { UploadCloud, X, Crop as CropIcon, Settings, Sliders, Download, Wand2, RotateCw, RotateCcw, ZoomIn, ZoomOut, Loader2 } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 import { useDownload } from "@/contexts/DownloadContext";
 
@@ -41,8 +41,9 @@ export default function SignatureResizer() {
   const [tempCrop, setTempCrop] = useState<Crop>();
   const [tempBrightness, setTempBrightness] = useState(100);
   const [tempContrast, setTempContrast] = useState(100);
-  const [tempRemoveBg, setTempRemoveBg] = useState(false);
   const [tempZoom, setTempZoom] = useState(1);
+  const [removingBgId, setRemovingBgId] = useState<string | null>(null);
+  const [removingBgProgress, setRemovingBgProgress] = useState<string>("");
   
   const imageRef = useRef<HTMLImageElement>(null);
 
@@ -95,7 +96,6 @@ export default function SignatureResizer() {
     const filters = itemFilters[item.id] || { brightness: 100, contrast: 100, removeBg: false };
     setTempBrightness(filters.brightness);
     setTempContrast(filters.contrast);
-    setTempRemoveBg(filters.removeBg);
     setTempZoom(1);
   };
 
@@ -129,6 +129,47 @@ export default function SignatureResizer() {
     }, "image/png");
   };
 
+  const handleAIRemoveBg = async (item: SignatureItem) => {
+    try {
+      setRemovingBgId(item.id);
+      setRemovingBgProgress("Loading AI model...");
+      
+      const { removeBackground } = await import("@imgly/background-removal");
+      
+      const response = await fetch(item.previewUrl);
+      const blob = await response.blob();
+      
+      const supportsWebGpu = typeof navigator !== "undefined" && Boolean((navigator as any).gpu);
+      const config: any = {
+        device: supportsWebGpu ? "gpu" : "cpu",
+        model: supportsWebGpu ? "isnet_fp16" : "isnet_quint8",
+        output: { format: "image/png", quality: 1 },
+        progress: (_key: string, current: number, total: number) => {
+          if (total > 0 && current < total) {
+            const percent = Math.min(99, Math.round((current / total) * 100));
+            setRemovingBgProgress(`Loading AI model... ${percent}%`);
+            return;
+          }
+          setRemovingBgProgress("Removing background...");
+        },
+      };
+
+      const foregroundBlob = await removeBackground(blob, config);
+      const newUrl = URL.createObjectURL(foregroundBlob);
+      
+      setItems((prev) => 
+        prev.map(i => i.id === item.id ? { ...i, previewUrl: newUrl } : i)
+      );
+      toast.success("AI Background removed successfully!");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to remove background");
+    } finally {
+      setRemovingBgId(null);
+      setRemovingBgProgress("");
+    }
+  };
+
   const saveCrop = () => {
     if (croppingItem) {
       setItems((prev) =>
@@ -140,8 +181,7 @@ export default function SignatureResizer() {
         ...prev,
         [croppingItem.id]: {
           brightness: tempBrightness,
-          contrast: tempContrast,
-          removeBg: tempRemoveBg
+          contrast: tempContrast
         }
       }));
     }
@@ -192,13 +232,13 @@ export default function SignatureResizer() {
         const resizeCtx = resizeCanvas.getContext("2d");
         
         // Fill white background for JPEG
-        if (format === "image/jpeg" && !tempRemoveBg) {
+        if (format === "image/jpeg") {
           resizeCtx!.fillStyle = "#FFFFFF";
           resizeCtx!.fillRect(0, 0, targetPxWidth, targetPxHeight);
         }
         
         // Apply filters
-        const filters = itemFilters[item.id] || { brightness: 100, contrast: 100, removeBg: false };
+        const filters = itemFilters[item.id] || { brightness: 100, contrast: 100 };
         resizeCtx!.filter = `brightness(${filters.brightness}%) contrast(${filters.contrast}%)`;
         
         resizeCtx?.drawImage(sourceCanvas, 0, 0, targetPxWidth, targetPxHeight);
@@ -206,23 +246,7 @@ export default function SignatureResizer() {
         // Reset filter
         resizeCtx!.filter = 'none';
 
-        // Background removal (Make white/near-white transparent)
-        if ((filters.removeBg || globalRemoveBg) && format === "image/png") {
-          const imageData = resizeCtx!.getImageData(0, 0, targetPxWidth, targetPxHeight);
-          const data = imageData.data;
-          // Loop through pixels
-          for (let i = 0; i < data.length; i += 4) {
-            const r = data[i];
-            const g = data[i + 1];
-            const b = data[i + 2];
-            // Threshold for white (adjusted to 230 to be safer and avoid deleting light signature parts)
-            if (r > 230 && g > 230 && b > 230) {
-              data[i + 3] = 0; // Set alpha to 0
-            }
-          }
-          resizeCtx!.putImageData(imageData, 0, 0);
-        }
-
+        // Compress and resolve
         // Binary search for target KB if JPEG
         if (format === "image/jpeg") {
           let minQ = 0.1;
@@ -353,13 +377,30 @@ export default function SignatureResizer() {
                   <div className="relative aspect-[4/3] bg-gray-50/50 rounded-lg border border-gray-100 overflow-hidden mb-4 flex items-center justify-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={item.previewUrl} alt="preview" className="max-h-full max-w-full object-contain p-2" />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                    
+                    {removingBgId === item.id && (
+                      <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
+                        <Loader2 className="animate-spin text-indigo-600 mb-2" size={24} />
+                        <span className="text-xs font-semibold text-indigo-700">{removingBgProgress}</span>
+                      </div>
+                    )}
+                    
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center backdrop-blur-sm gap-3">
                       <button
                         onClick={() => openCropModal(item)}
-                        className="bg-white text-gray-900 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg hover:scale-105 transition-all"
+                        disabled={removingBgId === item.id}
+                        className="bg-white text-gray-900 px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg hover:scale-105 transition-all w-3/4 justify-center"
                       >
                         <CropIcon size={16} />
-                        Crop
+                        Crop & Edit
+                      </button>
+                      <button
+                        onClick={() => handleAIRemoveBg(item)}
+                        disabled={removingBgId === item.id}
+                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-lg hover:scale-105 transition-all w-3/4 justify-center"
+                      >
+                        <Wand2 size={16} />
+                        AI Remove BG
                       </button>
                     </div>
                   </div>
@@ -482,24 +523,6 @@ export default function SignatureResizer() {
                   </p>
                 )}
               </div>
-
-              {/* Global Remove Background */}
-              {format === "image/png" && (
-                <div className="pt-2 border-t border-gray-100">
-                  <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl border border-gray-200 bg-gray-50 hover:bg-indigo-50 transition-colors">
-                    <input 
-                      type="checkbox" 
-                      checked={globalRemoveBg}
-                      onChange={(e) => setGlobalRemoveBg(e.target.checked)}
-                      className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
-                    />
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-gray-800">Auto-Remove Background</span>
-                      <span className="text-[11px] text-gray-500 mt-0.5">Applies to all downloaded signatures</span>
-                    </div>
-                  </label>
-                </div>
-              )}
             </div>
 
             <button
@@ -611,21 +634,6 @@ export default function SignatureResizer() {
                         onChange={(e) => setTempContrast(Number(e.target.value))}
                         className="w-full accent-indigo-600"
                       />
-                    </div>
-
-                    <div className="pt-2">
-                      <label className="flex items-center gap-2 cursor-pointer p-2 rounded border hover:bg-gray-50">
-                        <input 
-                          type="checkbox" 
-                          checked={tempRemoveBg}
-                          onChange={(e) => setTempRemoveBg(e.target.checked)}
-                          className="rounded text-indigo-600 focus:ring-indigo-500"
-                        />
-                        <div className="flex flex-col">
-                          <span className="text-sm font-semibold text-gray-700">Remove Background</span>
-                          <span className="text-[10px] text-gray-500">Makes white areas transparent</span>
-                        </div>
-                      </label>
                     </div>
                   </div>
                 </div>
