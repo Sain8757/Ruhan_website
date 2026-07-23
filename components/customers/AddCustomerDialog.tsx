@@ -9,7 +9,7 @@ interface AddCustomerDialogProps {
 }
 
 export default function AddCustomerDialog({ isOpen, onClose, onSuccess }: AddCustomerDialogProps) {
-  const { showToast } = useToast();
+  const toast = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -36,11 +36,11 @@ export default function AddCustomerDialog({ isOpen, onClose, onSuccess }: AddCus
         throw new Error(error || 'Failed to create customer');
       }
 
-      showToast('Customer created successfully', 'success');
+      toast.success('Customer created successfully');
       if (onSuccess) onSuccess();
       onClose();
     } catch (error: any) {
-      showToast(error.message || 'Something went wrong', 'error');
+      toast.error(error.message || 'Something went wrong');
     } finally {
       setIsSubmitting(false);
     }
