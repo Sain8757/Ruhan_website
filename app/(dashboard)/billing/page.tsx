@@ -8,6 +8,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import PageHeader from "@/components/layout/PageHeader";
 import SettleModal, { SettleInvoiceData } from "./SettleModal";
+import NewBillDialog from "@/components/billing/NewBillDialog";
 
 interface Invoice {
   id: string;
@@ -40,6 +41,7 @@ function BillingContent() {
   const searchParams = useSearchParams();
   const [statusFilter, setStatusFilter] = useState(searchParams.get("paymentStatus") || "");
   const [settleInvoice, setSettleInvoice] = useState<SettleInvoiceData | null>(null);
+  const [isNewBillOpen, setIsNewBillOpen] = useState(false);
   const toast = useToast();
   const router = useRouter();
   const limit = 20;
@@ -88,11 +90,16 @@ function BillingContent() {
         title="Billing & Invoices"
         subtitle={`${total} total invoice${total === 1 ? "" : "s"} generated`}
         actions={
-          <Link href="/billing/new" className="btn-primary">
+          <button type="button" className="btn-primary" onClick={() => setIsNewBillOpen(true)}>
             <Plus size={16} />
             Create Invoice
-          </Link>
+          </button>
         }
+      />
+      <NewBillDialog
+        isOpen={isNewBillOpen}
+        onClose={() => setIsNewBillOpen(false)}
+        onSuccess={() => fetchInvoices()}
       />
 
       {/* Search & Filters */}
@@ -143,10 +150,10 @@ function BillingContent() {
               : "Create your first invoice to record a sale."}
           </div>
           {!query && !statusFilter && (
-            <Link href="/billing/new" className="btn-primary mt-4">
+            <button type="button" onClick={() => setIsNewBillOpen(true)} className="btn-primary mt-4">
               <Plus size={16} />
               Create Invoice
-            </Link>
+            </button>
           )}
         </div>
       ) : (

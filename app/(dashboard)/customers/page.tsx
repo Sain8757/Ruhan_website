@@ -15,6 +15,7 @@ import { formatRelativeTime } from "@/lib/utils";
 import { useToast } from "@/contexts/ToastContext";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/layout/PageHeader";
+import AddCustomerDialog from "@/components/customers/AddCustomerDialog";
 
 interface Customer {
   id: string;
@@ -200,6 +201,8 @@ export default function CustomersPage() {
   const router = useRouter();
   const toast = useToast();
 
+  const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
+
   const fetchCustomers = useCallback(async () => {
     setLoading(true);
     try {
@@ -232,12 +235,19 @@ export default function CustomersPage() {
               <Download size={16} />
               Export
             </button>
-            <Link href="/customers/new" className="btn-primary">
+            <button type="button" onClick={() => setIsAddCustomerOpen(true)} className="btn-primary">
               <Plus size={16} />
               Add Customer
-            </Link>
+            </button>
           </>
         }
+      />
+      <AddCustomerDialog 
+        isOpen={isAddCustomerOpen} 
+        onClose={() => setIsAddCustomerOpen(false)} 
+        onSuccess={() => {
+          fetchCustomers();
+        }}
       />
 
       {/* Search */}
