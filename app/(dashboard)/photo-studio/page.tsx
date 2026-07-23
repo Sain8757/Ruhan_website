@@ -493,7 +493,7 @@ export default function PhotoStudioPage() {
         }
       }
 
-      const pdfUrl = pdf.output('bloburl');
+      const pdfUrl = pdf.output('bloburl').toString();
       downloadWithRename(pdfUrl, `RA_Seva_Passport_Photos_${Date.now()}.pdf`);
       toast.success(`PDF downloaded at exact ${activeSize.width}mm x ${activeSize.height}mm size`);
     } catch {

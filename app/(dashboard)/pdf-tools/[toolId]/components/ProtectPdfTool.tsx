@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { FileText, Loader2, X, Lock } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
-import { useDownload } from \"@/contexts/DownloadContext\";
+import { useDownload } from "@/contexts/DownloadContext";
 
 export default function ProtectPdfTool() {
   const toast = useToast();

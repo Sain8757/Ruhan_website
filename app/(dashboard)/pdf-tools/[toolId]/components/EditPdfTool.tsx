@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { PDFDocument, rgb } from "pdf-lib";
 import { FileText, Loader2, Edit, Trash2, ArrowLeft, ArrowRight, Type, Image as ImageIcon, Move } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
-import { useDownload } from \"@/contexts/DownloadContext\";
+import { useDownload } from "@/contexts/DownloadContext";
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Define workerSrc so pdf.js works properly

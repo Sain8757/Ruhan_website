@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { PDFDocument } from "pdf-lib";
 import { ListOrdered, GripVertical, FileText, Loader2, X } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
-import { useDownload } from \"@/contexts/DownloadContext\";
+import { useDownload } from "@/contexts/DownloadContext";
 
 declare const pdfjsLib: any;
 

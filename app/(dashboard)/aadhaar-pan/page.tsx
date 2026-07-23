@@ -245,7 +245,7 @@ export default function AadhaarPanCropPage() {
         pdf.addImage(croppedBack, "PNG", x, currentY, CARD_WIDTH_MM, CARD_HEIGHT_MM);
       }
 
-      const pdfUrl = pdf.output("bloburl");
+      const pdfUrl = pdf.output("bloburl").toString();
       downloadWithRename(pdfUrl, `RA_Seva_Card_Print_${Date.now()}.pdf`);
       toast.success("PDF created successfully!");
     } catch {

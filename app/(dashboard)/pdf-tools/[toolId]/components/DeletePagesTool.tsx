@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { PDFDocument } from "pdf-lib";
 import { Trash2, FileText, Loader2, X, CheckSquare, Square } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
-import { useDownload } from \"@/contexts/DownloadContext\";
+import { useDownload } from "@/contexts/DownloadContext";
 
 export default function DeletePagesTool() {
   const toast = useToast();

@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { Image as ImageIcon, Loader2, X, FileText } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
-import { useDownload } from \"@/contexts/DownloadContext\";
+import { useDownload } from "@/contexts/DownloadContext";
 
 declare const pdfjsLib: any;
 

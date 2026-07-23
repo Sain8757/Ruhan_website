@@ -157,7 +157,7 @@ export default function DocumentScannerPage() {
       const printH = w > h ? 210 : 297;
       pdf.addImage(croppedData, "JPEG", 0, 0, printW, printH);
       
-      const pdfUrl = pdf.output('bloburl');
+      const pdfUrl = pdf.output('bloburl').toString();
       downloadWithRename(pdfUrl, `RA_Scanned_Document_${Date.now()}.pdf`);
       toast.success("Document downloaded as PDF!");
     } catch {

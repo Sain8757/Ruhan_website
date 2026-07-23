@@ -283,7 +283,7 @@ export default function MultiIdCropperPage() {
     });
 
     pdf.autoPrint();
-    window.open(pdf.output('bloburl'), '_blank');
+    window.open(pdf.output('bloburl').toString(), '_blank');
   }
 
   return (
