@@ -80,15 +80,6 @@ export default function LegacyDialog({ isOpen, onClose, title, children, width =
             <button 
               className="legacy-btn-close"
               onClick={onClose}
-              style={{
-                backgroundColor: '#e81123',
-                borderTop: '1px solid #fff', borderLeft: '1px solid #fff',
-                borderRight: '1px solid #404040', borderBottom: '1px solid #404040',
-                width: '18px', height: '16px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 'bold', color: 'white', fontSize: '10px',
-                cursor: 'pointer'
-              }}
               title="Close"
             >
               <X size={12} strokeWidth={3} />

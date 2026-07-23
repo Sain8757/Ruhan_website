@@ -124,25 +124,6 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
                 </span>
               )}
             </button>
-          </div>
-
-          <a href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer" className="legacy-button" style={{ padding: '4px 8px', color: '#25D366', display: 'flex' }} title="WhatsApp Web">
-            <MessageCircle size={16} />
-          </a>
-          
-          <a href="https://mail.google.com/" target="_blank" rel="noopener noreferrer" className="legacy-button" style={{ padding: '4px 8px', color: '#ef4444', display: 'flex' }} title="Open Mail">
-            <Mail size={16} />
-          </a>
-          
-          <button 
-            className="legacy-button" 
-            style={{ padding: '4px 8px', color: '#3b82f6' }}
-            onClick={() => setShowAI(true)} 
-            title="RA Seva AI Assistant"
-          >
-            <Sparkles size={16} />
-          </button>
-
           {/* Notifications Dropdown */}
           {showNotifications && (
             <div
@@ -217,6 +198,23 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
             </div>
           )}
           </div>
+
+          <a href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer" className="legacy-button" style={{ padding: '4px 8px', color: '#25D366', display: 'flex' }} title="WhatsApp Web">
+            <MessageCircle size={16} />
+          </a>
+          
+          <a href="https://mail.google.com/" target="_blank" rel="noopener noreferrer" className="legacy-button" style={{ padding: '4px 8px', color: '#ef4444', display: 'flex' }} title="Open Mail">
+            <Mail size={16} />
+          </a>
+          
+          <button 
+            className="legacy-button" 
+            style={{ padding: '4px 8px', color: '#3b82f6' }}
+            onClick={() => setShowAI(true)} 
+            title="RA Seva AI Assistant"
+          >
+            <Sparkles size={16} />
+          </button>
         </div>
       </div>
       

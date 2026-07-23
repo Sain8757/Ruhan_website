@@ -63,7 +63,7 @@
   gap: 2px;
 }
 
-.legacy-btn-close, .legacy-btn-sys {
+.legacy-btn-sys {
   background-color: #d4d0c8;
   border-top: 1px solid #fff;
   border-left: 1px solid #fff;
@@ -81,13 +81,46 @@
   cursor: default;
 }
 
-.legacy-btn-close:active, .legacy-btn-sys:active {
+.legacy-btn-close {
+  background: #e81123 !important;
+  border-top: 1px solid #fff !important;
+  border-left: 1px solid #fff !important;
+  border-right: 1px solid #404040 !important;
+  border-bottom: 1px solid #404040 !important;
+  width: 20px !important;
+  height: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: bold !important;
+  color: white !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+.legacy-btn-close svg {
+  color: white !important;
+  stroke: white !important;
+}
+
+.legacy-btn-sys:active {
   border-top: 1px solid #404040;
   border-left: 1px solid #404040;
   border-right: 1px solid #fff;
   border-bottom: 1px solid #fff;
   padding-top: 1px;
   padding-left: 1px;
+}
+
+.legacy-btn-close:active {
+  background: #b00d1a !important;
+  border-top: 1px solid #404040 !important;
+  border-left: 1px solid #404040 !important;
+  border-right: 1px solid #fff !important;
+  border-bottom: 1px solid #fff !important;
+  padding-top: 1px !important;
+  padding-left: 1px !important;
 }
 
 .legacy-content {
