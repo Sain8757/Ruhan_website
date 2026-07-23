@@ -2,10 +2,32 @@
 
 import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { X, File, FilePlus, ArrowUpCircle, MousePointer2, Settings, FileText, Phone, Pause, LayoutDashboard, Users, Briefcase, Receipt, Camera, ScanLine } from 'lucide-react';
+import { 
+  X, LayoutDashboard, Users, Briefcase, Receipt, Camera, 
+  ScanLine, Layers, WalletCards, BookOpen, Package, 
+  MessageSquare, BarChart3, Settings, QrCode, FileImage 
+} from 'lucide-react';
 import { WorkspaceProvider } from "@/components/workspace/WorkspaceProvider";
 import Providers from "@/components/Providers";
-import { WORKSPACE_MODULES } from "@/lib/workspace";
+import { WORKSPACE_MODULES, type WorkspaceIcon } from "@/lib/workspace";
+
+const iconMap: Record<string, React.ComponentType<{ size?: number; color?: string; className?: string }>> = {
+  LayoutDashboard,
+  Users,
+  Briefcase,
+  Receipt,
+  Camera,
+  ScanLine,
+  Layers,
+  WalletCards,
+  BookOpen,
+  Package,
+  MessageSquare,
+  BarChart3,
+  Settings,
+  QrCode,
+  FileImage,
+};
 
 export default function LegacyDesktopLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -13,12 +35,8 @@ export default function LegacyDesktopLayout({ children }: { children: React.Reac
 
   const getWindowTitle = () => {
     if (pathname === '/') return 'Dashboard';
-    if (pathname.startsWith('/customers')) return 'Customers';
-    if (pathname.startsWith('/services')) return 'Services';
-    if (pathname.startsWith('/billing')) return 'Billing';
-    if (pathname.startsWith('/photo-studio')) return 'Photo Studio';
-    if (pathname.startsWith('/aadhaar-pan')) return 'Aadhaar / PAN';
-    return 'Agency Information Manager';
+    const activeModule = WORKSPACE_MODULES.find(m => pathname.startsWith(m.href) && m.href !== '/');
+    return activeModule ? activeModule.label : 'Agency Information Manager';
   };
 
   return (
@@ -46,61 +64,26 @@ export default function LegacyDesktopLayout({ children }: { children: React.Reac
               </div>
             </div>
 
-            {/* Menu Bar */}
-            <div style={{ background: '#d4d0c8', padding: '2px 4px', display: 'flex', gap: '8px', borderBottom: '1px solid #808080' }}>
-              <span><u style={{ textDecoration: 'none', borderBottom: '1px solid black' }}>F</u>ile</span>
-              <span><u style={{ textDecoration: 'none', borderBottom: '1px solid black' }}>E</u>dit</span>
-              <span>Module</span>
-              <span>Tools</span>
-              <span>Brokerage</span>
-              <span>Submission</span>
-              <span>Policy</span>
-              <span>ImageRight</span>
-              <span>Detail</span>
-              <span>Custom</span>
-              <span>Help</span>
+            {/* Menu Bar - Removed Dummy Text */}
+            <div style={{ background: '#d4d0c8', padding: '2px 4px', display: 'flex', gap: '8px', borderBottom: '1px solid #808080', height: '24px' }}>
             </div>
 
-            {/* Toolbar */}
-            <div className="legacy-toolbar">
-              <button className="legacy-toolbar-btn" onClick={() => router.push('/')}>
-                <LayoutDashboard size={16} color="#008080" />
-                Dash
-              </button>
-              <button className="legacy-toolbar-btn" onClick={() => router.push('/customers')}>
-                <Users size={16} color="#000080" />
-                Cust
-              </button>
-              <button className="legacy-toolbar-btn" onClick={() => router.push('/services')}>
-                <Briefcase size={16} color="#008080" />
-                Services
-              </button>
-              <button className="legacy-toolbar-btn" onClick={() => router.push('/billing')}>
-                <Receipt size={16} color="#000080" />
-                Billing
-              </button>
-              <div style={{ width: '2px', borderLeft: '1px solid #808080', borderRight: '1px solid #fff', margin: '0 4px' }}></div>
-              <button className="legacy-toolbar-btn" onClick={() => router.push('/photo-studio')}>
-                <Camera size={16} color="#000080" />
-                Studio
-              </button>
-              <button className="legacy-toolbar-btn" onClick={() => router.push('/aadhaar-pan')}>
-                <ScanLine size={16} color="#008080" />
-                ID Crop
-              </button>
-              <div style={{ width: '2px', borderLeft: '1px solid #808080', borderRight: '1px solid #fff', margin: '0 4px' }}></div>
-              <button className="legacy-toolbar-btn">
-                <ArrowUpCircle size={16} color="#008080" />
-                Submit
-              </button>
-              <button className="legacy-toolbar-btn">
-                <MousePointer2 size={16} color="#000080" />
-                Quote
-              </button>
-              <button className="legacy-toolbar-btn">
-                <FileText size={16} color="#000080" />
-                Bind
-              </button>
+            {/* Toolbar - Dynamic Modules */}
+            <div className="legacy-toolbar" style={{ overflowX: 'auto', whiteSpace: 'nowrap' }}>
+              {WORKSPACE_MODULES.map((module, idx) => {
+                const IconComponent = iconMap[module.icon as string] || ScanLine;
+                return (
+                  <React.Fragment key={module.id}>
+                    <button className="legacy-toolbar-btn" onClick={() => router.push(module.href)}>
+                      <IconComponent size={16} color={idx % 2 === 0 ? "#008080" : "#000080"} />
+                      {module.label}
+                    </button>
+                    {(idx === 3 || idx === 6 || idx === 10) && (
+                      <div style={{ width: '2px', borderLeft: '1px solid #808080', borderRight: '1px solid #fff', margin: '0 4px', height: '24px', alignSelf: 'center' }}></div>
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </div>
 
             {/* Inner Content Area */}
