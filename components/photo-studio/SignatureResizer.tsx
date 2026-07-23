@@ -4,7 +4,7 @@ import React, { useState, useRef, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import ReactCrop, { Crop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
-import { UploadCloud, X, Crop as CropIcon, Settings, FileImage, Sliders, Download } from "lucide-react";
+import { UploadCloud, X, Crop as CropIcon, Settings, Sliders, Download } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 
 interface SignatureItem {
@@ -93,7 +93,7 @@ export default function SignatureResizer() {
     return new Promise((resolve) => {
       const img = new Image();
       img.onload = () => {
-        let sourceCanvas = document.createElement("canvas");
+        const sourceCanvas = document.createElement("canvas");
         
         if (item.crop && item.crop.width > 0 && item.crop.height > 0) {
           // If crop is in percentages (which react-image-crop does by default when unit is '%')
@@ -367,7 +367,7 @@ export default function SignatureResizer() {
                 <select 
                   className="w-full py-2.5 px-3 text-sm font-medium bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all"
                   value={format} 
-                  onChange={(e) => setFormat(e.target.value as any)}
+                  onChange={(e) => setFormat(e.target.value as "image/jpeg" | "image/png")}
                 >
                   <option value="image/jpeg">JPEG / JPG</option>
                   <option value="image/png">PNG</option>
@@ -408,7 +408,7 @@ export default function SignatureResizer() {
             <div className="p-6 flex-1 overflow-auto bg-gray-100/50 flex items-center justify-center min-h-[300px]">
               <ReactCrop
                 crop={tempCrop}
-                onChange={(c) => setTempCrop(c)}
+                onChange={(_, percentCrop) => setTempCrop(percentCrop)}
                 className="max-w-full rounded-lg shadow-sm overflow-hidden"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
