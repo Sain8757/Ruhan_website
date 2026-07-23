@@ -78,42 +78,21 @@ export default function LegacyDialog({ isOpen, onClose, title, children, width =
           </div>
           <div style={{ display: 'flex', gap: '2px' }}>
             <button 
-              className="legacy-btn-sys"
-              style={{
-                backgroundColor: '#d4d0c8',
-                borderTop: '1px solid #fff', borderLeft: '1px solid #fff',
-                borderRight: '1px solid #404040', borderBottom: '1px solid #404040',
-                width: '16px', height: '14px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 'bold', color: 'black', fontSize: '10px',
-                cursor: 'pointer'
-              }}
-            >_</button>
-            <button 
-              className="legacy-btn-sys"
-              style={{
-                backgroundColor: '#d4d0c8',
-                borderTop: '1px solid #fff', borderLeft: '1px solid #fff',
-                borderRight: '1px solid #404040', borderBottom: '1px solid #404040',
-                width: '16px', height: '14px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 'bold', color: 'black', fontSize: '10px',
-                cursor: 'pointer'
-              }}
-            >□</button>
-            <button 
               className="legacy-btn-close"
               onClick={onClose}
               style={{
-                backgroundColor: '#d4d0c8',
+                backgroundColor: '#e81123',
                 borderTop: '1px solid #fff', borderLeft: '1px solid #fff',
                 borderRight: '1px solid #404040', borderBottom: '1px solid #404040',
-                width: '16px', height: '14px',
+                width: '18px', height: '16px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 'bold', color: 'black', fontSize: '10px',
+                fontWeight: 'bold', color: 'white', fontSize: '10px',
                 cursor: 'pointer'
               }}
-            ><X size={10} /></button>
+              title="Close"
+            >
+              <X size={12} strokeWidth={3} />
+            </button>
           </div>
         </div>
 
