@@ -76,20 +76,22 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
       </div>
 
       <div className="flex items-center justify-end flex-1 gap-2 md:gap-4 pr-2">
-        <button className="legacy-button hidden md:flex m-0 w-64 max-w-xs justify-start" style={{ padding: '4px', gap: '8px' }} onClick={openSearch}>
-          <Search size={15} />
-          <span className="flex-1 text-left text-xs">Search anything...</span>
-          <kbd
-            className="hidden lg:flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded font-mono"
-            style={{
-              background: "#dfdfdf",
-              color: "#000",
-              border: "1px solid #808080",
-            }}
+        <div 
+          className="hidden md:flex items-center" 
+          onClick={openSearch} 
+          style={{ cursor: 'text', border: '2px inset #dfdfdf', background: '#fff', height: '26px', width: '250px' }}
+        >
+          <span style={{ flex: 1, paddingLeft: '6px', color: '#808080', fontSize: '13px', userSelect: 'none' }}>
+            Search...
+          </span>
+          <button 
+            className="legacy-button" 
+            style={{ height: '20px', width: '22px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '1px' }}
+            title="Search"
           >
-            Ctrl F
-          </kbd>
-        </button>
+            <Search size={14} color="#000" />
+          </button>
+        </div>
 
         <div className="flex items-center gap-1 sm:gap-2">
           <input type="file" ref={fileInputRef} className="hidden" />
