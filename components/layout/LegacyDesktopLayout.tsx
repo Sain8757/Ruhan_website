@@ -103,8 +103,71 @@ export default function LegacyDesktopLayout({ children }: { children: React.Reac
             </div>
 
             {/* Inner Content Area */}
-            <div style={{ background: '#d4d0c8', flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-              <div className="legacy-tab-content" style={{ flex: 1, margin: '4px', overflowY: 'auto' }}>
+            <div style={{ background: '#d4d0c8', flex: 1, display: 'flex', overflow: 'hidden', padding: '4px' }}>
+              
+              {/* Classic Left Sidebar */}
+              <div style={{ 
+                width: '200px', 
+                background: '#fff', 
+                borderTop: '2px solid #808080', 
+                borderLeft: '2px solid #808080', 
+                borderRight: '2px solid #fff', 
+                borderBottom: '2px solid #fff',
+                marginRight: '6px',
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                <div style={{ background: '#000080', color: '#fff', padding: '2px 4px', fontWeight: 'bold' }}>
+                  Navigation
+                </div>
+                <div style={{ padding: '4px', display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto' }}>
+                  <div 
+                    className="legacy-tree-item" 
+                    onClick={() => router.push('/')}
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', background: pathname === '/' ? '#000080' : 'transparent', color: pathname === '/' ? '#fff' : '#000' }}
+                  >
+                    <span style={{ color: '#d4d0c8' }}>📁</span> Dashboard
+                  </div>
+                  <div 
+                    className="legacy-tree-item" 
+                    onClick={() => router.push('/customers')}
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', background: pathname.startsWith('/customers') ? '#000080' : 'transparent', color: pathname.startsWith('/customers') ? '#fff' : '#000' }}
+                  >
+                    <span style={{ color: '#d4d0c8' }}>📁</span> Customers
+                  </div>
+                  <div 
+                    className="legacy-tree-item" 
+                    onClick={() => router.push('/services')}
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', background: pathname.startsWith('/services') ? '#000080' : 'transparent', color: pathname.startsWith('/services') ? '#fff' : '#000' }}
+                  >
+                    <span style={{ color: '#d4d0c8' }}>📁</span> Services
+                  </div>
+                  <div 
+                    className="legacy-tree-item" 
+                    onClick={() => router.push('/billing')}
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', background: pathname.startsWith('/billing') ? '#000080' : 'transparent', color: pathname.startsWith('/billing') ? '#fff' : '#000' }}
+                  >
+                    <span style={{ color: '#d4d0c8' }}>📁</span> Billing
+                  </div>
+                  <div 
+                    className="legacy-tree-item" 
+                    onClick={() => router.push('/photo-studio')}
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', background: pathname.startsWith('/photo-studio') ? '#000080' : 'transparent', color: pathname.startsWith('/photo-studio') ? '#fff' : '#000' }}
+                  >
+                    <span style={{ color: '#d4d0c8' }}>📁</span> Photo Studio
+                  </div>
+                  <div 
+                    className="legacy-tree-item" 
+                    onClick={() => router.push('/aadhaar-pan')}
+                    style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', background: pathname.startsWith('/aadhaar-pan') ? '#000080' : 'transparent', color: pathname.startsWith('/aadhaar-pan') ? '#fff' : '#000' }}
+                  >
+                    <span style={{ color: '#d4d0c8' }}>📁</span> Aadhaar / PAN
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Content Pane */}
+              <div className="legacy-tab-content" style={{ flex: 1, overflowY: 'auto', background: '#d4d0c8' }}>
                 {children}
               </div>
             </div>
