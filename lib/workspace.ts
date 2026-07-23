@@ -226,7 +226,7 @@ export const QUICK_ACTIONS: WorkspaceCommand[] = [
   {
     id: "new-service",
     label: "New Service",
-    href: "/services/new",
+    href: "/services",
     icon: "FilePlus2",
     section: "Action",
     shortcut: "Ctrl+S",

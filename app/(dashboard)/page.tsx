@@ -215,7 +215,7 @@ const QUICK_ACTIONS = [
     label: "New Service",
     desc: "Start a request",
     icon: Briefcase,
-    href: "/services/new",
+    href: "/services",
     gradient: "linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)",
     accentColor: "#a78bfa",
     glow: "rgba(167,139,250,0.3)",
@@ -498,7 +498,7 @@ export default function DashboardPage() {
           </div>
 
           <Link
-            href="/services/new"
+            href="/services"
             className="hidden sm:flex btn-primary shrink-0 transition-transform hover:scale-105"
             style={{
               background: "#ffffff",
