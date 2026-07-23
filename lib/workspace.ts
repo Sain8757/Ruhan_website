@@ -122,14 +122,6 @@ export const WORKSPACE_MODULES: WorkspaceModule[] = [
     keywords: ["crop", "id", "aadhaar", "pan", "documents"],
   },
   {
-    id: "legacy-ui",
-    label: "Legacy UI Demo",
-    href: "/legacy-ui",
-    icon: "Layers",
-    section: "Tools",
-    keywords: ["legacy", "windows", "demo"],
-  },
-  {
     id: "online-work",
     label: "Online Work",
     href: "/online-work",

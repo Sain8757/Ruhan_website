@@ -18,107 +18,113 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ results: [] satisfies GlobalSearchResult[] });
   }
 
-  const mode = "insensitive" as const;
+  
   const perGroup = Math.max(3, Math.ceil(limit / 3));
   const customerWhere = {
     OR: [
-      { name: { contains: query, mode } },
+      { name: { contains: query} },
       { mobile: { contains: query } },
       { aadhaarNumber: { contains: query } },
-      { panNumber: { contains: query, mode } },
-      { email: { contains: query, mode } },
+      { panNumber: { contains: query} },
+      { email: { contains: query} },
     ],
   };
 
-  const [customers, invoices, services, books, inventoryItems] = await Promise.all([
-    prisma.customer.findMany({
-      where: customerWhere,
-      take: perGroup,
-      orderBy: { updatedAt: "desc" },
-      select: {
-        id: true,
-        name: true,
-        mobile: true,
-        aadhaarNumber: true,
-        panNumber: true,
-      },
-    }),
-    prisma.invoice.findMany({
-      where: {
-        OR: [
-          { invoiceNumber: { contains: query, mode } },
-          { notes: { contains: query, mode } },
-          { customer: { is: customerWhere } },
-          { items: { some: { name: { contains: query, mode } } } },
-        ],
-      },
-      take: perGroup,
-      orderBy: { updatedAt: "desc" },
-      select: {
-        id: true,
-        invoiceNumber: true,
-        total: true,
-        paymentStatus: true,
-        customer: { select: { name: true, mobile: true } },
-      },
-    }),
-    prisma.service.findMany({
-      where: {
-        OR: [
-          { serviceType: { contains: query, mode } },
-          { notes: { contains: query, mode } },
-          { customer: { is: customerWhere } },
-        ],
-      },
-      take: perGroup,
-      orderBy: { updatedAt: "desc" },
-      select: {
-        id: true,
-        serviceType: true,
-        status: true,
-        fees: true,
-        customer: { select: { name: true, mobile: true } },
-      },
-    }),
-    prisma.book.findMany({
-      where: {
-        OR: [
-          { name: { contains: query, mode } },
-          { author: { contains: query, mode } },
-          { category: { contains: query, mode } },
-          { isbn: { contains: query, mode } },
-          { barcode: { contains: query } },
-        ],
-      },
-      take: perGroup,
-      orderBy: { updatedAt: "desc" },
-      select: {
-        id: true,
-        name: true,
-        author: true,
-        isbn: true,
-        barcode: true,
-        quantity: true,
-      },
-    }),
-    prisma.inventoryItem.findMany({
-      where: {
-        OR: [
-          { name: { contains: query, mode } },
-          { category: { contains: query, mode } },
-        ],
-      },
-      take: perGroup,
-      orderBy: { updatedAt: "desc" },
-      select: {
-        id: true,
-        name: true,
-        category: true,
-        quantity: true,
-        unit: true,
-      },
-    }),
-  ]);
+  let customers: any[] = [], invoices: any[] = [], services: any[] = [], books: any[] = [], inventoryItems: any[] = [];
+  try {
+    [customers, invoices, services, books, inventoryItems] = await Promise.all([
+      prisma.customer.findMany({
+        where: customerWhere,
+        take: perGroup,
+        orderBy: { updatedAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          mobile: true,
+          aadhaarNumber: true,
+          panNumber: true,
+        },
+      }),
+      prisma.invoice.findMany({
+        where: {
+          OR: [
+            { invoiceNumber: { contains: query} },
+            { notes: { contains: query} },
+            { customer: { is: customerWhere } },
+            { items: { some: { name: { contains: query} } } },
+          ],
+        },
+        take: perGroup,
+        orderBy: { updatedAt: "desc" },
+        select: {
+          id: true,
+          invoiceNumber: true,
+          total: true,
+          paymentStatus: true,
+          customer: { select: { name: true, mobile: true } },
+        },
+      }),
+      prisma.service.findMany({
+        where: {
+          OR: [
+            { serviceType: { contains: query} },
+            { notes: { contains: query} },
+            { customer: { is: customerWhere } },
+          ],
+        },
+        take: perGroup,
+        orderBy: { updatedAt: "desc" },
+        select: {
+          id: true,
+          serviceType: true,
+          status: true,
+          fees: true,
+          customer: { select: { name: true, mobile: true } },
+        },
+      }),
+      prisma.book.findMany({
+        where: {
+          OR: [
+            { name: { contains: query} },
+            { author: { contains: query} },
+            { category: { contains: query} },
+            { isbn: { contains: query} },
+            { barcode: { contains: query } },
+          ],
+        },
+        take: perGroup,
+        orderBy: { updatedAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          author: true,
+          isbn: true,
+          barcode: true,
+          quantity: true,
+        },
+      }),
+      prisma.inventoryItem.findMany({
+        where: {
+          OR: [
+            { name: { contains: query} },
+            { category: { contains: query} },
+          ],
+        },
+        take: perGroup,
+        orderBy: { updatedAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          category: true,
+          quantity: true,
+          unit: true,
+        },
+      }),
+    ]);
+  } catch (err) {
+    console.error("Search API Error:", err);
+    // Continue with empty arrays if search fails
+  }
 
   const results: GlobalSearchResult[] = [
     ...customers.map((customer) => ({

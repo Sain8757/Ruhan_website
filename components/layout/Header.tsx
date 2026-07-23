@@ -75,11 +75,11 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
         )}
       </div>
 
-      <div className="flex items-center justify-end flex-1 gap-2 md:gap-4 pr-2">
+      <div className="flex items-center justify-center gap-2 md:gap-4 px-2" style={{ zIndex: 10 }}>
         <div 
           className="hidden md:flex items-center" 
           onClick={openSearch} 
-          style={{ cursor: 'text', border: '2px inset #dfdfdf', background: '#fff', height: '26px', width: '250px' }}
+          style={{ cursor: 'text', border: '2px inset #dfdfdf', background: '#fff', height: '26px', width: '200px' }}
         >
           <span style={{ flex: 1, paddingLeft: '6px', color: '#808080', fontSize: '13px', userSelect: 'none' }}>
             Search...
@@ -96,35 +96,35 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
         <div className="flex items-center gap-1 sm:gap-2">
           <input type="file" ref={fileInputRef} className="hidden" />
           
-          <button className="legacy-button" style={{ padding: '4px 8px' }} onClick={openFileExplorer} title="Open File Explorer">
-            <FolderOpen size={16} />
+          <button className="legacy-button flex items-center gap-1" style={{ padding: '2px 6px', color: '#000', fontSize: '12px' }} onClick={openFileExplorer} title="Open File Explorer">
+            📁 <span className="hidden lg:inline">Files</span>
           </button>
           
-          <button className="legacy-button" style={{ padding: '4px 8px' }} onClick={openMail} title="Open Mail">
-            <Mail size={16} />
-          </button>
+          <a href="https://mail.google.com/" target="_blank" rel="noopener noreferrer" className="legacy-button flex items-center gap-1" style={{ padding: '2px 6px', textDecoration: 'none', color: '#000', fontSize: '12px' }} title="Open Mail">
+            ✉️ <span className="hidden lg:inline">Mail</span>
+          </a>
           
-          <button className="legacy-button" style={{ padding: '4px 8px', color: '#25D366' }} onClick={openWhatsApp} title="WhatsApp Web">
-            <MessageCircle size={16} />
-          </button>
+          <a href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer" className="legacy-button flex items-center gap-1" style={{ padding: '2px 6px', textDecoration: 'none', color: '#000', fontSize: '12px' }} title="WhatsApp Web">
+            💬 <span className="hidden lg:inline">WhatsApp</span>
+          </a>
 
           <button 
-            className="legacy-button" 
-            style={{ padding: '4px 8px', color: '#8b5cf6' }}
+            className="legacy-button flex items-center gap-1" 
+            style={{ padding: '2px 6px', color: '#000', fontSize: '12px' }}
             onClick={() => setShowAI(true)} 
             title="RA Seva AI Assistant"
           >
-            <Sparkles size={16} />
+            ✨ <span className="hidden lg:inline">AI</span>
           </button>
 
           <div className="relative" ref={notifRef}>
             <button
-              className="legacy-button relative"
-              style={{ padding: '4px 8px' }}
+              className="legacy-button relative flex items-center gap-1"
+              style={{ padding: '2px 6px', color: '#000', fontSize: '12px' }}
               title="Notifications"
               onClick={() => setShowNotifications(!showNotifications)}
             >
-              <Bell size={16} />
+              🔔 <span className="hidden lg:inline">Alerts</span>
             {totalNotifs > 0 && (
               <span
                 className="absolute top-1.5 right-1.5 flex items-center justify-center text-[9px] font-bold text-white rounded-full min-w-[14px] h-[14px] px-0.5"
