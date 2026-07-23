@@ -11,7 +11,9 @@ import {
   Trash2, 
   Download, 
   ListOrdered,
-  PenTool
+  PenTool,
+  Eraser,
+  Edit
 } from "lucide-react";
 
 export type PdfToolId = 
@@ -27,7 +29,9 @@ export type PdfToolId =
   | "delete-pages" 
   | "extract-pages" 
   | "reorder-pages"
-  | "add-signature";
+  | "add-signature"
+  | "redact"
+  | "edit";
 
 export interface PdfToolDefinition {
   id: PdfToolId;
@@ -141,6 +145,22 @@ export const PDF_TOOLS: PdfToolDefinition[] = [
     description: "Place a signature or image on your PDF pages.",
     icon: PenTool,
     color: "bg-pink-500",
+    category: "Organize"
+  },
+  {
+    id: "redact",
+    title: "Redact PDF",
+    description: "Permanently blackout sensitive text and images.",
+    icon: Eraser,
+    color: "bg-zinc-800",
+    category: "Security"
+  },
+  {
+    id: "edit",
+    title: "Edit PDF",
+    description: "Add text, shapes, and images to your PDF document.",
+    icon: Edit,
+    color: "bg-sky-500",
     category: "Organize"
   }
 ];
