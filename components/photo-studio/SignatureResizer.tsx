@@ -15,6 +15,7 @@ interface SignatureItem {
   name: string;
   crop?: Crop;
   status: "pending" | "processing" | "done" | "error";
+  cropDimensions?: { width: number; height: number };
 }
 
 const DPI = 300; // Standard print DPI for conversions
@@ -52,19 +53,36 @@ export default function SignatureResizer() {
       return;
     }
 
-    const newItems: SignatureItem[] = acceptedFiles.map((file) => ({
-      id: Math.random().toString(36).substring(7),
-      file,
-      previewUrl: URL.createObjectURL(file),
-      name: file.name.split(".").slice(0, -1).join("."), // Default without extension
-      status: "pending",
-    }));
+    acceptedFiles.forEach((file) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      const id = Math.random().toString(36).substring(7);
+      
+      const newItem: SignatureItem = {
+        id,
+        file,
+        previewUrl: url,
+        name: file.name.split(".").slice(0, -1).join("."), // Default without extension
+        status: "pending",
+      };
 
-    setItems((prev) => [...prev, ...newItems]);
+      img.onload = () => {
+        setItems((prev) => prev.map(i => i.id === id ? { ...i, cropDimensions: { width: img.naturalWidth, height: img.naturalHeight } } : i));
+      };
+      img.src = url;
+      
+      setItems((prev) => [...prev, newItem]);
+    });
     
     // Auto open crop modal for the first item
-    if (newItems.length > 0) {
-      setTimeout(() => openCropModal(newItems[0]), 100);
+    if (acceptedFiles.length > 0) {
+      setTimeout(() => {
+        setItems((currentItems) => {
+          const firstNew = currentItems.find(i => i.file === acceptedFiles[0]);
+          if (firstNew) openCropModal(firstNew);
+          return currentItems;
+        });
+      }, 100);
     }
   }, [items.length, toast]);
 
@@ -171,9 +189,18 @@ export default function SignatureResizer() {
 
   const saveCrop = () => {
     if (croppingItem) {
+      let cropDimensions = croppingItem.cropDimensions;
+      if (tempCrop && tempCrop.width > 0 && tempCrop.height > 0 && imageRef.current) {
+        const isPercent = tempCrop.unit === '%';
+        const img = imageRef.current;
+        const cropW = isPercent ? (tempCrop.width / 100) * img.naturalWidth : tempCrop.width;
+        const cropH = isPercent ? (tempCrop.height / 100) * img.naturalHeight : tempCrop.height;
+        cropDimensions = { width: Math.round(cropW), height: Math.round(cropH) };
+      }
+
       setItems((prev) =>
         prev.map((item) =>
-          item.id === croppingItem.id ? { ...item, crop: tempCrop } : item
+          item.id === croppingItem.id ? { ...item, crop: tempCrop, cropDimensions } : item
         )
       );
       setItemFilters(prev => ({
@@ -376,6 +403,12 @@ export default function SignatureResizer() {
                   <div className="relative aspect-[4/3] bg-gray-50/50 rounded-lg border border-gray-100 overflow-hidden mb-4 flex items-center justify-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={item.previewUrl} alt="preview" className="max-h-full max-w-full object-contain p-2" />
+                    
+                    {item.cropDimensions && (
+                      <div className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm tracking-wider">
+                        {item.cropDimensions.width} x {item.cropDimensions.height} px
+                      </div>
+                    )}
                     
                     {removingBgId === item.id && (
                       <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
