@@ -5,8 +5,18 @@ import { Camera, Download, RotateCw, Trash2, Sliders, Layout, Printer, Move, Plu
 import { useToast } from "@/contexts/ToastContext";
 import jsPDF from "jspdf";
 import PageHeader from "@/components/layout/PageHeader";
-import ManualEraserModal from "@/components/photo-studio/ManualEraserModal";
+import AdvancedRetouchModal from "@/components/photo-studio/AdvancedRetouchModal";
 import type { Config } from "@imgly/background-removal";
+
+const FILTERS = [
+  { id: 'none', label: 'None', css: '' },
+  { id: 'grayscale', label: 'B&W', css: 'grayscale(100%)' },
+  { id: 'sepia', label: 'Sepia', css: 'sepia(100%)' },
+  { id: 'vintage', label: 'Vintage', css: 'sepia(50%) contrast(150%) saturate(120%) brightness(90%) hue-rotate(-15deg)' },
+  { id: 'warm', label: 'Warm', css: 'sepia(30%) saturate(140%) hue-rotate(-10deg)' },
+  { id: 'cool', label: 'Cool', css: 'saturate(120%) hue-rotate(15deg) brightness(105%)' },
+  { id: 'fade', label: 'Fade', css: 'brightness(120%) contrast(80%) saturate(80%)' }
+];
 
 const PHOTO_SIZES = [
   { label: "Passport (3.5 x 4.5 cm)", width: 35, height: 45, ratio: 35 / 45 },
@@ -159,6 +169,12 @@ export default function PhotoStudioPage() {
   const [pageFormat, setPageFormat] = useState<'A4' | '4x6'>('A4');
   const [downloadQuality, setDownloadQuality] = useState(100);
   const [estimatedSize, setEstimatedSize] = useState<number | null>(null);
+  
+  // New PicsArt-like features
+  const [hue, setHue] = useState(0);
+  const [flipH, setFlipH] = useState(false);
+  const [flipV, setFlipV] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('none');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -212,7 +228,12 @@ export default function PhotoStudioPage() {
     ctx.translate(targetWidth / 2, targetHeight / 2);
     ctx.rotate((rotation * Math.PI) / 180);
     ctx.translate((offsetX / 100) * targetWidth, (offsetY / 100) * targetHeight);
-    ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${enhance}%) ${sharpen > 0 ? `drop-shadow(0 0 ${(sharpen * 0.04).toFixed(2)}px rgba(0,0,0,0.6))` : ''}`;
+    ctx.scale(flipH ? -1 : 1, flipV ? -1 : 1);
+    
+    const filterObj = FILTERS.find(f => f.id === activeFilter);
+    const filterCSS = filterObj ? filterObj.css : '';
+    
+    ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${enhance}%) hue-rotate(${hue}deg) ${filterCSS} ${sharpen > 0 ? `drop-shadow(0 0 ${(sharpen * 0.04).toFixed(2)}px rgba(0,0,0,0.6))` : ''}`;
 
     const imgRatio = img.width / img.height;
     const targetRatio = targetWidth / targetHeight;
@@ -252,7 +273,7 @@ export default function PhotoStudioPage() {
     }
 
     return targetCanvas;
-  }, [backgroundColor, brightness, contrast, enhance, beauty, offsetX, offsetY, rotation, activeSize.height, activeSize.width, zoom, sharpen, watermark, useCustomSize, customW, customH]);
+  }, [backgroundColor, brightness, contrast, enhance, beauty, offsetX, offsetY, rotation, activeSize.height, activeSize.width, zoom, sharpen, watermark, useCustomSize, customW, customH, hue, flipH, flipV, activeFilter]);
 
   useEffect(() => {
     if (originalImage) drawCanvas();
@@ -396,6 +417,10 @@ export default function PhotoStudioPage() {
     setZoom(100);
     setOffsetX(0);
     setOffsetY(0);
+    setHue(0);
+    setFlipH(false);
+    setFlipV(false);
+    setActiveFilter('none');
     setBackgroundRemoved(false);
     setBackgroundRemovalStatus(null);
     originalImageRef.current = null;
@@ -705,7 +730,7 @@ export default function PhotoStudioPage() {
                       disabled={!originalImage}
                     >
                       <Eraser size={16} />
-                      Manual Edit / Eraser
+                      Advanced Retouch (Heal/Erase)
                     </button>
                   </div>
                 </div>
@@ -717,7 +742,30 @@ export default function PhotoStudioPage() {
                 <div>
                   <h2 className="section-title mb-4">Image Adjustments</h2>
                   <div className="space-y-5">
-
+                  
+                    {/* Filters & Flip controls */}
+                    <div>
+                      <div className="flex gap-2 overflow-x-auto custom-scrollbar pb-2 mb-4">
+                        {FILTERS.map(f => (
+                          <button
+                            key={f.id}
+                            onClick={() => setActiveFilter(f.id)}
+                            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${activeFilter === f.id ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+                          >
+                            {f.label}
+                          </button>
+                        ))}
+                      </div>
+                      
+                      <div className="flex gap-2 mb-4">
+                        <button onClick={() => setFlipH(!flipH)} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-xs font-semibold ${flipH ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-700'}`}>
+                           Flip Horizontal
+                        </button>
+                        <button onClick={() => setFlipV(!flipV)} className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border text-xs font-semibold ${flipV ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-700'}`}>
+                           Flip Vertical
+                        </button>
+                      </div>
+                    </div>
 
                     <div>
                       <div className="flex justify-between text-xs mb-2">
@@ -781,6 +829,22 @@ export default function PhotoStudioPage() {
                         max="150"
                         value={contrast}
                         onChange={(e) => setContrast(parseInt(e.target.value))}
+                        className="range-field"
+                        disabled={!originalImage}
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-xs mb-2">
+                        <span className="label mb-0">Hue</span>
+                        <span className="font-semibold" style={{ color: "var(--text-primary)" }}>{hue}deg</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="-180"
+                        max="180"
+                        value={hue}
+                        onChange={(e) => setHue(parseInt(e.target.value))}
                         className="range-field"
                         disabled={!originalImage}
                       />
@@ -971,17 +1035,20 @@ export default function PhotoStudioPage() {
         </div>
       </div>
       
-      {isEraserMode && (processedForeground || originalImage) && (
-        <ManualEraserModal
-          imageSrc={processedForeground || originalImage || ''}
-          onSave={async (newDataUrl) => {
-            setProcessedForeground(newDataUrl);
-            try {
-              processedForegroundRef.current = await loadImage(newDataUrl);
-              drawCanvas();
-            } catch (err) {
-              console.error("Failed to load edited foreground", err);
-            }
+      {isEraserMode && processedForeground && (
+        <AdvancedRetouchModal
+          imageSrc={processedForeground}
+          onClose={() => setIsEraserMode(false)}
+          onSave={(dataUrl) => {
+            setProcessedForeground(dataUrl);
+            (async () => {
+              try {
+                processedForegroundRef.current = await loadImage(dataUrl);
+                drawCanvas();
+              } catch (err) {
+                console.error("Failed to load edited foreground", err);
+              }
+            })();
             setIsEraserMode(false);
           }}
           onClose={() => setIsEraserMode(false)}
