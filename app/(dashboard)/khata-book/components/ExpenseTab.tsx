@@ -5,6 +5,7 @@ import { Plus, Trash2, Search, CalendarDays, Loader2, ArrowDownCircle, Download 
 import { useToast } from "@/contexts/ToastContext";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import * as XLSX from "xlsx";
+import LegacyDialog from "@/components/layout/LegacyDialog";
 
 interface Expense {
   id: string;
@@ -44,6 +45,7 @@ export default function ExpenseTab() {
     description: "",
     date: new Date().toISOString().split("T")[0]
   });
+  const [modalOpen, setModalOpen] = useState(false);
 
   const toast = useToast();
 
@@ -102,6 +104,7 @@ export default function ExpenseTab() {
         description: "",
         date: new Date().toISOString().split("T")[0]
       });
+      setModalOpen(false);
       fetchExpenses();
     } catch (err: any) {
       toast.error(err.message);
@@ -167,10 +170,8 @@ export default function ExpenseTab() {
   };
 
   return (
-    <div className="content-grid content-grid-wide mt-4">
-      {/* Expense Form & Summary */}
-      <div className="space-y-6">
-        {/* Summary Card */}
+    <div className="space-y-4 mt-4">
+      {/* Summary Card */}
         <div className="glass-card p-6 border-l-4 border-rose-500">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-rose-500/10 flex items-center justify-center text-rose-500">
@@ -184,71 +185,6 @@ export default function ExpenseTab() {
             </div>
           </div>
         </div>
-
-        {/* Add Expense Form */}
-        <form onSubmit={handleAddExpense} className="glass-card p-6">
-          <h2 className="section-title">Add New Expense</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="label">Amount (₹)</label>
-              <input
-                type="number"
-                className="input-field text-lg font-bold"
-                placeholder="0.00"
-                min="0"
-                step="0.01"
-                value={form.amount}
-                onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="label">Category</label>
-              <select
-                className="input-field"
-                value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value })}
-              >
-                {EXPENSE_CATEGORIES.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="label">Date</label>
-              <input
-                type="date"
-                className="input-field"
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="label">Description / Notes</label>
-              <textarea
-                className="input-field resize-none"
-                rows={2}
-                placeholder="Details about the expense..."
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-              />
-            </div>
-
-            <button type="submit" disabled={saving} className="btn-primary w-full h-11 text-base">
-              {saving ? (
-                <><Loader2 size={16} className="animate-spin" /> Saving...</>
-              ) : (
-                <><Plus size={16} /> Add Expense</>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
 
       {/* Expenses List */}
       <div className="glass-card p-6 flex flex-col h-full">
@@ -278,6 +214,9 @@ export default function ExpenseTab() {
             </button>
             <button onClick={exportExcel} className="btn-secondary h-11 px-3" title="Export to Excel">
               <Download size={16} /> Excel
+            </button>
+            <button onClick={() => setModalOpen(true)} className="btn-primary h-11 px-4 text-base shadow-md">
+              <Plus size={16} /> Add Expense
             </button>
           </div>
         </div>
@@ -330,6 +269,63 @@ export default function ExpenseTab() {
           )}
         </div>
       </div>
+
+      <LegacyDialog isOpen={modalOpen} onClose={() => setModalOpen(false)} title="New Expense" width="400px">
+        <form onSubmit={handleAddExpense} style={{ padding: '8px' }}>
+          <fieldset className="legacy-fieldset" style={{ marginBottom: '8px' }}>
+            <legend>Expense Details</legend>
+            <div style={{ marginBottom: '8px' }}>
+              <label>Amount (₹) *</label>
+              <input
+                type="number"
+                style={{ width: '100%', fontSize: '14px', fontWeight: 'bold' }}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                value={form.amount}
+                onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                required
+              />
+            </div>
+            <div style={{ marginBottom: '8px' }}>
+              <label>Category</label>
+              <select
+                style={{ width: '100%' }}
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+              >
+                {EXPENSE_CATEGORIES.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ marginBottom: '8px' }}>
+              <label>Date</label>
+              <input
+                type="date"
+                style={{ width: '100%' }}
+                value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label>Description / Notes</label>
+              <textarea
+                style={{ width: '100%' }}
+                rows={2}
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
+            </div>
+          </fieldset>
+          
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '12px' }}>
+            <button type="button" onClick={() => setModalOpen(false)}>Cancel</button>
+            <button type="submit" disabled={saving}>{saving ? "Saving..." : "OK"}</button>
+          </div>
+        </form>
+      </LegacyDialog>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { Plus, Trash2, Search, CalendarDays, Loader2, ArrowUpCircle, Download } 
 import { useToast } from "@/contexts/ToastContext";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import * as XLSX from "xlsx";
+import LegacyDialog from "@/components/layout/LegacyDialog";
 
 interface Income {
   id: string;
@@ -40,6 +41,7 @@ export default function IncomeTab() {
     description: "",
     date: new Date().toISOString().split("T")[0]
   });
+  const [modalOpen, setModalOpen] = useState(false);
 
   const toast = useToast();
 
@@ -98,6 +100,7 @@ export default function IncomeTab() {
         description: "",
         date: new Date().toISOString().split("T")[0]
       });
+      setModalOpen(false);
       fetchIncomes();
     } catch (err: any) {
       toast.error(err.message);
@@ -163,10 +166,8 @@ export default function IncomeTab() {
   };
 
   return (
-    <div className="content-grid content-grid-wide mt-4">
-      {/* Income Form & Summary */}
-      <div className="space-y-6">
-        {/* Summary Card */}
+    <div className="space-y-4 mt-4">
+      {/* Summary Card */}
         <div className="glass-card p-6 border-l-4 border-emerald-500">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
@@ -180,71 +181,6 @@ export default function IncomeTab() {
             </div>
           </div>
         </div>
-
-        {/* Add Income Form */}
-        <form onSubmit={handleAddIncome} className="glass-card p-6">
-          <h2 className="section-title">Add Extra Income</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="label">Amount (₹)</label>
-              <input
-                type="number"
-                className="input-field text-lg font-bold"
-                placeholder="0.00"
-                min="0"
-                step="0.01"
-                value={form.amount}
-                onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="label">Category</label>
-              <select
-                className="input-field"
-                value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value })}
-              >
-                {INCOME_CATEGORIES.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="label">Date</label>
-              <input
-                type="date"
-                className="input-field"
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="label">Description / Notes</label>
-              <textarea
-                className="input-field resize-none"
-                rows={2}
-                placeholder="Details about the income..."
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-              />
-            </div>
-
-            <button type="submit" disabled={saving} className="btn-primary w-full h-11 text-base bg-emerald-600 hover:bg-emerald-700">
-              {saving ? (
-                <><Loader2 size={16} className="animate-spin" /> Saving...</>
-              ) : (
-                <><Plus size={16} /> Add Income</>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
 
       {/* Income List */}
       <div className="glass-card p-6 flex flex-col h-full">
@@ -274,6 +210,9 @@ export default function IncomeTab() {
             </button>
             <button onClick={exportExcel} className="btn-secondary h-11 px-3" title="Export to Excel">
               <Download size={16} /> Excel
+            </button>
+            <button onClick={() => setModalOpen(true)} className="btn-primary h-11 px-4 text-base shadow-md">
+              <Plus size={16} /> Add Income
             </button>
           </div>
         </div>
@@ -326,6 +265,63 @@ export default function IncomeTab() {
           )}
         </div>
       </div>
+
+      <LegacyDialog isOpen={modalOpen} onClose={() => setModalOpen(false)} title="New Income" width="400px">
+        <form onSubmit={handleAddIncome} style={{ padding: '8px' }}>
+          <fieldset className="legacy-fieldset" style={{ marginBottom: '8px' }}>
+            <legend>Income Details</legend>
+            <div style={{ marginBottom: '8px' }}>
+              <label>Amount (₹) *</label>
+              <input
+                type="number"
+                style={{ width: '100%', fontSize: '14px', fontWeight: 'bold' }}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                value={form.amount}
+                onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                required
+              />
+            </div>
+            <div style={{ marginBottom: '8px' }}>
+              <label>Category</label>
+              <select
+                style={{ width: '100%' }}
+                value={form.category}
+                onChange={(e) => setForm({ ...form, category: e.target.value })}
+              >
+                {INCOME_CATEGORIES.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ marginBottom: '8px' }}>
+              <label>Date</label>
+              <input
+                type="date"
+                style={{ width: '100%' }}
+                value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <label>Description / Notes</label>
+              <textarea
+                style={{ width: '100%' }}
+                rows={2}
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
+            </div>
+          </fieldset>
+          
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '12px' }}>
+            <button type="button" onClick={() => setModalOpen(false)}>Cancel</button>
+            <button type="submit" disabled={saving}>{saving ? "Saving..." : "OK"}</button>
+          </div>
+        </form>
+      </LegacyDialog>
     </div>
   );
 }

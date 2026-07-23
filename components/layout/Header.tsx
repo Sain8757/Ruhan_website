@@ -76,15 +76,15 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
       </div>
 
       <div className="flex items-center justify-end flex-1 gap-2 md:gap-4 pr-2">
-        <button className="global-search hidden md:flex m-0 w-64 max-w-xs" onClick={openSearch}>
+        <button className="legacy-button hidden md:flex m-0 w-64 max-w-xs justify-start" style={{ padding: '4px', gap: '8px' }} onClick={openSearch}>
           <Search size={15} />
           <span className="flex-1 text-left text-xs">Search anything...</span>
           <kbd
             className="hidden lg:flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded font-mono"
             style={{
-              background: "var(--bg-tertiary)",
-              color: "var(--text-muted)",
-              border: "1px solid var(--border-primary)",
+              background: "#dfdfdf",
+              color: "#000",
+              border: "1px solid #808080",
             }}
           >
             Ctrl F
@@ -94,33 +94,35 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
         <div className="flex items-center gap-1 sm:gap-2">
           <input type="file" ref={fileInputRef} className="hidden" />
           
-          <button className="header-icon-button text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20" onClick={openFileExplorer} title="Open File Explorer">
-            <FolderOpen size={18} />
+          <button className="legacy-button" style={{ padding: '4px 8px' }} onClick={openFileExplorer} title="Open File Explorer">
+            <FolderOpen size={16} />
           </button>
           
-          <button className="header-icon-button text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={openMail} title="Open Mail">
-            <Mail size={18} />
+          <button className="legacy-button" style={{ padding: '4px 8px' }} onClick={openMail} title="Open Mail">
+            <Mail size={16} />
           </button>
           
-          <button className="header-icon-button text-[#25D366] hover:bg-green-50 dark:hover:bg-green-900/20" onClick={openWhatsApp} title="WhatsApp Web">
-            <MessageCircle size={18} />
+          <button className="legacy-button" style={{ padding: '4px 8px', color: '#25D366' }} onClick={openWhatsApp} title="WhatsApp Web">
+            <MessageCircle size={16} />
           </button>
 
           <button 
-            className="header-icon-button text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20" 
+            className="legacy-button" 
+            style={{ padding: '4px 8px', color: '#8b5cf6' }}
             onClick={() => setShowAI(true)} 
             title="RA Seva AI Assistant"
           >
-            <Sparkles size={18} className="animate-pulse" />
+            <Sparkles size={16} />
           </button>
 
           <div className="relative" ref={notifRef}>
             <button
-              className="header-icon-button relative"
+              className="legacy-button relative"
+              style={{ padding: '4px 8px' }}
               title="Notifications"
               onClick={() => setShowNotifications(!showNotifications)}
             >
-              <Bell size={18} />
+              <Bell size={16} />
             {totalNotifs > 0 && (
               <span
                 className="absolute top-1.5 right-1.5 flex items-center justify-center text-[9px] font-bold text-white rounded-full min-w-[14px] h-[14px] px-0.5"

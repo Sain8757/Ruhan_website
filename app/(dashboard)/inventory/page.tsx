@@ -5,6 +5,7 @@ import { Package, Search, Plus, Loader2, Save, X, AlertTriangle, Edit } from "lu
 import { useToast } from "@/contexts/ToastContext";
 import { formatCurrency, INVENTORY_CATEGORIES } from "@/lib/utils";
 import PageHeader from "@/components/layout/PageHeader";
+import LegacyDialog from "@/components/layout/LegacyDialog";
 import { useSearchParams, useRouter } from "next/navigation";
 
 interface InventoryItem {
@@ -233,120 +234,113 @@ function InventoryContent() {
       )}
 
       {/* Add Item Modal */}
-      {modalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h2 className="section-title mb-0">
-                {editItemId ? "Edit Inventory Product" : "Add Inventory Product"}
-              </h2>
-              <button onClick={() => setModalOpen(false)} className="btn-ghost p-1">
-                <X size={16} />
-              </button>
+      <LegacyDialog 
+        isOpen={modalOpen} 
+        onClose={() => setModalOpen(false)} 
+        title={editItemId ? "Edit Inventory Product" : "Add Inventory Product"}
+        width="450px"
+      >
+        <form onSubmit={handleSubmit} style={{ padding: '8px' }}>
+          <fieldset className="legacy-fieldset" style={{ marginBottom: '8px' }}>
+            <legend>Item Details</legend>
+            <div style={{ marginBottom: '8px' }}>
+              <label>Item Name *</label>
+              <input
+                type="text"
+                style={{ width: '100%' }}
+                placeholder="e.g. A4 Double A paper rim"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                required
+              />
             </div>
-            <form onSubmit={handleSubmit} className="modal-body space-y-4">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               <div>
-                <label className="label">Item Name *</label>
+                <label>Category</label>
+                <select
+                  style={{ width: '100%' }}
+                  value={form.category}
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                >
+                  {INVENTORY_CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label>Measurement Unit</label>
                 <input
                   type="text"
-                  className="input-field"
-                  placeholder="e.g. A4 Double A paper rim"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  style={{ width: '100%' }}
+                  placeholder="e.g. piece, rim, box"
+                  value={form.unit}
+                  onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                />
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset className="legacy-fieldset" style={{ marginBottom: '8px' }}>
+            <legend>Pricing & Stock</legend>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+              <div>
+                <label>Purchase Price (₹) *</label>
+                <input
+                  type="number"
+                  style={{ width: '100%' }}
+                  placeholder="0.00"
+                  value={form.purchasePrice}
+                  onChange={(e) => setForm({ ...form, purchasePrice: e.target.value })}
                   required
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="label">Category</label>
-                  <select
-                    className="input-field"
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  >
-                    {INVENTORY_CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="label">Measurement Unit</label>
-                  <input
-                    type="text"
-                    className="input-field"
-                    placeholder="e.g. piece, rim, box"
-                    value={form.unit}
-                    onChange={(e) => setForm({ ...form, unit: e.target.value })}
-                  />
-                </div>
+              <div>
+                <label>Selling Price (₹) *</label>
+                <input
+                  type="number"
+                  style={{ width: '100%' }}
+                  placeholder="0.00"
+                  value={form.sellingPrice}
+                  onChange={(e) => setForm({ ...form, sellingPrice: e.target.value })}
+                  required
+                />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="label">Purchase Price (₹) *</label>
-                  <input
-                    type="number"
-                    className="input-field"
-                    placeholder="0.00"
-                    value={form.purchasePrice}
-                    onChange={(e) => setForm({ ...form, purchasePrice: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="label">Selling Price (₹) *</label>
-                  <input
-                    type="number"
-                    className="input-field"
-                    placeholder="0.00"
-                    value={form.sellingPrice}
-                    onChange={(e) => setForm({ ...form, sellingPrice: e.target.value })}
-                    required
-                  />
-                </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div>
+                <label>Quantity in Stock *</label>
+                <input
+                  type="number"
+                  style={{ width: '100%' }}
+                  placeholder="0"
+                  value={form.quantity}
+                  onChange={(e) => setForm({ ...form, quantity: e.target.value })}
+                  required
+                />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="label">Quantity in Stock *</label>
-                  <input
-                    type="number"
-                    className="input-field"
-                    placeholder="0"
-                    value={form.quantity}
-                    onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="label">Min Stock Threshold</label>
-                  <input
-                    type="number"
-                    className="input-field"
-                    placeholder="10"
-                    value={form.minStock}
-                    onChange={(e) => setForm({ ...form, minStock: e.target.value })}
-                  />
-                </div>
+              <div>
+                <label>Min Stock Threshold</label>
+                <input
+                  type="number"
+                  style={{ width: '100%' }}
+                  placeholder="10"
+                  value={form.minStock}
+                  onChange={(e) => setForm({ ...form, minStock: e.target.value })}
+                />
               </div>
+            </div>
+          </fieldset>
 
-              <div className="pt-2 flex justify-end gap-3">
-                <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn-primary" disabled={saving}>
-                  {saving ? (
-                    <><Loader2 size={16} className="animate-spin" /> {editItemId ? "Updating..." : "Saving..."}</>
-                  ) : (
-                    <><Save size={16} /> {editItemId ? "Update Item" : "Save Item"}</>
-                  )}
-                </button>
-              </div>
-            </form>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '12px' }}>
+            <button type="button" onClick={() => setModalOpen(false)}>
+              Cancel
+            </button>
+            <button type="submit" disabled={saving}>
+              {saving ? "Saving..." : (editItemId ? "Update Item" : "Save Item")}
+            </button>
           </div>
-        </div>
-      )}
+        </form>
+      </LegacyDialog>
     </div>
   );
 }

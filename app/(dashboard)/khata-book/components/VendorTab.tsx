@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Plus, Search, Loader2, User, Phone, Briefcase, ArrowUpRight, ArrowDownRight, FileText } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import LegacyDialog from "@/components/layout/LegacyDialog";
 
 interface Vendor {
   id: string;
@@ -44,6 +45,9 @@ export default function VendorTab() {
     description: "",
     date: new Date().toISOString().split("T")[0]
   });
+
+  const [addVendorModalOpen, setAddVendorModalOpen] = useState(false);
+  const [addTxnModalOpen, setAddTxnModalOpen] = useState(false);
 
   const toast = useToast();
 
@@ -112,6 +116,7 @@ export default function VendorTab() {
       toast.success("Vendor added successfully");
       
       setForm({ name: "", phone: "", company: "", openingBalance: "" });
+      setAddVendorModalOpen(false);
       fetchVendors();
     } catch (err: any) {
       toast.error(err.message);
@@ -142,6 +147,7 @@ export default function VendorTab() {
         description: "",
         date: new Date().toISOString().split("T")[0]
       });
+      setAddTxnModalOpen(false);
       fetchTransactions(selectedVendor.id);
       fetchVendors(); // Refresh balance in the list
     } catch (err: any) {
@@ -183,77 +189,16 @@ export default function VendorTab() {
                     {selectedVendor.balance > 0 ? "You Owe: " : selectedVendor.balance < 0 ? "They Owe: " : "Settled: "}
                     {formatCurrency(Math.abs(selectedVendor.balance))}
                   </p>
+                  
+                  <button 
+                    onClick={() => setAddTxnModalOpen(true)}
+                    className="btn-primary w-full mt-4 h-10"
+                  >
+                    <Plus size={16} /> New Transaction
+                  </button>
                 </div>
               </div>
             </div>
-
-            <form onSubmit={handleAddTransaction} className="glass-card p-6">
-              <h3 className="section-title text-base mb-4">New Transaction</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="label">Type</label>
-                  <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
-                    <button
-                      type="button"
-                      onClick={() => setTxnForm({ ...txnForm, type: "PURCHASE" })}
-                      className={`flex-1 py-2 px-3 text-sm font-semibold rounded-md transition-all ${
-                        txnForm.type === "PURCHASE" ? "bg-white text-red-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
-                      }`}
-                    >
-                      New Udhaar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTxnForm({ ...txnForm, type: "PAYMENT" })}
-                      className={`flex-1 py-2 px-3 text-sm font-semibold rounded-md transition-all ${
-                        txnForm.type === "PAYMENT" ? "bg-white text-green-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
-                      }`}
-                    >
-                      Payment Made
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="label">Amount (₹)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    className="input-field"
-                    value={txnForm.amount}
-                    onChange={(e) => setTxnForm({ ...txnForm, amount: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="label">Date</label>
-                  <input
-                    type="date"
-                    className="input-field"
-                    value={txnForm.date}
-                    onChange={(e) => setTxnForm({ ...txnForm, date: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="label">Description (Optional)</label>
-                  <input
-                    type="text"
-                    className="input-field"
-                    placeholder="e.g. Paid via UPI"
-                    value={txnForm.description}
-                    onChange={(e) => setTxnForm({ ...txnForm, description: e.target.value })}
-                  />
-                </div>
-
-                <button type="submit" disabled={saving} className="btn-primary w-full h-11">
-                  {saving ? "Saving..." : "Save Transaction"}
-                </button>
-              </div>
-            </form>
           </div>
 
           <div className="lg:col-span-2 glass-card p-6 flex flex-col">
@@ -304,75 +249,91 @@ export default function VendorTab() {
             </div>
           </div>
         </div>
+
+        <LegacyDialog isOpen={addTxnModalOpen} onClose={() => setAddTxnModalOpen(false)} title="New Transaction" width="400px">
+          <form onSubmit={handleAddTransaction} style={{ padding: '8px' }}>
+            <fieldset className="legacy-fieldset" style={{ marginBottom: '8px' }}>
+              <legend>Transaction Details</legend>
+              <div style={{ marginBottom: '8px' }}>
+                <label>Type</label>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setTxnForm({ ...txnForm, type: "PURCHASE" })}
+                    style={{ flex: 1, backgroundColor: txnForm.type === "PURCHASE" ? '#0a246a' : '', color: txnForm.type === "PURCHASE" ? 'white' : '' }}
+                  >
+                    New Udhaar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTxnForm({ ...txnForm, type: "PAYMENT" })}
+                    style={{ flex: 1, backgroundColor: txnForm.type === "PAYMENT" ? '#0a246a' : '', color: txnForm.type === "PAYMENT" ? 'white' : '' }}
+                  >
+                    Payment Made
+                  </button>
+                </div>
+              </div>
+              <div style={{ marginBottom: '8px' }}>
+                <label>Amount (₹) *</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  style={{ width: '100%' }}
+                  value={txnForm.amount}
+                  onChange={(e) => setTxnForm({ ...txnForm, amount: e.target.value })}
+                  required
+                />
+              </div>
+              <div style={{ marginBottom: '8px' }}>
+                <label>Date</label>
+                <input
+                  type="date"
+                  style={{ width: '100%' }}
+                  value={txnForm.date}
+                  onChange={(e) => setTxnForm({ ...txnForm, date: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label>Description (Optional)</label>
+                <input
+                  type="text"
+                  style={{ width: '100%' }}
+                  placeholder="e.g. Paid via UPI"
+                  value={txnForm.description}
+                  onChange={(e) => setTxnForm({ ...txnForm, description: e.target.value })}
+                />
+              </div>
+            </fieldset>
+            
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '12px' }}>
+              <button type="button" onClick={() => setAddTxnModalOpen(false)}>Cancel</button>
+              <button type="submit" disabled={saving}>{saving ? "Saving..." : "Save Transaction"}</button>
+            </div>
+          </form>
+        </LegacyDialog>
       </div>
     );
   }
 
   return (
-    <div className="content-grid content-grid-wide mt-4">
-      <div className="space-y-6">
-        <form onSubmit={handleAddVendor} className="glass-card p-6">
-          <h2 className="section-title">Add Vendor / Supplier</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label className="label">Vendor Name *</label>
-              <input
-                type="text"
-                className="input-field"
-                placeholder="e.g. Ramesh Suppliers"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <label className="label">Company / Shop Name</label>
-              <input
-                type="text"
-                className="input-field"
-                value={form.company}
-                onChange={(e) => setForm({ ...form, company: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="label">Phone Number</label>
-              <input
-                type="text"
-                className="input-field"
-                value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="label">Opening Balance (₹)</label>
-              <input
-                type="number"
-                step="0.01"
-                placeholder="0.00"
-                className="input-field"
-                value={form.openingBalance}
-                onChange={(e) => setForm({ ...form, openingBalance: e.target.value })}
-              />
-              <p className="text-xs text-gray-500 mt-1">Enter positive amount if you owe them money.</p>
-            </div>
-            <button type="submit" disabled={saving} className="btn-primary w-full h-11">
-              {saving ? <Loader2 size={16} className="animate-spin mx-auto" /> : <><Plus size={16} className="inline mr-2" /> Add Vendor</>}
-            </button>
-          </div>
-        </form>
-      </div>
-
+    <div className="mt-4">
       <div className="glass-card p-6 flex flex-col h-full">
-        <div className="relative mb-6">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
-          <input
-            type="text"
-            placeholder="Search vendors..."
-            className="input-field pl-9"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="flex-1 relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
+            <input
+              type="text"
+              placeholder="Search vendors..."
+              className="input-field pl-9"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </div>
+          <button onClick={() => setAddVendorModalOpen(true)} className="btn-primary h-11 px-4">
+            <Plus size={16} /> Add Vendor
+          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
@@ -412,6 +373,59 @@ export default function VendorTab() {
           )}
         </div>
       </div>
+
+      <LegacyDialog isOpen={addVendorModalOpen} onClose={() => setAddVendorModalOpen(false)} title="New Vendor" width="400px">
+        <form onSubmit={handleAddVendor} style={{ padding: '8px' }}>
+          <fieldset className="legacy-fieldset" style={{ marginBottom: '8px' }}>
+            <legend>Vendor Details</legend>
+            <div style={{ marginBottom: '8px' }}>
+              <label>Vendor Name *</label>
+              <input
+                type="text"
+                style={{ width: '100%' }}
+                placeholder="e.g. Ramesh Suppliers"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                required
+              />
+            </div>
+            <div style={{ marginBottom: '8px' }}>
+              <label>Company / Shop Name</label>
+              <input
+                type="text"
+                style={{ width: '100%' }}
+                value={form.company}
+                onChange={(e) => setForm({ ...form, company: e.target.value })}
+              />
+            </div>
+            <div style={{ marginBottom: '8px' }}>
+              <label>Phone Number</label>
+              <input
+                type="text"
+                style={{ width: '100%' }}
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              />
+            </div>
+            <div>
+              <label>Opening Balance (₹)</label>
+              <input
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                style={{ width: '100%' }}
+                value={form.openingBalance}
+                onChange={(e) => setForm({ ...form, openingBalance: e.target.value })}
+              />
+            </div>
+          </fieldset>
+          
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '12px' }}>
+            <button type="button" onClick={() => setAddVendorModalOpen(false)}>Cancel</button>
+            <button type="submit" disabled={saving}>{saving ? "Saving..." : "Add Vendor"}</button>
+          </div>
+        </form>
+      </LegacyDialog>
     </div>
   );
 }
