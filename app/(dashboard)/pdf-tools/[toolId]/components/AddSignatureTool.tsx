@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { PDFDocument } from "pdf-lib";
-import { FileText, Image as ImageIcon, Loader2, X, PenTool, Move, Type, Eraser, Calendar, Check } from "lucide-react";
+import { PDFDocument, degrees } from "pdf-lib";
+import { FileText, Image as ImageIcon, Loader2, X, PenTool, Move, Type, Eraser, Calendar, Check, Save, Star, RotateCcw, Layers } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 import { useDownload } from "@/contexts/DownloadContext";
 
@@ -87,6 +87,12 @@ export default function AddSignatureTool() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [loading, setLoading] = useState(false);
+
+  // ✨ NEW Pro Features
+  const [sigOpacity, setSigOpacity] = useState(100);        // 10–100%
+  const [sigRotation, setSigRotation] = useState(0);        // -45° to +45°
+  const [applyAllPages, setApplyAllPages] = useState(false); // Apply to every page
+  const [savedSignatures, setSavedSignatures] = useState<string[]>([]); // Saved signature gallery
 
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const sigInputRef = useRef<HTMLInputElement>(null);
@@ -293,77 +299,82 @@ export default function AddSignatureTool() {
     (e.target as HTMLElement).releasePointerCapture(e.pointerId);
   };
 
+  // Save signature to gallery
+  const handleSaveToGallery = () => {
+    if (!activeSigDataUrl) { toast.error("No signature to save"); return; }
+    if (savedSignatures.includes(activeSigDataUrl)) { toast.info("Already saved!"); return; }
+    if (savedSignatures.length >= 6) {
+      setSavedSignatures((prev) => [...prev.slice(1), activeSigDataUrl!]);
+    } else {
+      setSavedSignatures((prev) => [...prev, activeSigDataUrl!]);
+    }
+    toast.success("Signature saved to gallery!");
+  };
+
+  // Helper: compute x,y for a single page given page size
+  const computeXY = (pageWidth: number, pageHeight: number, imgW: number, imgH: number) => {
+    let x = 50;
+    let y = 50;
+    if (placementMode === "preset") {
+      const margin = 50;
+      switch (position) {
+        case "top-left":    x = margin; y = pageHeight - imgH - margin; break;
+        case "top-right":   x = pageWidth - imgW - margin; y = pageHeight - imgH - margin; break;
+        case "bottom-left": x = margin; y = margin; break;
+        case "bottom-right":x = pageWidth - imgW - margin; y = margin; break;
+        case "center":      x = pageWidth / 2 - imgW / 2; y = pageHeight / 2 - imgH / 2; break;
+      }
+    } else {
+      x = dragPos.x / pdfScale;
+      y = pageHeight - dragPos.y / pdfScale - imgH;
+    }
+    return { x: Math.max(0, x), y: Math.max(0, y) };
+  };
+
   // Final Embed & Save Signature into PDF
   const handleAddSignature = async () => {
-    if (!pdfFile) {
-      toast.error("Please select a PDF file first");
-      return;
-    }
-    if (!activeSigDataUrl) {
-      toast.error("Please draw, type, or upload a signature first");
-      return;
-    }
+    if (!pdfFile) { toast.error("Please select a PDF file first"); return; }
+    if (!activeSigDataUrl) { toast.error("Please draw, type, or upload a signature first"); return; }
 
     setLoading(true);
     try {
       const pdfBytes = await pdfFile.arrayBuffer();
       const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
 
-      // Embed signature Data URL as PNG
+      // Embed signature PNG
       const sigImgBytes = await fetch(activeSigDataUrl).then((res) => res.arrayBuffer());
       const image = await pdfDoc.embedPng(sigImgBytes);
 
       const pages = pdfDoc.getPages();
-      const targetPageIndex = Math.min(Math.max(1, pageNum), pages.length) - 1;
-      const page = pages[targetPageIndex];
-      const { width, height } = page.getSize();
-
       const imgDims = image.scale(sigWidth / image.width);
-      let x = 50;
-      let y = 50;
 
-      if (placementMode === "preset") {
-        const margin = 50;
-        switch (position) {
-          case "top-left":
-            x = margin;
-            y = height - imgDims.height - margin;
-            break;
-          case "top-right":
-            x = width - imgDims.width - margin;
-            y = height - imgDims.height - margin;
-            break;
-          case "bottom-left":
-            x = margin;
-            y = margin;
-            break;
-          case "bottom-right":
-            x = width - imgDims.width - margin;
-            y = margin;
-            break;
-          case "center":
-            x = width / 2 - imgDims.width / 2;
-            y = height / 2 - imgDims.height / 2;
-            break;
-        }
-      } else {
-        // Drag placement calculation
-        x = dragPos.x / pdfScale;
-        y = height - dragPos.y / pdfScale - imgDims.height;
+      // Determine which pages to stamp
+      const pageIndexes = applyAllPages
+        ? Array.from({ length: pages.length }, (_, i) => i)
+        : [Math.min(Math.max(1, pageNum), pages.length) - 1];
+
+      for (const pageIdx of pageIndexes) {
+        const page = pages[pageIdx];
+        const { width, height } = page.getSize();
+        const { x, y } = computeXY(width, height, imgDims.width, imgDims.height);
+
+        page.drawImage(image, {
+          x,
+          y,
+          width: imgDims.width,
+          height: imgDims.height,
+          opacity: sigOpacity / 100,
+          rotate: degrees(sigRotation),
+        });
       }
-
-      page.drawImage(image, {
-        x: Math.max(0, x),
-        y: Math.max(0, y),
-        width: imgDims.width,
-        height: imgDims.height,
-      });
 
       const modifiedPdfBytes = await pdfDoc.save();
       const blob = new Blob([new Uint8Array(modifiedPdfBytes)], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
       downloadWithRename(url, `Signed_${pdfFile.name}`);
-      toast.success("Signature added to PDF successfully!");
+      toast.success(applyAllPages
+        ? `Signature added to ALL ${pages.length} pages and downloaded!`
+        : `Signature added to page ${pageNum} and downloaded!`);
     } catch {
       toast.error("Failed to add signature to PDF");
     } finally {
@@ -630,30 +641,55 @@ export default function AddSignatureTool() {
             )}
           </div>
 
+          {/* Saved Signatures Gallery */}
+          {savedSignatures.length > 0 && (
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <p className="text-xs font-extrabold text-amber-800 mb-2 flex items-center gap-1"><Star size={12} /> Saved Signatures — Click to Reuse</p>
+              <div className="flex gap-2 flex-wrap">
+                {savedSignatures.map((sig, idx) => (
+                  <div key={idx} className="relative group">
+                    <button
+                      type="button"
+                      onClick={() => { setActiveSigDataUrl(sig); toast.success("Signature loaded from gallery!"); }}
+                      className="border-2 border-amber-300 hover:border-blue-500 rounded bg-white p-1 cursor-pointer transition-all"
+                    >
+                      <img src={sig} alt={`Saved ${idx + 1}`} className="h-10 w-24 object-contain" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSavedSignatures((prev) => prev.filter((_, i) => i !== idx))}
+                      className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-600 text-white rounded-full text-[9px] font-black flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                    >✕</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* 3. Placement & Positioning Controls */}
           {activeSigDataUrl && (
             <div className="p-4 bg-white border border-slate-300 rounded-lg space-y-4 shadow-xs">
               <div className="flex flex-wrap items-center justify-between gap-3 border-b pb-3">
                 <span className="text-sm font-extrabold text-slate-900">
-                  Signature Placement & Size:
+                  Signature Placement, Size & Style:
                 </span>
 
                 <div className="flex items-center gap-2 text-xs">
                   <span className="font-bold text-slate-700">Page:</span>
                   <button
                     type="button"
-                    disabled={pageNum <= 1}
+                    disabled={pageNum <= 1 || applyAllPages}
                     onClick={() => setPageNum((p) => Math.max(1, p - 1))}
                     className="px-2 py-0.5 bg-slate-200 font-bold rounded border border-slate-300 disabled:opacity-40"
                   >
                     ←
                   </button>
                   <span className="font-extrabold text-slate-900">
-                    {pageNum} / {pdfTotalPages}
+                    {applyAllPages ? "All Pages" : `${pageNum} / ${pdfTotalPages}`}
                   </span>
                   <button
                     type="button"
-                    disabled={pageNum >= pdfTotalPages}
+                    disabled={pageNum >= pdfTotalPages || applyAllPages}
                     onClick={() => setPageNum((p) => Math.min(pdfTotalPages, p + 1))}
                     className="px-2 py-0.5 bg-slate-200 font-bold rounded border border-slate-300 disabled:opacity-40"
                   >
@@ -662,52 +698,74 @@ export default function AddSignatureTool() {
                 </div>
               </div>
 
-              {/* Controls Grid */}
+              {/* Controls Grid — Width, Opacity, Rotation */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-bold text-slate-800">
                 <div>
-                  <label className="block mb-1">Signature Width ({sigWidth}px):</label>
-                  <input
-                    type="range"
-                    min={60}
-                    max={400}
-                    value={sigWidth}
+                  <label className="block mb-1">Width ({sigWidth}px):</label>
+                  <input type="range" min={60} max={400} value={sigWidth}
                     onChange={(e) => setSigWidth(parseInt(e.target.value))}
-                    className="w-full accent-blue-700"
-                  />
+                    className="w-full accent-blue-700" />
                 </div>
 
                 <div>
+                  <label className="block mb-1">Opacity ({sigOpacity}%):</label>
+                  <input type="range" min={10} max={100} step={5} value={sigOpacity}
+                    onChange={(e) => setSigOpacity(parseInt(e.target.value))}
+                    className="w-full accent-purple-600" />
+                </div>
+
+                <div>
+                  <label className="block mb-1">Rotation ({sigRotation}°):</label>
+                  <input type="range" min={-45} max={45} step={1} value={sigRotation}
+                    onChange={(e) => setSigRotation(parseInt(e.target.value))}
+                    className="w-full accent-emerald-600" />
+                  <button type="button" onClick={() => setSigRotation(0)}
+                    className="mt-1 text-[10px] font-bold text-slate-500 hover:text-slate-800 flex items-center gap-0.5 cursor-pointer">
+                    <RotateCcw size={10} /> Reset Rotation
+                  </button>
+                </div>
+              </div>
+
+              {/* Apply to All Pages + Save to Gallery Row */}
+              <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-slate-50 rounded border border-slate-200">
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-extrabold text-slate-800">
+                  <input
+                    type="checkbox"
+                    checked={applyAllPages}
+                    onChange={(e) => setApplyAllPages(e.target.checked)}
+                    className="accent-blue-700 w-4 h-4"
+                  />
+                  <Layers size={14} className="text-blue-700" />
+                  Apply Signature to ALL {pdfTotalPages} Pages
+                </label>
+
+                <button type="button" onClick={handleSaveToGallery}
+                  className="px-3 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded border border-amber-300 text-xs font-bold flex items-center gap-1 cursor-pointer">
+                  <Save size={12} /> Save to Gallery
+                </button>
+              </div>
+
+              {/* Placement Mode */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-bold text-slate-800">
+                <div>
                   <label className="block mb-1">Placement Mode:</label>
                   <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setPlacementMode("manual")}
+                    <button type="button" onClick={() => setPlacementMode("manual")}
                       className={`flex-1 py-1 rounded font-bold border text-center ${
                         placementMode === "manual" ? "bg-blue-700 text-white border-blue-800" : "bg-slate-100 text-slate-700"
-                      }`}
-                    >
-                      👆 Drag & Drop
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPlacementMode("preset")}
+                      }`}>👆 Drag & Drop</button>
+                    <button type="button" onClick={() => setPlacementMode("preset")}
                       className={`flex-1 py-1 rounded font-bold border text-center ${
                         placementMode === "preset" ? "bg-blue-700 text-white border-blue-800" : "bg-slate-100 text-slate-700"
-                      }`}
-                    >
-                      📍 Preset
-                    </button>
+                      }`}>📍 Preset</button>
                   </div>
                 </div>
 
                 {placementMode === "preset" && (
                   <div>
                     <label className="block mb-1">Preset Location:</label>
-                    <select
-                      value={position}
-                      onChange={(e) => setPosition(e.target.value)}
-                      className="w-full p-1.5 border border-slate-300 rounded font-bold"
-                    >
+                    <select value={position} onChange={(e) => setPosition(e.target.value)}
+                      className="w-full p-1.5 border border-slate-300 rounded font-bold">
                       <option value="bottom-right">Bottom Right</option>
                       <option value="bottom-left">Bottom Left</option>
                       <option value="top-right">Top Right</option>
@@ -716,6 +774,24 @@ export default function AddSignatureTool() {
                     </select>
                   </div>
                 )}
+
+                {/* Live Signature Preview with opacity + rotation */}
+                <div>
+                  <label className="block mb-1">Live Preview:</label>
+                  <div className="border border-slate-200 rounded bg-slate-50 p-2 flex items-center justify-center min-h-[50px]">
+                    <img
+                      src={activeSigDataUrl}
+                      alt="Signature preview"
+                      style={{
+                        width: Math.min(sigWidth, 120),
+                        opacity: sigOpacity / 100,
+                        transform: `rotate(${sigRotation}deg)`,
+                        transition: "all 0.2s",
+                      }}
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Interactive PDF Canvas Viewer for Drag & Drop Placement */}
