@@ -98,6 +98,14 @@ export const WORKSPACE_MODULES: WorkspaceModule[] = [
     keywords: ["aadhaar", "pan", "id card"],
   },
   {
+    id: "pvc-card-studio",
+    label: "PVC Card Studio",
+    href: "/pvc-card-studio",
+    icon: "WalletCards",
+    section: "Tools",
+    keywords: ["pvc card", "id card", "voter id", "ayushman", "pan pvc", "aadhaar pvc"],
+  },
+  {
     id: "scanner",
     label: "Doc Scanner",
     href: "/scanner",
