@@ -103,66 +103,90 @@ function CustomerMobileCard({ customer, onClick }: { customer: Customer; onClick
 
 function CustomerTable({ customers, onOpen }: { customers: Customer[]; onOpen: (id: string) => void }) {
   return (
-    <div className="hidden md:block table-wrapper">
-      <table className="data-table">
+    <div
+      style={{
+        backgroundColor: "#ffffff",
+        borderTop: "2px solid #808080",
+        borderLeft: "2px solid #808080",
+        borderRight: "2px solid #ffffff",
+        borderBottom: "2px solid #ffffff",
+        overflowX: "auto",
+        boxShadow: "inset 1px 1px 2px rgba(0,0,0,0.2)",
+      }}
+    >
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", fontFamily: "Tahoma, 'MS Sans Serif', sans-serif" }}>
         <thead>
-          <tr>
-            <th>Customer</th>
-            <th>Contact</th>
-            <th>Services</th>
-            <th>Invoices</th>
-            <th>Last Activity</th>
-            <th>Status</th>
-            <th>Actions</th>
+          <tr style={{ backgroundColor: "#d4d0c8", borderBottom: "2px solid #808080" }}>
+            <th style={{ padding: "6px 10px", textAlign: "left", fontWeight: "bold", borderRight: "1px solid #808080", color: "#000000" }}>Customer Name</th>
+            <th style={{ padding: "6px 10px", textAlign: "left", fontWeight: "bold", borderRight: "1px solid #808080", color: "#000000" }}>Mobile / Contact</th>
+            <th style={{ padding: "6px 10px", textAlign: "center", fontWeight: "bold", borderRight: "1px solid #808080", color: "#000000" }}>Services</th>
+            <th style={{ padding: "6px 10px", textAlign: "center", fontWeight: "bold", borderRight: "1px solid #808080", color: "#000000" }}>Invoices</th>
+            <th style={{ padding: "6px 10px", textAlign: "left", fontWeight: "bold", borderRight: "1px solid #808080", color: "#000000" }}>Registered Date</th>
+            <th style={{ padding: "6px 10px", textAlign: "center", fontWeight: "bold", borderRight: "1px solid #808080", color: "#000000" }}>Status</th>
+            <th style={{ padding: "6px 10px", textAlign: "center", fontWeight: "bold", color: "#000000" }}>Action</th>
           </tr>
         </thead>
         <tbody>
-          {customers.map((customer) => (
-            <tr key={customer.id} className="cursor-pointer" onClick={() => onOpen(customer.id)}>
-              <td>
-                <div className="flex items-center gap-3">
-                  <CustomerAvatar customer={customer} />
-                  <div className="min-w-0">
-                    <div className="font-bold text-sm truncate" style={{ color: "var(--text-primary)" }}>
-                      {customer.name}
-                    </div>
-                    <div className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
-                      Registered customer
-                    </div>
-                  </div>
-                </div>
+          {customers.map((customer, index) => (
+            <tr
+              key={customer.id}
+              onClick={() => onOpen(customer.id)}
+              style={{
+                backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f6",
+                borderBottom: "1px solid #e2e8f0",
+                cursor: "pointer",
+              }}
+              className="hover:bg-blue-50 transition-colors"
+            >
+              <td style={{ padding: "8px 10px" }}>
+                <div style={{ fontWeight: "bold", color: "#000080", fontSize: "13px" }}>{customer.name}</div>
+                {customer.aadhaarNumber && (
+                  <div style={{ fontSize: "10px", color: "#64748b" }}>Aadhaar: {customer.aadhaarNumber}</div>
+                )}
               </td>
-              <td>
-                <div className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                  {customer.mobile}
-                </div>
-                <div className="text-xs" style={{ color: "var(--text-muted)" }}>
-                  {customer.email || "No email added"}
-                </div>
+              <td style={{ padding: "8px 10px" }}>
+                <div style={{ fontWeight: "bold", color: "#0f172a" }}>📞 {customer.mobile}</div>
+                <div style={{ fontSize: "10px", color: "#64748b" }}>{customer.email || "No email"}</div>
               </td>
-              <td>
-                <span className="badge badge-submitted">{customer._count.services} services</span>
+              <td style={{ padding: "8px 10px", textAlign: "center" }}>
+                <span style={{ background: "#e0f2fe", color: "#0369a1", fontWeight: "bold", padding: "2px 8px", borderRadius: "3px", border: "1px solid #bae6fd", fontSize: "11px" }}>
+                  {customer._count.services} Services
+                </span>
               </td>
-              <td>
-                <span className="badge badge-paid">{customer._count.invoices} invoices</span>
+              <td style={{ padding: "8px 10px", textAlign: "center" }}>
+                <span style={{ background: "#dcfce7", color: "#15803d", fontWeight: "bold", padding: "2px 8px", borderRadius: "3px", border: "1px solid #bbf7d0", fontSize: "11px" }}>
+                  {customer._count.invoices} Invoices
+                </span>
               </td>
-              <td className="text-sm" style={{ color: "var(--text-muted)" }}>
+              <td style={{ padding: "8px 10px", color: "#475569" }}>
                 {formatRelativeTime(customer.createdAt)}
               </td>
-              <td>
-                <span className="badge badge-approved">Active</span>
+              <td style={{ padding: "8px 10px", textAlign: "center" }}>
+                <span style={{ background: "#166534", color: "#ffffff", fontWeight: "bold", padding: "2px 8px", borderRadius: "2px", fontSize: "10px" }}>
+                  ACTIVE
+                </span>
               </td>
-              <td>
+              <td style={{ padding: "8px 10px", textAlign: "center" }}>
                 <button
                   type="button"
-                  className="btn-ghost p-2"
                   onClick={(e) => {
                     e.stopPropagation();
                     onOpen(customer.id);
                   }}
-                  title="Open customer"
+                  style={{
+                    backgroundColor: "#d4d0c8",
+                    borderTop: "2px solid #ffffff",
+                    borderLeft: "2px solid #ffffff",
+                    borderRight: "2px solid #404040",
+                    borderBottom: "2px solid #404040",
+                    padding: "3px 10px",
+                    fontWeight: "bold",
+                    fontSize: "11px",
+                    color: "#000000",
+                    cursor: "pointer",
+                  }}
                 >
-                  <ChevronRight size={16} />
+                  Open →
                 </button>
               </td>
             </tr>
