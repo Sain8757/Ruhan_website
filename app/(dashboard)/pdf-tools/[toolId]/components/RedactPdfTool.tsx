@@ -72,11 +72,12 @@ const PATTERNS: { label: string; icon: string; regex: RegExp }[] = [
 ];
 
 const FILL_COLORS = [
-  { label: "Black", value: "#000000", style: "bg-black" },
-  { label: "Navy", value: "#1e3a5f", style: "bg-blue-900" },
-  { label: "Red", value: "#991b1b", style: "bg-red-800" },
-  { label: "White", value: "#ffffff", style: "bg-white border border-slate-400" },
-  { label: "Gray", value: "#374151", style: "bg-gray-700" },
+  { label: "⬛ Black", value: "#000000" },
+  { label: "🟦 Navy", value: "#1e3a5f" },
+  { label: "🟥 Red", value: "#991b1b" },
+  { label: "⬜ White", value: "#ffffff" },
+  { label: "▪ Gray", value: "#374151" },
+  { label: "🎯 Auto BG", value: "auto" },
 ];
 
 const OVERLAY_TEXTS = [
@@ -266,23 +267,74 @@ export default function RedactPdfTool() {
     pushUndo();
 
     const effectiveOverlay = overlayText || customOverlayText;
-    const newRects: RedactRect[] = toRedact.map(item => ({
-      id: uid(),
-      pageNum,
-      x: item.x - 2,
-      y: item.y - 2,
-      w: item.w + 4,
-      h: item.h + 4,
-      fillColor,
-      overlayText: effectiveOverlay,
-      overlayColor: overlayTextColor,
-    }));
+    const newRects: RedactRect[] = toRedact.map(item => {
+      // Auto-sample background color for each text item if "auto" mode
+      const resolvedColor = fillColor === "auto"
+        ? sampleCanvasColor(item.x - 2, item.y - 2, item.w + 4, item.h + 4)
+        : fillColor;
+      return {
+        id: uid(),
+        pageNum,
+        x: item.x - 2,
+        y: item.y - 2,
+        w: item.w + 4,
+        h: item.h + 4,
+        fillColor: resolvedColor,
+        overlayText: effectiveOverlay,
+        overlayColor: overlayTextColor,
+      };
+    });
     setRedactions(prev => [...prev, ...newRects]);
     toast.success(`${newRects.length} item(s) marked for redaction!`);
     setMatchedItems([]);
     setPatternMatches([]);
     setSelectedMatches(new Set());
     setSearchQuery("");
+  };
+
+  // ─── Sample canvas background color at a rect position ──────────────────
+
+  const sampleCanvasColor = (x: number, y: number, w: number, h: number): string => {
+    if (!canvasRef.current) return "#000000";
+    const ctx = canvasRef.current.getContext("2d");
+    if (!ctx) return "#000000";
+    try {
+      // Sample a grid of points across the rectangle and average their colors
+      const points: [number, number][] = [
+        [x + w * 0.15, y + h * 0.15],
+        [x + w * 0.50, y + h * 0.15],
+        [x + w * 0.85, y + h * 0.15],
+        [x + w * 0.15, y + h * 0.50],
+        [x + w * 0.50, y + h * 0.50],
+        [x + w * 0.85, y + h * 0.50],
+        [x + w * 0.15, y + h * 0.85],
+        [x + w * 0.50, y + h * 0.85],
+        [x + w * 0.85, y + h * 0.85],
+      ];
+
+      let totalR = 0, totalG = 0, totalB = 0, count = 0;
+      const canvasW = canvasRef.current.width;
+      const canvasH = canvasRef.current.height;
+      const scaleX = canvasW / canvasRef.current.getBoundingClientRect().width;
+      const scaleY = canvasH / canvasRef.current.getBoundingClientRect().height;
+
+      for (const [sx, sy] of points) {
+        const px = Math.round(sx * scaleX);
+        const py = Math.round(sy * scaleY);
+        if (px < 0 || py < 0 || px >= canvasW || py >= canvasH) continue;
+        const pixel = ctx.getImageData(px, py, 1, 1).data;
+        totalR += pixel[0];
+        totalG += pixel[1];
+        totalB += pixel[2];
+        count++;
+      }
+
+      if (count === 0) return "#000000";
+      const toHex = (v: number) => Math.round(v / count).toString(16).padStart(2, "0");
+      return `#${toHex(totalR)}${toHex(totalG)}${toHex(totalB)}`;
+    } catch {
+      return "#000000";
+    }
   };
 
   // ─── Draw Handlers ─────────────────────────────────────────────────────────
@@ -319,6 +371,15 @@ export default function RedactPdfTool() {
         ? Array.from({ length: pdfTotalPages }, (_, i) => i + 1)
         : [pageNum];
 
+      // Auto-sample background color if "auto" mode is selected
+      const resolvedColor = fillColor === "auto"
+        ? sampleCanvasColor(currentRect.x, currentRect.y, currentRect.w, currentRect.h)
+        : fillColor;
+
+      if (fillColor === "auto") {
+        toast.success(`🎯 Auto-detected background color: ${resolvedColor}`);
+      }
+
       const newRects: RedactRect[] = pagesToApply.map(p => ({
         id: uid(),
         pageNum: p,
@@ -326,7 +387,7 @@ export default function RedactPdfTool() {
         y: currentRect.y,
         w: currentRect.w,
         h: currentRect.h,
-        fillColor,
+        fillColor: resolvedColor,
         overlayText: effectiveOverlay,
         overlayColor: overlayTextColor,
       }));
@@ -525,48 +586,75 @@ export default function RedactPdfTool() {
             {/* Fill Color Row — BIG visible buttons */}
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-extrabold text-slate-700 shrink-0">📦 Fill Color:</span>
-              {FILL_COLORS.map(c => (
-                <button
-                  key={c.value}
-                  onClick={() => setFillColor(c.value)}
-                  title={c.label}
-                  style={{
-                    backgroundColor: c.value,
-                    color: c.value === "#ffffff" ? "#1e293b" : "#ffffff",
-                    border: fillColor === c.value ? "3px solid #6366f1" : "2px solid #94a3b8",
-                    boxShadow: fillColor === c.value ? "0 0 0 3px rgba(99,102,241,0.35)" : "none",
-                  }}
-                  className={`px-3 py-1.5 rounded-full text-[11px] font-extrabold cursor-pointer transition-all flex items-center gap-1.5 ${
-                    fillColor === c.value ? "scale-105" : "hover:scale-105"
-                  }`}
-                >
-                  {c.label}
-                  {fillColor === c.value && <span className="text-[9px]">✓</span>}
-                </button>
-              ))}
+              {FILL_COLORS.map(c => {
+                const isAuto = c.value === "auto";
+                const isSelected = fillColor === c.value;
+                return (
+                  <button
+                    key={c.value}
+                    onClick={() => setFillColor(c.value)}
+                    title={isAuto ? "Automatically samples the page background color where you draw" : c.label}
+                    style={isAuto ? {
+                      background: "linear-gradient(135deg, #1e3a5f 0%, #fff 50%, #f97316 100%)",
+                      color: "#1e293b",
+                      border: isSelected ? "3px solid #6366f1" : "2px solid #94a3b8",
+                      boxShadow: isSelected ? "0 0 0 3px rgba(99,102,241,0.35)" : "none",
+                    } : {
+                      backgroundColor: c.value,
+                      color: c.value === "#ffffff" ? "#1e293b" : "#ffffff",
+                      border: isSelected ? "3px solid #6366f1" : "2px solid #94a3b8",
+                      boxShadow: isSelected ? "0 0 0 3px rgba(99,102,241,0.35)" : "none",
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-[11px] font-extrabold cursor-pointer transition-all flex items-center gap-1.5 ${
+                      isSelected ? "scale-105" : "hover:scale-105"
+                    }`}
+                  >
+                    {c.label}
+                    {isSelected && <span className="text-[9px]">✓</span>}
+                  </button>
+                );
+              })}
 
-              {/* Custom color input */}
-              <label className="flex items-center gap-1.5 cursor-pointer" title="Custom color">
-                <span className="text-[11px] font-extrabold text-slate-600">🎨 Custom:</span>
-                <input
-                  type="color"
-                  value={fillColor}
-                  onChange={(e) => setFillColor(e.target.value)}
-                  className="w-8 h-7 p-0 border border-slate-400 rounded cursor-pointer"
-                />
-              </label>
+              {/* Custom color input — only when not auto mode */}
+              {fillColor !== "auto" && (
+                <label className="flex items-center gap-1.5 cursor-pointer" title="Custom color">
+                  <span className="text-[11px] font-extrabold text-slate-600">🎨 Custom:</span>
+                  <input
+                    type="color"
+                    value={fillColor}
+                    onChange={(e) => setFillColor(e.target.value)}
+                    className="w-8 h-7 p-0 border border-slate-400 rounded cursor-pointer"
+                  />
+                </label>
+              )}
+
+              {/* Auto mode info label */}
+              {fillColor === "auto" && (
+                <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-1 rounded-full">
+                  🎯 Draw a box → background color auto-detected!
+                </span>
+              )}
 
               {/* Live Preview Swatch */}
               <div className="ml-auto flex items-center gap-2">
                 <span className="text-[10px] font-extrabold text-slate-500">Preview:</span>
                 <div
-                  style={{ backgroundColor: fillColor, minWidth: 80, minHeight: 28, border: "2px solid #94a3b8" }}
+                  style={{
+                    background: fillColor === "auto"
+                      ? "linear-gradient(135deg, #1e3a5f 0%, #fff 50%, #f97316 100%)"
+                      : fillColor,
+                    minWidth: 80, minHeight: 28, border: "2px solid #94a3b8"
+                  }}
                   className="rounded flex items-center justify-center px-2"
                 >
-                  {effectiveOverlay && (
-                    <span style={{ color: overlayTextColor, fontSize: 10, fontWeight: 900, letterSpacing: "0.05em" }}>
-                      {effectiveOverlay}
-                    </span>
+                  {fillColor === "auto" ? (
+                    <span style={{ fontSize: 9, fontWeight: 900, color: "#1e293b", textShadow: "0 0 4px white" }}>AUTO</span>
+                  ) : (
+                    effectiveOverlay && (
+                      <span style={{ color: overlayTextColor, fontSize: 10, fontWeight: 900, letterSpacing: "0.05em" }}>
+                        {effectiveOverlay}
+                      </span>
+                    )
                   )}
                 </div>
               </div>
