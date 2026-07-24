@@ -520,63 +520,107 @@ export default function RedactPdfTool() {
           </div>
 
           {/* ── Styling Options Bar ── */}
-          <div className="p-2.5 bg-slate-100 border border-slate-300 rounded-lg flex flex-wrap items-center gap-3">
-            {/* Fill Color */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-extrabold text-slate-600">FILL:</span>
+          <div className="p-3 bg-white border border-slate-300 rounded-lg shadow-xs space-y-3">
+
+            {/* Fill Color Row — BIG visible buttons */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-extrabold text-slate-700 shrink-0">📦 Fill Color:</span>
               {FILL_COLORS.map(c => (
-                <button key={c.value} onClick={() => setFillColor(c.value)} title={c.label}
-                  style={{ backgroundColor: c.value, outline: fillColor === c.value ? "2px solid #6366f1" : "none", outlineOffset: "2px" }}
-                  className={`w-5 h-5 rounded border border-slate-400 cursor-pointer transition-all ${fillColor === c.value ? "scale-110" : ""}`} />
+                <button
+                  key={c.value}
+                  onClick={() => setFillColor(c.value)}
+                  title={c.label}
+                  style={{
+                    backgroundColor: c.value,
+                    color: c.value === "#ffffff" ? "#1e293b" : "#ffffff",
+                    border: fillColor === c.value ? "3px solid #6366f1" : "2px solid #94a3b8",
+                    boxShadow: fillColor === c.value ? "0 0 0 3px rgba(99,102,241,0.35)" : "none",
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-[11px] font-extrabold cursor-pointer transition-all flex items-center gap-1.5 ${
+                    fillColor === c.value ? "scale-105" : "hover:scale-105"
+                  }`}
+                >
+                  {c.label}
+                  {fillColor === c.value && <span className="text-[9px]">✓</span>}
+                </button>
               ))}
-            </div>
 
-            {/* Overlay Text */}
-            <div className="flex items-center gap-1.5">
-              <Type size={11} className="text-slate-600 shrink-0" />
-              <span className="text-[10px] font-extrabold text-slate-600">LABEL:</span>
-              <select value={overlayText} onChange={(e) => setOverlayText(e.target.value)}
-                className="text-[10px] font-bold border border-slate-300 rounded px-1.5 py-0.5 cursor-pointer bg-white">
-                {OVERLAY_TEXTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
-            </div>
-
-            {/* Custom Label */}
-            <input type="text" placeholder="Custom label..."
-              value={customOverlayText} onChange={(e) => { setCustomOverlayText(e.target.value); setOverlayText(""); }}
-              className="text-[10px] font-bold border border-slate-300 rounded px-1.5 py-0.5 w-28 bg-white" />
-
-            {/* Overlay text color */}
-            {effectiveOverlay && (
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] font-extrabold text-slate-600">TEXT:</span>
-                <input type="color" value={overlayTextColor} onChange={(e) => setOverlayTextColor(e.target.value)}
-                  className="w-5 h-5 p-0 border-0 cursor-pointer rounded" title="Overlay text color" />
-              </div>
-            )}
-
-            {/* Apply to all pages (Draw mode only) */}
-            {toolMode === "draw" && (
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <input type="checkbox" checked={applyAllPages} onChange={(e) => setApplyAllPages(e.target.checked)} className="accent-red-600 w-3.5 h-3.5" />
-                <span className="text-[10px] font-extrabold text-slate-700">Apply to All Pages</span>
+              {/* Custom color input */}
+              <label className="flex items-center gap-1.5 cursor-pointer" title="Custom color">
+                <span className="text-[11px] font-extrabold text-slate-600">🎨 Custom:</span>
+                <input
+                  type="color"
+                  value={fillColor}
+                  onChange={(e) => setFillColor(e.target.value)}
+                  className="w-8 h-7 p-0 border border-slate-400 rounded cursor-pointer"
+                />
               </label>
-            )}
 
-            {/* Actions */}
-            <div className="flex items-center gap-1 ml-auto">
-              <button onClick={handleUndo} disabled={undoStack.length === 0}
-                className="px-2 py-1 text-[10px] font-bold bg-white border border-slate-300 rounded hover:bg-slate-200 flex items-center gap-1 cursor-pointer disabled:opacity-40">
-                <Undo size={10} /> Undo
-              </button>
-              <button onClick={clearPage}
-                className="px-2 py-1 text-[10px] font-bold bg-red-50 border border-red-200 rounded hover:bg-red-100 text-red-700 flex items-center gap-1 cursor-pointer">
-                <Trash2 size={10} /> Page
-              </button>
-              <button onClick={clearAll}
-                className="px-2 py-1 text-[10px] font-bold bg-red-100 border border-red-300 rounded hover:bg-red-200 text-red-800 flex items-center gap-1 cursor-pointer">
-                <Trash2 size={10} /> All
-              </button>
+              {/* Live Preview Swatch */}
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-[10px] font-extrabold text-slate-500">Preview:</span>
+                <div
+                  style={{ backgroundColor: fillColor, minWidth: 80, minHeight: 28, border: "2px solid #94a3b8" }}
+                  className="rounded flex items-center justify-center px-2"
+                >
+                  {effectiveOverlay && (
+                    <span style={{ color: overlayTextColor, fontSize: 10, fontWeight: 900, letterSpacing: "0.05em" }}>
+                      {effectiveOverlay}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Second Row: Overlay Label + Text Color + Apply All + Actions */}
+            <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100">
+              {/* Overlay Text */}
+              <div className="flex items-center gap-1.5">
+                <Type size={12} className="text-slate-600 shrink-0" />
+                <span className="text-[10px] font-extrabold text-slate-600">LABEL:</span>
+                <select value={overlayText} onChange={(e) => setOverlayText(e.target.value)}
+                  className="text-[10px] font-bold border border-slate-300 rounded px-1.5 py-0.5 cursor-pointer bg-white">
+                  {OVERLAY_TEXTS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
+
+              {/* Custom Label */}
+              <input type="text" placeholder="Custom label..."
+                value={customOverlayText} onChange={(e) => { setCustomOverlayText(e.target.value); setOverlayText(""); }}
+                className="text-[10px] font-bold border border-slate-300 rounded px-1.5 py-0.5 w-28 bg-white" />
+
+              {/* Overlay text color */}
+              {effectiveOverlay && (
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] font-extrabold text-slate-600">Text Color:</span>
+                  <input type="color" value={overlayTextColor} onChange={(e) => setOverlayTextColor(e.target.value)}
+                    className="w-6 h-6 p-0 border border-slate-300 cursor-pointer rounded" title="Overlay text color" />
+                </div>
+              )}
+
+              {/* Apply to all pages (Draw mode only) */}
+              {toolMode === "draw" && (
+                <label className="flex items-center gap-1.5 cursor-pointer">
+                  <input type="checkbox" checked={applyAllPages} onChange={(e) => setApplyAllPages(e.target.checked)} className="accent-red-600 w-3.5 h-3.5" />
+                  <span className="text-[10px] font-extrabold text-slate-700">Apply to All Pages</span>
+                </label>
+              )}
+
+              {/* Actions */}
+              <div className="flex items-center gap-1 ml-auto">
+                <button onClick={handleUndo} disabled={undoStack.length === 0}
+                  className="px-2 py-1 text-[10px] font-bold bg-white border border-slate-300 rounded hover:bg-slate-200 flex items-center gap-1 cursor-pointer disabled:opacity-40">
+                  <Undo size={10} /> Undo
+                </button>
+                <button onClick={clearPage}
+                  className="px-2 py-1 text-[10px] font-bold bg-red-50 border border-red-200 rounded hover:bg-red-100 text-red-700 flex items-center gap-1 cursor-pointer">
+                  <Trash2 size={10} /> Page
+                </button>
+                <button onClick={clearAll}
+                  className="px-2 py-1 text-[10px] font-bold bg-red-100 border border-red-300 rounded hover:bg-red-200 text-red-800 flex items-center gap-1 cursor-pointer">
+                  <Trash2 size={10} /> All
+                </button>
+              </div>
             </div>
           </div>
 
