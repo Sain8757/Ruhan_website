@@ -11,8 +11,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const service = await prisma.service.findUnique({
     where: { id },
     include: {
-      customer: { select: { id: true, name: true, mobile: true, email: true, address: true } },
-      assignedTo: { select: { name: true } },
+      customer: { select: { id: true, name: true, mobile: true, email: true, address: true, aadhaarNumber: true, panNumber: true } },
+      assignedTo: { select: { id: true, name: true } },
     },
   });
 
