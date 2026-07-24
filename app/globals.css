@@ -2503,7 +2503,7 @@ textarea.input-field {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 6mm 8mm;
+    margin: 5mm 5mm;
   }
 
   html, body {
@@ -2519,11 +2519,15 @@ textarea.input-field {
     print-color-adjust: exact !important;
   }
 
-  /* Hide app navigation, sidebar, header, buttons, toasts, toolbars */
+  /* Hide app navigation, sidebar, legacy window titlebars, toolbars, search bar, buttons, toasts */
   .no-print,
   .app-header,
   .app-sidebar,
   .sidebar,
+  .legacy-window-titlebar,
+  .legacy-toolbar,
+  .legacy-window-controls,
+  .legacy-statusbar,
   nav,
   header,
   aside,
@@ -2535,30 +2539,44 @@ textarea.input-field {
   }
 
   /* Main containers full width reset */
+  .legacy-desktop,
+  .legacy-window,
+  .legacy-tab-content,
   .page-shell,
   .app-main,
   main,
   .max-w-3xl,
   .max-w-4xl {
+    position: static !important;
     max-width: 100% !important;
     width: 100% !important;
+    height: auto !important;
     margin: 0 !important;
     padding: 0 !important;
     box-shadow: none !important;
     background: #ffffff !important;
     border: none !important;
+    overflow: visible !important;
   }
 
   /* Invoice Card Print Styling */
+  .invoice-print-area {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
   .invoice-print-card {
     position: relative !important;
     width: 100% !important;
+    max-width: 100% !important;
     margin: 0 !important;
-    padding: 2mm 0mm !important;
+    padding: 0 !important;
     box-shadow: none !important;
     border: none !important;
     background: #ffffff !important;
     page-break-inside: avoid;
   }
 }
+
 

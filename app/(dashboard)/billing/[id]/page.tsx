@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft, Printer, Loader2, CheckCircle, Clock, XCircle,
-  IndianRupee, Phone, MapPin, Mail, MessageCircle, Download, FileText
+  IndianRupee, Phone, MapPin, Mail, MessageCircle, Download
 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/contexts/ToastContext";
@@ -47,6 +47,8 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [template, setTemplate] = useState<"classic" | "modern">("classic");
   const [settleInvoiceData, setSettleInvoiceData] = useState<SettleInvoiceData | null>(null);
+
+  const invoiceCardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     Promise.all([
@@ -97,23 +99,38 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
   const handleDownloadPdf = async () => {
     try {
       setIsGeneratingPdf(true);
-      const element = document.querySelector(".invoice-print-card") as HTMLElement;
-      if (!element) throw new Error("Invoice container not found");
+      const element = invoiceCardRef.current;
+      if (!element) throw new Error("Invoice container element not found");
 
       const html2canvas = (await import("html2canvas")).default;
       const { jsPDF } = await import("jspdf");
 
-      const canvas = await html2canvas(element, { scale: 2.5, useCORS: true, backgroundColor: "#ffffff" });
-      const imgData = canvas.toDataURL("image/png");
+      // Temporarily enforce fixed 794px canvas width for standard A4 ratio during capture
+      const origWidth = element.style.width;
+      element.style.width = "794px";
 
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+
+      element.style.width = origWidth;
+
+      const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
+      const margin = 8;
+      const printWidth = pdfWidth - (margin * 2); // 194mm
+      const printHeight = (canvas.height * printWidth) / canvas.width;
+
+      pdf.addImage(imgData, "PNG", margin, margin, printWidth, printHeight);
       
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, Math.min(pdfHeight, 295));
       const fileName = `${invoice.customer.name.replace(/[^a-zA-Z0-9 ]/g, "")}_Invoice_${invoice.invoiceNumber}.pdf`;
       pdf.save(fileName);
-      toast.success("Invoice PDF downloaded!");
+      toast.success("Invoice PDF downloaded successfully!");
     } catch (err: any) {
       toast.error("Failed to generate PDF: " + err.message);
     } finally {
@@ -149,7 +166,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
 
     try {
       setIsGeneratingPdf(true);
-      const element = document.querySelector(".invoice-print-card") as HTMLElement;
+      const element = invoiceCardRef.current;
       if (!element) throw new Error("Invoice element not found");
 
       const html2canvas = (await import("html2canvas")).default;
@@ -162,7 +179,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
       
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.addImage(imgData, "PNG", 5, 5, pdfWidth - 10, pdfHeight);
       
       const pdfBlob = pdf.output("blob");
       const fileName = `${invoice.customer.name.replace(/[^a-zA-Z0-9 ]/g, "")}_Invoice_${invoice.invoiceNumber}.pdf`;
@@ -188,7 +205,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-12">
+    <div className="w-full max-w-4xl mx-auto pb-12">
       {/* Top Action Header — hidden on print */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6 no-print">
         <div className="flex items-center gap-3">
@@ -262,23 +279,26 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
       </div>
 
       {/* ── INVOICE TEMPLATE CONTAINER ── */}
-      <div className="invoice-print-area">
+      <div className="invoice-print-area flex justify-center">
         {template === "classic" ? (
           /* ========================================================================= */
           /*  CLASSIC VINTAGE / DOT-MATRIX OLD-STYLE INVOICE TEMPLATE (Matching Image 2)  */
           /* ========================================================================= */
           <div
-            className="invoice-print-card bg-white p-6 sm:p-8 text-black"
+            ref={invoiceCardRef}
+            className="invoice-print-card bg-white p-6 sm:p-8 text-black shadow-md border"
             style={{
+              width: "100%",
+              maxWidth: "794px",
               fontFamily: "'Courier New', Courier, 'Consolas', monospace",
-              border: "2px solid #000",
+              border: "2px solid #000000",
               color: "#000000",
               background: "#ffffff",
               boxSizing: "border-box"
             }}
           >
             {/* Top Brand Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "2px solid #000", paddingBottom: "12px", marginBottom: "12px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "2px solid #000000", paddingBottom: "12px", marginBottom: "12px" }}>
               <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
                 <div style={{ width: "60px", height: "60px", border: "1px solid #000", display: "flex", alignItems: "center", justifyContent: "center", background: "#fff" }}>
                   <img
@@ -324,9 +344,9 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* Billed To & Order Details Grid Table */}
-            <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid #000", fontSize: "11px", marginBottom: "12px" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", border: "1.5px solid #000", fontSize: "11px", marginBottom: "12px" }}>
               <thead>
-                <tr style={{ background: "#f2f2f2", borderBottom: "1px solid #000", textAlign: "left" }}>
+                <tr style={{ background: "#f2f2f2", borderBottom: "1.5px solid #000", textAlign: "left" }}>
                   <th style={{ padding: "4px 8px", width: "40%", borderRight: "1px solid #000", fontWeight: "bold" }}>BILL TO</th>
                   <th style={{ padding: "4px 8px", width: "15%", borderRight: "1px solid #000", fontWeight: "bold", textAlign: "center" }}>CUSTOMER NO.</th>
                   <th style={{ padding: "4px 8px", width: "15%", borderRight: "1px solid #000", fontWeight: "bold", textAlign: "center" }}>TERMS</th>
@@ -358,9 +378,9 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             </table>
 
             {/* Line Items Table with Vertical Grid Borders */}
-            <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid #000", fontSize: "11px", marginBottom: "12px" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", border: "1.5px solid #000", fontSize: "11px", marginBottom: "12px" }}>
               <thead>
-                <tr style={{ background: "#f2f2f2", borderBottom: "1px solid #000" }}>
+                <tr style={{ background: "#f2f2f2", borderBottom: "1.5px solid #000" }}>
                   <th style={{ padding: "6px 8px", width: "8%", borderRight: "1px solid #000", textAlign: "center" }}>ITEM #</th>
                   <th style={{ padding: "6px 8px", width: "52%", borderRight: "1px solid #000", textAlign: "left" }}>DESCRIPTION / PARTICULARS</th>
                   <th style={{ padding: "6px 8px", width: "10%", borderRight: "1px solid #000", textAlign: "center" }}>QTY</th>
@@ -389,8 +409,8 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                   </tr>
                 ))}
 
-                {/* Fill minimum blank rows for authentic vintage look */}
-                {Array.from({ length: Math.max(0, 5 - invoice.items.length) }).map((_, i) => (
+                {/* Blank rows for authentic vintage look */}
+                {Array.from({ length: Math.max(0, 4 - invoice.items.length) }).map((_, i) => (
                   <tr key={`empty-${i}`} style={{ height: "24px", borderBottom: "1px solid #eee" }}>
                     <td style={{ borderRight: "1px solid #000" }}></td>
                     <td style={{ borderRight: "1px solid #000" }}></td>
@@ -405,8 +425,8 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             {/* Bottom Grid Section: Left Note & Term | Right Sub-Total & Totals */}
             <div style={{ display: "flex", gap: "12px", alignItems: "stretch", marginBottom: "12px" }}>
               {/* NOTE & TERM Box */}
-              <div style={{ flex: 1.2, border: "1px solid #000", padding: "8px 10px", fontSize: "9px", lineHeight: "1.3" }}>
-                <div style={{ fontWeight: "bold", fontSize: "11px", textTransform: "uppercase", borderBottom: "1px solid #000", paddingBottom: "3px", marginBottom: "5px" }}>
+              <div style={{ flex: 1.2, border: "1.5px solid #000", padding: "8px 10px", fontSize: "9px", lineHeight: "1.3" }}>
+                <div style={{ fontWeight: "bold", fontSize: "11px", textTransform: "uppercase", borderBottom: "1.5px solid #000", paddingBottom: "3px", marginBottom: "5px" }}>
                   NOTE & TERM
                 </div>
                 
@@ -432,7 +452,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
               </div>
 
               {/* Totals Summary Box */}
-              <div style={{ flex: 0.8, border: "1px solid #000", padding: "8px 10px", fontSize: "11px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <div style={{ flex: 0.8, border: "1.5px solid #000", padding: "8px 10px", fontSize: "11px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
                   <span>SUB-TOTAL:</span>
                   <span>₹{invoice.subtotal.toFixed(2)}</span>
@@ -449,7 +469,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                     <span>₹{((invoice.subtotal * invoice.gst) / 100).toFixed(2)}</span>
                   </div>
                 )}
-                <div style={{ borderTop: "2px solid #000", borderBottom: "2px solid #000", padding: "4px 0", margin: "4px 0", fontWeight: "900", fontSize: "14px", display: "flex", justifyContent: "space-between" }}>
+                <div style={{ borderTop: "1.5px solid #000", borderBottom: "1.5px solid #000", padding: "4px 0", margin: "4px 0", fontWeight: "900", fontSize: "14px", display: "flex", justifyContent: "space-between" }}>
                   <span>TOTAL:</span>
                   <span>₹{invoice.total.toFixed(2)}</span>
                 </div>
@@ -467,7 +487,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* Bottom Footer & Signature */}
-            <div style={{ borderTop: "1px solid #000", paddingTop: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ borderTop: "1.5px solid #000", paddingTop: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                 <QRCodeSVG value={upiLink} size={50} />
                 <div style={{ fontSize: "9px" }}>
@@ -496,8 +516,9 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
           /*  MODERN EXECUTIVE INVOICE TEMPLATE                                         */
           /* ========================================================================= */
           <div
-            className="invoice-print-card glass-card p-8 bg-white border text-slate-900"
-            style={{ background: "#ffffff", borderColor: "var(--border-primary)" }}
+            ref={invoiceCardRef}
+            className="invoice-print-card glass-card p-8 bg-white border text-slate-900 shadow-md"
+            style={{ width: "100%", maxWidth: "794px", background: "#ffffff", borderColor: "var(--border-primary)" }}
           >
             {/* Header */}
             <div className="flex justify-between items-start gap-4 flex-wrap pb-6 border-b-2 border-slate-200">
