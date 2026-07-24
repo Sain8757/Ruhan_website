@@ -118,47 +118,47 @@ function StatCard({
   return (
     <Component
       href={href}
-      className={`stat-card animate-slide-up flex flex-col justify-between ${href ? 'hover:scale-[1.02] hover:shadow-lg transition-all cursor-pointer' : ''}`}
+      className={`stat-card animate-slide-up flex flex-col justify-between ${href ? 'hover:scale-[1.01] hover:shadow-md transition-all cursor-pointer' : ''}`}
       style={{ 
         animationDelay: `${delay}ms`, 
         animationFillMode: "both",
-        minHeight: "142px",
-        padding: "18px"
+        minHeight: "108px",
+        padding: "12px 14px"
       }}
     >
       {/* Background gradient orb */}
       <div
-        className="absolute top-0 right-0 w-28 h-28 rounded-full pointer-events-none"
+        className="absolute top-0 right-0 w-24 h-24 rounded-full pointer-events-none"
         style={{
           background: `radial-gradient(circle, ${accentColor}18 0%, transparent 70%)`,
           transform: "translate(30%, -30%)",
         }}
       />
 
-      <div className="flex items-center justify-between gap-3 mb-3 relative z-10">
+      <div className="flex items-center justify-between gap-2 mb-2 relative z-10">
         {/* Icon */}
         <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center relative overflow-hidden shrink-0"
+          className="w-8 h-8 rounded-lg flex items-center justify-center relative overflow-hidden shrink-0"
           style={{ background: gradient }}
         >
           <div
             className="absolute inset-0"
             style={{ background: "linear-gradient(135deg, rgba(255,255,255,0.22) 0%, transparent 60%)" }}
           />
-          <Icon size={19} className="text-white relative z-10" />
+          <Icon size={16} className="text-white relative z-10" />
         </div>
 
         {/* Change indicator */}
         {change && (
           <div
-            className="flex h-7 items-center gap-0.5 rounded-lg px-2 text-xs font-semibold"
+            className="flex h-5 items-center gap-0.5 rounded-md px-1.5 text-[11px] font-semibold"
             style={{
               background: changePositive ? "rgba(16,185,129,0.1)" : "rgba(244,63,94,0.1)",
               color: changePositive ? "#10b981" : "#f43f5e",
               border: `1px solid ${changePositive ? "rgba(16,185,129,0.2)" : "rgba(244,63,94,0.2)"}`,
             }}
           >
-            <ArrowUpRight size={11} style={{ transform: changePositive ? "" : "rotate(90deg)" }} />
+            <ArrowUpRight size={10} style={{ transform: changePositive ? "" : "rotate(90deg)" }} />
             {change}
           </div>
         )}
@@ -167,20 +167,20 @@ function StatCard({
       {/* Value */}
       <div className="relative z-10">
         <div
-          className="text-2xl font-extrabold mb-1"
+          className="text-xl font-black mb-0.5"
           style={{ color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}
         >
           {displayValue || animatedValue.toLocaleString()}
         </div>
         <div
-          className="text-[13px] font-semibold leading-tight"
+          className="text-xs font-bold leading-tight"
           style={{ color: "var(--text-secondary)" }}
         >
           {title}
         </div>
         {subtitle && (
           <div
-            className="text-xs mt-1.5 flex items-center gap-1 leading-tight"
+            className="text-[11px] mt-0.5 flex items-center gap-1 leading-tight"
             style={{ color: "var(--text-muted)" }}
           >
             {subtitle}
@@ -445,34 +445,27 @@ export default function DashboardPage() {
     <div className="page-shell page-shell-dashboard">
       {/* ===== WELCOME HERO ===== */}
       <div
-        className="relative overflow-hidden rounded-2xl p-6 sm:p-7 animate-fade-in flex flex-col gap-5"
+        className="relative overflow-hidden rounded-xl p-4 sm:p-5 animate-fade-in flex flex-col gap-3.5"
         style={{
           background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)", // Rich indigo gradient
           border: "1px solid rgba(255,255,255,0.1)",
-          boxShadow: "0 20px 40px -10px rgba(49, 46, 129, 0.4), inset 0 1px 0 rgba(255,255,255,0.15)",
+          boxShadow: "0 12px 24px -6px rgba(49, 46, 129, 0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
         }}
       >
         {/* Background orbs */}
         <div
-          className="absolute top-0 right-0 w-80 h-80 rounded-full pointer-events-none"
+          className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none"
           style={{
             background: "radial-gradient(circle, rgba(167,139,250,0.15) 0%, transparent 70%)",
             transform: "translate(20%, -30%)",
           }}
         />
-        <div
-          className="absolute bottom-0 left-1/4 w-64 h-64 rounded-full pointer-events-none"
-          style={{
-            background: "radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)",
-            transform: "translateY(30%)",
-          }}
-        />
 
-        <div className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative z-10 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-2 mb-2.5">
+            <div className="flex items-center gap-2 mb-1.5">
               <div
-                className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest text-white shadow-sm"
+                className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest text-white shadow-xs"
                 style={{
                   background: "linear-gradient(90deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)",
                   border: "1px solid rgba(255,255,255,0.15)",
@@ -484,37 +477,37 @@ export default function DashboardPage() {
               </div>
             </div>
             <h1
-              className="text-3xl sm:text-4xl font-extrabold text-white mb-1.5 tracking-tight"
+              className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight"
             >
-              {greeting} {greetingEmoji}
+              {greeting}, Ruhan! {greetingEmoji}
             </h1>
             <p
-              className="text-sm font-medium flex items-center gap-2"
-              style={{ color: "rgba(255,255,255,0.7)" }}
+              className="text-xs font-semibold flex items-center gap-1.5"
+              style={{ color: "rgba(255,255,255,0.75)" }}
             >
-              <Clock size={14} className="opacity-70" />
+              <Clock size={13} className="opacity-80" />
               {format(now, "EEEE, dd MMMM yyyy • hh:mm:ss a")}
             </p>
           </div>
 
           <Link
             href="/services"
-            className="hidden sm:flex btn-primary shrink-0 transition-transform hover:scale-105"
+            className="hidden sm:flex btn-primary shrink-0 py-2 px-3 text-xs transition-transform hover:scale-105"
             style={{
               background: "#ffffff",
               color: "#312e81",
               border: "none",
-              boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
             }}
           >
-            <Plus size={16} />
+            <Plus size={14} />
             New Service
           </Link>
         </div>
 
         {/* Stats preview strip */}
         <div
-          className="relative z-10 pt-4 flex items-center flex-wrap gap-x-8 gap-y-3"
+          className="relative z-10 pt-2.5 flex items-center flex-wrap gap-x-6 gap-y-2 text-xs"
           style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}
         >
           {[
@@ -522,11 +515,11 @@ export default function DashboardPage() {
             { label: "Active Services", value: data?.pendingServices || 0, icon: "⚡" },
             { label: "New Today", value: data?.todayCustomers || 0, icon: "👥" },
           ].map((item) => (
-            <div key={item.label} className="flex items-center gap-2.5">
-              <span className="text-xl filter drop-shadow-md">{item.icon}</span>
-              <div className="flex items-center gap-2 text-white font-semibold">
-                <span className="opacity-70 text-sm font-medium">{item.label}:</span>
-                <span className="text-lg tracking-tight">{item.value}</span>
+            <div key={item.label} className="flex items-center gap-2">
+              <span className="text-base filter drop-shadow-xs">{item.icon}</span>
+              <div className="flex items-center gap-1.5 text-white font-semibold">
+                <span className="opacity-75 text-xs font-medium">{item.label}:</span>
+                <span className="text-sm font-bold tracking-tight">{item.value}</span>
               </div>
             </div>
           ))}
