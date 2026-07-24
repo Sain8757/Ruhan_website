@@ -385,17 +385,7 @@ export default function SignatureResizer() {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 mt-4">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8 border-b border-gray-100 pb-6">
-        <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl w-fit">
-          <Settings size={24} />
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 m-0">Resize Signature</h2>
-          <p className="text-sm text-gray-500 m-0 mt-1">Smart tool to crop, resize, and compress your signatures to exact dimensions and file size.</p>
-        </div>
-      </div>
-
+    <div className="glass-card p-6 sm:p-8 mt-2 space-y-6">
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         
         {/* Left: Upload and Preview Area */}
