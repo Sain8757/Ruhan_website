@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
-import { Plus, Search, FileText, Loader2, Printer, IndianRupee } from "lucide-react";
+import { Plus, Search, FileText, Loader2, Printer, IndianRupee, Edit3 } from "lucide-react";
 import { formatCurrency, formatDate, PAYMENT_STATUS_COLORS } from "@/lib/utils";
 import { useToast } from "@/contexts/ToastContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import PageHeader from "@/components/layout/PageHeader";
 import SettleModal, { SettleInvoiceData } from "./SettleModal";
 import NewBillDialog from "@/components/billing/NewBillDialog";
+import EditBillDialog from "@/components/billing/EditBillDialog";
 
 interface Invoice {
   id: string;
@@ -42,6 +43,7 @@ function BillingContent() {
   const [statusFilter, setStatusFilter] = useState(searchParams.get("paymentStatus") || "");
   const [settleInvoice, setSettleInvoice] = useState<SettleInvoiceData | null>(null);
   const [isNewBillOpen, setIsNewBillOpen] = useState(false);
+  const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
   const toast = useToast();
   const router = useRouter();
   const limit = 20;
@@ -99,13 +101,13 @@ function BillingContent() {
       <NewBillDialog
         isOpen={isNewBillOpen}
         onClose={() => setIsNewBillOpen(false)}
-        onSuccess={() => fetchInvoices()}
+        onSuccess={fetchInvoices}
       />
 
       {/* Search & Filters */}
       <div className="toolbar">
         <div className="search-field">
-          <Search size={16} />
+          <Search size={14} />
           <input
             type="text"
             placeholder="Search by invoice number, customer name or mobile..."
@@ -234,6 +236,16 @@ function BillingContent() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
+                            setEditingInvoiceId(inv.id);
+                          }}
+                          className="btn-ghost p-1.5 rounded-lg"
+                          title="Edit Invoice"
+                        >
+                          <Edit3 size={16} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
                             router.push(`/billing/${inv.id}`);
                           }}
                           className="btn-ghost p-1.5 rounded-lg"
@@ -287,6 +299,13 @@ function BillingContent() {
           toast.success("Payment settled successfully");
           fetchInvoices();
         }}
+      />
+
+      <EditBillDialog
+        isOpen={!!editingInvoiceId}
+        onClose={() => setEditingInvoiceId(null)}
+        invoiceId={editingInvoiceId}
+        onSuccess={fetchInvoices}
       />
     </div>
   );

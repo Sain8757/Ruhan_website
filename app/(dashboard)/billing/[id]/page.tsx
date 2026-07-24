@@ -4,13 +4,14 @@ import { useState, useEffect, use, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft, Printer, Loader2, CheckCircle, Clock, XCircle,
-  IndianRupee, Phone, MapPin, Mail, MessageCircle, Download
+  IndianRupee, Phone, MapPin, Mail, MessageCircle, Download, Edit3
 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/contexts/ToastContext";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { QRCodeSVG } from "qrcode.react";
 import SettleModal, { SettleInvoiceData } from "../SettleModal";
+import EditBillDialog from "@/components/billing/EditBillDialog";
 
 const PAYMENT_STATUS_STYLES: Record<string, { className: string; icon: React.ReactNode; label: string }> = {
   PAID: {
@@ -47,6 +48,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [template, setTemplate] = useState<"classic" | "modern">("classic");
   const [settleInvoiceData, setSettleInvoiceData] = useState<SettleInvoiceData | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const invoiceCardRef = useRef<HTMLDivElement>(null);
 
@@ -562,6 +564,27 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                 <div><span className="text-slate-500">Mode: </span><span className="font-semibold text-slate-900">{PAYMENT_MODE_LABELS[invoice.paymentMode] || invoice.paymentMode}</span></div>
                 <div><span className="text-slate-500">Status: </span><span className="font-semibold text-blue-600">{invoice.paymentStatus}</span></div>
                 <div><span className="text-slate-500">UPI ID: </span><span className="font-mono font-semibold text-blue-600">{upiId}</span></div>
+                
+                <div className="flex gap-2 justify-end mt-2">
+                  {invoice.paymentStatus !== "PAID" && (
+                    <button
+                      onClick={handleSettleInvoice}
+                      className="btn-secondary px-3 py-1.5 flex items-center gap-1.5 text-xs font-bold no-print"
+                      style={{ color: "#059669", backgroundColor: "rgba(5, 150, 105, 0.1)", borderColor: "rgba(5, 150, 105, 0.2)" }}
+                    >
+                      <IndianRupee size={14} />
+                      Settle
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setIsEditOpen(true)}
+                    className="btn-secondary px-3 py-1.5 flex items-center gap-1.5 text-xs font-bold no-print"
+                    title="Edit Invoice Details"
+                  >
+                    <Edit3 size={14} />
+                    Edit
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -649,6 +672,17 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
         invoice={settleInvoiceData}
         onSuccess={async () => {
           toast.success("Payment settled successfully");
+          const inv = await fetch(`/api/invoices/${invoice.id}`).then(r => r.json());
+          setInvoice(inv);
+        }}
+      />
+
+      <EditBillDialog
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        invoiceId={invoice.id}
+        onSuccess={async () => {
+          toast.success("Invoice updated successfully!");
           const inv = await fetch(`/api/invoices/${invoice.id}`).then(r => r.json());
           setInvoice(inv);
         }}
