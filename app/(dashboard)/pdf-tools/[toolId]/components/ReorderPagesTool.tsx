@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { PDFDocument } from "pdf-lib";
-import { ListOrdered, GripVertical, FileText, Loader2, X } from "lucide-react";
+import { ListOrdered, GripVertical, FileText, Loader2, X, Eye, ArrowLeft, ArrowRight, ArrowUpDown, RotateCcw } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 import { useDownload } from "@/contexts/DownloadContext";
 
@@ -23,6 +23,11 @@ async function loadPdfJs(): Promise<any> {
   });
 }
 
+function formatFileSize(size: number) {
+  if (size >= 1024 * 1024) return `${(size / 1024 / 1024).toFixed(2)} MB`;
+  return `${Math.max(1, Math.round(size / 1024))} KB`;
+}
+
 export default function ReorderPagesTool() {
   const toast = useToast();
   const { downloadWithRename } = useDownload();
@@ -35,27 +40,32 @@ export default function ReorderPagesTool() {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Modal preview
+  const [previewPageIndex, setPreviewPageIndex] = useState<number | null>(null);
+
   const handleFile = async (incoming: File) => {
-    if (!incoming.name.toLowerCase().endsWith(".pdf")) { toast.error("Please select a PDF file"); return; }
+    if (!incoming.name.toLowerCase().endsWith(".pdf")) {
+      toast.error("Please select a PDF file");
+      return;
+    }
     setFile(incoming);
     setThumbnails({});
+    setLoadingPreviews(true);
+
     try {
-      setLoadingPreviews(true);
       const buf = await incoming.arrayBuffer();
-      
       const doc = await PDFDocument.load(buf, { ignoreEncryption: true });
       const count = doc.getPageCount();
       setPageOrder(Array.from({ length: count }, (_, i) => i));
 
       // Generate thumbnails with pdf.js
       const pdfjs = await loadPdfJs();
-      const pdf = await pdfjs.getDocument(buf).promise;
+      const pdf = await pdfjs.getDocument({ data: new Uint8Array(buf) }).promise;
       const thumbs: { [key: number]: string } = {};
-      
+
       for (let i = 1; i <= count; i++) {
         const page = await pdf.getPage(i);
-        // Using scale 0.6 to ensure it stays sharp when zooming in on hover
-        const viewport = page.getViewport({ scale: 0.6 }); 
+        const viewport = page.getViewport({ scale: 0.5 });
         const canvas = document.createElement("canvas");
         canvas.width = viewport.width;
         canvas.height = viewport.height;
@@ -63,17 +73,32 @@ export default function ReorderPagesTool() {
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         await page.render({ canvasContext: ctx, viewport }).promise;
-        thumbs[i - 1] = canvas.toDataURL("image/jpeg", 0.7); // key is 0-indexed original page
+        thumbs[i - 1] = canvas.toDataURL("image/jpeg", 0.85);
       }
       setThumbnails(thumbs);
-    } catch { toast.error("Failed to read PDF"); } finally { setLoadingPreviews(false); }
+    } catch {
+      toast.error("Failed to read PDF pages");
+    } finally {
+      setLoadingPreviews(false);
+    }
   };
 
-  const handleReorder = (fromIndex: number, toIndex: number) => {
+  const movePage = (fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= pageOrder.length) return;
     const updated = [...pageOrder];
     const [moved] = updated.splice(fromIndex, 1);
     updated.splice(toIndex, 0, moved);
     setPageOrder(updated);
+  };
+
+  const reversePageOrder = () => {
+    setPageOrder((prev) => [...prev].reverse());
+    toast.success("Page order reversed!");
+  };
+
+  const resetPageOrder = () => {
+    setPageOrder(Array.from({ length: pageOrder.length }, (_, i) => i));
+    toast.success("Page order reset to original sequence!");
   };
 
   const handleSave = async () => {
@@ -88,75 +113,266 @@ export default function ReorderPagesTool() {
       const bytes = await newDoc.save();
       const blob = new Blob([new Uint8Array(bytes)], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
-      downloadWithRename(url, `RA_Organized.pdf`);
-      toast.success("PDF organized and downloaded!");
-    } catch { toast.error("Failed to reorder PDF"); } finally { setLoading(false); }
+      downloadWithRename(url, `RA_Reordered.pdf`);
+      toast.success("Reordered PDF saved and downloaded!");
+    } catch {
+      toast.error("Failed to reorder PDF pages");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="space-y-6">
       {!file ? (
         <div
-          onDrop={(e) => { e.preventDefault(); setDragOver(false); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); }}
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOver(false);
+            if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+          }}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragOver(true);
+          }}
           onDragLeave={() => setDragOver(false)}
           onClick={() => inputRef.current?.click()}
-          className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all ${dragOver ? "border-indigo-400 bg-indigo-50" : "border-gray-300 hover:border-indigo-400 hover:bg-indigo-50/30"}`}
+          style={{
+            backgroundColor: dragOver ? "#eef2ff" : "#ffffff",
+            borderTop: "2px solid #808080",
+            borderLeft: "2px solid #808080",
+            borderRight: "2px solid #ffffff",
+            borderBottom: "2px solid #ffffff",
+            boxShadow: "inset 1px 1px 2px rgba(0,0,0,0.2)",
+          }}
+          className="p-10 text-center cursor-pointer transition-all hover:bg-indigo-50/50 rounded-lg"
         >
-          <ListOrdered size={40} className="mx-auto mb-4 text-indigo-500" />
-          <p className="text-xl font-bold mb-1" style={{ color: "var(--text-primary)" }}>Drop PDF to reorder pages</p>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>or click to browse</p>
-          <input ref={inputRef} type="file" accept=".pdf,application/pdf" hidden onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+          <ListOrdered size={40} className="mx-auto mb-3 text-indigo-600" />
+          <p className="text-lg font-black mb-1" style={{ color: "#000080" }}>
+            Drop PDF here to see Visual Page Reorder Tool
+          </p>
+          <p className="text-xs font-semibold text-slate-500">or click to browse PDF document</p>
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".pdf,application/pdf"
+            hidden
+            onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+          />
         </div>
       ) : (
         <div className="space-y-6 animate-fade-in">
-          <div className="flex items-center gap-3 p-4 bg-white border rounded-xl" style={{ borderColor: "var(--border-color)" }}>
-            <FileText size={24} className="text-red-500 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold truncate" style={{ color: "var(--text-primary)" }}>{file.name}</p>
-              <p className="text-sm" style={{ color: "var(--text-muted)" }}>{pageOrder.length} pages — drag to reorder</p>
+          {/* File Overview Bar */}
+          <div className="flex items-center justify-between gap-3 p-3 bg-white border border-slate-300 rounded-lg shadow-xs">
+            <div className="flex items-center gap-3 min-w-0">
+              <FileText size={28} className="text-red-600 shrink-0" />
+              <div className="min-w-0">
+                <p className="font-extrabold text-sm text-slate-900 truncate">{file.name}</p>
+                <p className="text-xs font-semibold text-slate-500">
+                  {formatFileSize(file.size)} • {pageOrder.length} Total Pages
+                </p>
+              </div>
             </div>
-            <button onClick={() => { setFile(null); setPageOrder([]); }} className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg"><X size={18} /></button>
+            <button
+              onClick={() => {
+                setFile(null);
+                setPageOrder([]);
+              }}
+              className="p-1.5 text-red-600 hover:bg-red-50 rounded border border-red-200 text-xs font-bold flex items-center gap-1 shrink-0 cursor-pointer"
+            >
+              <X size={16} /> Remove PDF
+            </button>
           </div>
 
-          {loadingPreviews ? (
-            <div className="p-10 flex flex-col items-center justify-center text-gray-400 border rounded-xl border-dashed">
-              <Loader2 size={30} className="animate-spin mb-3 text-indigo-500" />
-              <p>Generating previews...</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 pt-4 pb-12">
-              {pageOrder.map((originalPage, idx) => (
-                <div
-                  key={originalPage}
-                  draggable
-                  onDragStart={() => setDraggingIndex(idx)}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => { e.preventDefault(); if (draggingIndex !== null && draggingIndex !== idx) handleReorder(draggingIndex, idx); setDraggingIndex(null); }}
-                  className={`relative flex flex-col items-center gap-2 cursor-grab transition-transform duration-200 ease-out origin-center ${draggingIndex === idx ? "opacity-60 scale-75 z-0" : "hover:scale-[1.8] hover:z-50 hover:shadow-2xl"}`}
+          {/* Global Quick Sorting Helper Toolbar */}
+          <div className="p-3 bg-slate-100 border border-slate-300 rounded-lg space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-extrabold text-slate-800">
+                  Drag & Drop page cards to reorder or use quick arrow buttons below
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={reversePageOrder}
+                  className="px-2.5 py-1 text-xs font-bold bg-indigo-100 hover:bg-indigo-200 text-indigo-900 rounded border border-indigo-300 flex items-center gap-1 cursor-pointer"
                 >
-                  <div className={`w-full aspect-[1/1.4] rounded-lg border-2 overflow-hidden bg-gray-50 flex items-center justify-center transition-all ${draggingIndex === idx ? "border-indigo-400 border-dashed" : "border-gray-200"}`}>
-                    {thumbnails[originalPage] ? (
-                      <img 
-                        src={thumbnails[originalPage]} 
-                        alt={`Page ${originalPage + 1}`} 
-                        className="w-full h-full object-contain pointer-events-none bg-white"
+                  <ArrowUpDown size={13} /> Reverse Page Order
+                </button>
+                <button
+                  type="button"
+                  onClick={resetPageOrder}
+                  className="px-2.5 py-1 text-xs font-bold bg-white hover:bg-slate-200 text-slate-800 rounded border border-slate-300 flex items-center gap-1 cursor-pointer"
+                >
+                  <RotateCcw size={13} /> Reset Order (1..N)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Visual Page Reorder Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-h-[500px] overflow-y-auto p-1">
+            {pageOrder.map((origPageIdx, currentPosIdx) => {
+              const thumb = thumbnails[origPageIdx];
+
+              return (
+                <div
+                  key={origPageIdx}
+                  draggable
+                  onDragStart={() => setDraggingIndex(currentPosIdx)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (draggingIndex !== null && draggingIndex !== currentPosIdx) {
+                      movePage(draggingIndex, currentPosIdx);
+                    }
+                    setDraggingIndex(null);
+                  }}
+                  style={{
+                    backgroundColor: "#ffffff",
+                    borderColor: draggingIndex === currentPosIdx ? "#6366f1" : "#cbd5e1",
+                  }}
+                  className={`relative p-2 rounded-lg border-2 cursor-grab transition-all flex flex-col justify-between group ${
+                    draggingIndex === currentPosIdx ? "opacity-40 ring-2 ring-indigo-500 scale-95" : "hover:border-slate-400"
+                  }`}
+                >
+                  {/* Position Badge & Original Page Info */}
+                  <div className="flex items-center justify-between gap-1 mb-1.5">
+                    <span className="text-[10px] font-black px-1.5 py-0.5 bg-indigo-700 text-white rounded">
+                      Position #{currentPosIdx + 1}
+                    </span>
+                    <span className="text-[9px] font-bold text-slate-500">
+                      (Orig Pg {origPageIdx + 1})
+                    </span>
+                  </div>
+
+                  {/* Thumbnail Image */}
+                  <div className="relative bg-white border border-slate-200 rounded overflow-hidden min-h-[130px] flex items-center justify-center">
+                    {loadingPreviews ? (
+                      <Loader2 size={16} className="animate-spin text-indigo-600" />
+                    ) : thumb ? (
+                      <img
+                        src={thumb}
+                        alt={`Page ${origPageIdx + 1}`}
+                        className="w-full h-full object-contain max-h-[140px] p-1"
                       />
                     ) : (
-                      <span className="text-gray-300 font-bold">{originalPage + 1}</span>
+                      <FileText size={28} className="text-slate-300" />
                     )}
+
+                    {/* Zoom button */}
+                    <button
+                      type="button"
+                      onClick={() => setPreviewPageIndex(origPageIdx)}
+                      className="absolute bottom-1 right-1 bg-black/60 hover:bg-black/80 text-white p-1 rounded text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                    >
+                      <Eye size={12} />
+                    </button>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs pointer-events-none shadow-sm">
-                    {idx + 1}
+
+                  {/* Quick Move Left / Move Right Buttons */}
+                  <div className="grid grid-cols-2 gap-1 mt-2">
+                    <button
+                      type="button"
+                      disabled={currentPosIdx === 0}
+                      onClick={() => movePage(currentPosIdx, currentPosIdx - 1)}
+                      className="py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 rounded border border-indigo-200 text-[11px] font-bold flex items-center justify-center gap-0.5 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      <ArrowLeft size={12} /> Left
+                    </button>
+                    <button
+                      type="button"
+                      disabled={currentPosIdx === pageOrder.length - 1}
+                      onClick={() => movePage(currentPosIdx, currentPosIdx + 1)}
+                      className="py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-900 rounded border border-indigo-200 text-[11px] font-bold flex items-center justify-center gap-0.5 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                    >
+                      Right <ArrowRight size={12} />
+                    </button>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              );
+            })}
+          </div>
 
-          <button onClick={handleSave} disabled={loading || loadingPreviews} className="btn-primary w-full py-4 text-lg flex items-center justify-center gap-3" style={{ background: "linear-gradient(135deg, #6366f1, #4f46e5)" }}>
-            {loading ? <><Loader2 size={22} className="animate-spin" /> Saving...</> : <><ListOrdered size={22} /> Save Organized PDF</>}
+          {/* Save Action Button */}
+          <button
+            onClick={handleSave}
+            disabled={loading || loadingPreviews}
+            style={{
+              backgroundColor: "#4f46e5",
+              color: "#ffffff",
+              borderTop: "2px solid #ffffff",
+              borderLeft: "2px solid #ffffff",
+              borderRight: "2px solid #312e81",
+              borderBottom: "2px solid #312e81",
+            }}
+            className="w-full py-3.5 text-base font-extrabold flex items-center justify-center gap-2 cursor-pointer hover:bg-indigo-800 transition-colors shadow-md rounded disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <>
+                <Loader2 size={20} className="animate-spin" /> Saving Reordered PDF...
+              </>
+            ) : (
+              <>
+                <ListOrdered size={20} /> Save Reordered PDF Now
+              </>
+            )}
           </button>
+        </div>
+      )}
+
+      {/* Page Zoom Preview Modal */}
+      {previewPageIndex !== null && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div
+            style={{
+              backgroundColor: "#d4d0c8",
+              borderTop: "2px solid #ffffff",
+              borderLeft: "2px solid #ffffff",
+              borderRight: "2px solid #404040",
+              borderBottom: "2px solid #404040",
+            }}
+            className="max-w-xl w-full p-2 rounded shadow-2xl flex flex-col max-h-[90vh]"
+          >
+            <div
+              style={{
+                background: "linear-gradient(to right, #000080 0%, #1084d0 100%)",
+                color: "#ffffff",
+              }}
+              className="px-3 py-1.5 font-bold text-xs flex justify-between items-center"
+            >
+              <span>Original Page {previewPageIndex + 1} Preview</span>
+              <button
+                onClick={() => setPreviewPageIndex(null)}
+                className="w-5 h-5 bg-red-600 text-white font-bold text-xs flex items-center justify-center rounded cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-4 bg-white border border-slate-400 mt-1 overflow-y-auto flex flex-col items-center justify-center">
+              {thumbnails[previewPageIndex] ? (
+                <img
+                  src={thumbnails[previewPageIndex]}
+                  alt={`Page ${previewPageIndex + 1}`}
+                  className="max-h-[65vh] w-auto object-contain border border-slate-300 shadow-md"
+                />
+              ) : (
+                <div className="p-8 text-slate-500 text-xs">No preview</div>
+              )}
+            </div>
+
+            <div className="mt-2 text-right">
+              <button
+                onClick={() => setPreviewPageIndex(null)}
+                className="px-4 py-1 bg-slate-300 hover:bg-slate-400 font-bold text-xs rounded border border-slate-500 cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
