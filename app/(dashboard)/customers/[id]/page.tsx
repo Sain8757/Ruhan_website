@@ -249,47 +249,112 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             </div>
           </div>
 
-          {/* Khata Ledger Summary Card */}
-          <div className="p-5 space-y-3 rounded-xl shadow-md border" style={{ backgroundColor: "#1e293b", borderColor: "#334155", color: "#ffffff" }}>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-300">Khata Ledger Account</span>
-              <FileText size={16} className="text-blue-400" />
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-700">
-              <div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Lifetime Billed</div>
-                <div className="text-sm font-extrabold text-white">{formatCurrency(totalBilled)}</div>
-              </div>
-              <div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Received</div>
-                <div className="text-sm font-extrabold text-emerald-400">{formatCurrency(totalPaid)}</div>
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-slate-700 flex items-center justify-between">
-              <div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pending Due Balance</div>
-                <div className={`text-lg font-black ${totalDue > 0 ? "text-red-400" : "text-slate-300"}`}>
-                  {formatCurrency(totalDue)}
-                </div>
+          {/* Khata Ledger Summary Card (Windows 95 Classic Bevel Window Style) */}
+          <div
+            style={{
+              backgroundColor: "#d4d0c8",
+              borderTop: "2px solid #ffffff",
+              borderLeft: "2px solid #ffffff",
+              borderRight: "2px solid #404040",
+              borderBottom: "2px solid #404040",
+              padding: "2px",
+              boxShadow: "2px 2px 5px rgba(0,0,0,0.2)",
+            }}
+          >
+            {/* Title Bar */}
+            <div
+              style={{
+                background: "linear-gradient(to right, #000080 0%, #1084d0 100%)",
+                color: "#ffffff",
+                padding: "3px 6px",
+                fontWeight: "bold",
+                fontSize: "12px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <FileText size={13} color="#ffffff" />
+                <span style={{ color: "#ffffff", fontWeight: "bold" }}>KHATA LEDGER ACCOUNT</span>
               </div>
               {totalDue > 0 && (
-                <span className="text-[10px] font-bold bg-red-500/20 text-red-300 px-2 py-0.5 rounded-full border border-red-500/30">
-                  Udhaar Active
+                <span
+                  style={{
+                    background: "#b91c1c",
+                    color: "#ffffff",
+                    fontSize: "10px",
+                    fontWeight: "bold",
+                    padding: "1px 6px",
+                    borderRadius: "2px",
+                    border: "1px solid #ffffff",
+                  }}
+                >
+                  UDHAAR ACTIVE
                 </span>
               )}
             </div>
 
-            {totalDue > 0 && (
-              <button
-                type="button"
-                onClick={() => sendWhatsApp(`Namaste ${customer.name} ji! 🙏\n\nRA Seva Point se aapka total pending due (udhaar) *${formatCurrency(totalDue)}* baaki hai.\n\nKripya ise jald se jald cash ya UPI dwara bhugtan karein.\n\nDhanyawad! 📱 RA Seva Point`)}
-                className="w-full mt-2 py-2 px-3 rounded-lg text-xs font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer border border-emerald-500"
-              >
-                <MessageCircle size={15} /> Send Due Reminder on WhatsApp
-              </button>
-            )}
+            {/* Inset White Content Box */}
+            <div
+              style={{
+                backgroundColor: "#ffffff",
+                borderTop: "2px solid #808080",
+                borderLeft: "2px solid #808080",
+                borderRight: "2px solid #ffffff",
+                borderBottom: "2px solid #ffffff",
+                padding: "10px",
+                marginTop: "2px",
+              }}
+            >
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", paddingBottom: "8px", borderBottom: "1px solid #d4d0c8" }}>
+                <div>
+                  <div style={{ fontSize: "10px", fontWeight: "bold", color: "#444444", textTransform: "uppercase" }}>LIFETIME BILLED</div>
+                  <div style={{ fontSize: "14px", fontWeight: "900", color: "#000080" }}>{formatCurrency(totalBilled)}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: "10px", fontWeight: "bold", color: "#444444", textTransform: "uppercase" }}>TOTAL RECEIVED</div>
+                  <div style={{ fontSize: "14px", fontWeight: "900", color: "#008000" }}>{formatCurrency(totalPaid)}</div>
+                </div>
+              </div>
+
+              <div style={{ paddingTop: "8px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div>
+                  <div style={{ fontSize: "10px", fontWeight: "bold", color: "#444444", textTransform: "uppercase" }}>PENDING DUE BALANCE</div>
+                  <div style={{ fontSize: "18px", fontWeight: "900", color: totalDue > 0 ? "#cc0000" : "#008000" }}>
+                    {formatCurrency(totalDue)}
+                  </div>
+                </div>
+              </div>
+
+              {totalDue > 0 && (
+                <button
+                  type="button"
+                  onClick={() => sendWhatsApp(`Namaste ${customer.name} ji! 🙏\n\nRA Seva Point se aapka total pending due (udhaar) *${formatCurrency(totalDue)}* baaki hai.\n\nKripya ise jald se jald cash ya UPI dwara bhugtan karein.\n\nDhanyawad! 📱 RA Seva Point`)}
+                  style={{
+                    width: "100%",
+                    marginTop: "10px",
+                    padding: "6px 8px",
+                    backgroundColor: "#d4d0c8",
+                    borderTop: "2px solid #ffffff",
+                    borderLeft: "2px solid #ffffff",
+                    borderRight: "2px solid #404040",
+                    borderBottom: "2px solid #404040",
+                    color: "#000000",
+                    fontSize: "11px",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <MessageCircle size={15} color="#25D366" />
+                  <span>Send Due Reminder on WhatsApp</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
