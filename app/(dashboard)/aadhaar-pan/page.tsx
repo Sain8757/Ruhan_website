@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { CreditCard, Download, Trash2, Sparkles, FileImage, ChevronLeft, ChevronRight, Search, UserCheck, Loader2 } from "lucide-react";
+import { CreditCard, Download, Trash2, Sparkles, FileImage, ChevronLeft, ChevronRight, Search, UserCheck, Loader2, Printer } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 import { useDownload } from "@/contexts/DownloadContext";
 import jsPDF from "jspdf";
@@ -208,14 +208,37 @@ export default function AadhaarPanCropPage() {
     setCropperOpen(true);
   };
 
-  const handleCropComplete = (croppedImageBase64: string) => {
+  const [cardPreset, setCardPreset] = useState<string>("aadhaar");
+  const [autoEnhance, setAutoEnhance] = useState<boolean>(true);
+
+  const applyAutoEnhance = (base64Url: string): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(base64Url);
+
+        ctx.filter = "brightness(108%) contrast(112%) saturate(105%)";
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/png"));
+      };
+      img.onerror = () => resolve(base64Url);
+      img.src = base64Url;
+    });
+  };
+
+  const handleCropComplete = async (croppedImageBase64: string) => {
+    const finalImage = autoEnhance ? await applyAutoEnhance(croppedImageBase64) : croppedImageBase64;
     if (activeSide === "front") {
-      setCroppedFront(croppedImageBase64);
+      setCroppedFront(finalImage);
       setActiveSide("back");
-      toast.success("Front cropped. Ab back side select/crop karein.");
+      toast.success("Front cropped & enhanced! Ab back side crop karein.");
     } else {
-      setCroppedBack(croppedImageBase64);
-      toast.success("Back cropped. PDF/PNG export ready hai.");
+      setCroppedBack(finalImage);
+      toast.success("Back cropped & enhanced! PVC Layout print/download ke liye ready hai.");
     }
     setCropperOpen(false);
   };
@@ -224,7 +247,7 @@ export default function AadhaarPanCropPage() {
     downloadWithRename(dataUrl, `RA_Seva_${side === "front" ? "Front" : "Back"}_${Date.now()}.png`);
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = (layoutMode: "side-by-side" | "vertical" = "side-by-side") => {
     if (!croppedFront && !croppedBack) {
       toast.error("Please crop at least one side");
       return;
@@ -233,24 +256,54 @@ export default function AadhaarPanCropPage() {
     try {
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const pageWidth = 210;
-      const x = (pageWidth - CARD_WIDTH_MM) / 2;
-      let currentY = 20;
+      let startX = (pageWidth - (CARD_WIDTH_MM * 2 + 6)) / 2;
+      let startY = 30;
 
-      if (croppedFront) {
-        pdf.addImage(croppedFront, "PNG", x, currentY, CARD_WIDTH_MM, CARD_HEIGHT_MM);
-        currentY += CARD_HEIGHT_MM + 12;
-      }
+      // Add Header Title
+      pdf.setFontSize(14);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("RA SEVA POINT - AUTOMATIC PVC CARD PRINT", pageWidth / 2, 18, { align: "center" });
 
-      if (croppedBack) {
-        pdf.addImage(croppedBack, "PNG", x, currentY, CARD_WIDTH_MM, CARD_HEIGHT_MM);
+      if (layoutMode === "side-by-side" && croppedFront && croppedBack) {
+        // Front & Back Side-by-Side Dual PVC Layout
+        pdf.addImage(croppedFront, "PNG", startX, startY, CARD_WIDTH_MM, CARD_HEIGHT_MM);
+        pdf.setLineWidth(0.3);
+        pdf.setDrawColor(120, 120, 120);
+        pdf.rect(startX, startY, CARD_WIDTH_MM, CARD_HEIGHT_MM, "S");
+        
+        pdf.addImage(croppedBack, "PNG", startX + CARD_WIDTH_MM + 6, startY, CARD_WIDTH_MM, CARD_HEIGHT_MM);
+        pdf.rect(startX + CARD_WIDTH_MM + 6, startY, CARD_WIDTH_MM, CARD_HEIGHT_MM, "S");
+
+        // Helper label
+        pdf.setFontSize(9);
+        pdf.setFont("helvetica", "normal");
+        pdf.text("Front Side (85.6mm x 53.98mm)", startX + CARD_WIDTH_MM / 2, startY + CARD_HEIGHT_MM + 6, { align: "center" });
+        pdf.text("Back Side (85.6mm x 53.98mm)", startX + CARD_WIDTH_MM + 6 + CARD_WIDTH_MM / 2, startY + CARD_HEIGHT_MM + 6, { align: "center" });
+      } else {
+        // Vertical stacked layout
+        let y = startY;
+        const x = (pageWidth - CARD_WIDTH_MM) / 2;
+        if (croppedFront) {
+          pdf.addImage(croppedFront, "PNG", x, y, CARD_WIDTH_MM, CARD_HEIGHT_MM);
+          pdf.rect(x, y, CARD_WIDTH_MM, CARD_HEIGHT_MM, "S");
+          y += CARD_HEIGHT_MM + 14;
+        }
+        if (croppedBack) {
+          pdf.addImage(croppedBack, "PNG", x, y, CARD_WIDTH_MM, CARD_HEIGHT_MM);
+          pdf.rect(x, y, CARD_WIDTH_MM, CARD_HEIGHT_MM, "S");
+        }
       }
 
       const pdfUrl = pdf.output("bloburl").toString();
-      downloadWithRename(pdfUrl, `RA_Seva_Card_Print_${Date.now()}.pdf`);
-      toast.success("PDF created successfully!");
+      downloadWithRename(pdfUrl, `RA_Seva_PVC_${cardPreset.toUpperCase()}_${Date.now()}.pdf`);
+      toast.success("PVC Layout PDF created!");
     } catch {
       toast.error("Error creating layout PDF");
     }
+  };
+
+  const handlePrintPVC = () => {
+    window.print();
   };
 
   const handleReset = () => {
@@ -416,8 +469,38 @@ export default function AadhaarPanCropPage() {
           <div className="glass-card control-section space-y-4">
             <h2 className="section-title flex items-center gap-2">
               <Sparkles size={18} className="text-blue-500" />
-              Cropper Action
+              Card Preset & Settings
             </h2>
+
+            <div>
+              <label className="label">ID Card Preset Type</label>
+              <select
+                className="input-field w-full text-xs font-semibold"
+                value={cardPreset}
+                onChange={(e) => setCardPreset(e.target.value)}
+              >
+                <option value="aadhaar">e-Aadhaar Card (Standard CR80)</option>
+                <option value="pan">e-PAN Card (NSDL / UTI)</option>
+                <option value="voter">Voter ID Card (ECI)</option>
+                <option value="ayushman">Ayushman Bharat (PMJAY)</option>
+                <option value="license">Driving License / RC</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <input
+                type="checkbox"
+                id="auto-enhance-check"
+                checked={autoEnhance}
+                onChange={(e) => setAutoEnhance(e.target.checked)}
+                className="rounded text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="auto-enhance-check" className="text-xs font-medium cursor-pointer text-slate-700 dark:text-slate-300">
+                Auto-Enhance Brightness & Sharpness
+              </label>
+            </div>
+
+            <hr className="my-2 border-slate-200 dark:border-slate-800" />
 
             <button
               onClick={() => fileInputRef.current?.click()}
@@ -544,26 +627,57 @@ export default function AadhaarPanCropPage() {
               </div>
             </div>
 
-            <button
-              onClick={handleDownloadPDF}
-              className="btn-primary w-full flex items-center justify-center gap-2"
-              disabled={!croppedFront && !croppedBack}
-            >
-              <Download size={16} />
-              Download Layout PDF
-            </button>
-            <button
-              type="button"
-              onClick={handleReset}
-              className="btn-secondary w-full text-red-500 hover:bg-red-500/10"
-              disabled={!sourcePreview && !croppedFront && !croppedBack}
-            >
-              <Trash2 size={16} />
-              Reset Tool
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={() => handleDownloadPDF("side-by-side")}
+                className="btn-primary w-full flex items-center justify-center gap-2"
+                disabled={!croppedFront && !croppedBack}
+              >
+                <Download size={16} />
+                Download PVC PDF (Side-by-Side)
+              </button>
+              <button
+                onClick={handlePrintPVC}
+                className="btn-secondary w-full flex items-center justify-center gap-2 font-bold"
+                disabled={!croppedFront && !croppedBack}
+              >
+                <Printer size={16} />
+                Print PVC Layout Direct
+              </button>
+              <button
+                type="button"
+                onClick={handleReset}
+                className="btn-secondary w-full text-red-500 hover:bg-red-500/10"
+                disabled={!sourcePreview && !croppedFront && !croppedBack}
+              >
+                <Trash2 size={16} />
+                Reset Tool
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Printable Dual PVC Card Container (Hidden on screen, visible on Print) */}
+      {(croppedFront || croppedBack) && (
+        <div className="hidden print:block p-8">
+          <div className="text-center font-bold text-sm mb-4 uppercase">
+            RA SEVA POINT - PVC ID CARD PRINT LAYOUT
+          </div>
+          <div className="flex items-center justify-center gap-4">
+            {croppedFront && (
+              <div className="border border-black rounded-lg overflow-hidden" style={{ width: "85.6mm", height: "53.98mm" }}>
+                <img src={croppedFront} alt="Front" className="w-full h-full object-cover" />
+              </div>
+            )}
+            {croppedBack && (
+              <div className="border border-black rounded-lg overflow-hidden" style={{ width: "85.6mm", height: "53.98mm" }}>
+                <img src={croppedBack} alt="Back" className="w-full h-full object-cover" />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {sourcePreview && (
         <ImageCropperModal
