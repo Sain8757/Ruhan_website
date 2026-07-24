@@ -205,6 +205,63 @@ export async function GET(req: NextRequest) {
     revenue: Math.round(revenue),
   }));
 
+  // Calculate pending dues per customer
+  const [unpaidInvoices, unpaidServices] = await Promise.all([
+    prisma.invoice.findMany({
+      where: { paymentStatus: { in: ["UNPAID", "PARTIAL"] } },
+      include: { customer: true },
+    }),
+    prisma.service.findMany({
+      where: { paymentStatus: { in: ["UNPAID", "PARTIAL"] } },
+      include: { customer: true },
+    }),
+  ]);
+
+  const customerDuesMap: Record<string, { customer: any; totalDue: number; totalBilled: number; invoiceCount: number; serviceCount: number }> = {};
+
+  for (const inv of unpaidInvoices) {
+    if (!inv.customer) continue;
+    const cid = inv.customerId;
+    const due = inv.total - inv.amountPaid;
+    if (due <= 0) continue;
+
+    if (!customerDuesMap[cid]) {
+      customerDuesMap[cid] = {
+        customer: inv.customer,
+        totalDue: 0,
+        totalBilled: 0,
+        invoiceCount: 0,
+        serviceCount: 0,
+      };
+    }
+    customerDuesMap[cid].totalDue += due;
+    customerDuesMap[cid].totalBilled += inv.total;
+    customerDuesMap[cid].invoiceCount += 1;
+  }
+
+  for (const srv of unpaidServices) {
+    if (!srv.customer) continue;
+    const cid = srv.customerId;
+    const due = srv.fees;
+    if (due <= 0) continue;
+
+    if (!customerDuesMap[cid]) {
+      customerDuesMap[cid] = {
+        customer: srv.customer,
+        totalDue: 0,
+        totalBilled: 0,
+        invoiceCount: 0,
+        serviceCount: 0,
+      };
+    }
+    customerDuesMap[cid].totalDue += due;
+    customerDuesMap[cid].totalBilled += srv.fees;
+    customerDuesMap[cid].serviceCount += 1;
+  }
+
+  const pendingDueCustomers = Object.values(customerDuesMap).sort((a, b) => b.totalDue - a.totalDue);
+  const totalPendingDueBalance = pendingDueCustomers.reduce((acc, c) => acc + c.totalDue, 0);
+
   // Service status breakdown
   const serviceStats: Record<string, number> = {};
   for (const s of totalServices) {
@@ -224,6 +281,7 @@ export async function GET(req: NextRequest) {
       inventorySalesCount: posProductCount,
       serviceSalesRevenue: Math.round((serviceSalesTotalInRange._sum.fees || 0) + posServiceRevenue),
       serviceSalesCount: serviceSalesTotalInRange._count,
+      totalPendingDueBalance,
     },
     chartData,
     serviceStats,
@@ -237,5 +295,6 @@ export async function GET(req: NextRequest) {
       count: s._count,
     })),
     recentLargeInvoices,
+    pendingDueCustomers,
   });
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Download, FileDown, TrendingUp, IndianRupee, Users, Briefcase, BookOpen, Loader2, FileText, X, Package } from "lucide-react";
+import { Download, FileDown, TrendingUp, IndianRupee, Users, Briefcase, BookOpen, Loader2, FileText, X, Package, AlertTriangle, Search, MessageCircle } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, BarChart, Bar, Cell, PieChart, Pie, Legend,
@@ -24,11 +24,19 @@ interface ReportData {
     inventorySalesCount: number;
     serviceSalesRevenue: number;
     serviceSalesCount: number;
+    totalPendingDueBalance?: number;
   };
   chartData: { date: string; revenue: number }[];
   serviceStats: Record<string, number>;
   topServices: { name: string; count: number }[];
   invoicesByPaymentStatus: { status: string; total: number; count: number }[];
+  pendingDueCustomers?: {
+    customer: { id: string; name: string; mobile: string; email?: string };
+    totalDue: number;
+    totalBilled: number;
+    invoiceCount: number;
+    serviceCount: number;
+  }[];
 }
 
 interface DetailedReportData {
@@ -71,6 +79,10 @@ export default function ReportsPage() {
   const [revenueType, setRevenueType] = useState<"all-time" | "this-month" | "today">("all-time");
   const [revenueData, setRevenueData] = useState<any>(null);
   const [revenueLoading, setRevenueLoading] = useState(false);
+
+  // Pending Dues Modal State
+  const [showDueModal, setShowDueModal] = useState(false);
+  const [dueSearchQuery, setDueSearchQuery] = useState("");
 
   const fetchRevenueBreakdown = async (type: "all-time" | "this-month" | "today") => {
     setRevenueType(type);
@@ -387,6 +399,30 @@ export default function ReportsPage() {
           <p className="text-xs text-slate-400 mt-1">Registered customers</p>
         </Link>
 
+        {/* Pending Dues (Udhaar) Card */}
+        <div 
+          className="glass-card p-6 bg-red-500/10 border border-red-500/30 cursor-pointer hover:bg-red-500/20 transition-all shadow-xs"
+          onClick={() => setShowDueModal(true)}
+          title="Click to view all customers with pending dues and send WhatsApp reminders"
+        >
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <div className="flex items-center gap-1.5">
+              <AlertTriangle size={15} className="text-red-500" />
+              <span className="label text-red-500 font-extrabold">Kul Baaki Udhaar</span>
+            </div>
+            <span className="text-[10px] font-extrabold bg-red-600 text-white px-2 py-0.5 rounded-full">
+              {data.pendingDueCustomers?.length || 0} Dues
+            </span>
+          </div>
+          <div className="text-2xl font-black text-red-500 tracking-tight">
+            {formatCurrency(summary.totalPendingDueBalance || 0)}
+          </div>
+          <p className="text-xs text-red-400 font-bold mt-1 flex items-center justify-between">
+            <span>Click to View List</span>
+            <span className="underline">WhatsApp Remind →</span>
+          </p>
+        </div>
+
         <div 
           className="glass-card p-6 bg-pink-500/5 cursor-pointer hover:bg-pink-500/10 transition-colors"
           onClick={() => openDetailedReport('products')}
@@ -700,6 +736,137 @@ export default function ReportsPage() {
               ) : (
                 <div className="text-center p-8 text-red-500">Failed to load data</div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Pending Dues (Udhaar) Customer List Popup Modal ── */}
+      {showDueModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col border border-slate-200">
+            {/* Modal Header */}
+            <div className="px-6 py-4 bg-gradient-to-r from-red-600 to-rose-700 text-white flex justify-between items-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                  <AlertTriangle size={20} className="text-red-200" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-white leading-tight">
+                    Kul Baaki Udhaar (Pending Dues Report)
+                  </h3>
+                  <p className="text-xs text-red-100 mt-0.5">
+                    Total Dues: {formatCurrency(summary.totalPendingDueBalance || 0)} ({data.pendingDueCustomers?.length || 0} Customers)
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDueModal(false)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Search Bar */}
+            <div className="px-6 py-3 bg-slate-50 border-b border-slate-200 shrink-0">
+              <div className="relative">
+                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={dueSearchQuery}
+                  onChange={(e) => setDueSearchQuery(e.target.value)}
+                  placeholder="Search customer by name or mobile..."
+                  className="w-full pl-9 pr-8 py-2 text-xs font-semibold bg-white border border-slate-300 rounded-lg outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                />
+                {dueSearchQuery && (
+                  <button
+                    onClick={() => setDueSearchQuery("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Content Customer List */}
+            <div className="p-6 overflow-y-auto space-y-3 grow">
+              {data.pendingDueCustomers && data.pendingDueCustomers.length > 0 ? (
+                data.pendingDueCustomers
+                  .filter((item) => {
+                    if (!dueSearchQuery.trim()) return true;
+                    const q = dueSearchQuery.toLowerCase();
+                    return (
+                      item.customer.name.toLowerCase().includes(q) ||
+                      item.customer.mobile.includes(q)
+                    );
+                  })
+                  .map((item) => {
+                    const cleanMobile = item.customer.mobile.replace(/\D/g, "");
+                    const msg = `Namaste ${item.customer.name} ji! 🙏\n\nRA Seva Point se aapka total pending due (udhaar) *${formatCurrency(item.totalDue)}* baaki hai.\n\nKripya ise jald se jald cash ya Dukan ke UPI dwara bhugtan karein.\n\n📍 Shop: RA Seva Point\n\nDhanyawad! 📱`;
+                    const waUrl = `https://wa.me/91${cleanMobile}?text=${encodeURIComponent(msg)}`;
+
+                    return (
+                      <div
+                        key={item.customer.id}
+                        className="p-4 rounded-xl border border-red-200 bg-red-50/30 hover:bg-red-50 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="w-9 h-9 rounded-full bg-red-100 text-red-600 font-extrabold flex items-center justify-center shrink-0 text-sm">
+                            {item.customer.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <Link
+                              href={`/customers/${item.customer.id}`}
+                              className="font-bold text-sm text-slate-800 hover:text-blue-600 transition-colors"
+                              onClick={() => setShowDueModal(false)}
+                            >
+                              {item.customer.name}
+                            </Link>
+                            <p className="text-xs text-slate-500 font-semibold mt-0.5">
+                              📞 {item.customer.mobile}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 shrink-0 self-end sm:self-center">
+                          <div className="text-right">
+                            <div className="text-[10px] uppercase font-bold text-slate-400">Total Udhaar</div>
+                            <div className="text-base font-black text-red-600">
+                              {formatCurrency(item.totalDue)}
+                            </div>
+                          </div>
+
+                          <a
+                            href={waUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs"
+                          >
+                            <MessageCircle size={14} />
+                            Reminder Bhejein
+                          </a>
+                        </div>
+                      </div>
+                    );
+                  })
+              ) : (
+                <div className="text-center py-8 text-slate-500 text-xs font-semibold">
+                  ✅ Koi bhi pending due balance nahi hai!
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-between items-center text-xs text-slate-500 shrink-0">
+              <span>📱 Click "Reminder Bhejein" to send pre-filled WhatsApp message</span>
+              <button
+                onClick={() => setShowDueModal(false)}
+                className="px-4 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold transition-colors"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

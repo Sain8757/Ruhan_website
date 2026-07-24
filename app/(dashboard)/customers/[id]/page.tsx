@@ -250,39 +250,44 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           </div>
 
           {/* Khata Ledger Summary Card */}
-          <div className="glass-card p-5 space-y-3 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl shadow-md">
+          <div className="p-5 space-y-3 rounded-xl shadow-md border" style={{ backgroundColor: "#1e293b", borderColor: "#334155", color: "#ffffff" }}>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Khata Ledger Account</span>
+              <span className="text-xs font-black uppercase tracking-wider text-slate-300">Khata Ledger Account</span>
               <FileText size={16} className="text-blue-400" />
             </div>
 
             <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-700">
               <div>
-                <div className="text-[10px] text-slate-400 uppercase">Lifetime Billed</div>
-                <div className="text-sm font-bold text-slate-200">{formatCurrency(totalBilled)}</div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Lifetime Billed</div>
+                <div className="text-sm font-extrabold text-white">{formatCurrency(totalBilled)}</div>
               </div>
               <div>
-                <div className="text-[10px] text-slate-400 uppercase">Total Received</div>
-                <div className="text-sm font-bold text-green-400">{formatCurrency(totalPaid)}</div>
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Received</div>
+                <div className="text-sm font-extrabold text-emerald-400">{formatCurrency(totalPaid)}</div>
               </div>
             </div>
 
             <div className="pt-2 border-t border-slate-700 flex items-center justify-between">
               <div>
-                <div className="text-[10px] text-slate-400 uppercase">Pending Due Balance</div>
-                <div className={`text-base font-extrabold ${totalDue > 0 ? "text-red-400 animate-pulse" : "text-slate-300"}`}>
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pending Due Balance</div>
+                <div className={`text-lg font-black ${totalDue > 0 ? "text-red-400" : "text-slate-300"}`}>
                   {formatCurrency(totalDue)}
                 </div>
               </div>
+              {totalDue > 0 && (
+                <span className="text-[10px] font-bold bg-red-500/20 text-red-300 px-2 py-0.5 rounded-full border border-red-500/30">
+                  Udhaar Active
+                </span>
+              )}
             </div>
 
             {totalDue > 0 && (
               <button
                 type="button"
-                onClick={() => sendWhatsApp(`Namaste ${customer.name} ji,\n\nRA Seva Point se aapka total pending due balance *${formatCurrency(totalDue)}* baaki hai.\nKripya ise jald se jald karke raseed praapt karein.\n\nDanyawad!`)}
-                className="w-full mt-2 py-2 px-3 rounded-lg text-xs font-bold bg-green-600 hover:bg-green-500 text-white flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                onClick={() => sendWhatsApp(`Namaste ${customer.name} ji! 🙏\n\nRA Seva Point se aapka total pending due (udhaar) *${formatCurrency(totalDue)}* baaki hai.\n\nKripya ise jald se jald cash ya UPI dwara bhugtan karein.\n\nDhanyawad! 📱 RA Seva Point`)}
+                className="w-full mt-2 py-2 px-3 rounded-lg text-xs font-extrabold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer border border-emerald-500"
               >
-                <MessageCircle size={14} /> Send Due Reminder on WhatsApp
+                <MessageCircle size={15} /> Send Due Reminder on WhatsApp
               </button>
             )}
           </div>
