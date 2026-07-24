@@ -147,6 +147,27 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     }
   };
 
+  // Khata ledger calculations
+  const totalBilled = customer?.invoices?.reduce((sum: number, inv: any) => sum + (inv.total || 0), 0) || 0;
+  const totalPaid = customer?.invoices?.reduce((sum: number, inv: any) => sum + (inv.amountPaid || 0), 0) || 0;
+  const totalDue = Math.max(0, totalBilled - totalPaid);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      setDocForm((prev) => ({
+        ...prev,
+        name: prev.name || file.name,
+        url: base64,
+      }));
+      toast.success("File attached! Click Add to save.");
+    };
+    reader.readAsDataURL(file);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -180,50 +201,90 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Profile Card */}
-        <div className="glass-card p-6 h-fit space-y-4">
-          <h2 className="section-title flex items-center gap-2 mb-0">
-            <User size={18} className="text-blue-500" />
-            Customer Profile
-          </h2>
-          <hr style={{ borderColor: "var(--border-primary)" }} />
+        {/* Profile & Khata Card */}
+        <div className="space-y-4">
+          <div className="glass-card p-6 space-y-4">
+            <h2 className="section-title flex items-center gap-2 mb-0">
+              <User size={18} className="text-blue-500" />
+              Customer Profile
+            </h2>
+            <hr style={{ borderColor: "var(--border-primary)" }} />
 
-          <div className="space-y-3 text-sm">
-            <div className="flex items-center gap-2">
-              <Phone size={14} className="text-slate-400 shrink-0" />
-              <span style={{ color: "var(--text-primary)" }}>{customer.mobile}</span>
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center gap-2">
+                <Phone size={14} className="text-slate-400 shrink-0" />
+                <span style={{ color: "var(--text-primary)" }}>{customer.mobile}</span>
+              </div>
+
+              {customer.email && (
+                <div className="flex items-center gap-2">
+                  <Mail size={14} className="text-slate-400 shrink-0" />
+                  <span style={{ color: "var(--text-primary)" }}>{customer.email}</span>
+                </div>
+              )}
+
+              {customer.address && (
+                <div className="flex items-start gap-2">
+                  <MapPin size={14} className="text-slate-400 shrink-0 mt-0.5" />
+                  <span style={{ color: "var(--text-primary)" }}>{customer.address}</span>
+                </div>
+              )}
             </div>
 
-            {customer.email && (
-              <div className="flex items-center gap-2">
-                <Mail size={14} className="text-slate-400 shrink-0" />
-                <span style={{ color: "var(--text-primary)" }}>{customer.email}</span>
-              </div>
-            )}
+            <hr style={{ borderColor: "var(--border-primary)" }} />
 
-            {customer.address && (
-              <div className="flex items-start gap-2">
-                <MapPin size={14} className="text-slate-400 shrink-0 mt-0.5" />
-                <span style={{ color: "var(--text-primary)" }}>{customer.address}</span>
+            <div className="space-y-2">
+              <div>
+                <span className="label">Aadhaar Number</span>
+                <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                  {customer.aadhaarNumber || "Not Provided"}
+                </p>
               </div>
-            )}
+              <div>
+                <span className="label">PAN Number</span>
+                <p className="text-sm font-semibold uppercase" style={{ color: "var(--text-primary)" }}>
+                  {customer.panNumber || "Not Provided"}
+                </p>
+              </div>
+            </div>
           </div>
 
-          <hr style={{ borderColor: "var(--border-primary)" }} />
+          {/* Khata Ledger Summary Card */}
+          <div className="glass-card p-5 space-y-3 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-xl shadow-md">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-300">Khata Ledger Account</span>
+              <FileText size={16} className="text-blue-400" />
+            </div>
 
-          <div className="space-y-2">
-            <div>
-              <span className="label">Aadhaar Number</span>
-              <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                {customer.aadhaarNumber || "Not Provided"}
-              </p>
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-700">
+              <div>
+                <div className="text-[10px] text-slate-400 uppercase">Lifetime Billed</div>
+                <div className="text-sm font-bold text-slate-200">{formatCurrency(totalBilled)}</div>
+              </div>
+              <div>
+                <div className="text-[10px] text-slate-400 uppercase">Total Received</div>
+                <div className="text-sm font-bold text-green-400">{formatCurrency(totalPaid)}</div>
+              </div>
             </div>
-            <div>
-              <span className="label">PAN Number</span>
-              <p className="text-sm font-semibold uppercase" style={{ color: "var(--text-primary)" }}>
-                {customer.panNumber || "Not Provided"}
-              </p>
+
+            <div className="pt-2 border-t border-slate-700 flex items-center justify-between">
+              <div>
+                <div className="text-[10px] text-slate-400 uppercase">Pending Due Balance</div>
+                <div className={`text-base font-extrabold ${totalDue > 0 ? "text-red-400 animate-pulse" : "text-slate-300"}`}>
+                  {formatCurrency(totalDue)}
+                </div>
+              </div>
             </div>
+
+            {totalDue > 0 && (
+              <button
+                type="button"
+                onClick={() => sendWhatsApp(`Namaste ${customer.name} ji,\n\nRA Seva Point se aapka total pending due balance *${formatCurrency(totalDue)}* baaki hai.\nKripya ise jald se jald karke raseed praapt karein.\n\nDanyawad!`)}
+                className="w-full mt-2 py-2 px-3 rounded-lg text-xs font-bold bg-green-600 hover:bg-green-500 text-white flex items-center justify-center gap-1.5 transition-all shadow-sm"
+              >
+                <MessageCircle size={14} /> Send Due Reminder on WhatsApp
+              </button>
+            )}
           </div>
         </div>
 
@@ -270,7 +331,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                 customer.services.map((s: any) => (
                   <div
                     key={s.id}
-                    className="glass-card p-4 flex items-center justify-between cursor-pointer"
+                    className="glass-card p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors"
                     onClick={() => router.push(`/services/${s.id}`)}
                   >
                     <div>
@@ -290,7 +351,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                           e.stopPropagation();
                           sendWhatsApp(`Hello ${customer.name}, your service application for ${s.serviceType} is currently ${s.status}.`);
                         }}
-                        className="p-2 text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-full transition-colors"
+                        className="p-2 text-green-500 hover:bg-green-50 rounded-full transition-colors"
                         title="Send WhatsApp update"
                       >
                         <MessageCircle size={16} />
@@ -308,13 +369,13 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             <div className="space-y-3">
               {customer.invoices?.length === 0 ? (
                 <div className="text-center py-12 glass-card text-sm text-slate-400">
-                  No invoice records found.
+                  No billing records found.
                 </div>
               ) : (
                 customer.invoices.map((inv: any) => (
                   <div
                     key={inv.id}
-                    className="glass-card p-4 flex items-center justify-between cursor-pointer"
+                    className="glass-card p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors"
                     onClick={() => router.push(`/billing/${inv.id}`)}
                   >
                     <div>
@@ -322,31 +383,23 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                         #{inv.invoiceNumber}
                       </div>
                       <div className="text-xs text-slate-400 mt-1">
-                        {formatDate(inv.createdAt)} · {inv.items?.length || 0} items
+                        {formatDate(inv.createdAt)} · Total: {formatCurrency(inv.total)}
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>
-                        {formatCurrency(inv.total)}
-                      </span>
-                      {inv.paymentStatus !== "PAID" && (
-                        <div className="flex flex-col text-right">
-                          <span className="text-xs text-red-500 font-medium">
-                            Due: {formatCurrency(inv.total - (inv.amountPaid || 0))}
-                          </span>
-                        </div>
-                      )}
                       <span className={`badge ${PAYMENT_STATUS_COLORS[inv.paymentStatus]}`}>
                         {inv.paymentStatus}
                       </span>
                       
                       {inv.paymentStatus !== "PAID" && (
                         <button 
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleSettleInvoice(inv.id);
                           }}
-                          className="px-2 py-1 text-xs font-semibold bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 border border-emerald-200"
+                          className="btn-secondary px-2 py-1 text-xs"
+                          style={{ color: "#059669", backgroundColor: "rgba(5, 150, 105, 0.1)", borderColor: "rgba(5, 150, 105, 0.2)" }}
                         >
                           Settle
                         </button>
@@ -371,64 +424,99 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             </div>
           )}
 
+          {/* Documents Tab */}
           {activeTab === "documents" && (
-            <div className="space-y-3">
-              <div className="glass-card p-4">
-                <h2 className="section-title flex items-center gap-2">
-                  <FileText size={16} />
-                  Document Folder
+            <div className="space-y-4">
+              <div className="glass-card p-4 space-y-3">
+                <h2 className="section-title flex items-center gap-2 mb-0">
+                  <FileText size={16} className="text-blue-600" />
+                  Customer Document Folder
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-[1fr_160px_1fr_auto] gap-2">
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   <input
                     className="input-field"
                     value={docForm.name}
                     onChange={(e) => setDocForm({ ...docForm, name: e.target.value })}
-                    placeholder="Aadhaar copy, PAN, receipt..."
+                    placeholder="Document Name (e.g. Aadhaar Card)..."
                   />
-                  <input
+                  <select
                     className="input-field"
                     value={docForm.type}
                     onChange={(e) => setDocForm({ ...docForm, type: e.target.value })}
-                    placeholder="Type"
-                  />
-                  <input
-                    className="input-field"
-                    value={docForm.url}
-                    onChange={(e) => setDocForm({ ...docForm, url: e.target.value })}
-                    placeholder="File URL / reference"
-                  />
-                  <button type="button" className="btn-primary" onClick={addDocument}>
-                    <Plus size={14} />
-                    Add
-                  </button>
+                  >
+                    <option value="Aadhaar Card">Aadhaar Card</option>
+                    <option value="PAN Card">PAN Card</option>
+                    <option value="Passport Photo">Passport Photo</option>
+                    <option value="Income Certificate">Income Certificate</option>
+                    <option value="Caste Certificate">Caste Certificate</option>
+                    <option value="Marksheet">Marksheet</option>
+                    <option value="Other">Other Document</option>
+                  </select>
+                  
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      id="doc-file-input"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                    />
+                    <label
+                      htmlFor="doc-file-input"
+                      className="btn-secondary text-xs px-3 py-2 cursor-pointer truncate max-w-[130px]"
+                      title="Upload file from device"
+                    >
+                      {docForm.url ? "File Attached ✓" : "Choose File..."}
+                    </label>
+                    <button type="button" className="btn-primary flex-1 py-2 text-xs" onClick={addDocument}>
+                      <Plus size={14} />
+                      Save Doc
+                    </button>
+                  </div>
+                </div>
+
+                <div className="text-[11px] text-slate-400">
+                  Tip: Upload Aadhaar, PAN, Photos or Certificates directly to save them permanently for future form applications.
                 </div>
               </div>
 
               {customer.documents?.length === 0 ? (
                 <div className="text-center py-12 glass-card text-sm text-slate-400">
-                  No documents saved.
+                  No documents saved for this customer.
                 </div>
               ) : (
-                customer.documents.map((doc: any) => (
-                  <div key={doc.id} className="glass-card p-4 flex items-center justify-between gap-3">
-                    <div>
-                      <div className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>
-                        {doc.name}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {customer.documents.map((doc: any) => (
+                    <div key={doc.id} className="glass-card p-4 flex items-center justify-between gap-3 border border-slate-200 hover:shadow-md transition-shadow">
+                      <div className="truncate">
+                        <div className="font-bold text-sm truncate" style={{ color: "var(--text-primary)" }}>
+                          {doc.name}
+                        </div>
+                        <div className="text-xs text-slate-500 mt-0.5">
+                          Category: <span className="font-semibold text-blue-600">{doc.type}</span> · {formatDate(doc.createdAt)}
+                        </div>
+                        {doc.url && (
+                          <a
+                            href={doc.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs font-semibold underline mt-1 inline-block text-blue-600 hover:text-blue-800"
+                          >
+                            Preview / Download
+                          </a>
+                        )}
                       </div>
-                      <div className="text-xs text-slate-400 mt-1">
-                        {doc.type} · {formatDate(doc.createdAt)}
-                      </div>
-                      {doc.url && doc.url !== "#" && (
-                        <a href={doc.url} target="_blank" rel="noreferrer" className="text-xs underline" style={{ color: "var(--brand-primary)" }}>
-                          Open document
-                        </a>
-                      )}
+                      <button
+                        type="button"
+                        className="btn-ghost p-2 text-red-500 hover:bg-red-50 rounded"
+                        onClick={() => deleteDocument(doc.id)}
+                        title="Delete Document"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
-                    <button type="button" className="btn-ghost p-2" onClick={() => deleteDocument(doc.id)}>
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))
+                  ))}
+                </div>
               )}
             </div>
           )}

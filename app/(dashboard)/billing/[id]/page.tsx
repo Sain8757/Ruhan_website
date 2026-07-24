@@ -46,7 +46,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  const [template, setTemplate] = useState<"classic" | "modern">("classic");
+  const [template, setTemplate] = useState<"classic" | "modern" | "thermal">("classic");
   const [settleInvoiceData, setSettleInvoiceData] = useState<SettleInvoiceData | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
@@ -227,13 +227,19 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
               onClick={() => setTemplate("classic")}
               className={`px-3 py-1.5 transition-colors ${template === "classic" ? "bg-blue-600 text-white" : "text-slate-700 hover:bg-slate-100"}`}
             >
-              Classic Vintage (Old)
+              Classic Vintage
             </button>
             <button
               onClick={() => setTemplate("modern")}
               className={`px-3 py-1.5 transition-colors ${template === "modern" ? "bg-blue-600 text-white" : "text-slate-700 hover:bg-slate-100"}`}
             >
               Modern Executive
+            </button>
+            <button
+              onClick={() => setTemplate("thermal")}
+              className={`px-3 py-1.5 transition-colors ${template === "thermal" ? "bg-blue-600 text-white" : "text-slate-700 hover:bg-slate-100"}`}
+            >
+              Thermal POS (80mm)
             </button>
           </div>
 
@@ -513,7 +519,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
               Please retain this invoice for your records. This is a computer-generated invoice.
             </div>
           </div>
-        ) : (
+        ) : template === "modern" ? (
           /* ========================================================================= */
           /*  MODERN EXECUTIVE INVOICE TEMPLATE                                         */
           /* ========================================================================= */
@@ -661,6 +667,95 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             <div className="text-center pt-6 mt-6 border-t border-slate-200 text-[10px] text-slate-400">
               <p className="font-semibold">Thank you for choosing {shopName}!</p>
               <p className="mt-0.5">Please retain this invoice for your records. This is a computer-generated invoice.</p>
+            </div>
+          </div>
+        ) : (
+          /* ========================================================================= */
+          /*  THERMAL POS SLIP (80mm / 3-inch POS PRINTER TEMPLATE)                    */
+          /* ========================================================================= */
+          <div
+            ref={invoiceCardRef}
+            className="invoice-printable-card text-black font-mono shadow-md border border-slate-300 print:shadow-none print:border-none print:m-0"
+            style={{
+              width: "300px",
+              background: "#ffffff",
+              padding: "16px 12px",
+              boxSizing: "border-box",
+              color: "#000000",
+              fontFamily: "'Courier New', Courier, monospace",
+              fontSize: "11px",
+              lineHeight: "1.3",
+            }}
+          >
+            {/* Store Header */}
+            <div className="text-center pb-2 border-b border-black mb-2">
+              <h2 className="text-base font-bold uppercase tracking-wider">{shopName}</h2>
+              <p className="text-[10px]">{shopTagline}</p>
+              <p className="text-[10px]">Ph: {shopPhone}</p>
+              <p className="text-[9px] text-slate-700">{shopAddress}</p>
+            </div>
+
+            {/* Bill Meta */}
+            <div className="border-b border-black pb-2 mb-2 text-[10px] space-y-0.5">
+              <div className="flex justify-between font-bold">
+                <span>INV #{invoice.invoiceNumber}</span>
+                <span>{formatDate(invoice.createdAt)}</span>
+              </div>
+              <div>Customer: <strong>{invoice.customer.name}</strong></div>
+              <div>Mobile: {invoice.customer.mobile}</div>
+              <div>Mode: {PAYMENT_MODE_LABELS[invoice.paymentMode] || invoice.paymentMode}</div>
+            </div>
+
+            {/* Items Table */}
+            <table className="w-full text-[10px] text-left border-b border-black pb-2 mb-2">
+              <thead>
+                <tr className="border-b border-black">
+                  <th className="py-1">Item</th>
+                  <th className="py-1 text-center">Qty</th>
+                  <th className="py-1 text-right">Amt</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoice.items.map((item: any) => (
+                  <tr key={item.id}>
+                    <td className="py-1 pr-1 truncate max-w-[120px]">{item.name}</td>
+                    <td className="py-1 text-center">{item.quantity}</td>
+                    <td className="py-1 text-right font-bold">{item.total.toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Totals */}
+            <div className="space-y-0.5 text-[10px] text-right border-b border-black pb-2 mb-2">
+              <div className="flex justify-between"><span>Subtotal:</span><span>₹{invoice.subtotal.toFixed(2)}</span></div>
+              {invoice.discount > 0 && <div className="flex justify-between"><span>Discount:</span><span>-₹{invoice.discount.toFixed(2)}</span></div>}
+              {invoice.gst > 0 && <div className="flex justify-between"><span>GST:</span><span>₹{((invoice.subtotal * invoice.gst) / 100).toFixed(2)}</span></div>}
+              <div className="flex justify-between font-bold text-xs border-t border-black pt-1 my-0.5">
+                <span>TOTAL:</span>
+                <span>₹{invoice.total.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between"><span>Paid:</span><span>₹{(invoice.amountPaid || 0).toFixed(2)}</span></div>
+              {invoice.total - (invoice.amountPaid || 0) > 0 && (
+                <div className="flex justify-between font-bold text-red-700">
+                  <span>DUE:</span>
+                  <span>₹{(invoice.total - (invoice.amountPaid || 0)).toFixed(2)}</span>
+                </div>
+              )}
+            </div>
+
+            {/* QR Code */}
+            {upiLink && (
+              <div className="text-center py-2 border-b border-black mb-2 flex flex-col items-center">
+                <QRCodeSVG value={upiLink} size={80} />
+                <span className="text-[9px] mt-1 font-bold">Scan & Pay via UPI</span>
+              </div>
+            )}
+
+            {/* Footer */}
+            <div className="text-center text-[9px]">
+              <p className="font-bold">Thank You! Visit Again.</p>
+              <p>*** Computer Generated Receipt ***</p>
             </div>
           </div>
         )}

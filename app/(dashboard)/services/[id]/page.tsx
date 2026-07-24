@@ -3,8 +3,8 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft, Loader2, MessageCircle, Save, Trash2,
-  Phone, User, Calendar, IndianRupee, FileText, CheckCircle, Clock, XCircle
+  ArrowLeft, Loader2, MessageCircle, Save, Trash2, Printer, Plus,
+  Phone, User, Calendar, IndianRupee, FileText, CheckCircle, Clock, XCircle, CheckSquare, Square
 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/contexts/ToastContext";
@@ -34,6 +34,8 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
   const [paymentMode, setPaymentMode] = useState("CASH");
   const [fees, setFees] = useState<number | "">(0);
   const [notes, setNotes] = useState("");
+  const [requiredDocs, setRequiredDocs] = useState<string[]>([]);
+  const [newDocInput, setNewDocInput] = useState("");
 
   const fetchService = async () => {
     try {
@@ -46,6 +48,7 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
       setPaymentMode(data.paymentMode);
       setFees(data.fees);
       setNotes(data.notes || "");
+      setRequiredDocs(data.requiredDocs || ["Aadhaar Card", "Passport Photo"]);
     } catch (err: any) {
       toast.error(err.message);
       router.push("/services");
@@ -71,7 +74,7 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
           paymentMode,
           fees: Number(fees) || 0,
           notes,
-          requiredDocs: service?.requiredDocs || [],
+          requiredDocs,
         }),
       });
       if (!res.ok) throw new Error("Failed to update service status");
@@ -102,9 +105,29 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
   const handleSendWhatsApp = () => {
     if (!service || !service.customer?.mobile) return;
     const msg = encodeURIComponent(
-      `Hello ${service.customer.name},\n\nUpdate on your service request for *${service.serviceType}*:\nStatus: *${STATUS_LABELS[status] || status}*\nPayment: *${paymentStatus}*\n\nThank you,\nRA Seva Point`
+      `Hello ${service.customer.name},\n\nUpdate on your service request for *${service.serviceType}*:\nStatus: *${STATUS_LABELS[status] || status}*\nPayment: *${paymentStatus}*\nRef No: #${service.id.slice(-6).toUpperCase()}\n\nThank you,\nRA Seva Point`
     );
     window.open(`https://wa.me/91${service.customer.mobile.replace(/\D/g, '').slice(-10)}?text=${msg}`, '_blank');
+  };
+
+  const handlePrintToken = () => {
+    window.print();
+  };
+
+  const toggleDoc = (docName: string) => {
+    if (requiredDocs.includes(docName)) {
+      setRequiredDocs(requiredDocs.filter((d) => d !== docName));
+    } else {
+      setRequiredDocs([...requiredDocs, docName]);
+    }
+  };
+
+  const addCustomDoc = () => {
+    if (!newDocInput.trim()) return;
+    if (!requiredDocs.includes(newDocInput.trim())) {
+      setRequiredDocs([...requiredDocs, newDocInput.trim()]);
+    }
+    setNewDocInput("");
   };
 
   if (loading) {
@@ -119,8 +142,47 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="max-w-4xl mx-auto pb-12">
-      {/* Page Header */}
-      <div className="flex items-center justify-between mb-6">
+      {/* Printable Service Token Slip (Hidden on screen, visible on print) */}
+      <div className="hidden print:block text-black font-mono p-6 border-2 border-black max-w-lg mx-auto">
+        <div className="text-center pb-2 border-b-2 border-black mb-3">
+          <h2 className="text-xl font-bold uppercase">RA SEVA POINT</h2>
+          <p className="text-xs">Service Application Acknowledgment Slip</p>
+        </div>
+        <div className="text-xs space-y-1 mb-3">
+          <div className="flex justify-between">
+            <span><strong>Token Ref:</strong> #{service.id.slice(-6).toUpperCase()}</span>
+            <span><strong>Date:</strong> {formatDate(service.createdAt)}</span>
+          </div>
+          <div><strong>Customer Name:</strong> {service.customer.name}</div>
+          <div><strong>Mobile No:</strong> {service.customer.mobile}</div>
+          <div><strong>Service Application:</strong> {service.serviceType}</div>
+          <div className="flex justify-between">
+            <span><strong>Fees:</strong> {formatCurrency(service.fees)}</span>
+            <span><strong>Payment:</strong> {service.paymentStatus}</span>
+          </div>
+        </div>
+
+        {requiredDocs.length > 0 && (
+          <div className="border-t border-black pt-2 mb-3 text-xs">
+            <strong className="block mb-1">Required Documents Checklist:</strong>
+            <div className="grid grid-cols-2 gap-1">
+              {requiredDocs.map((doc, idx) => (
+                <div key={idx} className="flex items-center gap-1.5">
+                  <span className="font-bold">[✓]</span> {doc}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="border-t border-black pt-2 text-[10px] text-center">
+          <p>Please keep this token slip for tracking your application status.</p>
+          <p className="font-bold mt-1">Thank you for visiting RA Seva Point!</p>
+        </div>
+      </div>
+
+      {/* Screen Header (Hidden on Print) */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6 no-print">
         <div className="flex items-center gap-3">
           <Link href="/services" className="btn-ghost p-2">
             <ArrowLeft size={18} />
@@ -132,6 +194,15 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handlePrintToken}
+            className="btn-secondary px-3 py-1.5 text-xs font-bold flex items-center gap-1.5"
+            title="Print Customer Acknowledgment Slip"
+          >
+            <Printer size={14} />
+            Print Token Slip
+          </button>
           <span className={`badge ${SERVICE_STATUS_COLORS[service.status]} text-sm px-3 py-1`}>
             {STATUS_LABELS[service.status] || service.status}
           </span>
@@ -260,10 +331,52 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             <div>
+              <label className="label">Required Document Checklist</label>
+              <div className="grid grid-cols-2 gap-2 mb-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                {["Aadhaar Card", "PAN Card", "Passport Photo", "Income Proof", "Caste Certificate", "Ration Card"].map((docName) => {
+                  const isChecked = requiredDocs.includes(docName);
+                  return (
+                    <div
+                      key={docName}
+                      onClick={() => toggleDoc(docName)}
+                      className={`flex items-center gap-2 text-xs p-2 rounded cursor-pointer transition-colors ${isChecked ? "bg-blue-50 text-blue-800 font-bold border border-blue-200" : "bg-white text-slate-700 border border-slate-200"}`}
+                    >
+                      {isChecked ? <CheckSquare size={14} className="text-blue-600" /> : <Square size={14} className="text-slate-400" />}
+                      <span>{docName}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  className="input-field text-xs flex-1"
+                  placeholder="Add custom required document..."
+                  value={newDocInput}
+                  onChange={(e) => setNewDocInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addCustomDoc();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={addCustomDoc}
+                  className="btn-secondary text-xs px-3 py-1 flex items-center gap-1"
+                >
+                  <Plus size={14} /> Add Doc
+                </button>
+              </div>
+            </div>
+
+            <div>
               <label className="label">Notes / Instructions</label>
               <textarea
                 className="input-field w-full"
-                rows={4}
+                rows={3}
                 placeholder="Enter notes, portal details, or application reference numbers..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}

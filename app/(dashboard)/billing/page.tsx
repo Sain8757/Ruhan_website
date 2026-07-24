@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
-import { Plus, Search, FileText, Loader2, Printer, IndianRupee, Edit3 } from "lucide-react";
+import { Plus, Search, FileText, Loader2, Printer, IndianRupee, Edit3, Download } from "lucide-react";
 import { formatCurrency, formatDate, PAYMENT_STATUS_COLORS } from "@/lib/utils";
 import { useToast } from "@/contexts/ToastContext";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -79,6 +79,39 @@ function BillingContent() {
     });
   };
 
+  const handleExportCSV = () => {
+    if (!invoices || invoices.length === 0) {
+      toast.error("No invoices available to export");
+      return;
+    }
+    const headers = ["Invoice Number", "Date", "Customer Name", "Mobile", "Subtotal (INR)", "Discount (INR)", "GST (%)", "Total Amount (INR)", "Amount Paid (INR)", "Balance Due (INR)", "Payment Mode", "Payment Status"];
+    const rows = invoices.map(inv => [
+      `"${inv.invoiceNumber}"`,
+      `"${new Date(inv.createdAt).toLocaleDateString("en-IN")}"`,
+      `"${inv.customer.name.replace(/"/g, '""')}"`,
+      `"${inv.customer.mobile}"`,
+      inv.subtotal || 0,
+      inv.discount || 0,
+      inv.gst || 0,
+      inv.total || 0,
+      inv.amountPaid || 0,
+      Math.max(0, inv.total - (inv.amountPaid || 0)),
+      `"${inv.paymentMode}"`,
+      `"${inv.paymentStatus}"`
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `RA_Seva_Point_Invoices_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Sales report exported successfully!");
+  };
+
   useEffect(() => {
     const timer = setTimeout(fetchInvoices, 300);
     return () => clearTimeout(timer);
@@ -92,10 +125,16 @@ function BillingContent() {
         title="Billing & Invoices"
         subtitle={`${total} total invoice${total === 1 ? "" : "s"} generated`}
         actions={
-          <button type="button" className="btn-primary" onClick={() => setIsNewBillOpen(true)}>
-            <Plus size={16} />
-            Create Invoice
-          </button>
+          <div className="flex gap-2">
+            <button type="button" className="btn-secondary flex items-center gap-1 text-xs font-bold" onClick={handleExportCSV}>
+              <Download size={14} />
+              Export Sales (CSV)
+            </button>
+            <button type="button" className="btn-primary flex items-center gap-1 text-xs font-bold" onClick={() => setIsNewBillOpen(true)}>
+              <Plus size={16} />
+              Create Invoice
+            </button>
+          </div>
         }
       />
       <NewBillDialog
