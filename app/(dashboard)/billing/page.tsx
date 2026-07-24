@@ -199,98 +199,135 @@ function BillingContent() {
         </div>
       ) : (
         <>
-          <div className="table-wrapper">
-            <table className="data-table">
+          <div
+            style={{
+              backgroundColor: "#ffffff",
+              borderTop: "2px solid #808080",
+              borderLeft: "2px solid #808080",
+              borderRight: "2px solid #ffffff",
+              borderBottom: "2px solid #ffffff",
+              overflowX: "auto",
+              boxShadow: "inset 1px 1px 2px rgba(0,0,0,0.2)",
+            }}
+          >
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", fontFamily: "Tahoma, 'MS Sans Serif', sans-serif" }}>
               <thead>
-                <tr>
-                  <th>Invoice #</th>
-                  <th>Customer</th>
-                  <th>Items</th>
-                  <th>Payment Status</th>
-                  <th>Mode</th>
-                  <th>Total Amount</th>
-                  <th>Date</th>
-                  <th>Actions</th>
+                <tr style={{ backgroundColor: "#d4d0c8", borderBottom: "2px solid #808080" }}>
+                  <th style={{ padding: "6px 10px", textAlign: "left", fontWeight: "bold", borderRight: "1px solid #808080", color: "#000000" }}>Invoice #</th>
+                  <th style={{ padding: "6px 10px", textAlign: "left", fontWeight: "bold", borderRight: "1px solid #808080", color: "#000000" }}>Customer Name</th>
+                  <th style={{ padding: "6px 10px", textAlign: "center", fontWeight: "bold", borderRight: "1px solid #808080", color: "#000000" }}>Items</th>
+                  <th style={{ padding: "6px 10px", textAlign: "center", fontWeight: "bold", borderRight: "1px solid #808080", color: "#000000" }}>Payment Status</th>
+                  <th style={{ padding: "6px 10px", textAlign: "center", fontWeight: "bold", borderRight: "1px solid #808080", color: "#000000" }}>Mode</th>
+                  <th style={{ padding: "6px 10px", textAlign: "right", fontWeight: "bold", borderRight: "1px solid #808080", color: "#000000" }}>Total Amount</th>
+                  <th style={{ padding: "6px 10px", textAlign: "left", fontWeight: "bold", borderRight: "1px solid #808080", color: "#000000" }}>Date</th>
+                  <th style={{ padding: "6px 10px", textAlign: "center", fontWeight: "bold", color: "#000000" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {invoices.map((inv) => (
+                {invoices.map((inv, index) => (
                   <tr
                     key={inv.id}
-                    className="cursor-pointer"
                     onClick={() => router.push(`/billing/${inv.id}`)}
+                    style={{
+                      backgroundColor: index % 2 === 0 ? "#ffffff" : "#f9f9f6",
+                      borderBottom: "1px solid #e2e8f0",
+                      cursor: "pointer",
+                    }}
+                    className="hover:bg-blue-50 transition-colors"
                   >
-                    <td className="font-mono font-bold text-sm" style={{ color: "var(--brand-primary)" }}>
+                    <td style={{ padding: "8px 10px", fontWeight: "bold", color: "#000080" }}>
                       #{inv.invoiceNumber}
                     </td>
-                    <td>
-                      <div>
-                        <div className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
-                          {inv.customer.name}
-                        </div>
-                        <div className="text-xs" style={{ color: "var(--text-muted)" }}>
-                          {inv.customer.mobile}
-                        </div>
-                      </div>
+                    <td style={{ padding: "8px 10px" }}>
+                      <div style={{ fontWeight: "bold", color: "#0f172a" }}>{inv.customer.name}</div>
+                      <div style={{ fontSize: "10px", color: "#64748b" }}>📞 {inv.customer.mobile}</div>
                     </td>
-                    <td>
-                      <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                        {inv.items.length} item{inv.items.length !== 1 ? "s" : ""}
-                      </span>
+                    <td style={{ padding: "8px 10px", textAlign: "center", color: "#334155" }}>
+                      {inv.items.length} item{inv.items.length !== 1 ? "s" : ""}
                     </td>
-                    <td>
-                      <span className={`badge ${PAYMENT_STATUS_COLORS[inv.paymentStatus]}`}>
+                    <td style={{ padding: "8px 10px", textAlign: "center" }}>
+                      <span
+                        style={{
+                          background: inv.paymentStatus === "PAID" ? "#166534" : inv.paymentStatus === "PARTIAL" ? "#ca8a04" : "#dc2626",
+                          color: "#ffffff",
+                          fontWeight: "bold",
+                          padding: "2px 8px",
+                          borderRadius: "2px",
+                          fontSize: "10px",
+                        }}
+                      >
                         {inv.paymentStatus}
                       </span>
                     </td>
-                    <td>
-                      <span className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>
-                        {PAYMENT_MODE_LABELS[inv.paymentMode] || inv.paymentMode}
-                      </span>
+                    <td style={{ padding: "8px 10px", textAlign: "center", fontWeight: "bold", color: "#475569" }}>
+                      {PAYMENT_MODE_LABELS[inv.paymentMode] || inv.paymentMode}
                     </td>
-                    <td className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>
-                      <span className="flex items-center gap-1">
-                        <IndianRupee size={12} />
-                        {inv.total.toLocaleString("en-IN")}
-                      </span>
+                    <td style={{ padding: "8px 10px", textAlign: "right", fontWeight: "900", color: "#0f172a" }}>
+                      {formatCurrency(inv.total)}
                     </td>
-                    <td className="text-sm" style={{ color: "var(--text-muted)" }}>
+                    <td style={{ padding: "8px 10px", color: "#475569" }}>
                       {formatDate(inv.createdAt)}
                     </td>
-                    <td>
-                      <div className="flex items-center gap-2">
+                    <td style={{ padding: "8px 10px", textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "4px" }}>
+                        <Link
+                          href={`/billing/${inv.id}`}
+                          style={{
+                            backgroundColor: "#d4d0c8",
+                            borderTop: "2px solid #ffffff",
+                            borderLeft: "2px solid #ffffff",
+                            borderRight: "2px solid #404040",
+                            borderBottom: "2px solid #404040",
+                            padding: "2px 6px",
+                            fontWeight: "bold",
+                            fontSize: "11px",
+                            color: "#000000",
+                            textDecoration: "none",
+                          }}
+                        >
+                          View
+                        </Link>
                         {inv.paymentStatus !== "PAID" && (
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSettleInvoice(inv);
+                            type="button"
+                            onClick={() => handleSettleInvoice(inv)}
+                            style={{
+                              backgroundColor: "#166534",
+                              color: "#ffffff",
+                              borderTop: "2px solid #ffffff",
+                              borderLeft: "2px solid #ffffff",
+                              borderRight: "2px solid #14532d",
+                              borderBottom: "2px solid #14532d",
+                              padding: "2px 6px",
+                              fontWeight: "bold",
+                              fontSize: "11px",
+                              cursor: "pointer",
                             }}
-                            className="btn-secondary px-2 py-1 text-xs flex items-center gap-1"
-                            style={{ color: "#059669", backgroundColor: "rgba(5, 150, 105, 0.1)", borderColor: "rgba(5, 150, 105, 0.2)" }}
-                            title="Settle Payment"
                           >
-                            <IndianRupee size={12} /> Settle
+                            Settle
                           </button>
                         )}
                         <button
+                          type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setEditingInvoiceId(inv.id);
                           }}
-                          className="btn-ghost p-1.5 rounded-lg"
+                          style={{
+                            backgroundColor: "#d4d0c8",
+                            borderTop: "2px solid #ffffff",
+                            borderLeft: "2px solid #ffffff",
+                            borderRight: "2px solid #404040",
+                            borderBottom: "2px solid #404040",
+                            padding: "2px 6px",
+                            fontWeight: "bold",
+                            fontSize: "11px",
+                            color: "#000000",
+                            cursor: "pointer",
+                          }}
                           title="Edit Invoice"
                         >
-                          <Edit3 size={16} />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/billing/${inv.id}`);
-                          }}
-                          className="btn-ghost p-1.5 rounded-lg"
-                          title="View & Print"
-                        >
-                          <Printer size={16} />
+                          Edit
                         </button>
                       </div>
                     </td>
