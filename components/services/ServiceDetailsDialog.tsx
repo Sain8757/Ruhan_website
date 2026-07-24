@@ -126,10 +126,12 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               <div>
                 <label>Workflow Status:</label>
-                <select style={{ width: '100%' }} value={status} onChange={(e) => setStatus(e.target.value)}>
+                <select className="legacy-input" style={{ width: '100%' }} value={status} onChange={(e) => setStatus(e.target.value)}>
                   <option value="PENDING">Pending</option>
+                  <option value="SUBMITTED">Submitted</option>
                   <option value="PROCESSING">Processing</option>
-                  <option value="COMPLETED">Completed</option>
+                  <option value="APPROVED">Approved</option>
+                  <option value="DELIVERED">Delivered</option>
                   <option value="CANCELLED">Cancelled</option>
                 </select>
               </div>
