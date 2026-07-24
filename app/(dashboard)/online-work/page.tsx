@@ -30,14 +30,17 @@ export default function OnlineWorkPage() {
   }, []);
 
   const serviceGroups = useMemo(() => {
-    return servicesData.map((service) => ({
-      id: service.id,
-      title: service.title,
-      orderTitle: `${service.order}. ${service.title}`,
-      subtitle: service.description || "Official portal links & online services",
-      links: service.links || [],
-      raw: service,
-    }));
+    return servicesData.map((service) => {
+      // Remove leading numbers like "1. ", "2. " from title for clean display
+      const cleanTitle = service.title.replace(/^\d+\.\s*/, "");
+      return {
+        id: service.id,
+        title: cleanTitle,
+        subtitle: service.description || "Official portal links & online services",
+        links: service.links || [],
+        raw: service,
+      };
+    });
   }, [servicesData]);
 
   const filteredGroups = useMemo(() => {
@@ -70,15 +73,15 @@ export default function OnlineWorkPage() {
 
   return (
     <div className="page-shell page-shell-list" id="service-list">
-      <div className="border border-[#c7c7c7] bg-white rounded-xl shadow-sm overflow-hidden">
+      <div className="border border-slate-200 bg-white rounded-xl shadow-xs overflow-hidden">
         {/* Header Bar */}
-        <div className="border-b border-[#3b82f6]/20 bg-gradient-to-r from-blue-600 to-indigo-700 px-4 py-3 text-white flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Globe size={18} className="text-blue-200" />
+        <div className="border-b border-blue-600/20 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-5 py-3.5 text-white flex justify-between items-center">
+          <div className="flex items-center gap-2.5">
+            <Globe size={19} className="text-blue-200" />
             <h1 className="text-sm font-bold tracking-wide uppercase">Quick Online Work & Govt Portals Hub</h1>
           </div>
-          <span className="text-xs bg-white/20 px-2.5 py-1 rounded-full font-semibold">
-            {serviceGroups.length} Categories Ready
+          <span className="text-xs bg-white/20 backdrop-blur-xs px-3 py-1 rounded-full font-bold">
+            {serviceGroups.length} Portals Available
           </span>
         </div>
 
@@ -86,22 +89,22 @@ export default function OnlineWorkPage() {
           {/* Search Bar */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-4 rounded-xl bg-slate-50 border border-slate-200">
             <div>
-              <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-                <Sparkles size={18} className="text-blue-600" />
-                Select Category or Search Portal
+              <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
+                <Sparkles size={17} className="text-blue-600" />
+                Select Portal Category
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Click on any category card below to open its dedicated portal links popup
+                Click any category to view official portal links and direct access
               </p>
             </div>
 
             <div className="relative w-full md:w-80">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search portal: Aadhaar, PAN, RTPS..."
+                placeholder="Search: Aadhaar, PAN, Voter, RTPS..."
                 className="w-full pl-9 pr-8 py-2 text-xs font-semibold bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
               {query && (
@@ -115,8 +118,8 @@ export default function OnlineWorkPage() {
             </div>
           </div>
 
-          {/* Categories Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          {/* Clean Categories Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
             {filteredGroups.map((group) => (
               <div
                 key={group.id}
@@ -124,14 +127,13 @@ export default function OnlineWorkPage() {
                 className="group p-4 bg-white border border-slate-200 hover:border-blue-500 hover:shadow-md rounded-xl cursor-pointer transition-all flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <span className="text-xs font-extrabold px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200">
-                      #{group.raw.order || 1}
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200/80">
+                      {group.links.length} Links
                     </span>
-                    <span className="text-[11px] font-bold text-slate-400 group-hover:text-blue-600 transition-colors flex items-center gap-1">
-                      {group.links.length} Links <ExternalLink size={11} />
-                    </span>
+                    <ExternalLink size={13} className="text-slate-400 group-hover:text-blue-600 transition-colors" />
                   </div>
+                  
                   <h3 className="text-sm font-bold text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-1">
                     {group.title}
                   </h3>
@@ -141,10 +143,10 @@ export default function OnlineWorkPage() {
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-xs font-semibold text-blue-600 group-hover:underline">
-                    Tap to Open Links
+                  <span className="text-[11px] font-semibold text-slate-400 group-hover:text-blue-600 transition-colors">
+                    Click for Direct Links
                   </span>
-                  <div className="w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <div className="w-5 h-5 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors text-xs font-bold">
                     →
                   </div>
                 </div>
@@ -161,24 +163,19 @@ export default function OnlineWorkPage() {
         </div>
       </div>
 
-      {/* ── Category Popup Modal ── */}
+      {/* ── Clean Category Popup Modal ── */}
       {activeCategoryModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col border border-slate-200">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[85vh] overflow-hidden flex flex-col border border-slate-200">
             {/* Modal Header */}
             <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center font-black text-lg">
-                  #{activeCategoryModal.raw.order || 1}
-                </div>
-                <div>
-                  <h3 className="font-bold text-base text-white leading-tight">
-                    {activeCategoryModal.title}
-                  </h3>
-                  <p className="text-xs text-blue-100 mt-0.5">
-                    {activeCategoryModal.links.length} Official Portal Direct Links
-                  </p>
-                </div>
+              <div>
+                <h3 className="font-bold text-base text-white leading-tight">
+                  {activeCategoryModal.title}
+                </h3>
+                <p className="text-xs text-blue-100 mt-0.5">
+                  {activeCategoryModal.links.length} Official Direct Links
+                </p>
               </div>
               <button
                 onClick={() => setActiveCategoryModal(null)}
@@ -195,25 +192,20 @@ export default function OnlineWorkPage() {
             </div>
 
             {/* Modal Content Links */}
-            <div className="p-6 overflow-y-auto space-y-3 grow">
+            <div className="p-5 overflow-y-auto space-y-2.5 grow">
               {activeCategoryModal.links && activeCategoryModal.links.length > 0 ? (
                 activeCategoryModal.links.map((link: any, idx: number) => (
                   <div
                     key={link.id || idx}
                     className="p-3.5 rounded-xl border border-slate-200 hover:border-blue-400 bg-white hover:bg-blue-50/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 font-bold text-xs mt-0.5">
-                        {idx + 1}
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-sm text-slate-800 group-hover:text-blue-600 transition-colors">
-                          {link.title}
-                        </h4>
-                        <p className="text-xs text-slate-400 truncate max-w-sm mt-0.5">
-                          {link.href}
-                        </p>
-                      </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-slate-800 group-hover:text-blue-600 transition-colors">
+                        {link.title}
+                      </h4>
+                      <p className="text-xs text-slate-400 truncate max-w-xs mt-0.5">
+                        {link.href}
+                      </p>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
@@ -256,7 +248,7 @@ export default function OnlineWorkPage() {
 
             {/* Modal Footer */}
             <div className="px-6 py-3 bg-slate-50 border-t border-slate-200 flex justify-between items-center text-xs text-slate-500 shrink-0">
-              <span>⚠️ Always verify official URL before entering applicant details.</span>
+              <span>⚠️ Verify URL before submitting applicant details.</span>
               <button
                 onClick={() => setActiveCategoryModal(null)}
                 className="px-4 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold transition-colors"
