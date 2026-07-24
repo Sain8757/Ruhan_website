@@ -17,16 +17,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         if (
-          credentials?.email === "Ruhanahmadxyz123@" && 
-          credentials?.password === "Ruhanxyz@123"
+          credentials?.email === "Alminstore@gmail.com" && 
+          credentials?.password === "Almin@123"
         ) {
-          let hardcodedUser = await prisma.user.findFirst({ where: { email: "admin@raseva.com" } });
+          let hardcodedUser = await prisma.user.findFirst({ where: { email: "Alminstore@gmail.com" } });
           if (!hardcodedUser) {
             hardcodedUser = await prisma.user.create({
               data: {
-                name: "Ruhan Ahmad",
-                email: "admin@raseva.com",
-                password: await bcrypt.hash("Ruhanxyz@123", 10),
+                name: "Almin General Store",
+                email: "Alminstore@gmail.com",
+                password: await bcrypt.hash("Almin@123", 10),
                 role: "ADMIN",
                 isActive: true
               }

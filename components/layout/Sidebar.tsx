@@ -131,7 +131,7 @@ export default function Sidebar({ collapsed, onToggle, className }: SidebarProps
             <div
               className="font-extrabold text-[15px] leading-tight truncate text-slate-800"
             >
-              RA Seva Point
+              Almin General Store
             </div>
             <div className="flex items-center gap-1 mt-0.5">
               <Sparkles size={10} className="text-blue-500" />
@@ -281,7 +281,7 @@ export default function Sidebar({ collapsed, onToggle, className }: SidebarProps
             style={{ color: "rgba(255,255,255,0.15)" }}
           >
             <Heart size={9} style={{ color: "rgba(244,63,94,0.4)" }} />
-            <span className="text-[10px]">Made for RA Seva Point</span>
+            <span className="text-[10px]">Made for Almin General Store</span>
           </div>
         )}
       </div>

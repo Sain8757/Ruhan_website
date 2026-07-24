@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { X, Key } from "lucide-react";
 
-export default function LoginPage() {
+export default function ResetPasswordPage() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -15,22 +15,28 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setMessage("");
     setLoading(true);
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      const res = await fetch("/api/auth/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, newPassword }),
+      });
+      const data = await res.json();
+      
+      if (res.ok) {
+        setMessage("Password reset successfully. You can now login.");
+        setTimeout(() => router.push("/login"), 2000);
+      } else {
+        setError(data.error || "Failed to reset password");
+      }
+    } catch (err) {
+      setError("An error occurred");
+    }
 
     setLoading(false);
-
-    if (result?.error) {
-      setError("Invalid username or password. Please try again.");
-    } else {
-      router.push("/");
-      router.refresh();
-    }
   };
 
   return (
@@ -70,10 +76,10 @@ export default function LoginPage() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
             <Key size={14} color="#ffd700" style={{ filter: 'drop-shadow(1px 1px 1px #000)' }} />
-            Enter Network Password
+            Reset Password
           </div>
           <div style={{ display: 'flex', gap: '2px' }}>
-            <button className="legacy-btn-close" type="button" onClick={() => {}} title="Close">
+            <button className="legacy-btn-close" type="button" onClick={() => router.push("/login")} title="Close">
               <X size={12} strokeWidth={3} />
             </button>
           </div>
@@ -90,7 +96,7 @@ export default function LoginPage() {
 
           <div style={{ flex: 1 }}>
             <div style={{ marginBottom: '16px', fontSize: '11px' }}>
-              Type your user name and password to log on to the RA Seva Point network.
+              Type your user name (email) and your new password to reset it.
             </div>
 
             {error && (
@@ -98,10 +104,15 @@ export default function LoginPage() {
                 {error}
               </div>
             )}
+            
+            {message && (
+              <div style={{ marginBottom: '12px', padding: '4px 8px', backgroundColor: '#ccffcc', border: '1px solid #00cc00', color: '#006600', fontSize: '11px' }}>
+                {message}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               
-              {/* Username */}
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <label style={{ width: '90px' }}>User name:</label>
                 <input
@@ -113,19 +124,17 @@ export default function LoginPage() {
                 />
               </div>
 
-              {/* Password */}
               <div style={{ display: 'flex', alignItems: 'center' }}>
-                <label style={{ width: '90px' }}>Password:</label>
+                <label style={{ width: '90px' }}>New Password:</label>
                 <input
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
                   required
                   style={{ flex: 1 }}
                 />
               </div>
 
-              {/* Buttons */}
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
                 <button
                   type="submit"
@@ -133,21 +142,16 @@ export default function LoginPage() {
                   className="legacy-button"
                   style={{ width: '80px', fontWeight: 'bold' }}
                 >
-                  {loading ? "Please wait" : "OK"}
+                  {loading ? "Please wait" : "Reset"}
                 </button>
                 <button
                   type="button"
                   className="legacy-button"
                   style={{ width: '80px' }}
-                  onClick={() => { setEmail(""); setPassword(""); setError(""); }}
+                  onClick={() => router.push("/login")}
                 >
                   Cancel
                 </button>
-              </div>
-              <div style={{ textAlign: "right", marginTop: "4px" }}>
-                <a href="/reset-password" style={{ color: "blue", textDecoration: "underline", cursor: "pointer", fontSize: "11px" }}>
-                  Reset Password
-                </a>
               </div>
 
             </form>

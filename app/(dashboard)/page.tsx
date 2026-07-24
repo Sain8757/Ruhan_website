@@ -354,10 +354,10 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <div
-          className="w-14 h-14 rounded-2xl flex items-center justify-center animate-pulse-glow"
-          style={{ background: "linear-gradient(135deg, #4f6ef7 0%, #7c3aed 100%)" }}
+          className="w-16 h-16 rounded-2xl flex items-center justify-center animate-pulse-glow bg-white p-2"
+          style={{ border: "2px solid #4f6ef7" }}
         >
-          <Loader2 size={24} className="animate-spin text-white" />
+          <img src="/logo.png" alt="Loading" className="w-full h-full object-contain animate-spin" />
         </div>
         <p className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>
           Loading dashboard...
@@ -479,7 +479,7 @@ export default function DashboardPage() {
             <h1
               className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight"
             >
-              {greeting}, Ruhan! {greetingEmoji}
+              {greeting}, Almin General Store! {greetingEmoji}
             </h1>
             <p
               className="text-xs font-semibold flex items-center gap-1.5"
