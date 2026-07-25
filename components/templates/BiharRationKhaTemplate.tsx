@@ -5,475 +5,372 @@ interface Props {
   data: FormValues;
 }
 
+const CheckBox = ({ label, checked }: { label: string, checked: boolean }) => (
+  <span className="checkbox-group">
+    {label} <span className="box">{checked ? '✓' : ''}</span>
+  </span>
+);
+
 export function BiharRationKhaTemplate({ data }: Props) {
   const tick = '✓';
 
   return (
-    <div className="bg-white text-black text-sm w-[210mm] mx-auto shadow-sm" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>
-      
+    <div className="ration-kha-wrapper" style={{ fontFamily: '"Noto Sans Devanagari", "Mangal", Arial, sans-serif' }}>
+      <style dangerouslySetInnerHTML={{ __html: `
+        .ration-kha-wrapper {
+          color: #111;
+          line-height: 1.5;
+          font-size: 13px;
+        }
+        .ration-kha-wrapper .page {
+          width: 210mm;
+          min-height: 297mm;
+          padding: 25.4mm;
+          background: #fff;
+          position: relative;
+          box-sizing: border-box;
+          page-break-after: always;
+        }
+        .ration-kha-wrapper .header-title {
+          font-weight: bold;
+          font-size: 15px;
+          margin-bottom: 4px;
+          text-align: center;
+        }
+        .ration-kha-wrapper .header-sub {
+          font-size: 13px;
+          margin: 2px 0;
+          text-align: center;
+        }
+        .ration-kha-wrapper .photo-box {
+          position: absolute;
+          top: 35mm;
+          right: 15mm;
+          border: 1px solid #000;
+          width: 25mm;
+          height: 30mm;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          font-size: 11px;
+          overflow: hidden;
+        }
+        .ration-kha-wrapper .photo-box img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .ration-kha-wrapper .field-list {
+          list-style: none;
+          padding-left: 0;
+          margin-top: 40px;
+          width: 140mm;
+        }
+        .ration-kha-wrapper .field-list > li {
+          display: flex;
+          margin-bottom: 6px;
+          align-items: flex-start;
+        }
+        .ration-kha-wrapper .field-list .num {
+          width: 25px;
+          flex-shrink: 0;
+        }
+        .ration-kha-wrapper .field-list .label {
+          width: 180px;
+          flex-shrink: 0;
+        }
+        .ration-kha-wrapper .field-list .fill {
+          flex: 1;
+        }
+        .ration-kha-wrapper .field-list .fill span.u {
+          font-weight: 600;
+          text-decoration: underline;
+          text-decoration-style: dotted;
+          text-underline-offset: 4px;
+        }
+        .ration-kha-wrapper table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 15px;
+          font-size: 11px;
+        }
+        .ration-kha-wrapper table th, .ration-kha-wrapper table td {
+          border: 1px solid #000;
+          padding: 4px;
+          text-align: center;
+          vertical-align: middle;
+          height: 36px;
+        }
+        .ration-kha-wrapper table th {
+          font-weight: normal;
+        }
+        .ration-kha-wrapper table tr.hdr-num td {
+          background-color: #f3f4f6;
+          font-weight: bold;
+          height: auto;
+          padding: 2px;
+        }
+        .ration-kha-wrapper .qlist {
+          padding-left: 20px;
+          margin-top: 20px;
+        }
+        .ration-kha-wrapper .qlist > li {
+          margin-bottom: 12px;
+          font-weight: bold;
+        }
+        .ration-kha-wrapper .qlist .sub {
+          list-style: none;
+          padding-left: 15px;
+          font-weight: normal;
+          margin-top: 8px;
+        }
+        .ration-kha-wrapper .qlist .sub > li {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 6px;
+        }
+        .ration-kha-wrapper .checkbox-group {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          margin-left: 8px;
+        }
+        .ration-kha-wrapper .box {
+          display: inline-flex;
+          width: 16px;
+          height: 16px;
+          border: 1px solid #000;
+          margin: 0 4px;
+          vertical-align: middle;
+        }
+        .ration-kha-wrapper .sign-box {
+          border: 1px solid #000;
+          width: 180px;
+          height: 60px;
+          margin-top: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .ration-kha-wrapper .office-section {
+          border: 1px solid #000;
+          padding: 15px;
+          margin-top: 30px;
+        }
+      `}} />
+
       {/* PAGE 1 */}
-      <div className="w-[210mm] min-h-[297mm] p-[25.4mm] bg-white relative overflow-hidden" style={{ pageBreakAfter: 'always' }}>
-        
-        {/* Header */}
-        <div className="text-center font-bold mb-4">
-          <p className="text-lg">प्रपत्र 'ख'</p>
-          <p className="text-base mt-2">लोक सेवा के अधिकार अधिनियम के अन्तर्गत विद्यमान राशन कार्ड में उपांतरणों</p>
-          <p className="text-base">अथवा विद्यमान राशन कार्ड को प्रत्यर्पण (Surrender)/रद्द करने के लिए</p>
-          <p className="mt-2 text-[11px] font-normal leading-[1.5]">
-            (राष्ट्रीय खाद्य सुरक्षा अधिनियम 2013 (धारा-9) तथा लक्षित सार्वजनिक वितरण प्रणाली (नियंत्रण) आदेश 2015 (कंडिका 3 का
-            <br />
-            उपकंडिका 13, 14 तथा कंडिका 4 उपकंडिका 7, 8, 9) द्रष्टव्य)
-          </p>
+      <div className="page">
+        <div className="header-title">प्रपत्र 'ख'</div>
+        <div className="header-sub">लोक सेवा के अधिकार अधिनियम के अन्तर्गत विद्यमान राशन कार्ड में उपांतरणों</div>
+        <div className="header-sub">अथवा विद्यमान राशन कार्ड को प्रत्यर्पण (Surrender)/रद्द करने के लिए</div>
+        <div style={{ textAlign: 'center', fontSize: '11px', marginTop: '8px', lineHeight: 1.5 }}>
+          (राष्ट्रीय खाद्य सुरक्षा अधिनियम 2013 (धारा-9) तथा लक्षित सार्वजनिक वितरण प्रणाली (नियंत्रण) आदेश 2015 (कंडिका 3 का<br/>
+          उपकंडिका 13, 14 तथा कंडिका 4 उपकंडिका 7, 8, 9) द्रष्टव्य)
         </div>
 
-        {/* Photo Box */}
-        <div className="absolute top-[35mm] right-[15mm] w-[25mm] h-[30mm] border border-black flex items-center justify-center text-center overflow-hidden">
+        <div className="photo-box">
           {data.photoBase64 ? (
-             <img src={data.photoBase64} alt="Applicant" className="w-full h-full object-cover" />
+             <img src={data.photoBase64} alt="Applicant" />
           ) : (
-             <span className="text-xs">पारिवारिक फोटो</span>
+             <span>पारिवारिक फोटो</span>
           )}
         </div>
 
-        {/* Basic Details List */}
-        <div className="space-y-4 mt-12 w-[140mm] text-[13px]">
-          <div className="grid grid-cols-[30px_1fr] gap-2">
-            <span>1.</span>
-            <div className="flex">
-              <span className="w-48">आवेदक का नाम</span>
-              <span className="flex-1">: <span className="ml-2 font-semibold underline decoration-dotted underline-offset-4">{data.applicantName}</span></span>
-            </div>
-          </div>
-          <div className="grid grid-cols-[30px_1fr] gap-2">
-            <span>2.</span>
-            <div className="flex">
-              <span className="w-48">आधार / EID no</span>
-              <span className="flex-1">: <span className="ml-2 font-semibold underline decoration-dotted underline-offset-4">{data.aadhaar}</span></span>
-            </div>
-          </div>
-          <div className="grid grid-cols-[30px_1fr] gap-2">
-            <span>3.</span>
-            <div className="flex">
-              <span className="w-48">मोबाईल नं०</span>
-              <span className="flex-1">: <span className="ml-2 font-semibold underline decoration-dotted underline-offset-4">{data.mobile}</span></span>
-            </div>
-          </div>
-          <div className="grid grid-cols-[30px_1fr] gap-2">
-            <span>4.</span>
-            <div className="flex">
-              <span className="w-48">आवेदक के पति/पिता का नाम</span>
-              <span className="flex-1">: <span className="ml-2 font-semibold underline decoration-dotted underline-offset-4">{data.fatherName}</span></span>
-            </div>
-          </div>
-          <div className="grid grid-cols-[30px_1fr] gap-2">
-            <span>5.</span>
-            <div className="flex">
-              <span className="w-48">पूर्ण आवासीय पता</span>
-              <span className="flex-1">: <span className="ml-2 font-semibold underline decoration-dotted underline-offset-4">{data.address}</span></span>
-            </div>
-          </div>
-          <div className="grid grid-cols-[30px_1fr] gap-2">
-            <span>6.</span>
-            <div className="flex">
-              <span className="w-48">विद्यमान राशन कार्ड की सं०</span>
-              <span className="flex-1">: <span className="ml-2 font-semibold underline decoration-dotted underline-offset-4">{data.existingRationCard}</span></span>
-            </div>
-          </div>
-          <div className="grid grid-cols-[30px_1fr] gap-2">
-            <span>7.</span>
-            <div className="flex">
-              <span className="w-48 leading-[1.5]">सम्बद्ध जन वितरण प्रणाली विक्रेता का नाम एवं अनुज्ञप्ति सं०</span>
-              <span className="flex-1">: <span className="ml-2 font-semibold underline decoration-dotted underline-offset-4">{data.dealerName}</span></span>
-            </div>
-          </div>
-          <div className="grid grid-cols-[30px_1fr] gap-2">
-            <span>8.</span>
-            <div className="flex flex-col">
-              <span>विद्यमान राशन कार्ड में उपांतरण का कारण-</span>
-              <div className="ml-8 mt-2 space-y-2">
-                <div className="flex items-center">
-                  <span>(क) निवास में परिवर्तन</span>
-                  <span className="ml-4 w-6 h-6 border border-black inline-flex items-center justify-center text-lg">{data.reasonForChange === 'Nivas' ? tick : ''}</span>
+        <ul className="field-list">
+          <li><span className="num">1.</span><span className="label">आवेदक का नाम</span><span className="fill">: <span className="u">{data.applicantName}</span></span></li>
+          <li><span className="num">2.</span><span className="label">आधार / EID no</span><span className="fill">: <span className="u">{data.aadhaar}</span></span></li>
+          <li><span className="num">3.</span><span className="label">मोबाईल नं०</span><span className="fill">: <span className="u">{data.mobile}</span></span></li>
+          <li><span className="num">4.</span><span className="label">आवेदक के पति/पिता का नाम</span><span className="fill">: <span className="u">{data.fatherName}</span></span></li>
+          <li><span className="num">5.</span><span className="label">पूर्ण आवासीय पता</span><span className="fill">: <span className="u">{data.address}</span></span></li>
+          <li><span className="num">6.</span><span className="label">विद्यमान राशन कार्ड की सं०</span><span className="fill">: <span className="u">{data.existingRationCard}</span></span></li>
+          <li><span className="num">7.</span><span className="label">सम्बद्ध जन वितरण प्रणाली विक्रेता का नाम एवं अनुज्ञप्ति सं०</span><span className="fill">: <span className="u">{data.dealerName}</span></span></li>
+          <li>
+            <span className="num">8.</span>
+            <div className="fill">
+              <div>विद्यमान राशन कार्ड में उपांतरण का कारण-</div>
+              <div style={{ marginLeft: '20px', marginTop: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+                  <span style={{ width: '220px' }}>(क) निवास में परिवर्तन</span>
+                  <span className="box" style={{ width: '24px', height: '24px', fontSize: '16px', justifyContent: 'center' }}>{data.reasonForChange === 'Nivas' ? tick : ''}</span>
                 </div>
-                <div className="flex items-center">
-                  <span>(ख) जन्म या मृत्यु</span>
-                  <span className="ml-4 w-6 h-6 border border-black inline-flex items-center justify-center text-lg">{data.reasonForChange === 'JanmMrityu' ? tick : ''}</span>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+                  <span style={{ width: '220px' }}>(ख) जन्म या मृत्यु</span>
+                  <span className="box" style={{ width: '24px', height: '24px', fontSize: '16px', justifyContent: 'center' }}>{data.reasonForChange === 'JanmMrityu' ? tick : ''}</span>
                 </div>
-                <div className="flex items-center">
-                  <span>(ग) कार्ड में वर्णित ब्योरो में अशुद्धियाँ</span>
-                  <span className="ml-4 w-6 h-6 border border-black inline-flex items-center justify-center text-lg">{data.reasonForChange === 'Ashuddhiya' ? tick : ''}</span>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+                  <span style={{ width: '220px' }}>(ग) कार्ड में वर्णित ब्योरो में अशुद्धियाँ</span>
+                  <span className="box" style={{ width: '24px', height: '24px', fontSize: '16px', justifyContent: 'center' }}>{data.reasonForChange === 'Ashuddhiya' ? tick : ''}</span>
                 </div>
-                <div className="flex items-center">
-                  <span>(घ) अन्य कारण</span>
-                  <span className="ml-4 w-6 h-6 border border-black inline-flex items-center justify-center text-lg">{data.reasonForChange === 'Anya' ? tick : ''}</span>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+                  <span style={{ width: '220px' }}>(घ) अन्य कारण</span>
+                  <span className="box" style={{ width: '24px', height: '24px', fontSize: '16px', justifyContent: 'center' }}>{data.reasonForChange === 'Anya' ? tick : ''}</span>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="grid grid-cols-[30px_1fr] gap-2 mt-4">
-            <span>9.</span>
-            <span>विद्यमान राशन कार्ड में उपांतरण हेतु विवरणी -</span>
-          </div>
-        </div>
+          </li>
+          <li style={{ marginTop: '12px' }}><span className="num">9.</span><span className="fill">विद्यमान राशन कार्ड में उपांतरण हेतु विवरणी -</span></li>
+        </ul>
 
-        {/* Table 1 (Cols 1-7) */}
-        <div className="mt-4">
-          <table className="w-full border-collapse border border-black text-center text-[11px]">
-            <thead>
-              <tr>
-                <th className="border border-black p-1 font-normal w-10">क्र०</th>
-                <th className="border border-black p-1 font-normal w-36">नाम</th>
-                <th className="border border-black p-1 font-normal w-36">पति/पिता का नाम</th>
-                <th className="border border-black p-1 font-normal w-12">लिंग</th>
-                <th className="border border-black p-1 font-normal w-12">उम्र</th>
-                <th className="border border-black p-1 font-normal w-24">वैवाहिक स्थिति</th>
-                <th className="border border-black p-1 font-normal w-24">संबंध</th>
-              </tr>
-              <tr>
-                <td className="border border-black p-0.5 bg-gray-100 font-bold">1</td>
-                <td className="border border-black p-0.5 bg-gray-100 font-bold">2</td>
-                <td className="border border-black p-0.5 bg-gray-100 font-bold">3</td>
-                <td className="border border-black p-0.5 bg-gray-100 font-bold">4</td>
-                <td className="border border-black p-0.5 bg-gray-100 font-bold">5</td>
-                <td className="border border-black p-0.5 bg-gray-100 font-bold">6</td>
-                <td className="border border-black p-0.5 bg-gray-100 font-bold">7</td>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Show exactly 7 rows for aesthetics matching government form space */}
-              {[...Array(7)].map((_, i) => {
-                const member = data.familyMembers[i] || {};
-                return (
-                  <tr key={i} className="h-[36px]">
-                    <td className="border border-black p-1">{member.name ? i + 1 : ''}</td>
-                    <td className="border border-black p-1">{member.name || ''}</td>
-                    <td className="border border-black p-1">{member.fatherName || ''}</td>
-                    <td className="border border-black p-1">{member.gender || ''}</td>
-                    <td className="border border-black p-1">{member.age || ''}</td>
-                    <td className="border border-black p-1">{member.maritalStatus || ''}</td>
-                    <td className="border border-black p-1">{member.relation || ''}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style={{ width: '40px' }}>क्र०</th>
+              <th>नाम</th>
+              <th>पति/पिता का नाम</th>
+              <th style={{ width: '50px' }}>लिंग</th>
+              <th style={{ width: '50px' }}>उम्र</th>
+              <th style={{ width: '100px' }}>वैवाहिक स्थिति</th>
+              <th style={{ width: '100px' }}>संबंध</th>
+            </tr>
+            <tr className="hdr-num">
+              <td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td>
+            </tr>
+          </thead>
+          <tbody>
+            {[...Array(7)].map((_, i) => {
+              const member = data.familyMembers[i] || {};
+              return (
+                <tr key={i}>
+                  <td>{member.name ? i + 1 : ''}</td>
+                  <td>{member.name || ''}</td>
+                  <td>{member.fatherName || ''}</td>
+                  <td>{member.gender || ''}</td>
+                  <td>{member.age || ''}</td>
+                  <td>{member.maritalStatus || ''}</td>
+                  <td>{member.relation || ''}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
 
       {/* PAGE 2 */}
-      <div className="w-[210mm] min-h-[297mm] p-[25.4mm] bg-white overflow-hidden relative" style={{ pageBreakAfter: 'always' }}>
-        
-        {/* Table 2 (Cols 8-12) */}
-        <table className="w-full border-collapse border border-black text-center text-[11px] mt-2">
-            <thead>
-              <tr>
-                <th className="border border-black p-1 font-normal w-40">आधार / EID no</th>
-                <th className="border border-black p-1 font-normal w-28">मोबाईल नं०</th>
-                <th className="border border-black p-1 font-normal w-28">व्यवसाय / सरकारी सेवक</th>
-                <th className="border border-black p-1 font-normal w-28">आमदनी का स्रोत</th>
-                <th className="border border-black p-1 font-normal w-24">मासिक आय</th>
-              </tr>
-              <tr>
-                <td className="border border-black p-0.5 bg-gray-100 font-bold">8</td>
-                <td className="border border-black p-0.5 bg-gray-100 font-bold">9</td>
-                <td className="border border-black p-0.5 bg-gray-100 font-bold">10</td>
-                <td className="border border-black p-0.5 bg-gray-100 font-bold">11</td>
-                <td className="border border-black p-0.5 bg-gray-100 font-bold">12</td>
-              </tr>
-            </thead>
-            <tbody>
-              {/* Show 7 rows to match page 1 */}
-              {[...Array(7)].map((_, i) => {
-                const member = data.familyMembers[i] || {};
-                return (
-                  <tr key={i} className="h-[36px]">
-                    <td className="border border-black p-1">{member.aadhaar || ''}</td>
-                    <td className="border border-black p-1">{member.mobile || ''}</td>
-                    <td className="border border-black p-1">{member.occupation || ''}</td>
-                    <td className="border border-black p-1">{member.incomeSource || ''}</td>
-                    <td className="border border-black p-1">{member.monthlyIncome || ''}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+      <div className="page">
+        <table>
+          <thead>
+            <tr>
+              <th style={{ width: '150px' }}>आधार / EID no</th>
+              <th style={{ width: '100px' }}>मोबाईल नं०</th>
+              <th>व्यवसाय / सरकारी सेवक</th>
+              <th>आमदनी का स्रोत</th>
+              <th style={{ width: '100px' }}>मासिक आय</th>
+            </tr>
+            <tr className="hdr-num">
+              <td>8</td><td>9</td><td>10</td><td>11</td><td>12</td>
+            </tr>
+          </thead>
+          <tbody>
+            {[...Array(7)].map((_, i) => {
+              const member = data.familyMembers[i] || {};
+              return (
+                <tr key={i}>
+                  <td>{member.aadhaar || ''}</td>
+                  <td>{member.mobile || ''}</td>
+                  <td>{member.occupation || ''}</td>
+                  <td>{member.incomeSource || ''}</td>
+                  <td>{member.monthlyIncome || ''}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
 
-          <div className="mt-8 text-[13px] leading-[1.6]">
-            <div className="flex gap-2 font-bold mb-2">
-               <span>10.</span>
-               <span>विद्यमान राशन कार्ड को प्रत्यर्पण/रद्द करने का कारण -</span>
-            </div>
-            
-            {/* Gramin Kshetra */}
-            <div className="mt-2 ml-6">
-              <p className="font-bold">
-                 (क) ग्रामीण क्षेत्र में प्रवास, जन्म, विवाह, सामाजिक और आर्थिक परिस्थिति में परिवर्तन के कारण आवेदक निम्नलिखित पर हाँ/नहीं, पर टिक लगाये :-
-              </p>
-              
-              <div className="space-y-1 mt-4">
-                <div className="flex items-center gap-1 justify-between pr-10">
-                  <span className="flex-1">(i) मोटर चालित तिपहिया/चार पहिया वाहन है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.ruralDeclarations?.motorVehicle ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.ruralDeclarations && !data.ruralDeclarations.motorVehicle ? tick : ''}</span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-1 justify-between pr-10">
-                  <span className="flex-1">(ii) मशीन चालित तीन/चार पहियों वाले कृषि उपकरण है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.ruralDeclarations?.machineEquip ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.ruralDeclarations && !data.ruralDeclarations.machineEquip ? tick : ''}</span>
-                  </div>
-                </div>
+        <div style={{ marginTop: '30px', fontWeight: 'bold' }}>
+          10. विद्यमान राशन कार्ड को प्रत्यर्पण/रद्द करने का कारण -
+        </div>
 
-                <div className="flex items-center gap-1 justify-between pr-10">
-                  <span className="flex-1">(iii) सरकार में पंजीकृत गैर-कृषि उद्योग वाले परिवार वाली गृहस्थी है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.ruralDeclarations?.govtRegIndustry ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.ruralDeclarations && !data.ruralDeclarations.govtRegIndustry ? tick : ''}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1 justify-between pr-10">
-                  <span className="flex-1">(iv) परिवार के किसी सदस्य की मासिक आय 10,000/- रू0 से अधिक है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.ruralDeclarations?.incomeOver10k ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.ruralDeclarations && !data.ruralDeclarations.incomeOver10k ? tick : ''}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1 justify-between pr-10">
-                  <span className="flex-1">(v) आयकर देते है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.ruralDeclarations?.incomeTax ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.ruralDeclarations && !data.ruralDeclarations.incomeTax ? tick : ''}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1 justify-between pr-10">
-                  <span className="flex-1">(vi) व्यावसायिक कर का भुगतान करते है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.ruralDeclarations?.commercialTax ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.ruralDeclarations && !data.ruralDeclarations.commercialTax ? tick : ''}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1 justify-between pr-10">
-                  <span className="flex-1">(vii) जिस मकान में रहते है, उस मकान में सभी कमरों में पक्की दीवारों और छत के साथ तीन अथवा अधिक कमरा है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.ruralDeclarations?.puccaHouse3Rooms ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.ruralDeclarations && !data.ruralDeclarations.puccaHouse3Rooms ? tick : ''}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-1 justify-between pr-10">
-                  <span className="flex-1">(viii) परिवार में कम से कम एक सिंचाई उपकरण के साथ 2.5 एकड़ अथवा इससे अधिक सिंचित भूमि है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.ruralDeclarations?.irrigatedLand2_5 ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.ruralDeclarations && !data.ruralDeclarations.irrigatedLand2_5 ? tick : ''}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-1 justify-between pr-10">
-                  <span className="flex-1">(ix) दो अथवा उससे अधिक फसली मौसम के लिए 5 एकड़ अथवा इससे अधिक सिंचित भूमि वाली गृहस्थी है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.ruralDeclarations?.irrigatedLand5 ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.ruralDeclarations && !data.ruralDeclarations.irrigatedLand5 ? tick : ''}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-1 justify-between pr-10">
-                  <span className="flex-1">(x) कम से कम एक सिंचाई उपकरण के साथ कम से कम 7.5 एकड़ अथवा इससे अधिक भूमि वाली गृहस्थी है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.ruralDeclarations?.irrigatedLand7_5 ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.ruralDeclarations && !data.ruralDeclarations.irrigatedLand7_5 ? tick : ''}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-1 justify-between pr-10">
-                     <span className="flex-1">(xi) आवेदक अथवा आवेदक के परिवार का कोई सदस्य सरकारी सेवा में है,</span>
-                     <div className="flex items-center">
-                        <span>हाँ</span>
-                        <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.ruralDeclarations?.govtServant ? tick : ''}</span>
-                        <span>नहीं</span>
-                        <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.ruralDeclarations && !data.ruralDeclarations.govtServant ? tick : ''}</span>
-                     </div>
-                  </div>
-                  <div className="ml-8 mt-2 space-y-1">
-                     <p>अगर है तो उसका विवरण -</p>
-                     <p>(क) किस सेवा में है - <span className="font-semibold underline decoration-dotted underline-offset-4 px-2">{data.ruralDeclarations?.govtServantDetails?.serviceName || ''}</span></p>
-                     <p>(ख) कहाँ पदस्थापित है - <span className="font-semibold underline decoration-dotted underline-offset-4 px-2">{data.ruralDeclarations?.govtServantDetails?.postingPlace || ''}</span></p>
-                     <p>(ग) कितना मासिक आमदनी है - <span className="font-semibold underline decoration-dotted underline-offset-4 px-2">{data.ruralDeclarations?.govtServantDetails?.monthlyIncome || ''}</span></p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <ol className="qlist" style={{ listStyleType: 'none', marginLeft: '-20px' }}>
+          <li>(क) ग्रामीण क्षेत्र में प्रवास, जन्म, विवाह, सामाजिक और आर्थिक परिस्थिति में परिवर्तन के कारण आवेदक निम्नलिखित पर हाँ/नहीं, पर टिक लगाये :-
+            <ul className="sub">
+              <li>(i) मोटर चालित तिपहिया/चार पहिया वाहन है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.motorVehicle === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.motorVehicle === false} /></div></li>
+              <li>(ii) मशीन चालित तीन/चार पहियों वाले कृषि उपकरण है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.machineEquip === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.machineEquip === false} /></div></li>
+              <li>(iii) सरकार में पंजीकृत गैर-कृषि उद्योग वाले परिवार वाली गृहस्थी है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.govtRegIndustry === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.govtRegIndustry === false} /></div></li>
+              <li>(iv) परिवार के किसी सदस्य की मासिक आय 10,000/- रू0 से अधिक है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.incomeOver10k === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.incomeOver10k === false} /></div></li>
+              <li>(v) आयकर देते है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.incomeTax === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.incomeTax === false} /></div></li>
+              <li>(vi) व्यावसायिक कर का भुगतान करते है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.commercialTax === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.commercialTax === false} /></div></li>
+              <li>(vii) जिस मकान में रहते है, उस मकान में सभी कमरों में पक्की दीवारों और छत के साथ तीन अथवा अधिक कमरा है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.puccaHouse3Rooms === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.puccaHouse3Rooms === false} /></div></li>
+              <li>(viii) परिवार में कम से कम एक सिंचाई उपकरण के साथ 2.5 एकड़ अथवा इससे अधिक सिंचित भूमि है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.irrigatedLand2_5 === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.irrigatedLand2_5 === false} /></div></li>
+              <li>(ix) दो अथवा उससे अधिक फसली मौसम के लिए 5 एकड़ अथवा इससे अधिक सिंचित भूमि वाली गृहस्थी है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.irrigatedLand5 === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.irrigatedLand5 === false} /></div></li>
+              <li>(x) कम से कम एक सिंचाई उपकरण के साथ कम से कम 7.5 एकड़ अथवा इससे अधिक सिंचित भूमि वाली गृहस्थी है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.irrigatedLand7_5 === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.irrigatedLand7_5 === false} /></div></li>
+            </ul>
+          </li>
+        </ol>
       </div>
 
       {/* PAGE 3 */}
-      <div className="w-[210mm] min-h-[297mm] p-[25.4mm] bg-white relative overflow-hidden" style={{ pageBreakAfter: 'auto' }}>
-            {/* Shahari Kshetra */}
-            <div className="mt-4 text-[13px] leading-[1.6] ml-6">
-              <p className="font-bold">
-                 (ख) शहरी क्षेत्र में प्रवास, जन्म, विवाह, सामाजिक और आर्थिक प्रास्थिति में परिवर्तन के कारण आवेदक निम्नलिखित पर हाँ/नहीं, पर टिक लगाये :-
-              </p>
-              
-              <div className="space-y-1 mt-4">
-                <div className="flex items-center gap-1 justify-between pr-10">
-                  <span className="flex-1">(i) आयकर अदा करते है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.urbanDeclarations?.incomeTax ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.urbanDeclarations && !data.urbanDeclarations.incomeTax ? tick : ''}</span>
-                  </div>
-                </div>
+      <div className="page">
+        <ol className="qlist" style={{ listStyleType: 'none', marginLeft: '-20px', marginTop: 0 }}>
+          <li>(ख) शहरी क्षेत्र में प्रवास, जन्म, विवाह, सामाजिक और आर्थिक परिस्थिति में परिवर्तन के कारण आवेदक निम्नलिखित पर हाँ/नहीं, पर टिक लगाये :-
+            <ul className="sub">
+              <li>(i) आयकर देते है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.incomeTax === true} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.incomeTax === false} /></div></li>
+              <li>(ii) परिवार में कोई सदस्य सरकारी सेवा में है (सरकारी सेवा से तात्पर्य है- केन्द्र एवं राज्य सरकार/लोक उपक्रम, स्थानीय निकाय एवं स्वशासी संस्थाओं में नियमित वेतनमान में कार्यरत कर्मी, (अनु०जाति/अनु०जन०जाति के ग्रुप "डी" को छोड़कर)), <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.govtServant === true} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.govtServant === false} /></div></li>
+              <li>(iii) व्यावसायिक कर का भुगतान करते है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.commercialTax === true} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.commercialTax === false} /></div></li>
+              <li>(iv) जिस मकान में रहते है, उस मकान में सभी कमरों में पक्की दीवारों और छत के साथ तीन अथवा अधिक कमरा है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.puccaHouse3Rooms === true} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.puccaHouse3Rooms === false} /></div></li>
+              <li>(v) परिवार के किसी सदस्य का मासिक आय 20,000/- रू0 से अधिक है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.incomeOver20k === true} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.incomeOver20k === false} /></div></li>
+              <li>(vi) दो पहिया वाहन, रेफ्रीजरेटर तथा वाशिंग मशीन तीनों उपकरण है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.threeAppliances === true} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.threeAppliances === false} /></div></li>
+              <li>(vii) गृहस्थी में चार पहिया वाहन है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.fourWheeler === true} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.fourWheeler === false} /></div></li>
+              <li>(viii) गृहस्थी में वाशिंग मशीन है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.washingMachine === true} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.washingMachine === false} /></div></li>
+            </ul>
+          </li>
+        </ol>
 
-                <div className="flex flex-col gap-1">
-                  <div className="flex flex-wrap items-center gap-1 justify-between pr-10">
-                     <span className="flex-1 w-4/5 leading-snug">(ii) आवेदक अथवा आवेदक के परिवार का कोई सदस्य वर्ग 1, वर्ग 2, वर्ग 3 एवं वर्ग 4 श्रेणी के सरकारी सेवा (अनु०जाति/अनु० जनजाति के Group 'D' के कर्मी को छोड़कर) में है,</span>
-                     <div className="flex items-center">
-                        <span>हाँ</span>
-                        <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.urbanDeclarations?.govtServant ? tick : ''}</span>
-                        <span>नहीं</span>
-                        <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.urbanDeclarations && !data.urbanDeclarations.govtServant ? tick : ''}</span>
-                     </div>
-                  </div>
-                  <div className="ml-8 mt-2 space-y-1">
-                     <p>अगर हाँ तो उसका विवरण -</p>
-                     <p>(क) किस सेवा में है - <span className="font-semibold underline decoration-dotted underline-offset-4 px-2">{data.urbanDeclarations?.govtServantDetails?.serviceName || ''}</span></p>
-                     <p>(ख) कहाँ पदस्थापित है - <span className="font-semibold underline decoration-dotted underline-offset-4 px-2">{data.urbanDeclarations?.govtServantDetails?.postingPlace || ''}</span></p>
-                     <p>(ग) कितनी मासिक आमदनी है - <span className="font-semibold underline decoration-dotted underline-offset-4 px-2">{data.urbanDeclarations?.govtServantDetails?.monthlyIncome || ''}</span></p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1 justify-between pr-10 mt-2">
-                  <span className="flex-1">(iii) व्यवसायिक कर अदा करते है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.urbanDeclarations?.commercialTax ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.urbanDeclarations && !data.urbanDeclarations.commercialTax ? tick : ''}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-1 justify-between pr-10">
-                  <span className="flex-1">(iv) तीन कमरे या उससे अधिक (पक्का) कंक्रीट छतयुक्त मकान वाली गृहस्थी जो स्वयं की स्वामित्व में है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.urbanDeclarations?.puccaHouse3Rooms ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.urbanDeclarations && !data.urbanDeclarations.puccaHouse3Rooms ? tick : ''}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1 justify-between pr-10">
-                  <span className="flex-1">(v) परिवार के किसी सदस्य का मासिक आय 20,000/- रू0 से अधिक है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.urbanDeclarations?.incomeOver20k ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.urbanDeclarations && !data.urbanDeclarations.incomeOver20k ? tick : ''}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1 justify-between pr-10">
-                  <span className="flex-1">(vi) दो पहिया वाहन, रेफ्रीजरेटर तथा वाशिंग मशीन तीनों उपकरण है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.urbanDeclarations?.threeAppliances ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.urbanDeclarations && !data.urbanDeclarations.threeAppliances ? tick : ''}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1 justify-between pr-10">
-                  <span className="flex-1">(vii) गृहस्थी में चार पहिया वाहन है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.urbanDeclarations?.fourWheeler ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.urbanDeclarations && !data.urbanDeclarations.fourWheeler ? tick : ''}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1 justify-between pr-10">
-                  <span className="flex-1">(viii) गृहस्थी में वाशिंग मशीन है,</span>
-                  <div className="flex items-center">
-                    <span>हाँ</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center mx-2 text-xs">{data.urbanDeclarations?.washingMachine ? tick : ''}</span>
-                    <span>नहीं</span>
-                    <span className="w-5 h-4 border border-black inline-flex items-center justify-center ml-2 text-xs">{data.urbanDeclarations && !data.urbanDeclarations.washingMachine ? tick : ''}</span>
-                  </div>
-                </div>
-             </div>
-
-             <div className="mt-8 mx-8">
-                <p className="font-bold text-justify leading-[1.8]">
-                   उपरोक्त कंडिका ........ के अनुसार विद्यमान राशन कार्ड में आवश्यक उपांतरण किया जाय / कंडिका ........ के अनुसार पात्र गृहस्थियों हेतु मानक मानदंड से बाहर हो जाने के कारण विद्यमान राशन कार्ड को रद्द कर दिया जाय (राशन कार्ड संलग्न)
-                </p>
-             </div>
-
-             <div className="flex justify-between items-end mt-16 pr-10">
-               <div>
-                  <p>दिनांक: <span className="font-semibold underline decoration-dotted underline-offset-4 px-2">{data.date}</span></p>
-                  <p className="mt-2">स्थान: <span className="font-semibold underline decoration-dotted underline-offset-4 px-2">{data.place}</span></p>
-               </div>
-               <div className="text-center">
-                  <div className="w-[45mm] h-[15mm] border-b border-black mb-2 flex items-end justify-center relative">
-                    {data.signatureBase64 && <img src={data.signatureBase64} alt="Signature" className="max-h-full max-w-full object-contain absolute bottom-0" />}
-                  </div>
-                  <p>आवेदक का हस्ताक्षर/अंगूठे का निशान</p>
-                  <p className="mt-1 font-semibold">{data.applicantName}</p>
-               </div>
-             </div>
-
-             <div className="mt-16 text-center font-bold text-lg underline underline-offset-4">
-                घोषणा
-             </div>
-             
-             <div className="mt-6">
-                <p className="font-bold">महोदया / महोदय</p>
-                <p className="indent-10 mt-2 text-justify leading-[1.8] font-bold">मैं परिवार सहित यह घोषणा करता हूँ की आवेदन-पत्र में लिखी गई सभी प्रविष्टियाँ सही है । अगर आवेदन पत्र में लिखित कोई तथ्य गलत पाया जाता है तो मैं दंडात्मक/कानूनी कार्रवाई का भागी होऊँगा ।</p>
-             </div>
-
-             <div className="flex justify-between items-end mt-20 pr-10">
-               <div>
-                  <p>दिनांक: <span className="font-semibold underline decoration-dotted underline-offset-4 px-2">{data.date}</span></p>
-                  <p className="mt-2">स्थान: <span className="font-semibold underline decoration-dotted underline-offset-4 px-2">{data.place}</span></p>
-               </div>
-               <div className="text-center">
-                  <div className="w-[45mm] h-[15mm] border-b border-black mb-2 flex items-end justify-center relative">
-                    {data.signatureBase64 && <img src={data.signatureBase64} alt="Signature" className="max-h-full max-w-full object-contain absolute bottom-0" />}
-                  </div>
-                  <p>आवेदक का हस्ताक्षर/अंगूठे का निशान</p>
-                  <p className="mt-1 font-semibold">{data.applicantName}</p>
-               </div>
-             </div>
+        <div className="office-section" style={{ marginTop: '40px' }}>
+          <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '15px', marginBottom: '15px' }}>
+            विद्यमान राशन कार्ड में उपांतरणों / रद्द करने के लिए घोषणा
           </div>
+          <div style={{ textAlign: 'justify', lineHeight: 1.6 }}>
+            मैं / हम एतद् द्वारा यह घोषणा करता / करते हूँ / है कि ऊपर दी गई सभी प्रविष्टियाँ मेरे / हमारे ज्ञान और विश्वास के अनुसार सत्य है और कोई तथ्य छिपाया नहीं गया है। मैं / हम इसके भली - भाँति अवगत हूँ / है कि ऊपर दी गई कोई भी सूचना यदि जाँच के बाद झूठी पाई जाती है, तो मैं / हम आवश्यक वस्तु अधिनियम, 1955 (1955 का 10) की धारा-9 के अंतर्गत दाण्डिक कार्रवाई तथा अन्य संबंधित विधिक प्रावधानों के अंतर्गत उत्तरदायी होऊँगा / होंगे।
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '40px', alignItems: 'flex-start' }}>
+            <div style={{ lineHeight: 1.6 }}>
+              <div>स्थान: <span style={{ fontWeight: 'bold' }}>{data.place || '..........................'}</span></div>
+              <div>दिनांक: <span style={{ fontWeight: 'bold' }}>{data.date || '..........................'}</span></div>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div className="sign-box" style={{ position: 'relative' }}>
+                {data.signatureBase64 ? (
+                  <img src={data.signatureBase64} alt="Signature" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                ) : (
+                  <div style={{ opacity: 0.3 }}>हस्ताक्षर</div>
+                )}
+              </div>
+              <div style={{ marginTop: '5px' }}>आवेदक का हस्ताक्षर/ अंगूठे का निशान</div>
+              <div style={{ marginTop: '5px' }}>नाम: <span style={{ fontWeight: 'bold' }}>{data.applicantName}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* PAGE 4 */}
+      <div className="page">
+        <div className="office-section" style={{ marginTop: '40px', border: '1px dashed #000' }}>
+          <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: '14px', marginBottom: '15px', textDecoration: 'underline' }}>
+            कार्यालय उपयोग के लिए
+          </div>
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
+             <div>प्रपत्र - ख क्रमांक सं०: ...............................</div>
+             <div>दिनांक: ...............................</div>
+          </div>
+          
+          <div style={{ lineHeight: 1.8 }}>
+            श्री / श्रीमती .................................................................................................................................................................................. से <br/>
+            विद्यमान राशन कार्ड सं० ........................................................................................................................................................ में <br/>
+            उपांतरण / प्रत्यर्पण (Surrender) / रद्द करने के लिए आवेदन प्राप्त हुआ।
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '50px' }}>
+            <div style={{ textAlign: 'center' }}>
+               <div>..................................................................</div>
+               <div>(प्राप्तकर्ता पदाधिकारी का हस्ताक्षर एवं मुहर)</div>
+            </div>
+          </div>
+        </div>
       </div>
 
     </div>

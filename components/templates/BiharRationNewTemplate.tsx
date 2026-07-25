@@ -16,24 +16,34 @@ export default function BiharRationNewTemplate({ data, photoSrc, signatureSrc }:
   const tick = "✓";
 
   return (
-    <div className="font-sans text-black" style={{ width: a4Width, boxSizing: 'border-box', backgroundColor: '#fff' }}>
+    <div className="ration-new-wrapper" style={{ fontFamily: '"Noto Sans Devanagari", "Mangal", Arial, sans-serif' }}>
+      <style dangerouslySetInnerHTML={{ __html: `
+        .ration-new-wrapper {
+          color: #111;
+          line-height: 1.5;
+          font-size: 13px;
+        }
+        .ration-new-wrapper .page {
+          width: 210mm;
+          min-height: 297mm;
+          padding: 15mm;
+          background: #fff;
+          position: relative;
+          box-sizing: border-box;
+          page-break-after: always;
+        }
+        .ration-new-wrapper .section-header {
+          background-color: #d1d5db; /* gray-300 */
+          text-align: center;
+          font-weight: bold;
+          padding: 4px;
+          font-size: 13px;
+          border: 1px solid #000;
+        }
+      `}} />
+      
       {/* -------------------- PAGE 1 -------------------- */}
-      <div 
-        style={{ 
-          width: a4Width, 
-          height: a4Height, 
-          padding: "15mm 15mm 15mm 15mm", 
-          position: "relative",
-          pageBreakAfter: "always",
-          backgroundColor: '#fff',
-          boxSizing: 'border-box'
-        }}
-      >
-        {/* Background Image - Absolute Positioning - Developer guide only, user won't print this if they remove it */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: 'none', opacity: 1 }}>
-          <img src="/assets/forms/ration-new-page-1.jpg" alt="" style={{ width: '100%', height: '100%', objectFit: 'fill' }} />
-        </div>
-
+      <div className="page">
         {/* Content Overlay */}
         <div style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%' }}>
           {/* Main Title Header */}
@@ -47,8 +57,8 @@ export default function BiharRationNewTemplate({ data, photoSrc, signatureSrc }:
           <table className="w-full border-collapse border border-black text-sm">
             <tbody>
               {/* Section: Applicant Details */}
-              <tr className="bg-gray-300">
-                <td colSpan={4} className="border border-black text-center font-bold py-1 text-[13px]">-:: आवेदक का विवरण ::-</td>
+              <tr className="section-header">
+                <td colSpan={4}>-:: आवेदक का विवरण ::-</td>
               </tr>
               
               {/* Row 1 */}
@@ -152,8 +162,8 @@ export default function BiharRationNewTemplate({ data, photoSrc, signatureSrc }:
               </tr>
 
               {/* Section: Bank Details */}
-              <tr className="bg-gray-300">
-                <td colSpan={4} className="border border-black text-center font-bold py-1 text-[13px]">-:: बैंक का विवरण ::-</td>
+              <tr className="section-header">
+                <td colSpan={4}>-:: बैंक का विवरण ::-</td>
               </tr>
               
               {/* Bank 1 */}
@@ -193,8 +203,8 @@ export default function BiharRationNewTemplate({ data, photoSrc, signatureSrc }:
               </tr>
 
               {/* Section: Documents */}
-              <tr className="bg-gray-300">
-                <td colSpan={4} className="border border-black text-center font-bold py-1 text-[13px]">-:: संलग्न दस्तावेज ::-</td>
+              <tr className="section-header">
+                <td colSpan={4}>-:: संलग्न दस्तावेज ::-</td>
               </tr>
 
               {/* Doc 1 */}
@@ -241,8 +251,8 @@ export default function BiharRationNewTemplate({ data, photoSrc, signatureSrc }:
           {/* Section: Family Table */}
           <table className="w-full border-collapse border border-black text-sm mt-0 border-t-0">
             <tbody>
-              <tr className="bg-gray-300">
-                <td colSpan={6} className="border border-black text-center font-bold py-1 text-[13px]">-:: राशन कार्ड में जोड़े जाने वाले सदस्यों का विवरण ::-</td>
+              <tr className="section-header">
+                <td colSpan={6}>-:: राशन कार्ड के लिए परिवार के अन्य सदस्यों का विवरण ::-</td>
               </tr>
               <tr className="font-bold text-[12px] text-center italic">
                 <td className="border border-black py-1 w-12">क्र०</td>
@@ -276,21 +286,7 @@ export default function BiharRationNewTemplate({ data, photoSrc, signatureSrc }:
       </div>
 
       {/* -------------------- PAGE 2 -------------------- */}
-      <div 
-        style={{ 
-          width: a4Width, 
-          height: a4Height, 
-          padding: "20mm 15mm 20mm 15mm", 
-          position: "relative",
-          backgroundColor: '#fff',
-          boxSizing: 'border-box'
-        }}
-      >
-        {/* Background Image - Absolute Positioning */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: 'none', opacity: 1 }}>
-          <img src="/assets/forms/ration-new-page-2.jpg" alt="" style={{ width: '100%', height: '100%', objectFit: 'fill' }} />
-        </div>
-
+      <div className="page">
         {/* Content Overlay */}
         <div style={{ position: 'relative', zIndex: 1, width: '100%', height: '100%' }}>
           
