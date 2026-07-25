@@ -138,6 +138,14 @@ export const WORKSPACE_MODULES: WorkspaceModule[] = [
     keywords: ["bihar", "rtps", "domicile", "residence", "passport", "voter", "pan", "aadhaar", "ration", "online"],
   },
   {
+    id: "manual-forms",
+    label: "Manual Form Filling",
+    href: "/manual-forms",
+    icon: "FilePlus2",
+    section: "Tools",
+    keywords: ["ration", "bihar", "form", "pdf", "generate", "manual filling"],
+  },
+  {
     id: "counter-desk",
     label: "Counter Desk",
     href: "/counter-desk",
@@ -303,7 +311,7 @@ export function getPageTitle(pathname: string): string {
     (module) => module.href !== "/" && pathname.startsWith(module.href)
   );
 
-  return nested?.label || "RA Seva Point";
+  return nested?.label || "Almin General Store";
 }
 
 export function matchesCommand(command: WorkspaceCommand, query: string): boolean {
