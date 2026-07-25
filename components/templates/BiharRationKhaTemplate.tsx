@@ -27,7 +27,7 @@ export function BiharRationKhaTemplate({ data }: Props) {
         </div>
 
         {/* Photo Box */}
-        <div className="absolute top-[35mm] right-[15mm] w-[35mm] h-[45mm] border border-black flex items-center justify-center text-center overflow-hidden">
+        <div className="absolute top-[35mm] right-[15mm] w-[25mm] h-[30mm] border border-black flex items-center justify-center text-center overflow-hidden">
           {data.photoBase64 ? (
              <img src={data.photoBase64} alt="Applicant" className="w-full h-full object-cover" />
           ) : (

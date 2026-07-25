@@ -147,29 +147,31 @@ export default function RationCardFormPage() {
       
       const html = container.innerHTML;
 
-      const res = await fetch('/api/generate-form-pdf', {
+      const response = await fetch('/api/generate-form-pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ html })
       });
 
-      if (!res.ok) {
-        throw new Error("Failed to generate PDF from server");
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`PDF generation failed (${response.status}): ${errorText.substring(0, 100)}`);
       }
 
-      const blob = await res.blob();
+      const blob = await response.blob();
       const url = URL.createObjectURL(blob);
+      setPdfUrl(url);
       
-      // Auto-trigger download
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'Ration_Card_Form_Bihar.pdf';
-      a.click();
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = "Ration_Card_Form_Bihar.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-      setPdfUrl(url); // Also store it
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      alert("Failed to generate PDF. Check console for details.");
+    } catch (error: any) {
+      console.error('Error generating PDF:', error);
+      alert(`Failed to generate PDF. Error: ${error.message}`);
     } finally {
       setIsGenerating(false);
     }

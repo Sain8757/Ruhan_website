@@ -91,7 +91,10 @@ export default function RationCardKaApplyForm() {
         body: JSON.stringify({ html }),
       });
 
-      if (!response.ok) throw new Error('PDF generation failed');
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`PDF generation failed (${response.status}): ${errorText.substring(0, 100)}`);
+      }
 
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
@@ -104,9 +107,9 @@ export default function RationCardKaApplyForm() {
       link.click();
       document.body.removeChild(link);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating PDF:', error);
-      alert('Failed to generate PDF. Please try again.');
+      alert(`Failed to generate PDF. Error: ${error.message}`);
     } finally {
       setIsGenerating(false);
     }

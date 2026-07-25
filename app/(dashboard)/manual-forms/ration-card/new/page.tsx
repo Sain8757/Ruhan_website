@@ -80,18 +80,22 @@ export default function RationCardNewApplyForm() {
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to generate PDF');
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`PDF generation failed (${response.status}): ${errorText.substring(0, 100)}`);
+      }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${data.applicantNameEn || 'Ration_New_Apply'}.pdf`;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Bihar_Ration_Card_${data.applicantNameEn || 'Application'}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error: any) {
       console.error('Error generating PDF:', error);
-      alert('Failed to generate PDF. Please try again.');
+      alert(`Failed to generate PDF. Error: ${error.message}`);
     } finally {
       setIsGenerating(false);
     }
