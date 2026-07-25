@@ -412,7 +412,7 @@ export function BiharRationKaTemplate({ data }: Props) {
           <div>स्थान <span className="line-fill">: {data.place}</span></div>
         </div>
 
-        <div className="office-section p-4 border border-black mt-8 bg-slate-50">
+        <div className="office-section p-4 border border-black mt-8">
           <p className="font-bold underline mb-4">पूर्विकताप्राप्त गृहस्थी के अन्तर्गत :–</p>
           <div className="row mb-4">
             <div>आवेदन पत्र – स्वीकृत <span className="box"></span> &nbsp;&nbsp; अस्वीकृत <span className="box"></span></div>
