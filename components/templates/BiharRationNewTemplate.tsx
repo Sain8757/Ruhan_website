@@ -26,7 +26,7 @@ export default function BiharRationNewTemplate({ data, photoSrc, signatureSrc }:
         .ration-new-wrapper .page {
           width: 210mm;
           min-height: 297mm;
-          padding: 15mm;
+          padding: 10mm;
           background: #fff;
           position: relative;
           box-sizing: border-box;

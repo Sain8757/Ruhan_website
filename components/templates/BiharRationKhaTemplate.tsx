@@ -25,7 +25,7 @@ export function BiharRationKhaTemplate({ data }: Props) {
         .ration-kha-wrapper .page {
           width: 210mm;
           min-height: 297mm;
-          padding: 25.4mm;
+          padding: 10mm;
           background: #fff;
           position: relative;
           box-sizing: border-box;
