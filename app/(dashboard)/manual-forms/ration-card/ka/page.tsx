@@ -104,7 +104,7 @@ export default function RationCardKaApplyForm() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Form Section */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden h-[calc(100vh-12rem)] overflow-y-auto">
@@ -114,7 +114,8 @@ export default function RationCardKaApplyForm() {
               <h2 className="font-bold text-slate-800">Fill Application Details</h2>
             </div>
             <button
-              onClick={handleSubmit(generatePDF)}
+              type="button"
+              onClick={(e) => { e.preventDefault(); generatePDF(watch()); }}
               disabled={isGenerating}
               className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm font-medium"
             >

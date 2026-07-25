@@ -28,13 +28,27 @@ export default function ManualFormsDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 bg-slate-50/50">
           
           {/* Sub-category: New Apply */}
-          <Link href="/manual-forms/ration-card/ka" className="group">
+          <Link href="/manual-forms/ration-card/new" className="group">
             <div className="bg-white rounded-xl border border-slate-200 p-5 hover:border-blue-400 hover:shadow-md transition-all h-full flex items-center gap-4 cursor-pointer">
               <div className="w-12 h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center group-hover:bg-green-100 group-hover:scale-110 transition-transform">
                 <FilePlus2 size={24} className="stroke-[2]" />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">प्रपत्र क (New Apply)</h3>
+                <h3 className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">New Apply (Old)</h3>
+                <p className="text-xs text-slate-500 mt-1">Application for new ration card (Old Template).</p>
+              </div>
+              <ChevronRight size={20} className="text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+            </div>
+          </Link>
+
+          {/* Sub-category: Form Ka */}
+          <Link href="/manual-forms/ration-card/ka" className="group">
+            <div className="bg-white rounded-xl border border-slate-200 p-5 hover:border-blue-400 hover:shadow-md transition-all h-full flex items-center gap-4 cursor-pointer">
+              <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-100 group-hover:scale-110 transition-transform">
+                <FilePlus2 size={24} className="stroke-[2]" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">प्रपत्र क (Form Ka)</h3>
                 <p className="text-xs text-slate-500 mt-1">Application for generating a completely new ration card.</p>
               </div>
               <ChevronRight size={20} className="text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
