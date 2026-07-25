@@ -54,6 +54,7 @@
     "react-dropzone": "^19.0.2",
     "react-hook-form": "^7.83.0",
     "react-image-crop": "^11.1.2",
+    "react-transliterate": "^1.1.9",
     "recharts": "^3.9.2",
     "tailwind-merge": "^3.6.0",
     "xlsx": "^0.18.5",
