@@ -460,7 +460,12 @@ export default function RationCardFormPage() {
               </div>
             </div>
 
-            <button type="submit" disabled={isGenerating} className="btn-primary w-full py-3 flex items-center justify-center gap-2">
+            <button 
+              type="button" 
+              onClick={(e) => { e.preventDefault(); onSubmit(watch()); }} 
+              disabled={isGenerating} 
+              className="btn-primary w-full py-3 flex items-center justify-center gap-2"
+            >
               {isGenerating ? "Generating..." : <><Eye size={18} /> Preview Form PDF (3 Pages)</>}
             </button>
           </form>

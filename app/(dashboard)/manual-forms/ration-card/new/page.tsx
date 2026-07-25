@@ -111,7 +111,8 @@ export default function RationCardNewApplyForm() {
             <p className="text-xs text-slate-500">Manual Data Entry</p>
           </div>
           <button
-            onClick={handleSubmit(onSubmit)}
+            type="button"
+            onClick={(e) => { e.preventDefault(); onSubmit(watch()); }}
             disabled={isGenerating}
             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-all shadow-sm"
           >

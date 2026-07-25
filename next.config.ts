@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  serverExternalPackages: ["pdfjs-dist", "canvas"],
+  serverExternalPackages: ["pdfjs-dist", "canvas", "puppeteer-core", "@sparticuz/chromium"],
   experimental: {
     serverActions: {
       allowedOrigins: ["localhost:3000"],
