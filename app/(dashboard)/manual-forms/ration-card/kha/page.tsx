@@ -161,7 +161,7 @@ export default function RationCardFormPage() {
       const templateWrapper = offScreenContainer.firstChild as HTMLElement;
       if (!templateWrapper) throw new Error("Template not found");
       
-      const pages = Array.from(templateWrapper.children) as HTMLElement[];
+      const pages = Array.from(templateWrapper.children).filter(el => el.tagName !== 'STYLE' && el.tagName !== 'SCRIPT') as HTMLElement[];
       const pdf = new jsPDF('p', 'mm', 'a4');
 
       // Crucial: Wait for fonts to load to prevent text overlapping
