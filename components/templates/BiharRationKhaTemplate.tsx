@@ -144,7 +144,7 @@ export function BiharRationKhaTemplate({ data }: Props) {
               {[...Array(7)].map((_, i) => {
                 const member = data.familyMembers[i] || {};
                 return (
-                  <tr key={i} className="h-7">
+                  <tr key={i} className="h-[36px]">
                     <td className="border border-black p-1">{member.name ? i + 1 : ''}</td>
                     <td className="border border-black p-1">{member.name || ''}</td>
                     <td className="border border-black p-1">{member.fatherName || ''}</td>
@@ -186,7 +186,7 @@ export function BiharRationKhaTemplate({ data }: Props) {
               {[...Array(7)].map((_, i) => {
                 const member = data.familyMembers[i] || {};
                 return (
-                  <tr key={i} className="h-7">
+                  <tr key={i} className="h-[36px]">
                     <td className="border border-black p-1">{member.aadhaar || ''}</td>
                     <td className="border border-black p-1">{member.mobile || ''}</td>
                     <td className="border border-black p-1">{member.occupation || ''}</td>

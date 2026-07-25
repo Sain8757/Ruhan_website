@@ -257,7 +257,7 @@ export default function BiharRationNewTemplate({ data, photoSrc, signatureSrc }:
               {[0, 1, 2, 3, 4, 5].map((idx) => {
                 const member = data.familyMembers?.[idx];
                 return (
-                  <tr key={idx} className="text-center h-6">
+                  <tr key={idx} className="text-center h-[36px]">
                     <td className="border border-black py-1 text-xs">
                       <div className="w-4 h-4 mx-auto rounded-full border border-black inline-flex items-center justify-center text-[10px]">{idx + 1}</div>
                     </td>

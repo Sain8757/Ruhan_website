@@ -110,6 +110,7 @@ export function BiharRationKaTemplate({ data }: Props) {
           padding: 4px 6px;
           text-align: center;
           vertical-align: middle;
+          height: 36px;
         }
         .ration-ka-wrapper table th { font-weight: bold; }
         .ration-ka-wrapper h3.section-title {
