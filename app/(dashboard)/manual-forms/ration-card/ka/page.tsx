@@ -87,7 +87,17 @@ export default function RationCardKaApplyForm() {
       const html2canvas = (await import('html2canvas')).default;
       const { jsPDF } = await import('jspdf');
 
-      const templateWrapper = container.firstChild as HTMLElement;
+      // Create an off-screen container to render at full 100% scale without scroll issues
+      const offScreenContainer = document.createElement('div');
+      offScreenContainer.style.position = 'absolute';
+      offScreenContainer.style.left = '-9999px';
+      offScreenContainer.style.top = '0';
+      offScreenContainer.style.width = '210mm'; // Force A4 width
+      offScreenContainer.style.backgroundColor = 'white';
+      offScreenContainer.innerHTML = container.innerHTML;
+      document.body.appendChild(offScreenContainer);
+
+      const templateWrapper = offScreenContainer.firstChild as HTMLElement;
       if (!templateWrapper) throw new Error("Template not found");
       
       const pages = Array.from(templateWrapper.children) as HTMLElement[];
@@ -100,6 +110,8 @@ export default function RationCardKaApplyForm() {
           scale: 2, // High resolution
           useCORS: true,
           logging: false,
+          backgroundColor: '#ffffff',
+          windowWidth: 794 // 210mm in pixels at 96dpi
         });
 
         const imgData = canvas.toDataURL('image/jpeg', 0.95);
@@ -113,6 +125,7 @@ export default function RationCardKaApplyForm() {
         pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
       }
 
+      document.body.removeChild(offScreenContainer);
       pdf.save(`Prapatra-Ka-${data.applicantName || 'Applicant'}.pdf`);
       
     } catch (error: any) {
