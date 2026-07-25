@@ -119,13 +119,22 @@ export default function RationCardKaApplyForm() {
 
         const imgData = canvas.toDataURL('image/jpeg', 0.95);
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        let pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        let finalWidth = pdfWidth;
+        const a4Height = pdf.internal.pageSize.getHeight();
+
+        // If page is taller than A4, scale it down to fit perfectly without cutting
+        if (pdfHeight > a4Height) {
+          const ratio = a4Height / pdfHeight;
+          finalWidth = pdfWidth * ratio;
+          pdfHeight = a4Height;
+        }
 
         if (i > 0) {
           pdf.addPage();
         }
         
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        pdf.addImage(imgData, 'JPEG', (pdfWidth - finalWidth) / 2, 0, finalWidth, pdfHeight);
       }
 
       document.body.removeChild(offScreenContainer);
