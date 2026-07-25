@@ -35,7 +35,7 @@ export function BiharRationKaTemplate({ data }: Props) {
         </div>
 
         <div className="relative mb-6">
-          <div className="absolute right-0 top-0 w-[45mm] h-[35mm] border border-black flex flex-col items-center justify-center overflow-hidden">
+          <div className="absolute right-0 top-0 w-[35mm] h-[45mm] border border-black flex flex-col items-center justify-center overflow-hidden">
             {data.photoBase64 ? (
               <img src={data.photoBase64} alt="Applicant" className="w-full h-full object-cover" />
             ) : (
