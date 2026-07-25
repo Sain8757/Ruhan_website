@@ -65,34 +65,42 @@ export default function RationCardNewApplyForm() {
   };
 
   const onSubmit = async (data: BiharRationNewData) => {
-    if (!engineRef.current) return;
-    
-    setIsGenerating(true);
     try {
-      // Get the raw HTML of the unscaled container
-      const fullHtml = engineRef.current.innerHTML;
+      setIsGenerating(true);
+      
+      const container = engineRef.current;
+      if (!container) throw new Error("Preview container not found");
+      
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
 
-      const response = await fetch('/api/generate-form-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          html: fullHtml
-        }),
-      });
+      const templateWrapper = container.firstChild as HTMLElement;
+      if (!templateWrapper) throw new Error("Template not found");
+      
+      const pages = Array.from(templateWrapper.children) as HTMLElement[];
+      const pdf = new jsPDF('p', 'mm', 'a4');
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`PDF generation failed (${response.status}): ${errorText.substring(0, 100)}`);
+      for (let i = 0; i < pages.length; i++) {
+        const pageElement = pages[i];
+        
+        const canvas = await html2canvas(pageElement, {
+          scale: 2, // High resolution
+          useCORS: true,
+          logging: false,
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        if (i > 0) {
+          pdf.addPage();
+        }
+        
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
       }
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Bihar_Ration_Card_${data.applicantNameEn || 'Application'}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      pdf.save(`Bihar_Ration_Card_${data.applicantNameEn || 'Application'}.pdf`);
     } catch (error: any) {
       console.error('Error generating PDF:', error);
       alert(`Failed to generate PDF. Error: ${error.message}`);
