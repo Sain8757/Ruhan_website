@@ -56,7 +56,7 @@ export default function BiharRationNewTemplate({ data, photoSrc, signatureSrc }:
                 <td rowSpan={2} className="border border-black text-center w-8 p-1">
                   <div className="w-5 h-5 rounded-full border border-black inline-flex items-center justify-center text-xs">1</div>
                 </td>
-                <td rowSpan={2} className="border border-black px-2 py-1 font-bold w-48 text-[12px] leading-tight">
+                <td rowSpan={2} className="border border-black px-2 py-1 font-bold w-48 text-[12px] leading-[1.5]">
                   आवेदक का नाम :<br/>(आधार कार्ड के अनुसार)
                 </td>
                 <td className="border border-black px-2 py-1 font-bold text-[12px] w-16">हिन्दी में-</td>
@@ -100,7 +100,7 @@ export default function BiharRationNewTemplate({ data, photoSrc, signatureSrc }:
                 <td className="border border-black text-center p-1">
                   <div className="w-5 h-5 rounded-full border border-black inline-flex items-center justify-center text-xs">3</div>
                 </td>
-                <td className="border border-black px-2 py-1 font-bold text-[12px] leading-tight">
+                <td className="border border-black px-2 py-1 font-bold text-[12px] leading-[1.5]">
                   आवेदक का मोबाईल नं० :<br/>(आधार कार्ड से जुड़ा हुआ)
                 </td>
                 <td colSpan={2} className="border border-black px-2 py-1 text-[13px] font-semibold tracking-widest">{data.mobileNumber || ''}</td>
@@ -202,7 +202,7 @@ export default function BiharRationNewTemplate({ data, photoSrc, signatureSrc }:
                 <td className="border border-black text-center p-1">
                   <div className="w-5 h-5 rounded-full border border-black inline-flex items-center justify-center text-xs">1</div>
                 </td>
-                <td className="border border-black px-2 py-1 font-bold text-[12px] leading-tight">
+                <td className="border border-black px-2 py-1 font-bold text-[12px] leading-[1.5]">
                   आय प्रमाण पत्र :<br/><span className="font-normal text-[10px]">(दस्तावेज संख्या / निर्गत तिथि)</span>
                 </td>
                 <td colSpan={2} className="border border-black px-2 py-1 text-[13px] font-semibold">
@@ -215,7 +215,7 @@ export default function BiharRationNewTemplate({ data, photoSrc, signatureSrc }:
                 <td className="border border-black text-center p-1">
                   <div className="w-5 h-5 rounded-full border border-black inline-flex items-center justify-center text-xs">2</div>
                 </td>
-                <td className="border border-black px-2 py-1 font-bold text-[12px] leading-tight">
+                <td className="border border-black px-2 py-1 font-bold text-[12px] leading-[1.5]">
                   निवास प्रमाण पत्र :<br/><span className="font-normal text-[10px]">(दस्तावेज संख्या / निर्गत तिथि)</span>
                 </td>
                 <td colSpan={2} className="border border-black px-2 py-1 text-[13px] font-semibold">
@@ -228,7 +228,7 @@ export default function BiharRationNewTemplate({ data, photoSrc, signatureSrc }:
                 <td className="border border-black text-center p-1">
                   <div className="w-5 h-5 rounded-full border border-black inline-flex items-center justify-center text-xs">3</div>
                 </td>
-                <td className="border border-black px-2 py-1 font-bold text-[12px] leading-tight">
+                <td className="border border-black px-2 py-1 font-bold text-[12px] leading-[1.5]">
                   जाति प्रमाण पत्र :<br/><span className="font-normal text-[10px]">(दस्तावेज संख्या / निर्गत तिथि)</span>
                 </td>
                 <td colSpan={2} className="border border-black px-2 py-1 text-[13px] font-semibold">

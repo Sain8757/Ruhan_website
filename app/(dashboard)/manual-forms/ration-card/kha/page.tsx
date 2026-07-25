@@ -164,6 +164,9 @@ export default function RationCardFormPage() {
       const pages = Array.from(templateWrapper.children) as HTMLElement[];
       const pdf = new jsPDF('p', 'mm', 'a4');
 
+      // Crucial: Wait for fonts to load to prevent text overlapping
+      await document.fonts.ready;
+
       for (let i = 0; i < pages.length; i++) {
         const pageElement = pages[i];
         

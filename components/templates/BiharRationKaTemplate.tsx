@@ -17,18 +17,21 @@ export function BiharRationKaTemplate({ data }: Props) {
 
   const CheckBox = ({ checked, label }: { checked: boolean; label: string }) => (
     <span className="inline-flex items-center gap-1 mx-2 whitespace-nowrap">
-      {label} <span className="inline-block w-6 h-4 border border-black text-center leading-[14px] text-sm overflow-hidden">{checked ? tick : ''}</span>
+      <span>{label}</span>
+      <span className="flex items-center justify-center w-5 h-4 border border-black overflow-hidden font-bold text-[12px] pb-[2px]">
+        {checked ? tick : ''}
+      </span>
     </span>
   );
 
   return (
-    <div className="bg-white text-black w-[210mm] mx-auto shadow-sm text-[13px] leading-tight" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>
+    <div className="bg-white text-black w-[210mm] mx-auto shadow-sm text-[13px] leading-[1.5]" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>
       
       {/* PAGE 1 */}
-      <div className="w-[210mm] min-h-[297mm] p-[15mm] bg-white relative overflow-hidden" style={{ pageBreakAfter: 'always' }}>
+      <div className="w-[210mm] min-h-[297mm] p-[25.4mm] bg-white relative overflow-hidden" style={{ pageBreakAfter: 'always' }}>
         <div className="text-center font-bold mb-4">
           <p className="text-[14px]">लोक सेवा के अधिकार अधिनियम के अन्तर्गत नया राशन कार्ड के लिए आवेदन पत्र का प्रपत्र 'क'</p>
-          <p className="text-[12px] font-normal mt-1 leading-tight">
+          <p className="text-[12px] font-normal mt-1 leading-[1.5]">
             (राष्ट्रीय खाद्य सुरक्षा अधिनियम 2013 (धारा-9) तथा लक्षित सार्वजनिक वितरण प्रणाली (नियंत्रण)<br />
             आदेश 2015 (कंडिका 3 का उपकंडिका 13, 14 तथा कंडिका 4 उपकंडिका 7, 8, 9) द्रष्टव्य)
           </p>
@@ -139,7 +142,7 @@ export function BiharRationKaTemplate({ data }: Props) {
       </div>
 
       {/* PAGE 2 */}
-      <div className="w-[210mm] min-h-[297mm] p-[15mm] bg-white relative overflow-hidden text-[13px] leading-[1.6]" style={{ pageBreakAfter: 'always' }}>
+      <div className="w-[210mm] min-h-[297mm] p-[25.4mm] bg-white relative overflow-hidden text-[13px] leading-[1.6]" style={{ pageBreakAfter: 'always' }}>
         <div className="pl-[20px] pr-[15mm]">
           <div className="pl-6 space-y-1 mb-4">
             <p>(viii) परिवार में कम से कम एक सिंचाई उपकरण के साथ 2.5 एकड़ अथवा इससे अधिक सिंचित भूमि है, <CheckBox label="हाँ" checked={data.rural_irrigation2_5Acres === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_irrigation2_5Acres === 'No'} /></p>
@@ -233,7 +236,7 @@ export function BiharRationKaTemplate({ data }: Props) {
       </div>
 
       {/* PAGE 3 */}
-      <div className="w-[210mm] min-h-[297mm] p-[15mm] bg-white relative overflow-hidden text-[14px] leading-relaxed" style={{ pageBreakAfter: 'always' }}>
+      <div className="w-[210mm] min-h-[297mm] p-[25.4mm] bg-white relative overflow-hidden text-[14px] leading-relaxed" style={{ pageBreakAfter: 'always' }}>
         <p className="text-center font-bold underline mb-8 text-[16px]">सामान्य निर्देश</p>
         <div className="space-y-4 px-4 text-justify">
           <div className="flex gap-3"><span>1.</span><p>आवेदन पत्र केवल एक ही प्रति आवेदक द्वारा भरी जायेगी ।</p></div>
@@ -250,7 +253,7 @@ export function BiharRationKaTemplate({ data }: Props) {
       </div>
 
       {/* PAGE 4 */}
-      <div className="w-[210mm] min-h-[297mm] p-[15mm] bg-white relative overflow-hidden text-[14px] leading-relaxed">
+      <div className="w-[210mm] min-h-[297mm] p-[25.4mm] bg-white relative overflow-hidden text-[14px] leading-relaxed">
         <p className="mb-6">उपर्युक्त अधिसूचना के परिशिष्ट-I के बाद निम्नलिखित परिशिष्ट-II जोड़ा जाएगा:-</p>
         <p className="text-center font-bold mb-4 text-[16px]">"परिशिष्ट-II"</p>
         <p className="text-center font-bold underline mb-8 text-[16px]">सेवा प्राप्त करने हेतु आवेदन के साथ जमा किए जाने वाले आवश्यक कागजात<br/>(चेक लिस्ट)</p>

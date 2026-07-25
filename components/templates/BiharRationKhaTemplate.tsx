@@ -12,14 +12,14 @@ export function BiharRationKhaTemplate({ data }: Props) {
     <div className="bg-white text-black text-sm w-[210mm] mx-auto shadow-sm" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>
       
       {/* PAGE 1 */}
-      <div className="w-[210mm] min-h-[297mm] p-[15mm] bg-white relative overflow-hidden" style={{ pageBreakAfter: 'always' }}>
+      <div className="w-[210mm] min-h-[297mm] p-[25.4mm] bg-white relative overflow-hidden" style={{ pageBreakAfter: 'always' }}>
         
         {/* Header */}
         <div className="text-center font-bold mb-4">
           <p className="text-lg">प्रपत्र 'ख'</p>
           <p className="text-base mt-2">लोक सेवा के अधिकार अधिनियम के अन्तर्गत विद्यमान राशन कार्ड में उपांतरणों</p>
           <p className="text-base">अथवा विद्यमान राशन कार्ड को प्रत्यर्पण (Surrender)/रद्द करने के लिए</p>
-          <p className="mt-2 text-[11px] font-normal leading-tight">
+          <p className="mt-2 text-[11px] font-normal leading-[1.5]">
             (राष्ट्रीय खाद्य सुरक्षा अधिनियम 2013 (धारा-9) तथा लक्षित सार्वजनिक वितरण प्रणाली (नियंत्रण) आदेश 2015 (कंडिका 3 का
             <br />
             उपकंडिका 13, 14 तथा कंडिका 4 उपकंडिका 7, 8, 9) द्रष्टव्य)
@@ -82,7 +82,7 @@ export function BiharRationKhaTemplate({ data }: Props) {
           <div className="grid grid-cols-[30px_1fr] gap-2">
             <span>7.</span>
             <div className="flex">
-              <span className="w-48 leading-tight">सम्बद्ध जन वितरण प्रणाली विक्रेता का नाम एवं अनुज्ञप्ति सं०</span>
+              <span className="w-48 leading-[1.5]">सम्बद्ध जन वितरण प्रणाली विक्रेता का नाम एवं अनुज्ञप्ति सं०</span>
               <span className="flex-1">: <span className="ml-2 font-semibold underline decoration-dotted underline-offset-4">{data.dealerName}</span></span>
             </div>
           </div>
@@ -161,7 +161,7 @@ export function BiharRationKhaTemplate({ data }: Props) {
       </div>
 
       {/* PAGE 2 */}
-      <div className="w-[210mm] min-h-[297mm] p-[15mm] bg-white overflow-hidden relative" style={{ pageBreakAfter: 'always' }}>
+      <div className="w-[210mm] min-h-[297mm] p-[25.4mm] bg-white overflow-hidden relative" style={{ pageBreakAfter: 'always' }}>
         
         {/* Table 2 (Cols 8-12) */}
         <table className="w-full border-collapse border border-black text-center text-[11px] mt-2">
@@ -334,7 +334,7 @@ export function BiharRationKhaTemplate({ data }: Props) {
       </div>
 
       {/* PAGE 3 */}
-      <div className="w-[210mm] min-h-[297mm] p-[15mm] bg-white relative overflow-hidden" style={{ pageBreakAfter: 'auto' }}>
+      <div className="w-[210mm] min-h-[297mm] p-[25.4mm] bg-white relative overflow-hidden" style={{ pageBreakAfter: 'auto' }}>
             {/* Shahari Kshetra */}
             <div className="mt-4 text-[13px] leading-[1.6] ml-6">
               <p className="font-bold">
