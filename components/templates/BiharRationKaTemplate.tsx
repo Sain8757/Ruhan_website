@@ -16,260 +16,458 @@ export function BiharRationKaTemplate({ data }: Props) {
   const displayMembers = members.slice(0, 7);
 
   const CheckBox = ({ checked, label }: { checked: boolean; label: string }) => (
-    <span className="inline-flex items-center gap-1 mx-2 whitespace-nowrap">
-      <span>{label}</span>
-      <span className="flex items-center justify-center w-5 h-4 border border-black overflow-hidden font-bold text-[12px] pb-[2px]">
-        {checked ? tick : ''}
-      </span>
+    <span className="checkbox-group">
+      {label} <span className="box flex items-center justify-center font-bold text-[12px] overflow-hidden">{checked ? tick : ''}</span>
     </span>
   );
 
   return (
-    <div className="bg-white text-black w-[210mm] mx-auto shadow-sm text-[13px] leading-[1.5]" style={{ fontFamily: 'Noto Sans Devanagari, sans-serif' }}>
-      
-      {/* PAGE 1 */}
-      <div className="w-[210mm] min-h-[297mm] p-[25.4mm] bg-white relative overflow-hidden" style={{ pageBreakAfter: 'always' }}>
-        <div className="text-center font-bold mb-4">
-          <p className="text-[14px]">लोक सेवा के अधिकार अधिनियम के अन्तर्गत नया राशन कार्ड के लिए आवेदन पत्र का प्रपत्र 'क'</p>
-          <p className="text-[12px] font-normal mt-1 leading-[1.5]">
-            (राष्ट्रीय खाद्य सुरक्षा अधिनियम 2013 (धारा-9) तथा लक्षित सार्वजनिक वितरण प्रणाली (नियंत्रण)<br />
-            आदेश 2015 (कंडिका 3 का उपकंडिका 13, 14 तथा कंडिका 4 उपकंडिका 7, 8, 9) द्रष्टव्य)
-          </p>
-        </div>
+    <div className="ration-ka-wrapper bg-white" style={{ width: '210mm', margin: '0 auto', boxSizing: 'border-box' }}>
+      <style dangerouslySetInnerHTML={{ __html: `
+        .ration-ka-wrapper {
+          font-family: "Noto Sans Devanagari", "Mangal", Arial, sans-serif;
+          color: #111;
+          line-height: 1.5;
+        }
+        .ration-ka-wrapper .page {
+          width: 210mm;
+          min-height: 297mm;
+          padding: 25.4mm;
+          background: #fff;
+          position: relative;
+          box-sizing: border-box;
+          page-break-after: always;
+        }
+        .ration-ka-wrapper .header-title {
+          font-weight: bold;
+          text-decoration: underline;
+          font-size: 15px;
+          margin-bottom: 4px;
+          text-align: center;
+        }
+        .ration-ka-wrapper .header-sub {
+          font-size: 13px;
+          margin: 2px 0;
+          text-align: center;
+        }
+        .ration-ka-wrapper .top-flex {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 20px;
+          margin-top: 15px;
+        }
+        .ration-ka-wrapper .top-left { flex: 1; }
+        .ration-ka-wrapper .photo-box {
+          border: 1px solid #000;
+          width: 25mm;
+          height: 30mm;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          font-size: 11px;
+          flex-shrink: 0;
+          overflow: hidden;
+        }
+        .ration-ka-wrapper .photo-box img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .ration-ka-wrapper .field-list {
+          list-style: none;
+          padding-left: 0;
+          margin-top: 5px;
+          margin-bottom: 0;
+        }
+        .ration-ka-wrapper .field-list li {
+          display: flex;
+          padding: 5px 0;
+          font-size: 13px;
+        }
+        .ration-ka-wrapper .field-list li .num {
+          width: 25px;
+          flex-shrink: 0;
+        }
+        .ration-ka-wrapper .field-list li .label {
+          width: 180px;
+          flex-shrink: 0;
+        }
+        .ration-ka-wrapper .field-list li .fill {
+          flex: 1;
+          font-weight: bold;
+          padding-left: 10px;
+        }
+        .ration-ka-wrapper table {
+          border-collapse: collapse;
+          width: 100%;
+          margin-top: 15px;
+          font-size: 12px;
+        }
+        .ration-ka-wrapper table th, .ration-ka-wrapper table td {
+          border: 1px solid #000;
+          padding: 4px 6px;
+          text-align: center;
+          vertical-align: middle;
+        }
+        .ration-ka-wrapper table th { font-weight: bold; }
+        .ration-ka-wrapper h3.section-title {
+          text-decoration: underline;
+          text-align: center;
+          font-size: 16px;
+          margin: 25px 0 15px;
+          font-weight: bold;
+        }
+        .ration-ka-wrapper ol.qlist {
+          padding-left: 20px;
+          font-size: 13px;
+          margin-top: 15px;
+        }
+        .ration-ka-wrapper ol.qlist > li {
+          margin-bottom: 10px;
+        }
+        .ration-ka-wrapper ol.qlist ul.sub {
+          list-style: none;
+          padding-left: 15px;
+          margin: 6px 0;
+        }
+        .ration-ka-wrapper ol.qlist ul.sub > li {
+          margin-bottom: 6px;
+          display: flex;
+          align-items: flex-start;
+          gap: 6px;
+          flex-wrap: wrap;
+        }
+        .ration-ka-wrapper .checkbox-group {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          margin-left: 8px;
+        }
+        .ration-ka-wrapper .box {
+          display: inline-flex;
+          width: 16px;
+          height: 16px;
+          border: 1px solid #000;
+          margin: 0 4px;
+          vertical-align: middle;
+        }
+        .ration-ka-wrapper .subfields {
+          margin-left: 30px;
+          font-size: 13px;
+          width: 100%;
+        }
+        .ration-ka-wrapper .subfields div {
+          margin: 4px 0;
+          display: flex;
+        }
+        .ration-ka-wrapper .subfields div .lbl { width: 180px; }
+        .ration-ka-wrapper .subfields div .line { flex:1; font-weight: bold; }
+        .ration-ka-wrapper .sign-row {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 30px;
+          font-size: 13px;
+        }
+        .ration-ka-wrapper .sign-row div { width: 45%; }
+        .ration-ka-wrapper .line-fill {
+          display: inline-block;
+          font-weight: bold;
+          min-width: 150px;
+          margin-left: 6px;
+        }
+        .ration-ka-wrapper .declaration-title {
+          text-align: center;
+          font-weight: bold;
+          font-size: 16px;
+          text-decoration: underline;
+          margin: 25px 0 10px;
+        }
+        .ration-ka-wrapper .declaration-text {
+          font-size: 13px;
+          margin-bottom: 20px;
+        }
+        .ration-ka-wrapper .office-section {
+          margin-top: 30px;
+          font-size: 13px;
+        }
+        .ration-ka-wrapper .office-section .row {
+          display: flex;
+          justify-content: space-between;
+          margin: 10px 0;
+        }
+        .ration-ka-wrapper .office-section .row div { display:flex; align-items:center; gap:10px; }
+        .ration-ka-wrapper .general-instructions ol {
+          font-size: 13px;
+          padding-left: 22px;
+        }
+        .ration-ka-wrapper .general-instructions ol li { margin-bottom: 10px; }
+        .ration-ka-wrapper .annexure-title {
+          text-align: center;
+          font-weight: bold;
+          font-size: 16px;
+          text-decoration: underline;
+          margin: 10px 0 20px;
+        }
+        .ration-ka-wrapper .annexure-sub {
+          text-align: center;
+          font-weight: bold;
+          font-size: 14px;
+          margin-bottom: 15px;
+        }
+        .ration-ka-wrapper .checklist-table td, .ration-ka-wrapper .checklist-table th {
+          text-align: left;
+          vertical-align: top;
+          font-size: 13px;
+        }
+        .ration-ka-wrapper .checklist-table td ol, .ration-ka-wrapper .checklist-table td ul {
+          margin: 0;
+          padding-left: 18px;
+        }
+      `}} />
 
-        <div className="relative mb-6">
-          <div className="absolute right-0 top-0 w-[25mm] h-[30mm] border border-black flex flex-col items-center justify-center overflow-hidden">
+      {/* PAGE 1 */}
+      <div className="page">
+        <div className="header-title">लोक सेवा के अधिकार अधिनियम के अन्तर्गत नया राशन कार्ड के लिए आवेदन पत्र का प्रपत्र 'क'</div>
+        <div className="header-sub">(राष्ट्रीय खाद्य सुरक्षा अधिनियम 2013 (धारा-9) तथा लक्षित सार्वजनिक वितरण प्रणाली (नियंत्रण)</div>
+        <div className="header-sub">आदेश 2015 (कंडिका 3 का उपकंडिका 13, 14 तथा कंडिका 4 उपकंडिका 7, 8, 9) द्रष्टव्य)</div>
+
+        <div className="top-flex">
+          <div className="top-left">
+            <ul className="field-list">
+              <li><span className="num">1.</span><span className="label">आवेदक का नाम</span><span className="fill">: {data.applicantName}</span></li>
+              <li><span className="num">2.</span><span className="label">आधार / EID no</span><span className="fill">: {data.aadhaarNo}</span></li>
+              <li><span className="num">3.</span><span className="label">मोबाईल नं0—</span><span className="fill">: {data.mobileNo}</span></li>
+              <li><span className="num">4.</span><span className="label">आवेदक के पति / पिता का नाम</span><span className="fill">: {data.fatherHusbandName}</span></li>
+              <li><span className="num">5.</span><span className="label">पूर्ण आवासीय पता</span><span className="fill">: {data.fullAddress}</span></li>
+            </ul>
+          </div>
+          <div className="photo-box">
             {data.photoBase64 ? (
-              <img src={data.photoBase64} alt="Applicant" className="w-full h-full object-cover" />
+              <img src={data.photoBase64} alt="Applicant" />
             ) : (
-              <span className="text-xs">पारिवारिक फोटो</span>
+              <span>पारिवारिक फोटो</span>
             )}
           </div>
-          
-          <div className="space-y-3 w-[130mm]">
-            <div className="grid grid-cols-[20px_1fr] gap-1"><span>1.</span><div className="flex"><span className="w-48">आवेदक का नाम</span><span>: {data.applicantName}</span></div></div>
-            <div className="grid grid-cols-[20px_1fr] gap-1"><span>2.</span><div className="flex"><span className="w-48">आधार / EID no</span><span>: {data.aadhaarNo}</span></div></div>
-            <div className="grid grid-cols-[20px_1fr] gap-1"><span>3.</span><div className="flex"><span className="w-48">मोबाईल नं०</span><span>: {data.mobileNo}</span></div></div>
-            <div className="grid grid-cols-[20px_1fr] gap-1"><span>4.</span><div className="flex"><span className="w-48">आवेदक के पति/पिता का नाम</span><span>: {data.fatherHusbandName}</span></div></div>
-            <div className="grid grid-cols-[20px_1fr] gap-1"><span>5.</span><div className="flex"><span className="w-48">पूर्ण आवासीय पता</span><span>: {data.fullAddress}</span></div></div>
-            <div className="grid grid-cols-[20px_1fr] gap-1 mt-2"><span>6.</span><div className="flex"><span className="w-48">बैंक का IFSC Code</span><span>: {data.bankIfsc}</span></div></div>
-            <div className="grid grid-cols-[20px_1fr] gap-1"><span>7.</span><div className="flex"><span className="w-48">बैंक खाता नं०</span><span>: {data.bankAccountNo}</span></div></div>
-            <div className="grid grid-cols-[20px_1fr] gap-1"><span>8.</span><div className="flex"><span className="w-48">बैंक का नाम</span><span>: {data.bankName}</span></div></div>
-            <div className="grid grid-cols-[20px_1fr] gap-1"><span>9.</span><div className="flex"><span className="w-[80mm]">राशन कार्ड के लिए परिवार के अन्य सदस्यों का विवरण</span></div></div>
-          </div>
         </div>
 
-        {/* Tables */}
-        <table className="w-full border-collapse border border-black text-center text-[11px] mb-2">
+        <ul className="field-list">
+          <li><span className="num">6.</span><span className="label">बैंक का IFSC Code</span><span className="fill">: {data.bankIfsc}</span></li>
+          <li><span className="num">7.</span><span className="label">बैंक खाता नं0</span><span className="fill">: {data.bankAccountNo}</span></li>
+          <li><span className="num">8.</span><span className="label">बैंक का नाम</span><span className="fill">: {data.bankName}</span></li>
+          <li><span className="num">9.</span><span className="label">राशन कार्ड के लिए परिवार के अन्य सदस्यों का विवरण</span><span className="fill"></span></li>
+        </ul>
+
+        <table>
           <thead>
             <tr>
-              <th className="border border-black font-normal p-1 w-6">क्र०</th>
-              <th className="border border-black font-normal p-1 w-32">नाम</th>
-              <th className="border border-black font-normal p-1 w-32">पति/पिता का नाम</th>
-              <th className="border border-black font-normal p-1 w-12">लिंग</th>
-              <th className="border border-black font-normal p-1 w-10">उम्र</th>
-              <th className="border border-black font-normal p-1 w-16">वैवाहिक<br/>स्थिति</th>
-              <th className="border border-black font-normal p-1">संबंध</th>
+              <th className="w-10">क्र0</th>
+              <th>नाम</th>
+              <th>पति / पिता का नाम</th>
+              <th className="w-12">लिंग</th>
+              <th className="w-12">उम्र</th>
+              <th className="w-20">वैवाहिक स्थिति</th>
+              <th>संबंध</th>
             </tr>
             <tr>
-              <th className="border border-black font-normal p-0.5">1</th>
-              <th className="border border-black font-normal p-0.5">2</th>
-              <th className="border border-black font-normal p-0.5">3</th>
-              <th className="border border-black font-normal p-0.5">4</th>
-              <th className="border border-black font-normal p-0.5">5</th>
-              <th className="border border-black font-normal p-0.5">6</th>
-              <th className="border border-black font-normal p-0.5">7</th>
+              <th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th><th>7</th>
             </tr>
           </thead>
           <tbody>
             {displayMembers.map((m, i) => (
-              <tr key={`t1-${i}`} className="h-5">
-                <td className="border border-black">{m.name ? i + 1 : ''}</td>
-                <td className="border border-black">{m.name}</td>
-                <td className="border border-black">{m.fatherHusbandName}</td>
-                <td className="border border-black">{m.gender}</td>
-                <td className="border border-black">{m.age}</td>
-                <td className="border border-black">{m.maritalStatus}</td>
-                <td className="border border-black">{m.relation}</td>
+              <tr key={`t1-${i}`}>
+                <td>{m.name ? i + 1 : ''}</td>
+                <td>{m.name}</td>
+                <td>{m.fatherHusbandName}</td>
+                <td>{m.gender}</td>
+                <td>{m.age}</td>
+                <td>{m.maritalStatus}</td>
+                <td>{m.relation}</td>
               </tr>
             ))}
           </tbody>
         </table>
 
-        <table className="w-full border-collapse border border-black text-center text-[11px] mb-4">
+        <table>
           <thead>
             <tr>
-              <th className="border border-black font-normal p-1 w-32">आधार / EID no</th>
-              <th className="border border-black font-normal p-1 w-24">मोबाईल नं०</th>
-              <th className="border border-black font-normal p-1 w-24">व्यवसाय<br/>/सरकारी सेवक</th>
-              <th className="border border-black font-normal p-1 w-24">आमदनी का<br/>स्रोत</th>
-              <th className="border border-black font-normal p-1">मासिक आय</th>
+              <th>आधार / EID no</th>
+              <th>मोबाईल नं0</th>
+              <th>व्यवसाय / सरकारी सेवक</th>
+              <th>आमदनी का स्रोत</th>
+              <th>मासिक आय</th>
             </tr>
             <tr>
-              <th className="border border-black font-normal p-0.5">8</th>
-              <th className="border border-black font-normal p-0.5">9</th>
-              <th className="border border-black font-normal p-0.5">10</th>
-              <th className="border border-black font-normal p-0.5">11</th>
-              <th className="border border-black font-normal p-0.5">12</th>
+              <th>8</th><th>9</th><th>10</th><th>11</th><th>12</th>
             </tr>
           </thead>
           <tbody>
-            {displayMembers.map((m, i) => (
-              <tr key={`t2-${i}`} className="h-5">
-                <td className="border border-black">{m.aadhaar}</td>
-                <td className="border border-black">{m.mobile}</td>
-                <td className="border border-black">{m.occupation}</td>
-                <td className="border border-black">{m.incomeSource}</td>
-                <td className="border border-black">{m.monthlyIncome}</td>
+            {displayMembers.slice(0, 6).map((m, i) => (
+              <tr key={`t2-${i}`}>
+                <td>{m.aadhaar}</td>
+                <td>{m.mobile}</td>
+                <td>{m.occupation}</td>
+                <td>{m.incomeSource}</td>
+                <td>{m.monthlyIncome}</td>
               </tr>
             ))}
           </tbody>
         </table>
 
-        {/* Section 10 */}
-        <div className="pl-[20px] text-[13px] leading-relaxed">
-          <p className="font-semibold mb-1">10. ग्रामीण क्षेत्र के आवेदक निम्नलिखित पर हाँ/नहीं पर टिक लगावे :-</p>
-          <div className="pl-6 space-y-1">
-            <p>(i) मोटर चालित तिपहिया/चार पहिया वाहन है, <CheckBox label="हाँ" checked={data.rural_motorVehicle === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_motorVehicle === 'No'} /></p>
-            <p>(ii) मशीन चालित तीन/चार पहियों वाले कृषि उपकरण है, <CheckBox label="हाँ" checked={data.rural_agriMachine === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_agriMachine === 'No'} /></p>
-            <p>(iii) सरकार में पंजीकृत गैर-कृषि उद्योग वाले परिवार वाली गृहस्थी है, <CheckBox label="हाँ" checked={data.rural_nonAgriEnterprise === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_nonAgriEnterprise === 'No'} /></p>
-            <p>(iv) परिवार के किसी सदस्य की मासिक आय 10,000/- रू0 से अधिक है, <CheckBox label="हाँ" checked={data.rural_incomeAbove10k === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_incomeAbove10k === 'No'} /></p>
-            <p>(v) आयकर देते है, <CheckBox label="हाँ" checked={data.rural_incomeTaxPayee === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_incomeTaxPayee === 'No'} /></p>
-            <p>(vi) व्यावसायिक कर का भुगतान करते है, <CheckBox label="हाँ" checked={data.rural_commercialTaxPayee === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_commercialTaxPayee === 'No'} /></p>
-            <p>(vii) जिस मकान में रहते है, उस मकान में सभी कमरों में पक्की दीवारों और छत के साथ तीन अथवा अधिक कमरा है, <CheckBox label="हाँ" checked={data.rural_puccaHouse3Rooms === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_puccaHouse3Rooms === 'No'} /></p>
-          </div>
-        </div>
+        <ol className="qlist" start={10}>
+          <li><span className="font-bold underline">ग्रामीण क्षेत्र</span> के आवेदक निम्नलिखित पर हाँ / नहीं, पर टिक लगावे :–
+            <ul className="sub">
+              <li>(i) मोटर चालित तिपहिया/चार पहिया वाहन है, <CheckBox label="हाँ" checked={data.rural_motorVehicle === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_motorVehicle === 'No'} /></li>
+              <li>(ii) मशीन चालित तीन/चार पहियों वाले कृषि उपकरण है, <CheckBox label="हाँ" checked={data.rural_agriMachine === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_agriMachine === 'No'} /></li>
+              <li>(iii) सरकार में पंजीकृत गैर-कृषि उद्योग वाले परिवार वाली गृहस्थी है, <CheckBox label="हाँ" checked={data.rural_nonAgriEnterprise === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_nonAgriEnterprise === 'No'} /></li>
+              <li>(iv) परिवार के किसी सदस्य की मासिक आय 10,000/- रू0 से अधिक है, <CheckBox label="हाँ" checked={data.rural_incomeAbove10k === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_incomeAbove10k === 'No'} /></li>
+              <li>(v) आयकर देते है, <CheckBox label="हाँ" checked={data.rural_incomeTaxPayee === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_incomeTaxPayee === 'No'} /></li>
+              <li>(vi) व्यावसायिक कर का भुगतान करते है, <CheckBox label="हाँ" checked={data.rural_commercialTaxPayee === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_commercialTaxPayee === 'No'} /></li>
+              <li>(vii) जिस मकान में रहते है, उस मकान में सभी कमरों में पक्की दीवारों और छत के साथ तीन अथवा अधिक कमरा है, <CheckBox label="हाँ" checked={data.rural_puccaHouse3Rooms === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_puccaHouse3Rooms === 'No'} /></li>
+            </ul>
+          </li>
+        </ol>
       </div>
 
       {/* PAGE 2 */}
-      <div className="w-[210mm] min-h-[297mm] p-[25.4mm] bg-white relative overflow-hidden text-[13px] leading-[1.6]" style={{ pageBreakAfter: 'always' }}>
-        <div className="pl-[20px] pr-[15mm]">
-          <div className="pl-6 space-y-1 mb-4">
-            <p>(viii) परिवार में कम से कम एक सिंचाई उपकरण के साथ 2.5 एकड़ अथवा इससे अधिक सिंचित भूमि है, <CheckBox label="हाँ" checked={data.rural_irrigation2_5Acres === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_irrigation2_5Acres === 'No'} /></p>
-            <p>(ix) दो अथवा उससे अधिक फसली मौसम के लिए 5 एकड़ अथवा इससे अधिक सिंचित भूमि वाली गृहस्थी है, <CheckBox label="हाँ" checked={data.rural_irrigation5Acres === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_irrigation5Acres === 'No'} /></p>
-            <p>(x) कम से कम एक सिंचाई उपकरण के साथ कम से कम 7.5 एकड़ अथवा इससे अधिक सिंचित भूमि वाली गृहस्थी है, <CheckBox label="हाँ" checked={data.rural_irrigation7_5Acres === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_irrigation7_5Acres === 'No'} /></p>
-            <p>(xi) आवेदक अथवा आवेदक के परिवार का कोई सदस्य सरकारी सेवा में है, <CheckBox label="हाँ" checked={data.rural_govtService === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_govtService === 'No'} /></p>
-            <div className="pl-8">
-              <p>अगर है तो उसका विवरण -</p>
-              <p>(क) किस सेवा में है - {data.rural_govtService === 'Yes' ? data.rural_govtServiceDetails?.serviceName : ''}</p>
-              <p>(ख) कहाँ पदस्थापित है - {data.rural_govtService === 'Yes' ? data.rural_govtServiceDetails?.postName : ''}</p>
-              <p>(ग) कितना मासिक आमदनी है - {data.rural_govtService === 'Yes' ? data.rural_govtServiceDetails?.monthlyIncome : ''}</p>
-            </div>
-          </div>
-          
-          <p className="font-semibold mb-1 -ml-6">11. शहरी क्षेत्र के आवेदक निम्नलिखित पर आवश्यकतानुसार हाँ/नहीं, पर टिक लगावे :-</p>
-          <div className="pl-2 space-y-1 mb-8">
-            <p>(i) आयकर अदा करते है, <CheckBox label="हाँ" checked={data.urban_incomeTaxPayee === 'Yes'} /> <CheckBox label="नहीं" checked={data.urban_incomeTaxPayee === 'No'} /></p>
-            <p className="leading-tight mb-1">
-              (ii) आवेदक अथवा आवेदक के परिवार का कोई सदस्य वर्ग 1, वर्ग 2, वर्ग 3 एवं वर्ग 4 श्रेणी के सरकारी सेवा (अनु0जाति/अनु0 जनजाति के Group 'D' के कर्मी को छोड़कर) में है, <CheckBox label="हाँ" checked={data.urban_govtService === 'Yes'} /> <CheckBox label="नहीं" checked={data.urban_govtService === 'No'} />
-            </p>
-            <div className="pl-6 mb-1">
-              <p>अगर है तो उसका विवरण -</p>
-              <p>(क) किस सेवा में है - {data.urban_govtService === 'Yes' ? data.urban_govtServiceDetails?.serviceName : ''}</p>
-              <p>(ख) कहाँ पदस्थापित है - {data.urban_govtService === 'Yes' ? data.urban_govtServiceDetails?.postName : ''}</p>
-              <p>(ग) कितना मासिक आमदनी है - {data.urban_govtService === 'Yes' ? data.urban_govtServiceDetails?.monthlyIncome : ''}</p>
-            </div>
-            <p>(iii) व्यवसायिक कर अदा करते है, <CheckBox label="हाँ" checked={data.urban_commercialTaxPayee === 'Yes'} /> <CheckBox label="नहीं" checked={data.urban_commercialTaxPayee === 'No'} /></p>
-            <p>(iv) तीन कमरे या उससे अधिक (पक्का) कंक्रीट छतयुक्त मकान वाली गृहस्थी जो स्वयं की स्वामित्व में है, <CheckBox label="हाँ" checked={data.urban_puccaHouse3Rooms === 'Yes'} /> <CheckBox label="नहीं" checked={data.urban_puccaHouse3Rooms === 'No'} /></p>
-            <p>(v) परिवार के किसी सदस्य का मासिक आय 20,000/- रू0 से अधिक है, <CheckBox label="हाँ" checked={data.urban_incomeAbove20k === 'Yes'} /> <CheckBox label="नहीं" checked={data.urban_incomeAbove20k === 'No'} /></p>
-            <p>(vi) दो पहिया वाहन, रेफ्रीजरेटर तथा वाशिंग मशीन तीनों उपकरण है, <CheckBox label="हाँ" checked={data.urban_twoWheelerAndFridgeAndWash === 'Yes'} /> <CheckBox label="नहीं" checked={data.urban_twoWheelerAndFridgeAndWash === 'No'} /></p>
-            <p>(vii) गृहस्थी में चार पहिया वाहन है, <CheckBox label="हाँ" checked={data.urban_fourWheeler === 'Yes'} /> <CheckBox label="नहीं" checked={data.urban_fourWheeler === 'No'} /></p>
-            <p>(viii) गृहस्थी में वाशिंग मशीन है, <CheckBox label="हाँ" checked={data.urban_washingMachine === 'Yes'} /> <CheckBox label="नहीं" checked={data.urban_washingMachine === 'No'} /></p>
-          </div>
+      <div className="page">
+        <ol className="qlist" start={8} style={{ marginTop: 0 }}>
+          <ul className="sub" style={{ marginLeft: '-15px' }}>
+            <li>(viii) परिवार में कम से कम एक सिंचाई उपकरण के साथ 2.5 एकड़ अथवा इससे अधिक सिंचित भूमि है, <CheckBox label="हाँ" checked={data.rural_irrigation2_5Acres === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_irrigation2_5Acres === 'No'} /></li>
+            <li>(ix) दो अथवा उससे अधिक फसली मौसम के लिए 5 एकड़ अथवा इससे अधिक सिंचित भूमि वाली गृहस्थी है, <CheckBox label="हाँ" checked={data.rural_irrigation5Acres === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_irrigation5Acres === 'No'} /></li>
+            <li>(x) कम से कम एक सिंचाई उपकरण के साथ कम से कम 7.5 एकड़ अथवा इससे अधिक सिंचित भूमि वाली गृहस्थी है, <CheckBox label="हाँ" checked={data.rural_irrigation7_5Acres === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_irrigation7_5Acres === 'No'} /></li>
+            <li>(xi) आवेदक अथवा आवेदक के परिवार का कोई सदस्य सरकारी सेवा में है, <CheckBox label="हाँ" checked={data.rural_govtService === 'Yes'} /> <CheckBox label="नहीं" checked={data.rural_govtService === 'No'} />
+              {data.rural_govtService === 'Yes' && (
+                <div className="subfields">
+                  अगर है तो उसका विवरण –
+                  <div><span className="lbl">(क) किस सेवा में है –</span><span className="line">: {data.rural_govtServiceDetails?.serviceName}</span></div>
+                  <div><span className="lbl">(ख) कहाँ पदस्थापित है –</span><span className="line">: {data.rural_govtServiceDetails?.postName}</span></div>
+                  <div><span className="lbl">(ग) कितना मासिक आमदनी है –</span><span className="line">: {data.rural_govtServiceDetails?.monthlyIncome}</span></div>
+                </div>
+              )}
+            </li>
+          </ul>
+        </ol>
 
-          {/* Signatures & Declaration */}
-          <div className="flex justify-between mt-12 mb-6">
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-2"><span>दिनांक</span> <span className="border-b border-black w-24 px-1">{data.date}</span></div>
-              <div className="flex gap-2"><span>स्थान</span> <span className="border-b border-black w-24 px-1">{data.place}</span></div>
+        <ol className="qlist" start={11}>
+          <li><span className="font-bold underline">शहरी क्षेत्र</span> के आवेदक निम्नलिखित पर आवश्यकतानुसार हाँ / नहीं, पर टिक लगायें :–
+            <ul className="sub">
+              <li>(i) आयकर अदा करते है, <CheckBox label="हाँ" checked={data.urban_incomeTaxPayee === 'Yes'} /> <CheckBox label="नहीं" checked={data.urban_incomeTaxPayee === 'No'} /></li>
+              <li style={{ display: 'block' }}>
+                <div className="flex gap-2">
+                  <span>(ii) आवेदक अथवा आवेदक के परिवार का कोई सदस्य वर्ग 1, वर्ग 2, वर्ग 3 एवं वर्ग 4 श्रेणी के सरकारी सेवा (अनु0जाति / अनु0 जनजाति के Group 'D' के कर्मी को छोड़कर) में है,</span>
+                  <CheckBox label="हाँ" checked={data.urban_govtService === 'Yes'} /> <CheckBox label="नहीं" checked={data.urban_govtService === 'No'} />
+                </div>
+                {data.urban_govtService === 'Yes' && (
+                  <div className="subfields mt-2">
+                    अगर है तो उसका विवरण –
+                    <div><span className="lbl">(क) किस सेवा में है –</span><span className="line">: {data.urban_govtServiceDetails?.serviceName}</span></div>
+                    <div><span className="lbl">(ख) कहाँ पदस्थापित है –</span><span className="line">: {data.urban_govtServiceDetails?.postName}</span></div>
+                    <div><span className="lbl">(ग) कितना मासिक आमदनी है –</span><span className="line">: {data.urban_govtServiceDetails?.monthlyIncome}</span></div>
+                  </div>
+                )}
+              </li>
+              <li>(iii) व्यवसायिक कर अदा करते है, <CheckBox label="हाँ" checked={data.urban_commercialTaxPayee === 'Yes'} /> <CheckBox label="नहीं" checked={data.urban_commercialTaxPayee === 'No'} /></li>
+              <li>(iv) तीन कमरे या उससे अधिक (पक्का) कंक्रीट छतयुक्त मकान वाली गृहस्थी जो स्वयं की स्वामित्व में है, <CheckBox label="हाँ" checked={data.urban_puccaHouse3Rooms === 'Yes'} /> <CheckBox label="नहीं" checked={data.urban_puccaHouse3Rooms === 'No'} /></li>
+              <li>(v) परिवार के किसी सदस्य का मासिक आय 20,000/- रू0 से अधिक है, <CheckBox label="हाँ" checked={data.urban_incomeAbove20k === 'Yes'} /> <CheckBox label="नहीं" checked={data.urban_incomeAbove20k === 'No'} /></li>
+              <li>(vi) दो पहिया वाहन, रेफ्रीजरेटर तथा वाशिंग मशीन तीनों उपकरण है, <CheckBox label="हाँ" checked={data.urban_twoWheelerAndFridgeAndWash === 'Yes'} /> <CheckBox label="नहीं" checked={data.urban_twoWheelerAndFridgeAndWash === 'No'} /></li>
+              <li>(vii) गृहस्थी में चार पहिया वाहन है, <CheckBox label="हाँ" checked={data.urban_fourWheeler === 'Yes'} /> <CheckBox label="नहीं" checked={data.urban_fourWheeler === 'No'} /></li>
+              <li>(viii) गृहस्थी में वाशिंग मशीन है, <CheckBox label="हाँ" checked={data.urban_washingMachine === 'Yes'} /> <CheckBox label="नहीं" checked={data.urban_washingMachine === 'No'} /></li>
+            </ul>
+          </li>
+        </ol>
+
+        <div className="sign-row mt-6">
+          <div>दिनांक <span className="line-fill">: {data.date}</span></div>
+          <div className="text-right flex flex-col items-end">
+            <div className="border border-black w-32 h-10 mb-1 flex items-center justify-center">
+              {data.signatureBase64 && <img src={data.signatureBase64} alt="Signature" className="max-h-full max-w-full" />}
             </div>
-            <div className="text-center w-64">
-              <div className="h-10 border-b border-black mb-1 flex items-end justify-center">
-                {data.signatureBase64 && <img src={data.signatureBase64} alt="Signature" className="h-8 max-w-full" />}
-              </div>
-              <p>आवेदक का हस्ताक्षर/अंगूठे का निशान</p>
-              <div className="flex gap-2 justify-center mt-2">
-                <span>नाम</span> <span className="border-b border-black w-40 px-1 inline-block text-left">{data.applicantName}</span>
-              </div>
-            </div>
+            आवेदक का हस्ताक्षर / अंगूठे का निशान<br/>
+            नाम <span className="font-bold ml-2">{data.applicantName}</span>
           </div>
+        </div>
+        <div className="sign-row mt-2">
+          <div>स्थान <span className="line-fill">: {data.place}</span></div>
+        </div>
 
-          <p className="text-center font-bold underline mb-4 text-[15px]">घोषणा</p>
-          <p className="mb-2">महोदया/महोदय</p>
-          <p className="indent-8 text-justify mb-8">
-            मैं परिवार सहित यह घोषणा करता हूँ की आवेदन पत्र में लिखी गई सभी प्रविष्टियाँ सही है । मैं इसके पूर्व राशन कार्ड के लिए कोई आवेदन पत्र नहीं दिया हूँ । अगर आवेदन पत्र में लिखी गई कोई तथ्य गलत पाया जाता है तो मैं दंडात्मक/कानूनी कार्रवाई का भागी होऊँगा ।
-          </p>
+        <div className="declaration-title">घोषणा</div>
+        <div className="declaration-text text-justify">
+          महोदया / महोदय<br/><br/>
+          मैं परिवार सहित यह घोषणा करता हूँ की आवेदन पत्र में लिखी गई सभी प्रविष्टियाँ सही है । मैं इसके पूर्व राशन कार्ड के लिए कोई आवेदन पत्र नहीं दिया हूँ । अगर आवेदन पत्र में लिखी गई कोई तथ्य गलत पाया जाता है तो मैं दंडात्मक / कानूनी कार्यवाई का भागी होऊँगा ।
+        </div>
 
-          <div className="flex justify-between mt-12 mb-8">
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-2"><span>दिनांक</span> <span className="border-b border-black w-24 px-1">{data.date}</span></div>
-              <div className="flex gap-2"><span>स्थान</span> <span className="border-b border-black w-24 px-1">{data.place}</span></div>
+        <div className="sign-row mt-6">
+          <div>दिनांक <span className="line-fill">: {data.date}</span></div>
+          <div className="text-right flex flex-col items-end">
+            <div className="border border-black w-32 h-10 mb-1 flex items-center justify-center">
+              {data.signatureBase64 && <img src={data.signatureBase64} alt="Signature" className="max-h-full max-w-full" />}
             </div>
-            <div className="text-center w-64">
-              <div className="h-10 border-b border-black mb-1 flex items-end justify-center">
-                {data.signatureBase64 && <img src={data.signatureBase64} alt="Signature" className="h-8 max-w-full" />}
-              </div>
-              <p>आवेदक का हस्ताक्षर/अंगूठे का निशान</p>
-              <div className="flex gap-2 justify-center mt-2">
-                <span>नाम</span> <span className="border-b border-black w-40 px-1 inline-block text-left">{data.applicantName}</span>
-              </div>
-            </div>
+            आवेदक का हस्ताक्षर / अंगूठे का निशान<br/>
+            नाम <span className="font-bold ml-2">{data.applicantName}</span>
           </div>
+        </div>
+        <div className="sign-row mt-2">
+          <div>स्थान <span className="line-fill">: {data.place}</span></div>
+        </div>
 
-          <div className="mt-8 border-t border-black pt-4">
-            <p className="mb-2 font-semibold">पूर्विकताप्राप्त गृहस्थी के अन्तर्गत :-</p>
-            <p className="mb-2">आवेदन पत्र - स्वीकृत <span className="inline-block w-8 h-5 border border-black mx-1"></span> अस्वीकृत <span className="inline-block w-8 h-5 border border-black mx-1"></span></p>
-            <p className="mb-8">अस्वीकृत का कारण - <span className="border-b border-black w-[150mm] inline-block"></span></p>
-            
-            <div className="flex justify-between mt-12">
-              <div className="text-center">
-                <p>जांच करने वाले पदाधिकारी</p>
-                <p>का नाम एवं हस्ताक्षर</p>
-              </div>
-              <div className="text-center">
-                <p>प्रखंड विकास पदाधिकारी</p>
-                <p>का नाम एवं हस्ताक्षर</p>
-              </div>
+        <div className="office-section p-4 border border-black mt-8 bg-slate-50">
+          <p className="font-bold underline mb-4">पूर्विकताप्राप्त गृहस्थी के अन्तर्गत :–</p>
+          <div className="row mb-4">
+            <div>आवेदन पत्र – स्वीकृत <span className="box"></span> &nbsp;&nbsp; अस्वीकृत <span className="box"></span></div>
+          </div>
+          <p className="mb-8">अस्वीकृत का कारण – <span className="line-fill w-full inline-block mt-2"></span></p>
+          <div className="row mt-10 flex justify-between">
+            <div className="flex-col items-center">
+              <div className="w-48 border-b border-black mb-1"></div>
+              <span>जांच करने वाले पदाधिकारी का नाम एवं हस्ताक्षर</span>
+            </div>
+            <div className="flex-col items-center">
+              <div className="w-48 border-b border-black mb-1"></div>
+              <span>प्रखंड विकास पदाधिकारी का नाम एवं हस्ताक्षर</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* PAGE 3 */}
-      <div className="w-[210mm] min-h-[297mm] p-[25.4mm] bg-white relative overflow-hidden text-[14px] leading-relaxed" style={{ pageBreakAfter: 'always' }}>
-        <p className="text-center font-bold underline mb-8 text-[16px]">सामान्य निर्देश</p>
-        <div className="space-y-4 px-4 text-justify">
-          <div className="flex gap-3"><span>1.</span><p>आवेदन पत्र केवल एक ही प्रति आवेदक द्वारा भरी जायेगी ।</p></div>
-          <div className="flex gap-3"><span>2.</span><p>किसी व्यक्ति, संगठन या राजनीतिक पार्टी द्वारा तादाद में प्रस्तुत किये गये आवेदन पत्र स्वीकार नहीं किये जाएँगे ।</p></div>
-          <div className="flex gap-3"><span>3.</span><p>अपूर्ण आवेदन पत्र को रद्द कर दिया जायेगा ।</p></div>
-          <div className="flex gap-3"><span>4.</span><p>आवेदक द्वारा बिना सही हस्ताक्षर किये हुए या बिना अंगूठे के निशान के आवेदन पत्र को रद्द कर दिया जायेगा ।</p></div>
-          <div className="flex gap-3"><span>5.</span><p>हस्तलिखित, टाईप किये गये, फोटो कॉपी किये गये या एन.आई.सी. की वेबसाईट से डाउनलोड किये गये प्रपत्र भी स्वीकार किये जायेंगे, बशर्ते कि इस प्रकार के प्रपत्र निर्धारित उपरोक्त प्रपत्र के समरूप होने चाहिए ।</p></div>
-          <div className="flex gap-3"><span>6.</span><p>सभी आवेदन पत्र RTPS के माध्यम से लिया जायेगा ।</p></div>
-          <div className="flex gap-3"><span>7.</span><p>सरकारी सेवा से तात्पर्य है केन्द्र एवं राज्य सरकार, लोक उपक्रम, स्थानीय निकाय एवं स्वशासी में नियमित वेतनमान में कार्यरत कर्मी की सेवा ।</p></div>
-          <div className="flex gap-3"><span>8.</span><p>RTPS के तहत पात्र गृहस्थी द्वारा राशन कार्ड का आवेदन पत्र संबंधित क्षेत्र के अनुमंडल पदाधिकारी के कार्यालय में जमा किया जायेगा ।</p></div>
-          <div className="flex gap-3"><span>9.</span><p>अनुमंडल पदाधिकारी द्वारा RTPS के तहत राशन कार्ड हेतु प्राप्त आवेदन पत्र को एक सप्ताह के अन्दर संबंधित क्षेत्र के प्रखंड विकास पदाधिकारी को भेजा जायेगा । प्रखंड विकास पदाधिकारी द्वारा प्राप्त आवेदन पत्र को जांच कराकर 15 दिनों के अन्दर अनुमंडल पदाधिकारी को वापस किया जायेगा ।</p></div>
-          <div className="flex gap-3"><span>10.</span><p>अनुमंडल पदाधिकारी द्वारा आवेदन पत्र को स्वीकृत किया जाता है तो राशन कार्ड निर्गत किया जायेगा ।</p></div>
+      {/* PAGE 3: General Instructions */}
+      <div className="page">
+        <h3 className="section-title">सामान्य निर्देश</h3>
+        <div className="general-instructions text-justify">
+          <ol>
+            <li>आवेदन पत्र केवल एक ही प्रति आवेदक द्वारा भरी जायेगी ।</li>
+            <li>किसी व्यक्ति, संगठन या राजनीतिक पार्टी द्वारा तादाद में प्रस्तुत किये गये आवेदन पत्र स्वीकार नहीं किये जाऐंगे ।</li>
+            <li>अपूर्ण आवेदन पत्र को रद्द कर दिया जायेगा ।</li>
+            <li>आवेदक द्वारा बिना सही हस्ताक्षर किये हुए या बिना अंगूठे के निशान के आवेदन पत्र को रद्द कर दिया जायेगा ।</li>
+            <li>हस्तलिखित, टाईप किये गये, फोटो कॉपी किये गये या एन.आई.सी. की वेबसाईट से डाउनलोड किये गये प्रपत्र भी स्वीकार किये जायेंगे, बशर्ते कि इस प्रकार के प्रपत्र निर्धारित उपरोक्त प्रपत्र से समरूप होने चाहिए ।</li>
+            <li>सभी आवेदन पत्र RTPS के माध्यम से लिया जायेगा ।</li>
+            <li>सरकारी सेवा से तात्पर्य है केन्द्र एवं राज्य सरकार, लोक उपक्रम, स्थानीय निकाय एवं स्वशासी में नियमित वेतनमान में कार्यरत कर्मी की सेवा ।</li>
+            <li>RTPS के तहत पात्र गृहस्थी द्वारा राशन कार्ड का आवेदन पत्र संबंधित क्षेत्र के अनुमंडल पदाधिकारी के कार्यालय में जमा किया जायेगा ।</li>
+            <li>अनुमंडल पदाधिकारी द्वारा RTPS के तहत राशन कार्ड हेतु प्राप्त आवेदन पत्र को एक सप्ताह के अन्दर संबंधित क्षेत्र के प्रखंड विकास पदाधिकारी को भेजा जायेगा । प्रखंड विकास पदाधिकारी द्वारा प्राप्त आवेदन पत्र को जांच कराकर 15 दिनों के अन्दर अनुमंडल पदाधिकारी को वापस किया जायेगा ।</li>
+            <li>अनुमंडल पदाधिकारी द्वारा आवेदन पत्र को स्वीकृत किया जाता है तो राशन कार्ड निर्गत किया जायेगा ।</li>
+          </ol>
         </div>
       </div>
 
-      {/* PAGE 4 */}
-      <div className="w-[210mm] min-h-[297mm] p-[25.4mm] bg-white relative overflow-hidden text-[14px] leading-relaxed">
-        <p className="mb-6">उपर्युक्त अधिसूचना के परिशिष्ट-I के बाद निम्नलिखित परिशिष्ट-II जोड़ा जाएगा:-</p>
-        <p className="text-center font-bold mb-4 text-[16px]">"परिशिष्ट-II"</p>
-        <p className="text-center font-bold underline mb-8 text-[16px]">सेवा प्राप्त करने हेतु आवेदन के साथ जमा किए जाने वाले आवश्यक कागजात<br/>(चेक लिस्ट)</p>
+      {/* PAGE 4: Annexure II */}
+      <div className="page">
+        <p className="mb-4">2. उपर्युक्त अधिसूचना के परिशिष्ट-I. के बाद निम्नलिखित परिशिष्ट-II जोड़ा जाएगाः–</p>
+        <div className="annexure-title text-center font-bold">"परिशिष्ट–II"</div>
+        <div className="annexure-sub text-center font-bold underline mb-6">सेवा प्राप्त करने हेतु आवेदन के साथ जमा किए जाने वाले आवश्यक कागजात<br/>(चेक लिस्ट)</div>
 
-        <table className="w-full border-collapse border border-black mb-10 text-sm">
+        <table className="checklist-table w-full">
           <thead>
             <tr>
-              <th className="border border-black font-semibold p-2 w-[35%] text-center">सेवा का नाम</th>
-              <th className="border border-black font-semibold p-2 w-[65%] text-center">चेक लिस्ट</th>
+              <th style={{ width: '30%' }}>सेवा का नाम</th>
+              <th>चेक लिस्ट</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td className="border border-black p-3 align-top">1. नये राशन कार्ड का निर्गमन</td>
-              <td className="border border-black p-3 align-top">
-                <ol className="list-decimal pl-5 space-y-2">
+              <td className="p-2 font-bold">1. नये राशन कार्ड का निर्माण</td>
+              <td className="p-2">
+                <ol className="list-decimal pl-5 space-y-1">
                   <li>आवेदन पत्र विभागीय प्रपत्र 'क' में ।</li>
                   <li>आधार कार्ड का छायाप्रति ।</li>
                   <li>बैंक खाता के प्रथम पृष्ठ की छायाप्रति, जिसपर खाताधारी का नाम, खाता संख्या, बैंक का नाम, बैंक का IFSC Code रहता है ।</li>
@@ -280,46 +478,33 @@ export function BiharRationKaTemplate({ data }: Props) {
               </td>
             </tr>
             <tr>
-              <td className="border border-black p-3 align-top">2. राशन कार्ड में संशोधन (नाम में संशोधन, नाम जोड़ना, नाम हटना)</td>
-              <td className="border border-black p-3 align-top">
-                <ol className="list-decimal pl-5 space-y-2">
+              <td className="p-2 font-bold">2. राशन कार्ड में संशोधन (नाम में संशोधन, नाम जोड़ना, नाम हटाना)</td>
+              <td className="p-2">
+                <ol className="list-decimal pl-5 space-y-1">
                   <li>आवेदन पत्र विभागीय प्रपत्र 'ख' में ।</li>
                   <li>व्यक्ति, जिसका नाम जोड़ा जाना है, के आधार कार्ड की छाया प्रति।</li>
-                  <li>विभागीय आवेदन प्रपत्र 'ख' के क्रमांक 8 एवं 9 के संबंध में लागू कारण के प्रमाण-पत्र की छायाप्रति, यथा :-<br/>
-                      i. निवास में परिवर्तन हेतु आवासीय प्रमाण-पत्र<br/>
-                      ii. जन्म/मृत्यु का प्रमाण पत्र<br/>
-                      iii. राशन कार्ड में वर्णित अशुद्धियाँ जिनको शुद्ध किया जाना है, के लिए सरकारी प्रमाण-पत्र (सरकारी विद्यालय का प्रमाण-पत्र, आधार कार्ड, वोटर आई0कार्ड, ड्राईविंग लाईसेंस, पैन कार्ड आदि)।
+                  <li>विभागीय आवेदन प्रपत्र 'ख' के क्रमांक 8 एवं 9 के संबंध में लागू कारण के प्रमाण-पत्र की छायाप्रति, यथा :–
+                    <ul className="list-[lower-roman] pl-5 space-y-1 mt-1">
+                      <li>निवास में परिवर्तन हेतु आवासीय प्रमाण-पत्र</li>
+                      <li>जन्म / मृत्यु का प्रमाण-पत्र</li>
+                      <li>राशन कार्ड में वर्णित अशुद्धियाँ जिनको शुद्ध किया जाना है, के लिए सरकारी प्रमाण-पत्र (सरकारी विद्यालय का प्रमाण-पत्र, आधार कार्ड, वोटर आई0कार्ड, ड्राईविंग लाईसेंस, पैन कार्ड आदि)।</li>
+                    </ul>
                   </li>
                 </ol>
               </td>
             </tr>
             <tr>
-              <td className="border border-black p-3 align-top">3. राशन कार्ड का प्रत्यर्पण (Surrender)/रद्दीकरण</td>
-              <td className="border border-black p-3 align-top">
-                <ol className="list-decimal pl-5 space-y-2">
+              <td className="p-2 font-bold">3. राशन कार्ड का प्रत्यर्पण (Surrender) / रद्दीकरण</td>
+              <td className="p-2">
+                <ol className="list-decimal pl-5 space-y-1">
                   <li>आवेदन पत्र विभागीय प्रपत्र 'ख' में ।</li>
-                  <li>विद्यमान राशन कार्ड का प्रत्यर्पण/रद्द करने के लिए आवेदन पत्र के क्रमांक 10 के संबंध में लागू कारण की छायाप्रति ।</li>
+                  <li>विधमान राशन कार्ड का प्रत्यर्पण / रद्द करने के लिए आवेदन पत्र के क्रमांक 10 के संबंध में लागू कारण की छायाप्रति ।</li>
                 </ol>
               </td>
             </tr>
           </tbody>
         </table>
-
-        <p className="text-center font-bold underline mb-6 text-[15px] mt-10">सामान्य निर्देश</p>
-        <div className="space-y-3 px-4 text-justify">
-          <div className="flex gap-3"><span>1.</span><p>आवेदन-पत्र केवल एक ही प्रति आवेदक द्वारा भरी जायेगी ।</p></div>
-          <div className="flex gap-3"><span>2.</span><p>किसी व्यक्ति, संगठन या राजनीतिक पार्टी द्वारा तादाद में प्रस्तुत किये गये आवेदन-पत्रों को स्वीकार नहीं किये जाएँगे ।</p></div>
-          <div className="flex gap-3"><span>3.</span><p>अपूर्ण आवेदन पत्र को रद्द कर दिया जायेगा ।</p></div>
-          <div className="flex gap-3"><span>4.</span><p>अहस्ताक्षरित या बिना अंगूठे के निशान के आवेदन-पत्र को रद्द कर दिया जायेगा ।</p></div>
-          <div className="flex gap-3"><span>5.</span><p>हस्तलिखित, टाईप किये गये, फोटो कॉपी किये गये या एन.आई.सी. की वेबसाईट से डाउनलोड किये गये प्रपत्र भी स्वीकार किये जायेंगे, बशर्ते कि इस प्रकार के प्रपत्र निर्धारित प्रपत्र के समरूप होने चाहिए ।</p></div>
-          <div className="flex gap-3"><span>6.</span><p>सभी आवेदन पत्र RTPS के माध्यम से लिये जायेंगें ।</p></div>
-          <div className="flex gap-3"><span>7.</span><p>सरकारी सेवा से तात्पर्य है केन्द्र एवं राज्य सरकार, लोक उपक्रम, स्थानीय निकाय एवं स्वशासी में नियमित वेतनमान में कार्यरत कर्मी की सेवा ।</p></div>
-          <div className="flex gap-3"><span>8.</span><p>RTPS के तहत पात्र गृहस्थी द्वारा राशन कार्ड का आवेदन-पत्र संबंधित क्षेत्र के अनुमंडल पदाधिकारी के कार्यालय में जमा किया जायेगा ।</p></div>
-          <div className="flex gap-3"><span>9.</span><p>अनुमंडल पदाधिकारी द्वारा RTPS के तहत राशन कार्ड हेतु प्राप्त आवेदन-पत्र को एक सप्ताह के अन्दर संबंधित क्षेत्र के प्रखंड विकास पदाधिकारी को भेजा जायेगा । प्रखंड विकास पदाधिकारी द्वारा प्राप्त आवेदन पत्र को जांच कराकर 15 दिनों के अन्दर अनुमंडल पदाधिकारी को वापस किया जायेगा ।</p></div>
-          <div className="flex gap-3"><span>10.</span><p>अनुमंडल पदाधिकारी द्वारा आवेदन-पत्र को स्वीकृत किया जाता है तो राशन कार्ड निर्गत किया जायेगा ।</p></div>
-        </div>
       </div>
-
     </div>
   );
 }
