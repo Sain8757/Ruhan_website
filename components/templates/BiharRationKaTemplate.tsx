@@ -6,7 +6,7 @@ interface Props {
 }
 
 export function BiharRationKaTemplate({ data }: Props) {
-  const tick = '✓';
+  const tick = <span style={{ fontFamily: 'Arial, sans-serif', lineHeight: 1, position: 'relative', top: '1px' }}>✓</span>;
   
   // Array of 7 members for page 1 table
   const members = [...data.familyMembers];
