@@ -27,6 +27,7 @@ export default function NewServiceDialog({ isOpen, onClose, onSuccess }: NewServ
     notes: "",
     requiredDocs: [] as string[],
   });
+  const [customServiceType, setCustomServiceType] = useState("");
   const [docInput, setDocInput] = useState("");
 
   // Reset form when opened
@@ -43,6 +44,7 @@ export default function NewServiceDialog({ isOpen, onClose, onSuccess }: NewServ
         notes: "",
         requiredDocs: [],
       });
+      setCustomServiceType("");
       setDocInput("");
     }
   }, [isOpen]);
@@ -84,7 +86,8 @@ export default function NewServiceDialog({ isOpen, onClose, onSuccess }: NewServ
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCustomer) { toast.error("Please select a customer"); return; }
-    if (!form.serviceType) { toast.error("Please select service type"); return; }
+    const finalServiceType = form.serviceType === "Other" && customServiceType.trim() ? customServiceType.trim() : form.serviceType;
+    if (!finalServiceType) { toast.error("Please select service type"); return; }
     setLoading(true);
     
     // Generate a short 8-character alphanumeric tracking ID
@@ -94,7 +97,7 @@ export default function NewServiceDialog({ isOpen, onClose, onSuccess }: NewServ
       const res = await fetch("/api/services", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, customerId: selectedCustomer.id, trackingId }),
+        body: JSON.stringify({ ...form, serviceType: finalServiceType, customerId: selectedCustomer.id, trackingId }),
       });
       if (!res.ok) throw new Error("Failed to create service");
       toast.success("Service created!");
@@ -186,6 +189,60 @@ export default function NewServiceDialog({ isOpen, onClose, onSuccess }: NewServ
                     <option key={t} value={t}>{t}</option>
                   ))}
                 </select>
+                {form.serviceType === "Other" && (
+                  <div style={{ marginTop: '8px' }}>
+                    <label>Custom Service Name:</label>
+                    <input
+                      type="text"
+                      className="legacy-input"
+                      style={{ width: '100%' }}
+                      placeholder="Enter custom service name"
+                      value={customServiceType}
+                      onChange={(e) => setCustomServiceType(e.target.value)}
+                      required
+                    />
+                  </div>
+                )}
+                <div style={{ marginTop: '8px', padding: '6px', border: '1px solid #a6caf0', background: '#f0f4ff' }}>
+                  <div style={{ fontWeight: 'bold', fontSize: '11px', color: '#0a246a', marginBottom: '4px' }}>Required Documents:</div>
+                  {form.requiredDocs.length > 0 && (
+                    <ul style={{ margin: '0 0 6px 0', paddingLeft: '16px', fontSize: '11px', color: 'black' }}>
+                      {form.requiredDocs.map((doc, idx) => (
+                        <li key={idx}>
+                          {doc}
+                          <button type="button" onClick={() => removeDoc(idx)} style={{ marginLeft: '4px', color: 'red', background: 'none', border: 'none', cursor: 'pointer', fontSize: '10px' }} title="Remove">✕</button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                    <input 
+                      type="text" 
+                      className="legacy-input" 
+                      style={{ flex: 1, fontSize: '10px' }} 
+                      placeholder="Add a document..." 
+                      value={docInput} 
+                      onChange={(e) => setDocInput(e.target.value)} 
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addDoc(); } }} 
+                    />
+                    <button type="button" className="legacy-button" style={{ fontSize: '10px', padding: '2px 6px' }} onClick={addDoc}>Add</button>
+                  </div>
+                  
+                  {form.requiredDocs.length > 0 && selectedCustomer && selectedCustomer.mobile && (
+                    <button 
+                      type="button" 
+                      className="legacy-button"
+                      style={{ marginTop: '8px', fontSize: '10px', color: '#056230', fontWeight: 'bold' }}
+                      onClick={() => {
+                        const docList = form.requiredDocs.map(d => `- ${d}`).join('%0A');
+                        const msg = `Hello ${selectedCustomer.name},%0A%0AWe require the following documents for your ${form.serviceType === 'Other' ? (customServiceType || 'service') : form.serviceType} application:%0A%0A${docList}%0A%0APlease send them at your earliest convenience.%0A%0AThank you,%0ARA Seva Point`;
+                        window.open(`https://wa.me/91${selectedCustomer.mobile.replace(/\D/g, '').slice(-10)}?text=${msg}`, '_blank');
+                      }}
+                    >
+                      Ask Docs via WhatsApp
+                    </button>
+                  )}
+                </div>
               </div>
               <div>
                 <label>Fees (₹):</label>

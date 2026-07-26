@@ -401,8 +401,27 @@ export default function ServicesPage() {
             </fieldset>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-              <button onClick={() => setSelectedService(null)}>Close</button>
-              <button onClick={() => setIsDetailsOpen(true)}>View Full Details</button>
+              <button 
+                type="button"
+                className="legacy-button"
+                style={{ color: '#e81123', fontWeight: 'bold' }}
+                onClick={async () => {
+                  if (!confirm("Are you sure you want to delete this service record?")) return;
+                  try {
+                    const res = await fetch(`/api/services/${selectedService.id}`, { method: "DELETE" });
+                    if (!res.ok) throw new Error("Failed to delete service");
+                    toast.success("Service record deleted");
+                    setSelectedService(null);
+                    fetchServices();
+                  } catch (err: any) {
+                    toast.error(err.message);
+                  }
+                }}
+              >
+                Delete
+              </button>
+              <button className="legacy-button" onClick={() => setSelectedService(null)}>Close</button>
+              <button className="legacy-button" onClick={() => setIsDetailsOpen(true)} style={{ fontWeight: 'bold' }}>View Full Details</button>
             </div>
           </div>
         )}
