@@ -27,12 +27,12 @@ export function BiharRationKaTemplate({ data }: Props) {
         .ration-ka-wrapper {
           font-family: "Noto Sans Devanagari", "Mangal", Arial, sans-serif;
           color: #000;
-          line-height: 1.4;
+          line-height: 1.3;
         }
         .ration-ka-wrapper .page {
           width: 210mm;
           height: 297mm;
-          padding: 15mm 15mm;
+          padding: 10mm 15mm;
           background: #fff;
           position: relative;
           box-sizing: border-box;
@@ -41,13 +41,13 @@ export function BiharRationKaTemplate({ data }: Props) {
         }
         .ration-ka-wrapper .header-title {
           font-weight: 600;
-          font-size: 16px;
-          margin-bottom: 2px;
+          font-size: 15px;
+          margin-bottom: 1px;
           text-align: center;
         }
         .ration-ka-wrapper .header-sub {
-          font-size: 14px;
-          margin: 1px 0;
+          font-size: 13px;
+          margin: 0;
           text-align: center;
         }
         .ration-ka-wrapper .top-flex {
@@ -55,13 +55,13 @@ export function BiharRationKaTemplate({ data }: Props) {
           justify-content: space-between;
           align-items: flex-start;
           gap: 15px;
-          margin-top: 15px;
+          margin-top: 10px;
         }
         .ration-ka-wrapper .top-left { flex: 1; }
         .ration-ka-wrapper .photo-box {
           border: 1px solid #000;
-          width: 35mm;
-          height: 45mm;
+          width: 30mm;
+          height: 38mm;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -79,13 +79,13 @@ export function BiharRationKaTemplate({ data }: Props) {
         .ration-ka-wrapper .field-list {
           list-style: none;
           padding-left: 15px;
-          margin-top: 5px;
+          margin-top: 2px;
           margin-bottom: 0;
         }
         .ration-ka-wrapper .field-list li {
           display: flex;
-          padding: 4px 0;
-          font-size: 14px;
+          padding: 3px 0;
+          font-size: 13px;
         }
         .ration-ka-wrapper .field-list li .num {
           width: 25px;
@@ -103,39 +103,39 @@ export function BiharRationKaTemplate({ data }: Props) {
         .ration-ka-wrapper table {
           border-collapse: collapse;
           width: 100%;
-          margin-top: 10px;
-          font-size: 13px;
+          margin-top: 8px;
+          font-size: 12px;
         }
         .ration-ka-wrapper table th, .ration-ka-wrapper table td {
           border: 1px solid #000;
-          padding: 2px 4px;
+          padding: 1px 4px;
           text-align: center;
           vertical-align: middle;
-          height: 28px;
+          height: 24px;
         }
         .ration-ka-wrapper table th { font-weight: normal; }
         .ration-ka-wrapper h3.section-title {
           text-decoration: underline;
           text-align: center;
-          font-size: 16px;
-          margin: 15px 0;
+          font-size: 15px;
+          margin: 12px 0;
           font-weight: bold;
         }
         .ration-ka-wrapper ol.qlist {
           padding-left: 20px;
-          font-size: 14px;
-          margin-top: 10px;
+          font-size: 13px;
+          margin-top: 8px;
         }
         .ration-ka-wrapper ol.qlist > li {
-          margin-bottom: 6px;
+          margin-bottom: 4px;
         }
         .ration-ka-wrapper ol.qlist ul.sub {
           list-style: none;
           padding-left: 25px;
-          margin: 4px 0;
+          margin: 2px 0;
         }
         .ration-ka-wrapper ol.qlist ul.sub > li {
-          margin-bottom: 4px;
+          margin-bottom: 3px;
           display: flex;
           align-items: flex-start;
           gap: 6px;
