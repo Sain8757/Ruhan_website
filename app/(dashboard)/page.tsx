@@ -479,7 +479,7 @@ export default function DashboardPage() {
             <h1
               className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight"
             >
-              {greeting}, Almin General Store! {greetingEmoji}
+              {greeting}, Ruhan! {greetingEmoji}
             </h1>
             <p
               className="text-xs font-semibold flex items-center gap-1.5"
