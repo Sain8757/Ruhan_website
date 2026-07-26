@@ -5,14 +5,17 @@ interface Props {
   data: FormValues;
 }
 
-const CheckBox = ({ label, checked }: { label: string, checked: boolean }) => (
-  <span className="checkbox-group">
-    {label} <span className="box">{checked ? '✓' : ''}</span>
-  </span>
-);
+  const checkedIcon = "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%2214%22%20height%3D%2214%22%20fill%3D%22white%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%2F%3E%3Cpath%20d%3D%22M4%208%20L7%2011%20L12%204%22%20stroke%3D%22black%22%20stroke-width%3D%222.5%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E";
+  const uncheckedIcon = "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%2214%22%20height%3D%2214%22%20fill%3D%22white%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%2F%3E%3C%2Fsvg%3E";
+
+  const CheckBox = ({ checked, label }: { checked: boolean; label: string }) => (
+    <span className="checkbox-group" style={{ whiteSpace: 'nowrap' }}>
+      <span>{label}</span>
+      <img src={checked ? checkedIcon : uncheckedIcon} alt={checked ? 'Yes' : 'No'} style={{ width: '14px', height: '14px', display: 'inline-block', verticalAlign: 'middle', marginLeft: '4px', marginBottom: '2px' }} />
+    </span>
+  );
 
 export function BiharRationKhaTemplate({ data }: Props) {
-  const tick = '✓';
 
   return (
     <div className="ration-kha-wrapper" style={{ fontFamily: '"Noto Sans Devanagari", "Mangal", Arial, sans-serif' }}>
@@ -126,22 +129,16 @@ export function BiharRationKhaTemplate({ data }: Props) {
           margin-top: 8px;
         }
         .ration-kha-wrapper .qlist .sub > li {
-          display: flex;
-          justify-content: space-between;
+          display: block; /* Removed flex to stop html2canvas from miscalculating layout when wrapping */
+          line-height: 1.6;
           margin-bottom: 6px;
         }
         .ration-kha-wrapper .checkbox-group {
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
+          display: inline-block;
           margin-left: 8px;
         }
-        .ration-kha-wrapper .box {
-          display: inline-flex;
-          width: 16px;
-          height: 16px;
-          border: 1px solid #000;
-          margin: 0 4px;
+        .ration-kha-wrapper .checkbox-group > * {
+          display: inline-block;
           vertical-align: middle;
         }
         .ration-kha-wrapper .sign-box {
@@ -193,19 +190,19 @@ export function BiharRationKhaTemplate({ data }: Props) {
               <div style={{ marginLeft: '20px', marginTop: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
                   <span style={{ width: '220px' }}>(क) निवास में परिवर्तन</span>
-                  <span className="box" style={{ width: '24px', height: '24px', fontSize: '16px', justifyContent: 'center' }}>{data.reasonForChange === 'Nivas' ? tick : ''}</span>
+                  <img src={data.reasonForChange === 'Nivas' ? checkedIcon : uncheckedIcon} alt="" style={{ width: '16px', height: '16px', display: 'inline-block' }} />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
                   <span style={{ width: '220px' }}>(ख) जन्म या मृत्यु</span>
-                  <span className="box" style={{ width: '24px', height: '24px', fontSize: '16px', justifyContent: 'center' }}>{data.reasonForChange === 'JanmMrityu' ? tick : ''}</span>
+                  <img src={data.reasonForChange === 'JanmMrityu' ? checkedIcon : uncheckedIcon} alt="" style={{ width: '16px', height: '16px', display: 'inline-block' }} />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
                   <span style={{ width: '220px' }}>(ग) कार्ड में वर्णित ब्योरो में अशुद्धियाँ</span>
-                  <span className="box" style={{ width: '24px', height: '24px', fontSize: '16px', justifyContent: 'center' }}>{data.reasonForChange === 'Ashuddhiya' ? tick : ''}</span>
+                  <img src={data.reasonForChange === 'Ashuddhiya' ? checkedIcon : uncheckedIcon} alt="" style={{ width: '16px', height: '16px', display: 'inline-block' }} />
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
                   <span style={{ width: '220px' }}>(घ) अन्य कारण</span>
-                  <span className="box" style={{ width: '24px', height: '24px', fontSize: '16px', justifyContent: 'center' }}>{data.reasonForChange === 'Anya' ? tick : ''}</span>
+                  <img src={data.reasonForChange === 'Anya' ? checkedIcon : uncheckedIcon} alt="" style={{ width: '16px', height: '16px', display: 'inline-block' }} />
                 </div>
               </div>
             </div>
@@ -285,16 +282,16 @@ export function BiharRationKhaTemplate({ data }: Props) {
         <ol className="qlist" style={{ listStyleType: 'none', marginLeft: '-20px' }}>
           <li>(क) ग्रामीण क्षेत्र में प्रवास, जन्म, विवाह, सामाजिक और आर्थिक परिस्थिति में परिवर्तन के कारण आवेदक निम्नलिखित पर हाँ/नहीं, पर टिक लगाये :-
             <ul className="sub">
-              <li>(i) मोटर चालित तिपहिया/चार पहिया वाहन है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.motorVehicle === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.motorVehicle === false} /></div></li>
-              <li>(ii) मशीन चालित तीन/चार पहियों वाले कृषि उपकरण है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.machineEquip === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.machineEquip === false} /></div></li>
-              <li>(iii) सरकार में पंजीकृत गैर-कृषि उद्योग वाले परिवार वाली गृहस्थी है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.govtRegIndustry === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.govtRegIndustry === false} /></div></li>
-              <li>(iv) परिवार के किसी सदस्य की मासिक आय 10,000/- रू0 से अधिक है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.incomeOver10k === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.incomeOver10k === false} /></div></li>
-              <li>(v) आयकर देते है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.incomeTax === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.incomeTax === false} /></div></li>
-              <li>(vi) व्यावसायिक कर का भुगतान करते है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.commercialTax === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.commercialTax === false} /></div></li>
-              <li>(vii) जिस मकान में रहते है, उस मकान में सभी कमरों में पक्की दीवारों और छत के साथ तीन अथवा अधिक कमरा है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.puccaHouse3Rooms === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.puccaHouse3Rooms === false} /></div></li>
-              <li>(viii) परिवार में कम से कम एक सिंचाई उपकरण के साथ 2.5 एकड़ अथवा इससे अधिक सिंचित भूमि है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.irrigatedLand2_5 === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.irrigatedLand2_5 === false} /></div></li>
-              <li>(ix) दो अथवा उससे अधिक फसली मौसम के लिए 5 एकड़ अथवा इससे अधिक सिंचित भूमि वाली गृहस्थी है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.irrigatedLand5 === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.irrigatedLand5 === false} /></div></li>
-              <li>(x) कम से कम एक सिंचाई उपकरण के साथ कम से कम 7.5 एकड़ अथवा इससे अधिक सिंचित भूमि वाली गृहस्थी है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.irrigatedLand7_5 === true} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.irrigatedLand7_5 === false} /></div></li>
+              <li>(i) मोटर चालित तिपहिया/चार पहिया वाहन है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.motorVehicle === 'Yes'} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.motorVehicle === 'No'} /></div></li>
+              <li>(ii) मशीन चालित तीन/चार पहियों वाले कृषि उपकरण है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.machineEquip === 'Yes'} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.machineEquip === 'No'} /></div></li>
+              <li>(iii) सरकार में पंजीकृत गैर-कृषि उद्योग वाले परिवार वाली गृहस्थी है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.govtRegIndustry === 'Yes'} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.govtRegIndustry === 'No'} /></div></li>
+              <li>(iv) परिवार के किसी सदस्य की मासिक आय 10,000/- रू0 से अधिक है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.incomeOver10k === 'Yes'} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.incomeOver10k === 'No'} /></div></li>
+              <li>(v) आयकर देते है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.incomeTax === 'Yes'} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.incomeTax === 'No'} /></div></li>
+              <li>(vi) व्यावसायिक कर का भुगतान करते है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.commercialTax === 'Yes'} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.commercialTax === 'No'} /></div></li>
+              <li>(vii) जिस मकान में रहते है, उस मकान में सभी कमरों में पक्की दीवारों और छत के साथ तीन अथवा अधिक कमरा है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.puccaHouse3Rooms === 'Yes'} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.puccaHouse3Rooms === 'No'} /></div></li>
+              <li>(viii) परिवार में कम से কমপক্ষে एक सिंचाई उपकरण के साथ 2.5 एकड़ अथवा इससे अधिक सिंचित भूमि है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.irrigatedLand2_5 === 'Yes'} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.irrigatedLand2_5 === 'No'} /></div></li>
+              <li>(ix) दो अथवा उससे अधिक फसली मौसम के लिए 5 एकड़ अथवा इससे अधिक सिंचित भूमि वाली गृहस्थी है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.irrigatedLand5 === 'Yes'} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.irrigatedLand5 === 'No'} /></div></li>
+              <li>(x) कम से कम एक सिंचाई उपकरण के साथ कम से कम 7.5 एकड़ अथवा इससे अधिक सिंचित भूमि वाली गृहस्थी है, <div><CheckBox label="हाँ" checked={data.ruralDeclarations?.irrigatedLand7_5 === 'Yes'} /> <CheckBox label="नहीं" checked={data.ruralDeclarations?.irrigatedLand7_5 === 'No'} /></div></li>
             </ul>
           </li>
         </ol>
@@ -305,14 +302,14 @@ export function BiharRationKhaTemplate({ data }: Props) {
         <ol className="qlist" style={{ listStyleType: 'none', marginLeft: '-20px', marginTop: 0 }}>
           <li>(ख) शहरी क्षेत्र में प्रवास, जन्म, विवाह, सामाजिक और आर्थिक परिस्थिति में परिवर्तन के कारण आवेदक निम्नलिखित पर हाँ/नहीं, पर टिक लगाये :-
             <ul className="sub">
-              <li>(i) आयकर देते है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.incomeTax === true} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.incomeTax === false} /></div></li>
-              <li>(ii) परिवार में कोई सदस्य सरकारी सेवा में है (सरकारी सेवा से तात्पर्य है- केन्द्र एवं राज्य सरकार/लोक उपक्रम, स्थानीय निकाय एवं स्वशासी संस्थाओं में नियमित वेतनमान में कार्यरत कर्मी, (अनु०जाति/अनु०जन०जाति के ग्रुप "डी" को छोड़कर)), <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.govtServant === true} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.govtServant === false} /></div></li>
-              <li>(iii) व्यावसायिक कर का भुगतान करते है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.commercialTax === true} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.commercialTax === false} /></div></li>
-              <li>(iv) जिस मकान में रहते है, उस मकान में सभी कमरों में पक्की दीवारों और छत के साथ तीन अथवा अधिक कमरा है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.puccaHouse3Rooms === true} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.puccaHouse3Rooms === false} /></div></li>
-              <li>(v) परिवार के किसी सदस्य का मासिक आय 20,000/- रू0 से अधिक है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.incomeOver20k === true} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.incomeOver20k === false} /></div></li>
-              <li>(vi) दो पहिया वाहन, रेफ्रीजरेटर तथा वाशिंग मशीन तीनों उपकरण है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.threeAppliances === true} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.threeAppliances === false} /></div></li>
-              <li>(vii) गृहस्थी में चार पहिया वाहन है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.fourWheeler === true} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.fourWheeler === false} /></div></li>
-              <li>(viii) गृहस्थी में वाशिंग मशीन है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.washingMachine === true} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.washingMachine === false} /></div></li>
+              <li>(i) आयकर देते है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.incomeTax === 'Yes'} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.incomeTax === 'No'} /></div></li>
+              <li>(ii) परिवार में कोई सदस्य सरकारी सेवा में है (सरकारी सेवा से तात्पर्य है- केन्द्र एवं राज्य सरकार/लोक उपक्रम, स्थानीय निकाय एवं स्वशासी संस्थाओं में नियमित वेतनमान में कार्यरत कर्मी, (अनु०जाति/अनु०जन०जाति के ग्रुप "डी" को छोड़कर)), <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.govtServant === 'Yes'} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.govtServant === 'No'} /></div></li>
+              <li>(iii) व्यावसायिक कर का भुगतान करते है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.commercialTax === 'Yes'} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.commercialTax === 'No'} /></div></li>
+              <li>(iv) जिस मकान में रहते है, उस मकान में सभी कमरों में पक्की दीवारों और छत के साथ तीन अथवा अधिक कमरा है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.puccaHouse3Rooms === 'Yes'} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.puccaHouse3Rooms === 'No'} /></div></li>
+              <li>(v) परिवार के किसी सदस्य का मासिक आय 20,000/- रू0 से अधिक है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.incomeOver20k === 'Yes'} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.incomeOver20k === 'No'} /></div></li>
+              <li>(vi) दो पहिया वाहन, रेफ्रीजरेटर तथा वाशिंग मशीन तीनों उपकरण है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.threeAppliances === 'Yes'} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.threeAppliances === 'No'} /></div></li>
+              <li>(vii) गृहस्थी में चार पहिया वाहन है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.fourWheeler === 'Yes'} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.fourWheeler === 'No'} /></div></li>
+              <li>(viii) गृहस्थी में वाशिंग मशीन है, <div><CheckBox label="हाँ" checked={data.urbanDeclarations?.washingMachine === 'Yes'} /> <CheckBox label="नहीं" checked={data.urbanDeclarations?.washingMachine === 'No'} /></div></li>
             </ul>
           </li>
         </ol>

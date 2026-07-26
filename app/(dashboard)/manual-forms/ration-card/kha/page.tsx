@@ -34,19 +34,19 @@ const formSchema = z.object({
       monthlyIncome: z.string().optional(),
     })
   ),
-  areaType: z.enum(["Rural", "Urban"]),
+  areaType: z.enum(["Rural", "Urban"]).optional(),
   ruralDeclarations: z.object({
-    motorVehicle: z.boolean().optional(),
-    machineEquip: z.boolean().optional(),
-    govtRegIndustry: z.boolean().optional(),
-    incomeOver10k: z.boolean().optional(),
-    incomeTax: z.boolean().optional(),
-    commercialTax: z.boolean().optional(),
-    puccaHouse3Rooms: z.boolean().optional(),
-    irrigatedLand2_5: z.boolean().optional(),
-    irrigatedLand5: z.boolean().optional(),
-    irrigatedLand7_5: z.boolean().optional(),
-    govtServant: z.boolean().optional(),
+    motorVehicle: z.enum(["Yes", "No"]).optional(),
+    machineEquip: z.enum(["Yes", "No"]).optional(),
+    govtRegIndustry: z.enum(["Yes", "No"]).optional(),
+    incomeOver10k: z.enum(["Yes", "No"]).optional(),
+    incomeTax: z.enum(["Yes", "No"]).optional(),
+    commercialTax: z.enum(["Yes", "No"]).optional(),
+    puccaHouse3Rooms: z.enum(["Yes", "No"]).optional(),
+    irrigatedLand2_5: z.enum(["Yes", "No"]).optional(),
+    irrigatedLand5: z.enum(["Yes", "No"]).optional(),
+    irrigatedLand7_5: z.enum(["Yes", "No"]).optional(),
+    govtServant: z.enum(["Yes", "No"]).optional(),
     govtServantDetails: z.object({
       serviceName: z.string().optional(),
       postingPlace: z.string().optional(),
@@ -54,8 +54,14 @@ const formSchema = z.object({
     }).optional(),
   }).optional(),
   urbanDeclarations: z.object({
-    incomeTax: z.boolean().optional(),
-    govtServant: z.boolean().optional(),
+    incomeTax: z.enum(["Yes", "No"]).optional(),
+    commercialTax: z.enum(["Yes", "No"]).optional(),
+    puccaHouse3Rooms: z.enum(["Yes", "No"]).optional(),
+    incomeOver20k: z.enum(["Yes", "No"]).optional(),
+    threeAppliances: z.enum(["Yes", "No"]).optional(),
+    fourWheeler: z.enum(["Yes", "No"]).optional(),
+    washingMachine: z.enum(["Yes", "No"]).optional(),
+    govtServant: z.enum(["Yes", "No"]).optional(),
     govtServantDetails: z.object({
       serviceName: z.string().optional(),
       postingPlace: z.string().optional(),
@@ -82,15 +88,30 @@ export default function RationCardFormPage() {
   const photoInputRef = useRef<HTMLInputElement>(null);
   const sigInputRef = useRef<HTMLInputElement>(null);
 
-  const { register, control, handleSubmit, setValue, watch, formState: { errors } } = useForm<FormValues>({
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    getValues,
+    formState: { errors },
+  } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      familyMembers: [{ name: "", fatherName: "", gender: "", age: "", maritalStatus: "", relation: "", aadhaar: "", mobile: "", occupation: "", incomeSource: "", monthlyIncome: "" }],
+      date: new Date().toISOString().split("T")[0],
+      familyMembers: [{ name: '', fatherName: '', gender: '', age: '', maritalStatus: '', relation: '', aadhaar: '', mobile: '', occupation: '', incomeSource: '', monthlyIncome: '' }],
       areaType: "Rural",
       ruralDeclarations: {},
       urbanDeclarations: {},
     },
   });
+
+  const handleRadioClick = (fieldName: keyof FormValues | `ruralDeclarations.${string}` | `urbanDeclarations.${string}`, value: string | boolean) => (e: React.MouseEvent<HTMLInputElement>) => {
+    if (getValues(fieldName as any) === value) {
+      setTimeout(() => setValue(fieldName as any, undefined as any), 0);
+    }
+  };
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -399,32 +420,146 @@ export default function RationCardFormPage() {
               
               <div className="mb-4">
                 <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">(क) ग्रामीण क्षेत्र (Rural)</h4>
-                <div className="space-y-2 pl-2 border-l-2 border-blue-500">
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("ruralDeclarations.motorVehicle")} /> Motor/3-4 wheeler</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("ruralDeclarations.machineEquip")} /> Machine agriculture eq.</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("ruralDeclarations.govtRegIndustry")} /> Govt reg. non-agri industry</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("ruralDeclarations.incomeOver10k")} /> Income over 10k/month</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("ruralDeclarations.incomeTax")} /> Pay Income Tax</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("ruralDeclarations.commercialTax")} /> Pay Commercial Tax</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("ruralDeclarations.puccaHouse3Rooms")} /> Pucca house with 3+ rooms</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("ruralDeclarations.irrigatedLand2_5")} /> 2.5 acre irrigated land</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("ruralDeclarations.irrigatedLand5")} /> 5 acre irrigated land</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("ruralDeclarations.irrigatedLand7_5")} /> 7.5 acre irrigated land</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("ruralDeclarations.govtServant")} /> Govt Servant</label>
+                <div className="space-y-3 pl-2 border-l-2 border-blue-500">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">Motor/3-4 wheeler</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.motorVehicle")} onClick={handleRadioClick("ruralDeclarations.motorVehicle", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.motorVehicle")} onClick={handleRadioClick("ruralDeclarations.motorVehicle", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">Machine agriculture eq.</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.machineEquip")} onClick={handleRadioClick("ruralDeclarations.machineEquip", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.machineEquip")} onClick={handleRadioClick("ruralDeclarations.machineEquip", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">Govt reg. non-agri industry</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.govtRegIndustry")} onClick={handleRadioClick("ruralDeclarations.govtRegIndustry", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.govtRegIndustry")} onClick={handleRadioClick("ruralDeclarations.govtRegIndustry", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">Income over 10k/month</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.incomeOver10k")} onClick={handleRadioClick("ruralDeclarations.incomeOver10k", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.incomeOver10k")} onClick={handleRadioClick("ruralDeclarations.incomeOver10k", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">Pay Income Tax</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.incomeTax")} onClick={handleRadioClick("ruralDeclarations.incomeTax", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.incomeTax")} onClick={handleRadioClick("ruralDeclarations.incomeTax", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">Pay Commercial Tax</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.commercialTax")} onClick={handleRadioClick("ruralDeclarations.commercialTax", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.commercialTax")} onClick={handleRadioClick("ruralDeclarations.commercialTax", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">Pucca house with 3+ rooms</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.puccaHouse3Rooms")} onClick={handleRadioClick("ruralDeclarations.puccaHouse3Rooms", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.puccaHouse3Rooms")} onClick={handleRadioClick("ruralDeclarations.puccaHouse3Rooms", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">2.5 acre irrigated land</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.irrigatedLand2_5")} onClick={handleRadioClick("ruralDeclarations.irrigatedLand2_5", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.irrigatedLand2_5")} onClick={handleRadioClick("ruralDeclarations.irrigatedLand2_5", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">5 acre irrigated land</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.irrigatedLand5")} onClick={handleRadioClick("ruralDeclarations.irrigatedLand5", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.irrigatedLand5")} onClick={handleRadioClick("ruralDeclarations.irrigatedLand5", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">7.5 acre irrigated land</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.irrigatedLand7_5")} onClick={handleRadioClick("ruralDeclarations.irrigatedLand7_5", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.irrigatedLand7_5")} onClick={handleRadioClick("ruralDeclarations.irrigatedLand7_5", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">Govt Servant</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.govtServant")} onClick={handleRadioClick("ruralDeclarations.govtServant", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.govtServant")} onClick={handleRadioClick("ruralDeclarations.govtServant", "No")} /> No</label>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <div>
                 <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">(ख) शहरी क्षेत्र (Urban)</h4>
-                <div className="space-y-2 pl-2 border-l-2 border-green-500">
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("urbanDeclarations.incomeTax")} /> Pay Income Tax</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("urbanDeclarations.commercialTax")} /> Pay Commercial Tax</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("urbanDeclarations.puccaHouse3Rooms")} /> Pucca house with 3+ rooms</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("urbanDeclarations.incomeOver20k")} /> Income over 20k/month</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("urbanDeclarations.threeAppliances")} /> 2-wheeler, Fridge & Washing Mach.</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("urbanDeclarations.fourWheeler")} /> 4-wheeler</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("urbanDeclarations.washingMachine")} /> Washing Machine</label>
-                  <label className="flex items-center gap-2 text-xs"><input type="checkbox" {...register("urbanDeclarations.govtServant")} /> Govt Servant (excluding Group D)</label>
+                <div className="space-y-3 pl-2 border-l-2 border-green-500">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">Pay Income Tax</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("urbanDeclarations.incomeTax")} onClick={handleRadioClick("urbanDeclarations.incomeTax", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("urbanDeclarations.incomeTax")} onClick={handleRadioClick("urbanDeclarations.incomeTax", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">Pay Commercial Tax</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("urbanDeclarations.commercialTax")} onClick={handleRadioClick("urbanDeclarations.commercialTax", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("urbanDeclarations.commercialTax")} onClick={handleRadioClick("urbanDeclarations.commercialTax", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">Pucca house with 3+ rooms</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("urbanDeclarations.puccaHouse3Rooms")} onClick={handleRadioClick("urbanDeclarations.puccaHouse3Rooms", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("urbanDeclarations.puccaHouse3Rooms")} onClick={handleRadioClick("urbanDeclarations.puccaHouse3Rooms", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">Income over 20k/month</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("urbanDeclarations.incomeOver20k")} onClick={handleRadioClick("urbanDeclarations.incomeOver20k", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("urbanDeclarations.incomeOver20k")} onClick={handleRadioClick("urbanDeclarations.incomeOver20k", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">2-wheeler, Fridge & Washing Mach.</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("urbanDeclarations.threeAppliances")} onClick={handleRadioClick("urbanDeclarations.threeAppliances", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("urbanDeclarations.threeAppliances")} onClick={handleRadioClick("urbanDeclarations.threeAppliances", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">4-wheeler</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("urbanDeclarations.fourWheeler")} onClick={handleRadioClick("urbanDeclarations.fourWheeler", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("urbanDeclarations.fourWheeler")} onClick={handleRadioClick("urbanDeclarations.fourWheeler", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">Washing Machine</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("urbanDeclarations.washingMachine")} onClick={handleRadioClick("urbanDeclarations.washingMachine", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("urbanDeclarations.washingMachine")} onClick={handleRadioClick("urbanDeclarations.washingMachine", "No")} /> No</label>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-xs text-gray-700 dark:text-gray-300">Govt Servant (excluding Group D)</span>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("urbanDeclarations.govtServant")} onClick={handleRadioClick("urbanDeclarations.govtServant", "Yes")} /> Yes</label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("urbanDeclarations.govtServant")} onClick={handleRadioClick("urbanDeclarations.govtServant", "No")} /> No</label>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
