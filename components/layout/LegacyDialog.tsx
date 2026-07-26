@@ -79,47 +79,19 @@ export default function LegacyDialog({ isOpen, onClose, title, children, width =
           </div>
           <div style={{ display: 'flex', gap: '2px' }}>
             <button 
+              className="legacy-btn-close"
               onClick={onClose}
               title="Close"
               style={{
-                background: '#e81123',
-                borderTop: '1px solid #fff',
-                borderLeft: '1px solid #fff',
-                borderRight: '1px solid #404040',
-                borderBottom: '1px solid #404040',
-                width: '20px',
-                height: '18px',
+                width: '18px',
+                height: '16px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'white',
-                cursor: 'pointer',
                 padding: 0,
-                boxShadow: 'none'
-              }}
-              onMouseDown={(e) => {
-                e.currentTarget.style.background = '#b00d1a';
-                e.currentTarget.style.borderTop = '1px solid #404040';
-                e.currentTarget.style.borderLeft = '1px solid #404040';
-                e.currentTarget.style.borderRight = '1px solid #fff';
-                e.currentTarget.style.borderBottom = '1px solid #fff';
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.background = '#e81123';
-                e.currentTarget.style.borderTop = '1px solid #fff';
-                e.currentTarget.style.borderLeft = '1px solid #fff';
-                e.currentTarget.style.borderRight = '1px solid #404040';
-                e.currentTarget.style.borderBottom = '1px solid #404040';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = '#e81123';
-                e.currentTarget.style.borderTop = '1px solid #fff';
-                e.currentTarget.style.borderLeft = '1px solid #fff';
-                e.currentTarget.style.borderRight = '1px solid #404040';
-                e.currentTarget.style.borderBottom = '1px solid #404040';
               }}
             >
-              <X size={12} strokeWidth={3} color="white" style={{ display: 'block' }} />
+              <X size={12} strokeWidth={3} />
             </button>
           </div>
         </div>

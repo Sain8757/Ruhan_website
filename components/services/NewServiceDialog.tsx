@@ -51,16 +51,28 @@ export default function NewServiceDialog({ isOpen, onClose, onSuccess }: NewServ
 
   const applyServicePreset = (serviceType: string) => {
     const preset = findCatalogItem(serviceType);
-    setForm((current) => ({
-      ...current,
-      serviceType,
-      fees: preset ? String(preset.fee) : current.fees,
-      requiredDocs: preset ? preset.documents : current.requiredDocs,
-      notes: preset
-        ? `${preset.message}\nEstimated time: ${preset.estimate}${preset.portal ? `\nPortal: ${preset.portal}` : ""}`
-        : current.notes,
-    }));
+    setForm((current) => {
+      const replacedMessage = preset ? preset.message.replace(/{name}/g, selectedCustomer ? selectedCustomer.name : '{name}') : '';
+      return {
+        ...current,
+        serviceType,
+        fees: preset ? String(preset.fee) : current.fees,
+        requiredDocs: preset ? preset.documents : current.requiredDocs,
+        notes: preset
+          ? `${replacedMessage}\nEstimated time: ${preset.estimate}${preset.portal ? `\nPortal: ${preset.portal}` : ""}`
+          : current.notes,
+      };
+    });
   };
+
+  useEffect(() => {
+    if (selectedCustomer && form.notes.includes("{name}")) {
+      setForm(prev => ({
+        ...prev,
+        notes: prev.notes.replace(/{name}/g, selectedCustomer.name)
+      }));
+    }
+  }, [selectedCustomer]);
 
   useEffect(() => {
     if (!customerSearch.trim()) { setCustomers([]); return; }
@@ -203,14 +215,14 @@ export default function NewServiceDialog({ isOpen, onClose, onSuccess }: NewServ
                     />
                   </div>
                 )}
-                <div style={{ marginTop: '8px', padding: '6px', border: '1px solid #a6caf0', background: '#f0f4ff' }}>
-                  <div style={{ fontWeight: 'bold', fontSize: '11px', color: '#0a246a', marginBottom: '4px' }}>Required Documents:</div>
+                <fieldset className="legacy-fieldset" style={{ marginTop: '8px', padding: '6px' }}>
+                  <legend style={{ color: '#000080' }}>Required Documents</legend>
                   {form.requiredDocs.length > 0 && (
-                    <ul style={{ margin: '0 0 6px 0', paddingLeft: '16px', fontSize: '11px', color: 'black' }}>
+                    <ul style={{ margin: '0 0 8px 0', paddingLeft: '16px', color: 'black' }}>
                       {form.requiredDocs.map((doc, idx) => (
-                        <li key={idx}>
+                        <li key={idx} style={{ marginBottom: '2px' }}>
                           {doc}
-                          <button type="button" onClick={() => removeDoc(idx)} style={{ marginLeft: '4px', color: 'red', background: 'none', border: 'none', cursor: 'pointer', fontSize: '10px' }} title="Remove">✕</button>
+                          <span onClick={() => removeDoc(idx)} style={{ marginLeft: '8px', color: '#e81123', cursor: 'pointer', textDecoration: 'underline' }}>remove</span>
                         </li>
                       ))}
                     </ul>
@@ -232,7 +244,7 @@ export default function NewServiceDialog({ isOpen, onClose, onSuccess }: NewServ
                     <button 
                       type="button" 
                       className="legacy-button"
-                      style={{ marginTop: '8px', fontSize: '10px', color: '#056230', fontWeight: 'bold' }}
+                      style={{ marginTop: '8px', fontWeight: 'bold' }}
                       onClick={() => {
                         const docList = form.requiredDocs.map(d => `- ${d}`).join('%0A');
                         const msg = `Hello ${selectedCustomer.name},%0A%0AWe require the following documents for your ${form.serviceType === 'Other' ? (customServiceType || 'service') : form.serviceType} application:%0A%0A${docList}%0A%0APlease send them at your earliest convenience.%0A%0AThank you,%0ARA Seva Point`;
@@ -242,7 +254,7 @@ export default function NewServiceDialog({ isOpen, onClose, onSuccess }: NewServ
                       Ask Docs via WhatsApp
                     </button>
                   )}
-                </div>
+                </fieldset>
               </div>
               <div>
                 <label>Fees (₹):</label>
