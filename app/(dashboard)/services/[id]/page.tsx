@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   ArrowLeft, Loader2, MessageCircle, Save, Trash2, Printer, Plus,
   Phone, User, Calendar, IndianRupee, FileText, CheckCircle, Clock, XCircle, CheckSquare, Square,
-  ExternalLink, Copy, AlertCircle, Check
+  ExternalLink, Copy, AlertCircle, Check, Settings
 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/contexts/ToastContext";
@@ -254,46 +254,71 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
       </div>
 
       {/* Screen Header (Hidden on Print) */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6 no-print">
-        <div className="flex items-center gap-3">
-          <Link href="/services" className="btn-ghost p-2">
-            <ArrowLeft size={18} />
-          </Link>
-          <div>
-            <h1 className="page-title">{service.serviceType}</h1>
-            <p className="page-subtitle">Service Ref: #{service.id.slice(-6).toUpperCase()} • Registered {formatDate(service.createdAt)}</p>
+      <div className="relative overflow-hidden bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-800 rounded-2xl p-6 md:p-8 mb-8 text-white shadow-xl shadow-blue-900/10 no-print">
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-white opacity-5 rounded-full blur-2xl translate-y-1/3 -translate-x-1/4"></div>
+
+        <div className="relative z-10 flex flex-col md:flex-row items-start justify-between gap-5">
+          <div className="flex items-start gap-4 w-full md:w-auto">
+            <Link href="/services" className="bg-white/10 hover:bg-white/20 p-2.5 rounded-full backdrop-blur-md transition-colors text-white border border-white/10 mt-1 flex-shrink-0 shadow-sm">
+              <ArrowLeft size={20} />
+            </Link>
+            <div className="flex-1">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <span className="bg-white/15 backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-mono tracking-widest font-bold uppercase border border-white/10 shadow-inner">
+                  Ref: #{service.id.slice(-6).toUpperCase()}
+                </span>
+                <span className="bg-white/15 backdrop-blur-md px-2.5 py-1 rounded-md text-[10px] font-bold uppercase border border-white/10 shadow-inner">
+                  {formatDate(service.createdAt)}
+                </span>
+              </div>
+              <h1 className="text-3xl font-extrabold tracking-tight drop-shadow-md mb-3">{service.serviceType}</h1>
+              
+              <div className="flex flex-wrap items-center gap-2">
+                <span className={`flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full shadow-sm backdrop-blur-md border ${
+                  service.status === 'APPROVED' || service.status === 'DELIVERED' ? 'bg-green-500/30 text-green-50 border-green-400/40' :
+                  service.status === 'PENDING' ? 'bg-amber-500/30 text-amber-50 border-amber-400/40' :
+                  'bg-blue-400/30 text-blue-50 border-blue-300/40'
+                }`}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70"></span> 
+                  {STATUS_LABELS[service.status] || service.status}
+                </span>
+                
+                <span className={`flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full shadow-sm backdrop-blur-md border ${
+                  service.paymentStatus === 'PAID' ? 'bg-emerald-500/30 text-emerald-50 border-emerald-400/40' :
+                  service.paymentStatus === 'PARTIAL' ? 'bg-orange-500/30 text-orange-50 border-orange-400/40' :
+                  'bg-rose-500/30 text-rose-50 border-rose-400/40'
+                }`}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70"></span>
+                  {service.paymentStatus}
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={handlePrintToken}
-            className="btn-secondary px-3 py-1.5 text-xs font-bold flex items-center gap-1.5"
-            title="Print Customer Acknowledgment Slip"
-          >
-            <Printer size={14} />
-            Print Token Slip
-          </button>
-          
-          <button
-            type="button"
-            onClick={handleGenerateInvoice}
-            disabled={isGeneratingInvoice}
-            className="btn-primary px-3 py-1.5 text-xs font-bold flex items-center gap-1.5"
-            style={{ background: "#056230", border: "1px solid #044b25" }}
-            title="Generate Final Invoice for this service"
-          >
-            <FileText size={14} />
-            {isGeneratingInvoice ? "..." : "1-Click Invoice"}
-          </button>
-
-          <span className={`badge ${SERVICE_STATUS_COLORS[service.status]} text-sm px-3 py-1`}>
-            {STATUS_LABELS[service.status] || service.status}
-          </span>
-          <span className={`badge ${PAYMENT_STATUS_COLORS[service.paymentStatus]} text-sm px-3 py-1`}>
-            {service.paymentStatus}
-          </span>
+          <div className="flex items-center gap-3 w-full md:w-auto md:mt-1 pt-4 md:pt-0 border-t border-white/10 md:border-0">
+            <button
+              type="button"
+              onClick={handlePrintToken}
+              className="flex-1 md:flex-none bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md px-4 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm"
+              title="Print Customer Acknowledgment Slip"
+            >
+              <Printer size={16} />
+              Print Slip
+            </button>
+            
+            <button
+              type="button"
+              onClick={handleGenerateInvoice}
+              disabled={isGeneratingInvoice}
+              className="flex-1 md:flex-none bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white border border-emerald-400/50 px-5 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)] disabled:opacity-70"
+              title="Generate Final Invoice for this service"
+            >
+              {isGeneratingInvoice ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
+              {isGeneratingInvoice ? "Working..." : "1-Click Invoice"}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -338,20 +363,29 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
           </div>
 
           {/* Profit Tracking */}
-          <div className="glass-card p-5 space-y-3">
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Profit Margin</div>
-            <div className="flex flex-col gap-1">
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Customer Fees:</span>
-                <span className="font-semibold text-slate-800">{formatCurrency(Number(fees) || 0)}</span>
+          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 p-6 rounded-2xl shadow-sm relative overflow-hidden">
+            <div className="absolute right-0 top-0 w-32 h-32 bg-emerald-200/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
+            
+            <div className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700 mb-4 flex items-center gap-1.5">
+              <div className="p-1 bg-emerald-100 rounded text-emerald-600"><IndianRupee size={12} /></div>
+              Profit Margin
+            </div>
+            
+            <div className="flex flex-col gap-3 relative z-10">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-emerald-800/80 font-semibold">Customer Fees:</span>
+                <span className="font-bold text-emerald-900 bg-white/70 px-2.5 py-1 rounded-md border border-emerald-100/50 shadow-sm">{formatCurrency(Number(fees) || 0)}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-500">Vendor/Govt Cost:</span>
-                <span className="font-semibold text-red-600">-{formatCurrency(Number(vendorCost) || 0)}</span>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-emerald-800/80 font-semibold">Vendor/Govt Cost:</span>
+                <span className="font-bold text-rose-600 bg-white/70 px-2.5 py-1 rounded-md border border-rose-100/50 shadow-sm">-{formatCurrency(Number(vendorCost) || 0)}</span>
               </div>
-              <div className="flex justify-between text-base border-t border-slate-200 mt-2 pt-2">
-                <span className="font-bold text-slate-800">Est. Profit:</span>
-                <span className="font-bold text-green-600">{formatCurrency((Number(fees) || 0) - (Number(vendorCost) || 0))}</span>
+              
+              <div className="flex justify-between items-center border-t border-emerald-200/70 mt-1 pt-4">
+                <span className="font-black text-emerald-900 uppercase text-xs tracking-wider">Est. Profit</span>
+                <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600 drop-shadow-sm">
+                  {formatCurrency((Number(fees) || 0) - (Number(vendorCost) || 0))}
+                </span>
               </div>
             </div>
           </div>
@@ -430,8 +464,13 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
 
         {/* Right Column: Status Update Form */}
         <div className="md:col-span-2">
-          <form onSubmit={handleUpdate} className="glass-card p-6 space-y-6">
-            <h2 className="text-lg font-bold text-slate-900 border-b pb-3">Update Service Status</h2>
+          <form onSubmit={handleUpdate} className="bg-white rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 space-y-8">
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-5 mb-2">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100/50 flex items-center justify-center text-blue-600 shadow-sm">
+                <Settings size={20} />
+              </div>
+              <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">Service Configuration</h2>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
