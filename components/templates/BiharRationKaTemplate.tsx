@@ -6,7 +6,7 @@ interface Props {
 }
 
 export function BiharRationKaTemplate({ data }: Props) {
-  const tick = <span style={{ fontFamily: 'Arial, sans-serif', lineHeight: 1, position: 'relative', top: '1px' }}>✓</span>;
+  const tick = <span style={{ fontFamily: 'Arial, sans-serif', fontWeight: 'bold', fontSize: '13px' }}>✓</span>;
   
   // Array of 7 members for page 1 table
   const members = [...data.familyMembers];
@@ -154,15 +154,15 @@ export function BiharRationKaTemplate({ data }: Props) {
           margin-left: 6px;
         }
         .ration-ka-wrapper .box {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
+          display: inline-block;
+          text-align: center;
           width: 15px;
           height: 15px;
           border: 1px solid #000;
           margin: 0;
           vertical-align: middle;
-          line-height: 1;
+          line-height: 14px;
+          overflow: hidden;
         }
         .ration-ka-wrapper .subfields {
           margin-left: 30px;
