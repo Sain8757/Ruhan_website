@@ -26,49 +26,50 @@ export function BiharRationKaTemplate({ data }: Props) {
       <style dangerouslySetInnerHTML={{ __html: `
         .ration-ka-wrapper {
           font-family: "Noto Sans Devanagari", "Mangal", Arial, sans-serif;
-          color: #111;
-          line-height: 1.5;
+          color: #000;
+          line-height: 1.4;
         }
         .ration-ka-wrapper .page {
           width: 210mm;
-          min-height: 297mm;
-          padding: 10mm;
+          height: 297mm;
+          padding: 15mm 15mm;
           background: #fff;
           position: relative;
           box-sizing: border-box;
           page-break-after: always;
+          overflow: hidden;
         }
         .ration-ka-wrapper .header-title {
-          font-weight: bold;
-          text-decoration: underline;
-          font-size: 15px;
-          margin-bottom: 4px;
+          font-weight: 600;
+          font-size: 16px;
+          margin-bottom: 2px;
           text-align: center;
         }
         .ration-ka-wrapper .header-sub {
-          font-size: 13px;
-          margin: 2px 0;
+          font-size: 14px;
+          margin: 1px 0;
           text-align: center;
         }
         .ration-ka-wrapper .top-flex {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
-          gap: 20px;
+          gap: 15px;
           margin-top: 15px;
         }
         .ration-ka-wrapper .top-left { flex: 1; }
         .ration-ka-wrapper .photo-box {
           border: 1px solid #000;
-          width: 25mm;
-          height: 30mm;
+          width: 35mm;
+          height: 45mm;
           display: flex;
           align-items: center;
           justify-content: center;
           text-align: center;
-          font-size: 11px;
+          font-size: 12px;
           flex-shrink: 0;
           overflow: hidden;
+          margin-right: 10px;
         }
         .ration-ka-wrapper .photo-box img {
           width: 100%;
@@ -77,64 +78,64 @@ export function BiharRationKaTemplate({ data }: Props) {
         }
         .ration-ka-wrapper .field-list {
           list-style: none;
-          padding-left: 0;
+          padding-left: 15px;
           margin-top: 5px;
           margin-bottom: 0;
         }
         .ration-ka-wrapper .field-list li {
           display: flex;
-          padding: 5px 0;
-          font-size: 13px;
+          padding: 4px 0;
+          font-size: 14px;
         }
         .ration-ka-wrapper .field-list li .num {
           width: 25px;
           flex-shrink: 0;
         }
         .ration-ka-wrapper .field-list li .label {
-          width: 180px;
+          width: 190px;
           flex-shrink: 0;
         }
         .ration-ka-wrapper .field-list li .fill {
           flex: 1;
           font-weight: bold;
-          padding-left: 10px;
+          padding-left: 5px;
         }
         .ration-ka-wrapper table {
           border-collapse: collapse;
           width: 100%;
-          margin-top: 15px;
-          font-size: 12px;
+          margin-top: 10px;
+          font-size: 13px;
         }
         .ration-ka-wrapper table th, .ration-ka-wrapper table td {
           border: 1px solid #000;
-          padding: 4px 6px;
+          padding: 2px 4px;
           text-align: center;
           vertical-align: middle;
-          height: 36px;
+          height: 28px;
         }
-        .ration-ka-wrapper table th { font-weight: bold; }
+        .ration-ka-wrapper table th { font-weight: normal; }
         .ration-ka-wrapper h3.section-title {
           text-decoration: underline;
           text-align: center;
           font-size: 16px;
-          margin: 25px 0 15px;
+          margin: 15px 0;
           font-weight: bold;
         }
         .ration-ka-wrapper ol.qlist {
           padding-left: 20px;
-          font-size: 13px;
-          margin-top: 15px;
+          font-size: 14px;
+          margin-top: 10px;
         }
         .ration-ka-wrapper ol.qlist > li {
-          margin-bottom: 10px;
+          margin-bottom: 6px;
         }
         .ration-ka-wrapper ol.qlist ul.sub {
           list-style: none;
-          padding-left: 15px;
-          margin: 6px 0;
+          padding-left: 25px;
+          margin: 4px 0;
         }
         .ration-ka-wrapper ol.qlist ul.sub > li {
-          margin-bottom: 6px;
+          margin-bottom: 4px;
           display: flex;
           align-items: flex-start;
           gap: 6px;
@@ -148,19 +149,20 @@ export function BiharRationKaTemplate({ data }: Props) {
         }
         .ration-ka-wrapper .box {
           display: inline-flex;
-          width: 16px;
-          height: 16px;
+          width: 18px;
+          height: 12px;
           border: 1px solid #000;
           margin: 0 4px;
           vertical-align: middle;
+          line-height: 12px;
         }
         .ration-ka-wrapper .subfields {
           margin-left: 30px;
-          font-size: 13px;
+          font-size: 14px;
           width: 100%;
         }
         .ration-ka-wrapper .subfields div {
-          margin: 4px 0;
+          margin: 2px 0;
           display: flex;
         }
         .ration-ka-wrapper .subfields div .lbl { width: 180px; }
@@ -168,8 +170,8 @@ export function BiharRationKaTemplate({ data }: Props) {
         .ration-ka-wrapper .sign-row {
           display: flex;
           justify-content: space-between;
-          margin-top: 30px;
-          font-size: 13px;
+          margin-top: 15px;
+          font-size: 14px;
         }
         .ration-ka-wrapper .sign-row div { width: 45%; }
         .ration-ka-wrapper .line-fill {
@@ -183,48 +185,55 @@ export function BiharRationKaTemplate({ data }: Props) {
           font-weight: bold;
           font-size: 16px;
           text-decoration: underline;
-          margin: 25px 0 10px;
+          margin: 15px 0 10px;
         }
         .ration-ka-wrapper .declaration-text {
-          font-size: 13px;
-          margin-bottom: 20px;
+          font-size: 14px;
+          margin-bottom: 10px;
+          text-align: justify;
         }
         .ration-ka-wrapper .office-section {
-          margin-top: 30px;
-          font-size: 13px;
+          font-size: 14px;
+          margin-top: 15px;
         }
         .ration-ka-wrapper .office-section .row {
           display: flex;
           justify-content: space-between;
-          margin: 10px 0;
+          margin: 5px 0;
         }
         .ration-ka-wrapper .office-section .row div { display:flex; align-items:center; gap:10px; }
         .ration-ka-wrapper .general-instructions ol {
-          font-size: 13px;
+          font-size: 14px;
           padding-left: 22px;
         }
-        .ration-ka-wrapper .general-instructions ol li { margin-bottom: 10px; }
+        .ration-ka-wrapper .general-instructions ol li { margin-bottom: 12px; }
         .ration-ka-wrapper .annexure-title {
           text-align: center;
           font-weight: bold;
-          font-size: 16px;
-          text-decoration: underline;
-          margin: 10px 0 20px;
+          font-size: 18px;
+          margin: 15px 0 10px;
         }
         .ration-ka-wrapper .annexure-sub {
           text-align: center;
           font-weight: bold;
-          font-size: 14px;
+          font-size: 15px;
           margin-bottom: 15px;
         }
         .ration-ka-wrapper .checklist-table td, .ration-ka-wrapper .checklist-table th {
           text-align: left;
           vertical-align: top;
-          font-size: 13px;
+          font-size: 14px;
+          padding: 8px;
         }
         .ration-ka-wrapper .checklist-table td ol, .ration-ka-wrapper .checklist-table td ul {
           margin: 0;
           padding-left: 18px;
+        }
+        .ration-ka-wrapper .signature-box {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          margin-top: 15px;
         }
       `}} />
 
@@ -432,42 +441,23 @@ export function BiharRationKaTemplate({ data }: Props) {
         </div>
       </div>
 
-      {/* PAGE 3: General Instructions */}
+      {/* PAGE 3: Annexure II */}
       <div className="page">
-        <h3 className="section-title">सामान्य निर्देश</h3>
-        <div className="general-instructions text-justify">
-          <ol>
-            <li>आवेदन पत्र केवल एक ही प्रति आवेदक द्वारा भरी जायेगी ।</li>
-            <li>किसी व्यक्ति, संगठन या राजनीतिक पार्टी द्वारा तादाद में प्रस्तुत किये गये आवेदन पत्र स्वीकार नहीं किये जाऐंगे ।</li>
-            <li>अपूर्ण आवेदन पत्र को रद्द कर दिया जायेगा ।</li>
-            <li>आवेदक द्वारा बिना सही हस्ताक्षर किये हुए या बिना अंगूठे के निशान के आवेदन पत्र को रद्द कर दिया जायेगा ।</li>
-            <li>हस्तलिखित, टाईप किये गये, फोटो कॉपी किये गये या एन.आई.सी. की वेबसाईट से डाउनलोड किये गये प्रपत्र भी स्वीकार किये जायेंगे, बशर्ते कि इस प्रकार के प्रपत्र निर्धारित उपरोक्त प्रपत्र से समरूप होने चाहिए ।</li>
-            <li>सभी आवेदन पत्र RTPS के माध्यम से लिया जायेगा ।</li>
-            <li>सरकारी सेवा से तात्पर्य है केन्द्र एवं राज्य सरकार, लोक उपक्रम, स्थानीय निकाय एवं स्वशासी में नियमित वेतनमान में कार्यरत कर्मी की सेवा ।</li>
-            <li>RTPS के तहत पात्र गृहस्थी द्वारा राशन कार्ड का आवेदन पत्र संबंधित क्षेत्र के अनुमंडल पदाधिकारी के कार्यालय में जमा किया जायेगा ।</li>
-            <li>अनुमंडल पदाधिकारी द्वारा RTPS के तहत राशन कार्ड हेतु प्राप्त आवेदन पत्र को एक सप्ताह के अन्दर संबंधित क्षेत्र के प्रखंड विकास पदाधिकारी को भेजा जायेगा । प्रखंड विकास पदाधिकारी द्वारा प्राप्त आवेदन पत्र को जांच कराकर 15 दिनों के अन्दर अनुमंडल पदाधिकारी को वापस किया जायेगा ।</li>
-            <li>अनुमंडल पदाधिकारी द्वारा आवेदन पत्र को स्वीकृत किया जाता है तो राशन कार्ड निर्गत किया जायेगा ।</li>
-          </ol>
-        </div>
-      </div>
-
-      {/* PAGE 4: Annexure II */}
-      <div className="page">
-        <p className="mb-4">2. उपर्युक्त अधिसूचना के परिशिष्ट-I. के बाद निम्नलिखित परिशिष्ट-II जोड़ा जाएगाः–</p>
-        <div className="annexure-title text-center font-bold">"परिशिष्ट–II"</div>
-        <div className="annexure-sub text-center font-bold underline mb-6">सेवा प्राप्त करने हेतु आवेदन के साथ जमा किए जाने वाले आवश्यक कागजात<br/>(चेक लिस्ट)</div>
+        <p className="mb-2 text-[14px]">2. उपर्युक्त अधिसूचना के परिशिष्ट-I. के बाद निम्नलिखित परिशिष्ट-II जोड़ा जाएगाः–</p>
+        <div className="annexure-title">"परिशिष्ट–II"</div>
+        <div className="annexure-sub underline">सेवा प्राप्त करने हेतु आवेदन के साथ जमा किए जाने वाले आवश्यक कागजात<br/>(चेक लिस्ट)</div>
 
         <table className="checklist-table w-full">
           <thead>
             <tr>
-              <th style={{ width: '30%' }}>सेवा का नाम</th>
-              <th>चेक लिस्ट</th>
+              <th style={{ width: '30%', border: '1px solid black', padding: '6px', textAlign: 'center' }}>सेवा का नाम</th>
+              <th style={{ border: '1px solid black', padding: '6px', textAlign: 'center' }}>चेक लिस्ट</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td className="p-2 font-bold">1. नये राशन कार्ड का निर्माण</td>
-              <td className="p-2">
+              <td style={{ border: '1px solid black', padding: '6px' }}>1. नये राशन कार्ड का निर्माण</td>
+              <td style={{ border: '1px solid black', padding: '6px' }}>
                 <ol className="list-decimal pl-5 space-y-1">
                   <li>आवेदन पत्र विभागीय प्रपत्र 'क' में ।</li>
                   <li>आधार कार्ड का छायाप्रति ।</li>
@@ -479,8 +469,8 @@ export function BiharRationKaTemplate({ data }: Props) {
               </td>
             </tr>
             <tr>
-              <td className="p-2 font-bold">2. राशन कार्ड में संशोधन (नाम में संशोधन, नाम जोड़ना, नाम हटाना)</td>
-              <td className="p-2">
+              <td style={{ border: '1px solid black', padding: '6px' }}>2. राशन कार्ड में संशोधन (नाम में संशोधन, नाम जोड़ना, नाम हटाना)</td>
+              <td style={{ border: '1px solid black', padding: '6px' }}>
                 <ol className="list-decimal pl-5 space-y-1">
                   <li>आवेदन पत्र विभागीय प्रपत्र 'ख' में ।</li>
                   <li>व्यक्ति, जिसका नाम जोड़ा जाना है, के आधार कार्ड की छाया प्रति।</li>
@@ -495,11 +485,11 @@ export function BiharRationKaTemplate({ data }: Props) {
               </td>
             </tr>
             <tr>
-              <td className="p-2 font-bold">3. राशन कार्ड का प्रत्यर्पण (Surrender) / रद्दीकरण</td>
-              <td className="p-2">
+              <td style={{ border: '1px solid black', padding: '6px' }}>3. राशन कार्ड का प्रत्यर्पण (Surrender) / रद्दीकरण</td>
+              <td style={{ border: '1px solid black', padding: '6px' }}>
                 <ol className="list-decimal pl-5 space-y-1">
                   <li>आवेदन पत्र विभागीय प्रपत्र 'ख' में ।</li>
-                  <li>विधमान राशन कार्ड का प्रत्यर्पण / रद्द करने के लिए आवेदन पत्र के क्रमांक 10 के संबंध में लागू कारण की छायाप्रति ।</li>
+                  <li>विद्यमान राशन कार्ड का प्रत्यर्पण / रद्द करने के लिए आवेदन पत्र के क्रमांक 10 के संबंध में लागू कारण की छायाप्रति ।</li>
                 </ol>
               </td>
             </tr>
@@ -507,10 +497,10 @@ export function BiharRationKaTemplate({ data }: Props) {
         </table>
       </div>
 
-      {/* PAGE 5: General Instructions (repeat) */}
+      {/* PAGE 4: General Instructions */}
       <div className="page" style={{ borderBottom: 'none' }}>
-        <h3 className="section-title">सामान्य निर्देश</h3>
-        <div className="general-instructions text-justify">
+        <h3 className="section-title" style={{ fontSize: '18px' }}>सामान्य निर्देश</h3>
+        <div className="general-instructions text-justify mt-6">
           <ol>
             <li>आवेदन पत्र केवल एक ही प्रति आवेदक द्वारा भरी जायेगी ।</li>
             <li>किसी व्यक्ति, संगठन या राजनीतिक पार्टी द्वारा तादाद में प्रस्तुत किये गये आवेदन पत्र स्वीकार नहीं किये जाऐंगे ।</li>
@@ -528,3 +518,4 @@ export function BiharRationKaTemplate({ data }: Props) {
     </div>
   );
 }
+
