@@ -35,10 +35,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       paymentStatus: body.paymentStatus,
       paymentMode: body.paymentMode,
       notes: body.notes || null,
-      requiredDocs: body.requiredDocs,
+      requiredDocs: body.requiredDocs !== undefined ? body.requiredDocs : undefined,
       submittedAt: body.status === "SUBMITTED" ? new Date() : undefined,
       approvedAt: body.status === "APPROVED" ? new Date() : undefined,
       deliveredAt: body.status === "DELIVERED" ? new Date() : undefined,
+      deadline: body.deadline !== undefined ? (body.deadline ? new Date(body.deadline) : null) : undefined,
+      referenceNo: body.referenceNo !== undefined ? body.referenceNo : undefined,
+      vendorId: body.vendorId !== undefined ? body.vendorId : undefined,
+      vendorCost: body.vendorCost !== undefined ? parseFloat(body.vendorCost) : undefined,
+      missingDocs: body.missingDocs !== undefined ? body.missingDocs : undefined,
     },
   });
 

@@ -90,10 +90,18 @@ model Service {
   requiredDocs   String[]
   submittedAt    DateTime?
   approvedAt     DateTime?
+  trackingId     String?       @unique // Unique short ID for customer tracking portal
+  deadline       DateTime?
+  referenceNo    String?       // Government portal application reference number
+  vendorId       String?
+  vendor         Vendor?       @relation(fields: [vendorId], references: [id])
+  vendorCost     Float?        @default(0)
+  missingDocs    String?
   deliveredAt    DateTime?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
+  @@index([trackingId])
   @@index([serviceType])
   @@index([status])
   @@index([paymentStatus])
@@ -278,6 +286,7 @@ model Vendor {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   transactions VendorTransaction[]
+  services    Service[]
 }
 
 model VendorTransaction {

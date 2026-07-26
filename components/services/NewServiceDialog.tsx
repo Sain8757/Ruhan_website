@@ -86,11 +86,15 @@ export default function NewServiceDialog({ isOpen, onClose, onSuccess }: NewServ
     if (!selectedCustomer) { toast.error("Please select a customer"); return; }
     if (!form.serviceType) { toast.error("Please select service type"); return; }
     setLoading(true);
+    
+    // Generate a short 8-character alphanumeric tracking ID
+    const trackingId = "RA-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
     try {
       const res = await fetch("/api/services", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, customerId: selectedCustomer.id }),
+        body: JSON.stringify({ ...form, customerId: selectedCustomer.id, trackingId }),
       });
       if (!res.ok) throw new Error("Failed to create service");
       toast.success("Service created!");

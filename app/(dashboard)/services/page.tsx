@@ -28,6 +28,7 @@ interface Service {
   fees: number;
   paymentStatus: string;
   createdAt: string;
+  deadline?: string | null;
   customer: { id: string; name: string; mobile: string };
 }
 
@@ -96,10 +97,14 @@ function KanbanBoard({
                 No services
               </div>
             ) : (
-              cols.map((s) => (
+              cols.map((s) => {
+                const isOverdue = s.deadline && new Date(s.deadline).getTime() < new Date().getTime() && !["APPROVED", "DELIVERED", "CANCELLED"].includes(s.status);
+                const isDueSoon = s.deadline && new Date(s.deadline).getTime() - new Date().getTime() < 86400000 * 2 && !isOverdue && !["APPROVED", "DELIVERED", "CANCELLED"].includes(s.status); // less than 2 days
+
+                return (
                 <div
                   key={s.id}
-                  className="kanban-card cursor-grab active:cursor-grabbing"
+                  className={`kanban-card cursor-grab active:cursor-grabbing ${isOverdue ? 'border-2 border-red-500 bg-red-50' : (isDueSoon ? 'border-2 border-orange-400 bg-orange-50' : '')}`}
                   draggable
                   onDragStart={(e) => handleDragStart(e, s.id)}
                   onClick={() => onSelect(s)}
@@ -108,7 +113,10 @@ function KanbanBoard({
                     className="font-bold text-sm mb-1 truncate flex items-center justify-between"
                     style={{ color: "var(--text-primary)" }}
                   >
-                    {s.customer.name}
+                    <span className="flex items-center gap-1">
+                      {s.customer.name}
+                      {isOverdue && <span title="Overdue!" className="text-red-500 text-xs text-xl">⚠️</span>}
+                    </span>
                     {s.status === "DELIVERED" && (
                       <button
                         onClick={(e) => {
@@ -129,19 +137,27 @@ function KanbanBoard({
                   >
                     {s.serviceType}
                   </div>
-                  <div className="flex items-center justify-between mt-2">
-                    <span
-                      className="text-xs font-semibold"
-                      style={{ color: "var(--text-muted)" }}
-                    >
-                      {formatDate(s.createdAt)}
-                    </span>
-                    <span className="text-sm font-bold" style={{ color: "var(--brand-primary)" }}>
-                      {formatCurrency(s.fees)}
-                    </span>
+                  <div className="flex flex-col gap-1 mt-2">
+                    <div className="flex items-center justify-between">
+                      <span
+                        className="text-xs font-semibold"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        {formatDate(s.createdAt)}
+                      </span>
+                      <span className="text-sm font-bold" style={{ color: "var(--brand-primary)" }}>
+                        {formatCurrency(s.fees)}
+                      </span>
+                    </div>
+                    {s.deadline && (
+                      <div className={`text-[10px] font-bold px-1.5 py-0.5 rounded-sm inline-block self-start ${isOverdue ? 'bg-red-100 text-red-700' : (isDueSoon ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-600')}`}>
+                        Due: {new Date(s.deadline).toLocaleDateString()}
+                      </div>
+                    )}
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
         );

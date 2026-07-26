@@ -53,6 +53,12 @@ export async function POST(req: NextRequest) {
       notes: body.notes || null,
       requiredDocs: body.requiredDocs || [],
       assignedToId: (session.user as any).id,
+      trackingId: body.trackingId || null,
+      deadline: body.deadline ? new Date(body.deadline) : null,
+      referenceNo: body.referenceNo || null,
+      vendorId: body.vendorId || null,
+      vendorCost: parseFloat(body.vendorCost) || 0,
+      missingDocs: body.missingDocs || null,
     },
     include: {
       customer: { select: { id: true, name: true, mobile: true } },

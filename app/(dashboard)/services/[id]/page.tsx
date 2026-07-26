@@ -4,7 +4,8 @@ import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft, Loader2, MessageCircle, Save, Trash2, Printer, Plus,
-  Phone, User, Calendar, IndianRupee, FileText, CheckCircle, Clock, XCircle, CheckSquare, Square
+  Phone, User, Calendar, IndianRupee, FileText, CheckCircle, Clock, XCircle, CheckSquare, Square,
+  ExternalLink, Copy, AlertCircle, Check
 } from "lucide-react";
 import Link from "next/link";
 import { useToast } from "@/contexts/ToastContext";
@@ -37,6 +38,14 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
   const [requiredDocs, setRequiredDocs] = useState<string[]>([]);
   const [newDocInput, setNewDocInput] = useState("");
 
+  const [deadline, setDeadline] = useState("");
+  const [referenceNo, setReferenceNo] = useState("");
+  const [vendorId, setVendorId] = useState("");
+  const [vendorCost, setVendorCost] = useState<number | "">(0);
+  const [missingDocs, setMissingDocs] = useState("");
+  const [vendors, setVendors] = useState<any[]>([]);
+  const [copied, setCopied] = useState(false);
+
   const fetchService = async () => {
     try {
       const res = await fetch(`/api/services/${resolvedParams.id}`);
@@ -49,6 +58,11 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
       setFees(data.fees);
       setNotes(data.notes || "");
       setRequiredDocs(data.requiredDocs || ["Aadhaar Card", "Passport Photo"]);
+      setDeadline(data.deadline ? new Date(data.deadline).toISOString().split('T')[0] : "");
+      setReferenceNo(data.referenceNo || "");
+      setVendorId(data.vendorId || "");
+      setVendorCost(data.vendorCost || 0);
+      setMissingDocs(data.missingDocs || "");
     } catch (err: any) {
       toast.error(err.message);
       router.push("/services");
@@ -57,8 +71,21 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
     }
   };
 
+  const fetchVendors = async () => {
+    try {
+      const res = await fetch("/api/vendors");
+      if (res.ok) {
+        const data = await res.json();
+        setVendors(data.vendors || []);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchService();
+    fetchVendors();
   }, [resolvedParams.id]);
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -75,6 +102,11 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
           fees: Number(fees) || 0,
           notes,
           requiredDocs,
+          deadline,
+          referenceNo,
+          vendorId,
+          vendorCost: Number(vendorCost) || 0,
+          missingDocs,
         }),
       });
       if (!res.ok) throw new Error("Failed to update service status");
@@ -252,6 +284,60 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
             </div>
           </div>
 
+          {/* Tracking Info */}
+          {service.trackingId && (
+            <div className="glass-card p-5 space-y-3">
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Customer Tracking</div>
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-medium text-slate-800">Tracking ID: <span className="font-mono text-blue-600 font-bold">{service.trackingId}</span></span>
+                <div className="flex gap-2">
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/track/${service.trackingId}`);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                      toast.success("Tracking link copied");
+                    }}
+                    className="btn-secondary text-xs flex-1 py-1.5 flex items-center justify-center gap-1"
+                  >
+                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                    Copy Link
+                  </button>
+                  <Link 
+                    href={`/track/${service.trackingId}`} 
+                    target="_blank"
+                    className="btn-secondary text-xs flex-1 py-1.5 flex items-center justify-center gap-1 text-blue-600 border-blue-200 bg-blue-50"
+                  >
+                    <ExternalLink size={14} />
+                    View Portal
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Action Required: Missing Docs */}
+          {status === "PENDING" && (
+            <div className="glass-card p-5 space-y-3 bg-red-50 border-red-100">
+              <div className="text-xs font-bold uppercase tracking-wider text-red-500 flex items-center gap-1">
+                <AlertCircle size={14} /> Missing Documents
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!service?.customer?.mobile) return;
+                  const docs = missingDocs || "Pending Documents";
+                  const msg = encodeURIComponent(`Namaste ${service.customer.name},\n\nAapka service request (${service.serviceType}) abhi ruka hua hai kyunki kuch documents missing hain:\n\n*${docs}*\n\nKripya jaldi bhejein taaki kaam aage badh sake.\n- RA Seva Point`);
+                  window.open(`https://wa.me/91${service.customer.mobile.replace(/\D/g, '').slice(-10)}?text=${msg}`, '_blank');
+                }}
+                className="w-full btn-danger py-1.5 text-xs font-bold flex items-center justify-center gap-1.5"
+              >
+                <MessageCircle size={14} /> Send Auto-Reminder
+              </button>
+            </div>
+          )}
+
           {/* Quick Metrics */}
           <div className="glass-card p-5 space-y-3">
             <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Service Info</div>
@@ -370,6 +456,81 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
                   <Plus size={14} /> Add Doc
                 </button>
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="label">Expected Deadline</label>
+                <input
+                  type="date"
+                  className="input-field w-full"
+                  value={deadline}
+                  onChange={(e) => setDeadline(e.target.value)}
+                />
+              </div>
+              
+              <div>
+                <label className="label">Govt. Ref / ARN Number</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    className="input-field w-full"
+                    placeholder="e.g. 15-digit ARN"
+                    value={referenceNo}
+                    onChange={(e) => setReferenceNo(e.target.value)}
+                  />
+                  {referenceNo && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        window.open(`https://www.google.com/search?q=track+${referenceNo}`, "_blank");
+                      }}
+                      className="btn-secondary px-2 py-1 text-xs"
+                      title="Search / Track on Portal"
+                    >
+                      <ExternalLink size={14} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="label">Assign to Vendor (Outsource)</label>
+                <select
+                  className="input-field w-full"
+                  value={vendorId}
+                  onChange={(e) => setVendorId(e.target.value)}
+                >
+                  <option value="">-- No Vendor (Self) --</option>
+                  {vendors.map((v) => (
+                    <option key={v.id} value={v.id}>{v.name} {v.company ? `(${v.company})` : ""}</option>
+                  ))}
+                </select>
+              </div>
+
+              {vendorId && (
+                <div>
+                  <label className="label">Vendor Cost (₹)</label>
+                  <input
+                    type="number"
+                    className="input-field w-full text-red-600"
+                    placeholder="Cost paid to vendor"
+                    value={vendorCost}
+                    onChange={(e) => setVendorCost(e.target.value === "" ? "" : parseFloat(e.target.value))}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="label">Missing Documents (If any)</label>
+              <textarea
+                className="input-field w-full border-red-200 focus:border-red-500 bg-red-50"
+                rows={2}
+                placeholder="List documents customer still needs to provide..."
+                value={missingDocs}
+                onChange={(e) => setMissingDocs(e.target.value)}
+              />
             </div>
 
             <div>
