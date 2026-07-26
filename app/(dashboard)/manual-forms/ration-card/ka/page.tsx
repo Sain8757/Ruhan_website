@@ -24,6 +24,7 @@ export default function RationCardKaApplyForm() {
     control,
     watch,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<BiharRationKaData>({
     resolver: zodResolver(biharRationKaSchema),
@@ -40,6 +41,13 @@ export default function RationCardKaApplyForm() {
   const watchSignature = watch("signatureBase64");
   const watchRuralGovt = watch("rural_govtService");
   const watchUrbanGovt = watch("urban_govtService");
+
+  const handleRadioClick = (fieldName: keyof BiharRationKaData, value: string) => (e: React.MouseEvent<HTMLInputElement>) => {
+    if (getValues(fieldName) === value) {
+      setValue(fieldName, "" as any, { shouldValidate: true, shouldDirty: true });
+      e.preventDefault();
+    }
+  };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>, fieldName: "photoBase64" | "signatureBase64") => {
     const file = e.target.files?.[0];
@@ -417,19 +425,18 @@ export default function RationCardKaApplyForm() {
               <h3 className="text-lg font-bold text-slate-800 border-b pb-2">क्षेत्र प्रकार (Area Type)</h3>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" value="RURAL" {...register("areaType")} className="w-4 h-4 text-blue-600" />
+                  <input type="radio" value="RURAL" {...register("areaType")} onClick={handleRadioClick("areaType", "RURAL")} className="w-4 h-4 text-blue-600" />
                   <span className="font-medium text-slate-700">ग्रामीण (Rural) - Section 10</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" value="URBAN" {...register("areaType")} className="w-4 h-4 text-blue-600" />
+                  <input type="radio" value="URBAN" {...register("areaType")} onClick={handleRadioClick("areaType", "URBAN")} className="w-4 h-4 text-blue-600" />
                   <span className="font-medium text-slate-700">शहरी (Urban) - Section 11</span>
                 </label>
               </div>
             </section>
 
             {/* Rural Declarations */}
-            {watchAreaType === "RURAL" && (
-              <section className="space-y-4 bg-orange-50 p-4 rounded-xl border border-orange-100">
+            <section className="space-y-4 bg-orange-50 p-4 rounded-xl border border-orange-100">
                 <h3 className="text-lg font-bold text-slate-800 border-b border-orange-200 pb-2">ग्रामीण क्षेत्र (Rural Declarations)</h3>
                 
                 <div className="space-y-3">
@@ -449,8 +456,8 @@ export default function RationCardKaApplyForm() {
                     <div key={field.id} className="flex items-center justify-between">
                       <span className="text-sm font-medium text-slate-700">{field.label}</span>
                       <div className="flex gap-4 bg-white px-3 py-1 rounded-lg border border-slate-200">
-                        <label className="flex items-center gap-1 cursor-pointer"><input type="radio" value="Yes" {...register(field.id as any)} className="w-3.5 h-3.5" /> <span className="text-xs">हाँ</span></label>
-                        <label className="flex items-center gap-1 cursor-pointer"><input type="radio" value="No" {...register(field.id as any)} className="w-3.5 h-3.5" /> <span className="text-xs">नहीं</span></label>
+                        <label className="flex items-center gap-1 cursor-pointer"><input type="radio" value="Yes" {...register(field.id as any)} onClick={handleRadioClick(field.id as any, "Yes")} className="w-3.5 h-3.5" /> <span className="text-xs">हाँ</span></label>
+                        <label className="flex items-center gap-1 cursor-pointer"><input type="radio" value="No" {...register(field.id as any)} onClick={handleRadioClick(field.id as any, "No")} className="w-3.5 h-3.5" /> <span className="text-xs">नहीं</span></label>
                       </div>
                     </div>
                   ))}
@@ -464,11 +471,9 @@ export default function RationCardKaApplyForm() {
                   )}
                 </div>
               </section>
-            )}
 
             {/* Urban Declarations */}
-            {watchAreaType === "URBAN" && (
-              <section className="space-y-4 bg-blue-50 p-4 rounded-xl border border-blue-100">
+            <section className="space-y-4 bg-blue-50 p-4 rounded-xl border border-blue-100">
                 <h3 className="text-lg font-bold text-slate-800 border-b border-blue-200 pb-2">शहरी क्षेत्र (Urban Declarations)</h3>
                 
                 <div className="space-y-3">
@@ -479,8 +484,8 @@ export default function RationCardKaApplyForm() {
                     <div key={field.id} className="flex items-center justify-between">
                       <span className="text-sm font-medium text-slate-700">{field.label}</span>
                       <div className="flex gap-4 bg-white px-3 py-1 rounded-lg border border-slate-200">
-                        <label className="flex items-center gap-1 cursor-pointer"><input type="radio" value="Yes" {...register(field.id as any)} className="w-3.5 h-3.5" /> <span className="text-xs">हाँ</span></label>
-                        <label className="flex items-center gap-1 cursor-pointer"><input type="radio" value="No" {...register(field.id as any)} className="w-3.5 h-3.5" /> <span className="text-xs">नहीं</span></label>
+                        <label className="flex items-center gap-1 cursor-pointer"><input type="radio" value="Yes" {...register(field.id as any)} onClick={handleRadioClick(field.id as any, "Yes")} className="w-3.5 h-3.5" /> <span className="text-xs">हाँ</span></label>
+                        <label className="flex items-center gap-1 cursor-pointer"><input type="radio" value="No" {...register(field.id as any)} onClick={handleRadioClick(field.id as any, "No")} className="w-3.5 h-3.5" /> <span className="text-xs">नहीं</span></label>
                       </div>
                     </div>
                   ))}
@@ -504,14 +509,13 @@ export default function RationCardKaApplyForm() {
                     <div key={field.id} className="flex items-center justify-between">
                       <span className="text-sm font-medium text-slate-700">{field.label}</span>
                       <div className="flex gap-4 bg-white px-3 py-1 rounded-lg border border-slate-200">
-                        <label className="flex items-center gap-1 cursor-pointer"><input type="radio" value="Yes" {...register(field.id as any)} className="w-3.5 h-3.5" /> <span className="text-xs">हाँ</span></label>
-                        <label className="flex items-center gap-1 cursor-pointer"><input type="radio" value="No" {...register(field.id as any)} className="w-3.5 h-3.5" /> <span className="text-xs">नहीं</span></label>
+                        <label className="flex items-center gap-1 cursor-pointer"><input type="radio" value="Yes" {...register(field.id as any)} onClick={handleRadioClick(field.id as any, "Yes")} className="w-3.5 h-3.5" /> <span className="text-xs">हाँ</span></label>
+                        <label className="flex items-center gap-1 cursor-pointer"><input type="radio" value="No" {...register(field.id as any)} onClick={handleRadioClick(field.id as any, "No")} className="w-3.5 h-3.5" /> <span className="text-xs">नहीं</span></label>
                       </div>
                     </div>
                   ))}
                 </div>
               </section>
-            )}
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
