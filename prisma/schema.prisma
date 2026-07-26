@@ -62,6 +62,7 @@ model Customer {
   photoUrl       String?
   signatureUrl   String?
   notes          String?
+  loyaltyPoints  Int           @default(0)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   services       Service[]
@@ -115,6 +116,8 @@ model Invoice {
   amountPaid     Float         @default(0)
   paymentMode    PaymentMode   @default(CASH)
   paymentStatus  PaymentStatus @default(UNPAID)
+  type           String        @default("INVOICE") // INVOICE | QUOTATION
+  dueDate        DateTime?
   notes          String?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
