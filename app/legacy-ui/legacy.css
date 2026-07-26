@@ -102,6 +102,9 @@
 .legacy-btn-close svg {
   color: white !important;
   stroke: white !important;
+  width: 12px !important;
+  height: 12px !important;
+  display: block !important;
 }
 
 .legacy-btn-sys:active {
