@@ -17,7 +17,7 @@ export function BiharRationKaTemplate({ data }: Props) {
 
   const CheckBox = ({ checked, label }: { checked: boolean; label: string }) => (
     <span className="checkbox-group">
-      {label} <span className="box flex items-center justify-center font-bold text-[12px] overflow-hidden">{checked ? tick : ''}</span>
+      <span>{label}</span> <span className="box">{checked ? tick : ''}</span>
     </span>
   );
 
@@ -108,12 +108,18 @@ export function BiharRationKaTemplate({ data }: Props) {
         }
         .ration-ka-wrapper table th, .ration-ka-wrapper table td {
           border: 1px solid #000;
-          padding: 1px 4px;
+          padding: 2px 4px;
           text-align: center;
           vertical-align: middle;
           height: 24px;
+          line-height: 1.2;
         }
-        .ration-ka-wrapper table th { font-weight: normal; }
+        .ration-ka-wrapper table td {
+          font-weight: bold;
+        }
+        .ration-ka-wrapper table th { 
+          font-weight: normal; 
+        }
         .ration-ka-wrapper h3.section-title {
           text-decoration: underline;
           text-align: center;
@@ -137,7 +143,7 @@ export function BiharRationKaTemplate({ data }: Props) {
         .ration-ka-wrapper ol.qlist ul.sub > li {
           margin-bottom: 3px;
           display: flex;
-          align-items: flex-start;
+          align-items: center; /* Changed from flex-start to center for better vertical alignment */
           gap: 6px;
           flex-wrap: wrap;
         }
@@ -145,16 +151,18 @@ export function BiharRationKaTemplate({ data }: Props) {
           display: inline-flex;
           align-items: center;
           gap: 4px;
-          margin-left: 8px;
+          margin-left: 6px;
         }
         .ration-ka-wrapper .box {
           display: inline-flex;
-          width: 18px;
-          height: 12px;
+          align-items: center;
+          justify-content: center;
+          width: 15px;
+          height: 15px;
           border: 1px solid #000;
-          margin: 0 4px;
+          margin: 0;
           vertical-align: middle;
-          line-height: 12px;
+          line-height: 1;
         }
         .ration-ka-wrapper .subfields {
           margin-left: 30px;
