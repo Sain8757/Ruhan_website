@@ -343,7 +343,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
 
               <div style={{ textAlign: "right" }}>
                 <h2 style={{ fontSize: "28px", fontWeight: "900", margin: 0, textTransform: "uppercase", letterSpacing: "2px", color: "#000" }}>
-                  INVOICE
+                  {invoice.type === "QUOTATION" ? "QUOTATION" : "INVOICE"}
                 </h2>
                 <div style={{ fontSize: "12px", fontWeight: "bold", marginTop: "4px" }}>
                   INVOICE NO. <span style={{ textDecoration: "underline" }}>{invoice.invoiceNumber}</span>
@@ -548,8 +548,8 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
               </div>
 
               <div className="text-right">
-                <div className="inline-block px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider mb-2 bg-blue-50 text-blue-600">
-                  Tax Invoice
+                <div className={`inline-block px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider mb-2 ${invoice.type === 'QUOTATION' ? 'bg-orange-50 text-orange-600' : 'bg-blue-50 text-blue-600'}`}>
+                  {invoice.type === 'QUOTATION' ? 'Quotation / Proforma' : 'Tax Invoice'}
                 </div>
                 <div className="font-mono font-bold text-lg text-slate-900">#{invoice.invoiceNumber}</div>
                 <div className="text-xs text-slate-500 mt-1">Date: {formatDate(invoice.createdAt)}</div>
@@ -590,9 +590,35 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
                     <Edit3 size={14} />
                     Edit
                   </button>
+                  {invoice.type === 'QUOTATION' && (
+                    <button
+                      onClick={async () => {
+                        const res = await fetch(`/api/invoices/${invoice.id}`, {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ type: 'INVOICE' })
+                        });
+                        if (res.ok) {
+                          toast.success('Converted to Tax Invoice');
+                          window.location.reload();
+                        }
+                      }}
+                      className="btn-primary px-3 py-1.5 flex items-center gap-1.5 text-xs font-bold no-print"
+                      title="Convert to Final Invoice"
+                    >
+                      Convert to Invoice
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
+
+            {/* Late Fee Notice if applicable */}
+            {invoice.dueDate && new Date(invoice.dueDate) < new Date() && invoice.paymentStatus !== "PAID" && (
+              <div className="bg-red-50 text-red-700 px-4 py-2 mt-4 text-xs font-bold border border-red-200 rounded text-center">
+                ⚠️ OVERDUE: Late Fees of ₹50/day may be applicable as the due date ({formatDate(invoice.dueDate)}) has passed.
+              </div>
+            )}
 
             {/* Items Table */}
             <div className="my-6">

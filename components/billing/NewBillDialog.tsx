@@ -162,6 +162,8 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess }: NewBillDia
   const [paymentMode, setPaymentMode] = useState("CASH");
   const [paymentStatus, setPaymentStatus] = useState("PAID");
   const [amountPaid, setAmountPaid] = useState<number | "">("");
+  const [type, setType] = useState("INVOICE");
+  const [dueDate, setDueDate] = useState("");
   const [notes, setNotes] = useState("");
 
   // Customer search
@@ -199,6 +201,7 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess }: NewBillDia
           customerId: selectedCustomer.id,
           items, discount, gst, paymentMode, paymentStatus,
           amountPaid: finalAmountPaid, notes,
+          type, dueDate: dueDate ? new Date(dueDate).toISOString() : null,
         }),
       });
       if (!res.ok) throw new Error("Failed to create invoice");
@@ -369,7 +372,28 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess }: NewBillDia
               )}
             </div>
           </div>
-        </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <div>
+              <label className="label">Document Type</label>
+              <select className="legacy-input w-full" value={type} onChange={(e) => setType(e.target.value)}>
+                <option value="INVOICE">Tax Invoice</option>
+                <option value="QUOTATION">Quotation / Proforma</option>
+              </select>
+            </div>
+            {type === "INVOICE" && (
+              <div>
+                <label className="label">Due Date (For Late Fees)</label>
+                <input 
+                  type="date" 
+                  className="legacy-input w-full" 
+                  value={dueDate} 
+                  onChange={(e) => setDueDate(e.target.value)} 
+                />
+              </div>
+            )}
+          </div>
 
         {/* Buttons */}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>

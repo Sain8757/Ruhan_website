@@ -21,6 +21,8 @@ interface Invoice {
   amountPaid: number;
   paymentMode: string;
   paymentStatus: string;
+  type: string;
+  dueDate: string | null;
   createdAt: string;
   customer: { id: string; name: string; mobile: string };
   items: any[];
@@ -237,6 +239,11 @@ function BillingContent() {
                   >
                     <td style={{ padding: "8px 10px", fontWeight: "bold", color: "#000080" }}>
                       #{inv.invoiceNumber}
+                      {inv.type === "QUOTATION" && (
+                        <span style={{ marginLeft: "6px", fontSize: "9px", background: "orange", color: "white", padding: "2px 4px", borderRadius: "2px" }}>
+                          QUOTATION
+                        </span>
+                      )}
                     </td>
                     <td style={{ padding: "8px 10px" }}>
                       <div style={{ fontWeight: "bold", color: "#0f172a" }}>{inv.customer.name}</div>

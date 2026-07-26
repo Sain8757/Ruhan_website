@@ -71,6 +71,8 @@ export async function POST(req: NextRequest) {
       amountPaid: Number(body.amountPaid) || 0,
       paymentMode: body.paymentMode || "CASH",
       paymentStatus: body.paymentStatus || "UNPAID",
+      type: body.type || "INVOICE",
+      dueDate: body.dueDate ? new Date(body.dueDate) : null,
       notes: body.notes || null,
       items: {
         create: body.items.map((item: any) => ({

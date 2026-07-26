@@ -11,6 +11,26 @@ export type ServiceCatalogItem = {
 
 export const SERVICE_CATALOG: ServiceCatalogItem[] = [
   {
+    id: "combo-rtps-all",
+    name: "COMBO: Income + Caste + Residence",
+    category: "Combo Packages",
+    fee: 250,
+    estimate: "7-14 days",
+    portal: "https://serviceonline.bihar.gov.in/",
+    documents: ["Aadhaar card", "Mobile number", "Photo", "Income details", "Family caste proof", "Address proof"],
+    message: "Namaste {name}, RTPS Combo (Income, Caste, Residence) ke liye Aadhaar, photo, mobile OTP, income aur caste proof bhej dijiye.",
+  },
+  {
+    id: "combo-pan-aadhaar",
+    name: "COMBO: PAN + Aadhaar Update",
+    category: "Combo Packages",
+    fee: 300,
+    estimate: "1-15 days",
+    portal: "Multiple Portals",
+    documents: ["Aadhaar card", "Mobile OTP", "Photo", "Signature", "Old PAN (if any)"],
+    message: "Namaste {name}, PAN+Aadhaar Combo ke liye Aadhaar, photo, signature aur OTP required hai.",
+  },
+  {
     id: "rtps-residence",
     name: "Residence / Domicile Certificate",
     category: "RTPS Bihar",
