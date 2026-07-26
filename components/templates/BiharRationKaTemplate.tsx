@@ -144,10 +144,8 @@ export function BiharRationKaTemplate({ data }: Props) {
         }
         .ration-ka-wrapper ol.qlist ul.sub > li {
           margin-bottom: 3px;
-          display: flex;
-          align-items: center; /* Changed from flex-start to center for better vertical alignment */
-          gap: 6px;
-          flex-wrap: wrap;
+          display: block; /* Removed flex to stop html2canvas from miscalculating layout when wrapping */
+          line-height: 1.6;
         }
         .ration-ka-wrapper .checkbox-group {
           display: inline-flex;
