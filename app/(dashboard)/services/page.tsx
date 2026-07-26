@@ -11,6 +11,7 @@ import {
   LayoutGrid,
   List,
   Search,
+  MessageCircle,
 } from "lucide-react";
 import { formatCurrency, formatDate, SERVICE_STATUS_COLORS, PAYMENT_STATUS_COLORS } from "@/lib/utils";
 import { useToast } from "@/contexts/ToastContext";
@@ -41,13 +42,41 @@ const STATUS_LABELS: Record<string, string> = {
   CANCELLED: "Cancelled",
 };
 
-function KanbanBoard({ services, onSelect }: { services: Service[], onSelect: (s: Service) => void }) {
+function KanbanBoard({
+  services,
+  onSelect,
+  onStatusChange,
+}: {
+  services: Service[];
+  onSelect: (s: Service) => void;
+  onStatusChange: (id: string, newStatus: string) => void;
+}) {
+  const handleDragStart = (e: React.DragEvent, id: string) => {
+    e.dataTransfer.setData("serviceId", id);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault(); // allow drop
+  };
+
+  const handleDrop = (e: React.DragEvent, status: string) => {
+    e.preventDefault();
+    const id = e.dataTransfer.getData("serviceId");
+    if (id) onStatusChange(id, status);
+  };
+
   return (
     <div className="flex gap-4 overflow-x-auto pb-4">
       {STATUS_ORDER.map((status) => {
         const cols = services.filter((s) => s.status === status);
         return (
-          <div key={status} className="kanban-column shrink-0">
+          <div
+            key={status}
+            className="kanban-column shrink-0"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, status)}
+            style={{ minHeight: "200px" }}
+          >
             <div className="flex items-center justify-between mb-3">
               <span className={`badge ${SERVICE_STATUS_COLORS[status]}`}>
                 {STATUS_LABELS[status]}
@@ -70,14 +99,29 @@ function KanbanBoard({ services, onSelect }: { services: Service[], onSelect: (s
               cols.map((s) => (
                 <div
                   key={s.id}
-                  className="kanban-card"
+                  className="kanban-card cursor-grab active:cursor-grabbing"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, s.id)}
                   onClick={() => onSelect(s)}
                 >
                   <div
-                    className="font-bold text-sm mb-1 truncate"
+                    className="font-bold text-sm mb-1 truncate flex items-center justify-between"
                     style={{ color: "var(--text-primary)" }}
                   >
                     {s.customer.name}
+                    {s.status === "DELIVERED" && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const msg = encodeURIComponent(`नमस्ते ${s.customer.name}, आपका ${s.serviceType} का काम पूरा हो गया है!`);
+                          window.open(`https://wa.me/91${s.customer.mobile}?text=${msg}`, '_blank');
+                        }}
+                        className="text-green-600 hover:text-green-700 p-1"
+                        title="Send WhatsApp Alert"
+                      >
+                        <MessageCircle size={14} />
+                      </button>
+                    )}
                   </div>
                   <div
                     className="text-xs mb-2 truncate"
@@ -139,6 +183,25 @@ export default function ServicesPage() {
   useEffect(() => {
     fetchServices();
   }, [fetchServices]);
+
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    try {
+      // Optimistic update
+      setServices((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, status: newStatus } : s))
+      );
+      const res = await fetch(`/api/services/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) throw new Error("Failed to update status");
+      toast.success("Status updated");
+    } catch {
+      toast.error("Status update failed");
+      fetchServices(); // Revert on failure
+    }
+  };
 
   const filtered = query
     ? services.filter(
@@ -224,7 +287,11 @@ export default function ServicesPage() {
           </button>
         </div>
       ) : view === "kanban" ? (
-        <KanbanBoard services={filtered} onSelect={setSelectedService} />
+        <KanbanBoard 
+            services={filtered} 
+            onSelect={setSelectedService} 
+            onStatusChange={handleStatusChange} 
+          />
       ) : (
         <div className="table-wrapper">
           <table className="data-table">
