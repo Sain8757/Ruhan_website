@@ -413,80 +413,80 @@ export default function RationCardFormPage() {
               <label className="block text-sm font-bold mb-3">Declarations</label>
               
               <div className="mb-4">
-                <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">(क) ग्रामीण क्षेत्र (Rural)</h4>
+                <h4 className="text-sm font-bold text-gray-900 dark:text-gray-900 mb-2">(क) ग्रामीण क्षेत्र (Rural)</h4>
                 <div className="space-y-3 pl-2 border-l-2 border-blue-500">
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">Motor/3-4 wheeler</span>
+                    <span className="text-xs font-medium">Motor/3-4 wheeler</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.motorVehicle")} onClick={handleRadioClick("ruralDeclarations.motorVehicle", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.motorVehicle")} onClick={handleRadioClick("ruralDeclarations.motorVehicle", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">Machine agriculture eq.</span>
+                    <span className="text-xs font-medium">Machine agriculture eq.</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.machineEquip")} onClick={handleRadioClick("ruralDeclarations.machineEquip", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.machineEquip")} onClick={handleRadioClick("ruralDeclarations.machineEquip", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">Govt reg. non-agri industry</span>
+                    <span className="text-xs font-medium">Govt reg. non-agri industry</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.govtRegIndustry")} onClick={handleRadioClick("ruralDeclarations.govtRegIndustry", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.govtRegIndustry")} onClick={handleRadioClick("ruralDeclarations.govtRegIndustry", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">Income over 10k/month</span>
+                    <span className="text-xs font-medium">Income over 10k/month</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.incomeOver10k")} onClick={handleRadioClick("ruralDeclarations.incomeOver10k", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.incomeOver10k")} onClick={handleRadioClick("ruralDeclarations.incomeOver10k", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">Pay Income Tax</span>
+                    <span className="text-xs font-medium">Pay Income Tax</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.incomeTax")} onClick={handleRadioClick("ruralDeclarations.incomeTax", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.incomeTax")} onClick={handleRadioClick("ruralDeclarations.incomeTax", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">Pay Commercial Tax</span>
+                    <span className="text-xs font-medium">Pay Commercial Tax</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.commercialTax")} onClick={handleRadioClick("ruralDeclarations.commercialTax", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.commercialTax")} onClick={handleRadioClick("ruralDeclarations.commercialTax", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">Pucca house with 3+ rooms</span>
+                    <span className="text-xs font-medium">Pucca house with 3+ rooms</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.puccaHouse3Rooms")} onClick={handleRadioClick("ruralDeclarations.puccaHouse3Rooms", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.puccaHouse3Rooms")} onClick={handleRadioClick("ruralDeclarations.puccaHouse3Rooms", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">2.5 acre irrigated land</span>
+                    <span className="text-xs font-medium">2.5 acre irrigated land</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.irrigatedLand2_5")} onClick={handleRadioClick("ruralDeclarations.irrigatedLand2_5", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.irrigatedLand2_5")} onClick={handleRadioClick("ruralDeclarations.irrigatedLand2_5", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">5 acre irrigated land</span>
+                    <span className="text-xs font-medium">5 acre irrigated land</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.irrigatedLand5")} onClick={handleRadioClick("ruralDeclarations.irrigatedLand5", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.irrigatedLand5")} onClick={handleRadioClick("ruralDeclarations.irrigatedLand5", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">7.5 acre irrigated land</span>
+                    <span className="text-xs font-medium">7.5 acre irrigated land</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.irrigatedLand7_5")} onClick={handleRadioClick("ruralDeclarations.irrigatedLand7_5", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.irrigatedLand7_5")} onClick={handleRadioClick("ruralDeclarations.irrigatedLand7_5", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">Govt Servant</span>
+                    <span className="text-xs font-medium">Govt Servant</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("ruralDeclarations.govtServant")} onClick={handleRadioClick("ruralDeclarations.govtServant", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("ruralDeclarations.govtServant")} onClick={handleRadioClick("ruralDeclarations.govtServant", "No")} /> No</label>
@@ -496,59 +496,59 @@ export default function RationCardFormPage() {
               </div>
 
               <div>
-                <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">(ख) शहरी क्षेत्र (Urban)</h4>
+                <h4 className="text-sm font-bold text-gray-900 dark:text-gray-900 mb-2">(ख) शहरी क्षेत्र (Urban)</h4>
                 <div className="space-y-3 pl-2 border-l-2 border-green-500">
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">Pay Income Tax</span>
+                    <span className="text-xs font-medium">Pay Income Tax</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("urbanDeclarations.incomeTax")} onClick={handleRadioClick("urbanDeclarations.incomeTax", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("urbanDeclarations.incomeTax")} onClick={handleRadioClick("urbanDeclarations.incomeTax", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">Pay Commercial Tax</span>
+                    <span className="text-xs font-medium">Pay Commercial Tax</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("urbanDeclarations.commercialTax")} onClick={handleRadioClick("urbanDeclarations.commercialTax", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("urbanDeclarations.commercialTax")} onClick={handleRadioClick("urbanDeclarations.commercialTax", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">Pucca house with 3+ rooms</span>
+                    <span className="text-xs font-medium">Pucca house with 3+ rooms</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("urbanDeclarations.puccaHouse3Rooms")} onClick={handleRadioClick("urbanDeclarations.puccaHouse3Rooms", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("urbanDeclarations.puccaHouse3Rooms")} onClick={handleRadioClick("urbanDeclarations.puccaHouse3Rooms", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">Income over 20k/month</span>
+                    <span className="text-xs font-medium">Income over 20k/month</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("urbanDeclarations.incomeOver20k")} onClick={handleRadioClick("urbanDeclarations.incomeOver20k", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("urbanDeclarations.incomeOver20k")} onClick={handleRadioClick("urbanDeclarations.incomeOver20k", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">2-wheeler, Fridge & Washing Mach.</span>
+                    <span className="text-xs font-medium">2-wheeler, Fridge & Washing Mach.</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("urbanDeclarations.threeAppliances")} onClick={handleRadioClick("urbanDeclarations.threeAppliances", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("urbanDeclarations.threeAppliances")} onClick={handleRadioClick("urbanDeclarations.threeAppliances", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">4-wheeler</span>
+                    <span className="text-xs font-medium">4-wheeler</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("urbanDeclarations.fourWheeler")} onClick={handleRadioClick("urbanDeclarations.fourWheeler", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("urbanDeclarations.fourWheeler")} onClick={handleRadioClick("urbanDeclarations.fourWheeler", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">Washing Machine</span>
+                    <span className="text-xs font-medium">Washing Machine</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("urbanDeclarations.washingMachine")} onClick={handleRadioClick("urbanDeclarations.washingMachine", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("urbanDeclarations.washingMachine")} onClick={handleRadioClick("urbanDeclarations.washingMachine", "No")} /> No</label>
                     </div>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-gray-700 dark:text-gray-300">Govt Servant (excluding Group D)</span>
+                    <span className="text-xs font-medium">Govt Servant (excluding Group D)</span>
                     <div className="flex gap-4">
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="Yes" {...register("urbanDeclarations.govtServant")} onClick={handleRadioClick("urbanDeclarations.govtServant", "Yes")} /> Yes</label>
                       <label className="flex items-center gap-1 text-xs cursor-pointer"><input type="radio" value="No" {...register("urbanDeclarations.govtServant")} onClick={handleRadioClick("urbanDeclarations.govtServant", "No")} /> No</label>
