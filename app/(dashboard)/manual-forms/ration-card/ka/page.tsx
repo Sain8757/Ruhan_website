@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileText, Save, ArrowLeft, Printer, Trash2, Plus, Download } from "lucide-react";
+import { FileText, Save, ArrowLeft, Printer, Trash2, Plus, Download, ZoomIn, ZoomOut } from "lucide-react";
 import Link from "next/link";
 import { ReactTransliterate } from "react-transliterate";
 import "react-transliterate/dist/index.css";
@@ -13,6 +13,10 @@ import { BiharRationKaTemplate } from "@/components/templates/BiharRationKaTempl
 export default function RationCardKaApplyForm() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(0.8);
+
+  const handleZoomIn = () => setZoom(prev => Math.min(prev + 0.1, 2));
+  const handleZoomOut = () => setZoom(prev => Math.max(prev - 0.1, 0.3));
 
   const {
     register,
@@ -534,13 +538,24 @@ export default function RationCardKaApplyForm() {
           <div className="bg-slate-800 text-white px-4 py-3 flex items-center justify-between shadow-md z-10">
             <div className="flex items-center gap-2">
               <Printer size={18} />
-              <span className="font-semibold text-sm">A4 Print Preview (4 Pages)</span>
+              <span className="font-semibold text-sm hidden sm:inline">A4 Print Preview (4 Pages)</span>
             </div>
-            <span className="text-xs text-slate-400 font-mono">Live Template Rendering</span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 bg-slate-700/50 rounded-lg p-1">
+                <button type="button" onClick={handleZoomOut} className="p-1 hover:bg-slate-600 rounded text-slate-300 hover:text-white transition-colors" title="Zoom Out">
+                  <ZoomOut size={16} />
+                </button>
+                <span className="text-xs font-mono w-10 text-center">{Math.round(zoom * 100)}%</span>
+                <button type="button" onClick={handleZoomIn} className="p-1 hover:bg-slate-600 rounded text-slate-300 hover:text-white transition-colors" title="Zoom In">
+                  <ZoomIn size={16} />
+                </button>
+              </div>
+              <span className="text-xs text-slate-400 font-mono hidden md:inline">Live Template Rendering</span>
+            </div>
           </div>
           
           <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-            <div className="transform origin-top scale-[0.65] sm:scale-75 lg:scale-90 xl:scale-100 flex justify-center">
+            <div className="flex justify-center transition-transform duration-200 origin-top" style={{ transform: `scale(${zoom})` }}>
               <div ref={previewRef} className="shadow-2xl ring-1 ring-black/5 bg-white">
                 <BiharRationKaTemplate data={watch()} />
               </div>
