@@ -45,6 +45,11 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
   const [missingDocs, setMissingDocs] = useState("");
   const [vendors, setVendors] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
+  
+  // Pro Max Features State
+  const [tasks, setTasks] = useState<{title: string, completed: boolean}[]>([]);
+  const [newTaskInput, setNewTaskInput] = useState("");
+  const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
 
   const fetchService = async () => {
     try {
@@ -63,6 +68,7 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
       setVendorId(data.vendorId || "");
       setVendorCost(data.vendorCost || 0);
       setMissingDocs(data.missingDocs || "");
+      setTasks(data.tasks || []);
     } catch (err: any) {
       toast.error(err.message);
       router.push("/services");
@@ -107,6 +113,7 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
           vendorId,
           vendorCost: Number(vendorCost) || 0,
           missingDocs,
+          tasks,
         }),
       });
       if (!res.ok) throw new Error("Failed to update service status");
@@ -140,6 +147,39 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
       `Hello ${service.customer.name},\n\nUpdate on your service request for *${service.serviceType}*:\nStatus: *${STATUS_LABELS[status] || status}*\nPayment: *${paymentStatus}*\nRef No: #${service.id.slice(-6).toUpperCase()}\n\nThank you,\nRA Seva Point`
     );
     window.open(`https://wa.me/91${service.customer.mobile.replace(/\D/g, '').slice(-10)}?text=${msg}`, '_blank');
+  };
+
+  const handleGenerateInvoice = async () => {
+    setIsGeneratingInvoice(true);
+    try {
+      const res = await fetch("/api/invoices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerId: service.customer.id,
+          totalAmount: Number(fees) || 0,
+          paymentStatus: paymentStatus,
+          paymentMode: paymentMode,
+          type: "TAX_INVOICE",
+          notes: `Generated for service: ${service.serviceType}`,
+          items: [
+            {
+              serviceId: service.id,
+              description: service.serviceType,
+              amount: Number(fees) || 0,
+            }
+          ]
+        })
+      });
+      if (!res.ok) throw new Error("Failed to generate invoice");
+      const newInvoice = await res.json();
+      toast.success("Invoice generated successfully!");
+      router.push(`/invoices/${newInvoice.id}`);
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsGeneratingInvoice(false);
+    }
   };
 
   const handlePrintToken = () => {
@@ -235,6 +275,19 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
             <Printer size={14} />
             Print Token Slip
           </button>
+          
+          <button
+            type="button"
+            onClick={handleGenerateInvoice}
+            disabled={isGeneratingInvoice}
+            className="btn-primary px-3 py-1.5 text-xs font-bold flex items-center gap-1.5"
+            style={{ background: "#056230", border: "1px solid #044b25" }}
+            title="Generate Final Invoice for this service"
+          >
+            <FileText size={14} />
+            {isGeneratingInvoice ? "..." : "1-Click Invoice"}
+          </button>
+
           <span className={`badge ${SERVICE_STATUS_COLORS[service.status]} text-sm px-3 py-1`}>
             {STATUS_LABELS[service.status] || service.status}
           </span>
@@ -281,6 +334,25 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
                 <MessageCircle size={14} />
                 WhatsApp Update
               </button>
+            </div>
+          </div>
+
+          {/* Profit Tracking */}
+          <div className="glass-card p-5 space-y-3">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Profit Margin</div>
+            <div className="flex flex-col gap-1">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Customer Fees:</span>
+                <span className="font-semibold text-slate-800">{formatCurrency(Number(fees) || 0)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-500">Vendor/Govt Cost:</span>
+                <span className="font-semibold text-red-600">-{formatCurrency(Number(vendorCost) || 0)}</span>
+              </div>
+              <div className="flex justify-between text-base border-t border-slate-200 mt-2 pt-2">
+                <span className="font-bold text-slate-800">Est. Profit:</span>
+                <span className="font-bold text-green-600">{formatCurrency((Number(fees) || 0) - (Number(vendorCost) || 0))}</span>
+              </div>
             </div>
           </div>
 
@@ -522,7 +594,71 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
               )}
             </div>
 
-            <div>
+            <div className="border-t border-slate-200 pt-4">
+              <label className="label flex items-center gap-2">
+                <CheckSquare size={16} className="text-blue-600"/> 
+                Service Task Checklist
+              </label>
+              <div className="space-y-2 mt-2">
+                {tasks.map((task, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <input 
+                      type="checkbox" 
+                      checked={task.completed} 
+                      onChange={() => {
+                        const newTasks = [...tasks];
+                        newTasks[idx].completed = !newTasks[idx].completed;
+                        setTasks(newTasks);
+                      }}
+                      className="cursor-pointer"
+                    />
+                    <span className={`text-sm flex-1 ${task.completed ? "line-through text-slate-400" : "text-slate-800"}`}>
+                      {task.title}
+                    </span>
+                    <button 
+                      type="button" 
+                      onClick={() => setTasks(tasks.filter((_, i) => i !== idx))}
+                      className="text-red-500 hover:text-red-700 p-1"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                ))}
+                
+                <div className="flex gap-2 pt-2 mt-2 border-t border-slate-100">
+                  <input
+                    type="text"
+                    className="input-field text-xs flex-1"
+                    placeholder="Add a new task (e.g. Scan docs)..."
+                    value={newTaskInput}
+                    onChange={(e) => setNewTaskInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        if (newTaskInput.trim()) {
+                          setTasks([...tasks, { title: newTaskInput.trim(), completed: false }]);
+                          setNewTaskInput("");
+                        }
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (newTaskInput.trim()) {
+                        setTasks([...tasks, { title: newTaskInput.trim(), completed: false }]);
+                        setNewTaskInput("");
+                      }
+                    }}
+                    className="btn-secondary text-xs px-3 py-1 flex items-center gap-1"
+                  >
+                    <Plus size={14} /> Add
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-slate-200 pt-4">
               <label className="label">Missing Documents (If any)</label>
               <textarea
                 className="input-field w-full border-red-200 focus:border-red-500 bg-red-50"

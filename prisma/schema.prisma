@@ -98,6 +98,8 @@ model Service {
   vendorCost     Float?        @default(0)
   missingDocs    String?
   deliveredAt    DateTime?
+  tasks          Json?
+
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 

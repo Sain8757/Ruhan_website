@@ -67,6 +67,13 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
       toast.success("Service updated successfully!");
       if (onSuccess) onSuccess();
       onClose();
+
+      if ((status === "APPROVED" || status === "DELIVERED") && service.status !== status) {
+        if (confirm(`Status updated to ${status}! Do you want to notify the customer via WhatsApp?`)) {
+          const msg = encodeURIComponent(`Hello ${service.customer.name},\n\nYour service application for *${service.serviceType}* is now *${status}*.\n\nThank you,\nRA Seva Point`);
+          window.open(`https://wa.me/91${service.customer.mobile.replace(/\D/g, '').slice(-10)}?text=${msg}`, '_blank');
+        }
+      }
     } catch (err: any) {
       toast.error(err.message);
     } finally {

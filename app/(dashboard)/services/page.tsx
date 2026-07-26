@@ -176,6 +176,11 @@ export default function ServicesPage() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isNewServiceOpen, setIsNewServiceOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkStatus, setBulkStatus] = useState("");
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+
   const toast = useToast();
   const router = useRouter();
 
@@ -213,9 +218,56 @@ export default function ServicesPage() {
       });
       if (!res.ok) throw new Error("Failed to update status");
       toast.success("Status updated");
+      
+      if (newStatus === "APPROVED" || newStatus === "DELIVERED") {
+        if (confirm(`Status updated to ${newStatus}! Do you want to notify the customer via WhatsApp?`)) {
+          const s = services.find(x => x.id === id);
+          if (s && s.customer.mobile) {
+            const msg = encodeURIComponent(`Hello ${s.customer.name},\n\nYour service application for *${s.serviceType}* is now *${newStatus}*.\n\nThank you,\nRA Seva Point`);
+            window.open(`https://wa.me/91${s.customer.mobile.replace(/\D/g, '').slice(-10)}?text=${msg}`, '_blank');
+          }
+        }
+      }
     } catch {
       toast.error("Status update failed");
       fetchServices(); // Revert on failure
+    }
+  };
+
+  const handleBulkUpdate = async () => {
+    if (!bulkStatus || selectedIds.size === 0) return;
+    setIsBulkUpdating(true);
+    try {
+      const res = await fetch("/api/services/bulk", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: Array.from(selectedIds), status: bulkStatus })
+      });
+      if (!res.ok) throw new Error("Bulk update failed");
+      toast.success(`${selectedIds.size} services updated`);
+      setSelectedIds(new Set());
+      setBulkStatus("");
+      fetchServices();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setIsBulkUpdating(false);
+    }
+  };
+
+  const toggleSelection = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedIds(next);
+  };
+
+  const toggleAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setSelectedIds(new Set(filtered.map(s => s.id)));
+    } else {
+      setSelectedIds(new Set());
     }
   };
 
@@ -287,6 +339,29 @@ export default function ServicesPage() {
         </select>
       </div>
 
+      {/* Bulk Actions */}
+      {selectedIds.size > 0 && view === "list" && (
+        <div className="flex items-center gap-3 p-3 mb-4 rounded" style={{ background: '#000080', color: 'white' }}>
+          <span className="font-semibold text-sm">{selectedIds.size} selected</span>
+          <select 
+            className="input-field" style={{ width: '150px', color: 'black' }}
+            value={bulkStatus}
+            onChange={e => setBulkStatus(e.target.value)}
+          >
+            <option value="">Change Status...</option>
+            {STATUS_ORDER.map(s => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
+          </select>
+          <button 
+            className="legacy-button" 
+            style={{ fontWeight: 'bold' }}
+            onClick={handleBulkUpdate}
+            disabled={!bulkStatus || isBulkUpdating}
+          >
+            {isBulkUpdating ? "Updating..." : "Apply to Selected"}
+          </button>
+        </div>
+      )}
+
       {/* Content */}
       {loading ? (
         <div className="flex items-center justify-center h-48">
@@ -313,6 +388,13 @@ export default function ServicesPage() {
           <table className="data-table">
             <thead>
               <tr>
+                <th style={{ width: '40px' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={filtered.length > 0 && selectedIds.size === filtered.length}
+                    onChange={toggleAll}
+                  />
+                </th>
                 <th>Customer</th>
                 <th>Service Type</th>
                 <th>Status</th>
@@ -326,9 +408,16 @@ export default function ServicesPage() {
               {filtered.map((s) => (
                 <tr
                   key={s.id}
-                  className="cursor-pointer"
+                  className={`cursor-pointer ${selectedIds.has(s.id) ? 'bg-blue-50' : ''}`}
                   onClick={() => setSelectedService(s)}
                 >
+                  <td onClick={(e) => toggleSelection(s.id, e)}>
+                    <input 
+                      type="checkbox" 
+                      checked={selectedIds.has(s.id)}
+                      onChange={() => {}} // handled by td onClick
+                    />
+                  </td>
                   <td>
                     <div>
                       <div className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
