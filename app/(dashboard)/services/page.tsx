@@ -421,7 +421,7 @@ export default function ServicesPage() {
                 Delete
               </button>
               <button className="legacy-button" onClick={() => setSelectedService(null)}>Close</button>
-              <button className="legacy-button" onClick={() => setIsDetailsOpen(true)} style={{ fontWeight: 'bold' }}>View Full Details</button>
+              <button className="legacy-button" onClick={() => router.push(`/services/${selectedService.id}`)} style={{ fontWeight: 'bold' }}>View Full Details</button>
             </div>
           </div>
         )}
