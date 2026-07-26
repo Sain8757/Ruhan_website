@@ -6,7 +6,6 @@ interface Props {
 }
 
 export function BiharRationKaTemplate({ data }: Props) {
-  const tick = <span style={{ fontFamily: 'Arial, sans-serif', fontWeight: 'bold', fontSize: '13px' }}>✓</span>;
   
   // Array of 7 members for page 1 table
   const members = [...data.familyMembers];
@@ -16,8 +15,8 @@ export function BiharRationKaTemplate({ data }: Props) {
   const displayMembers = members.slice(0, 7);
 
   const CheckBox = ({ checked, label }: { checked: boolean; label: string }) => (
-    <span className="checkbox-group">
-      <span>{label}</span> <span className="box">{checked ? tick : ''}</span>
+    <span className="checkbox-group" style={{ whiteSpace: 'nowrap' }}>
+      <span>{label}</span> <span style={{ fontFamily: 'Arial, sans-serif', fontSize: '18px', lineHeight: 1, verticalAlign: 'middle', position: 'relative', top: '1px' }}>{checked ? '☑' : '☐'}</span>
     </span>
   );
 
@@ -152,17 +151,6 @@ export function BiharRationKaTemplate({ data }: Props) {
           align-items: center;
           gap: 4px;
           margin-left: 6px;
-        }
-        .ration-ka-wrapper .box {
-          display: inline-block;
-          text-align: center;
-          width: 15px;
-          height: 15px;
-          border: 1px solid #000;
-          margin: 0;
-          vertical-align: middle;
-          line-height: 14px;
-          overflow: hidden;
         }
         .ration-ka-wrapper .subfields {
           margin-left: 30px;
