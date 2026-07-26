@@ -246,6 +246,12 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                   {customer.panNumber || "Not Provided"}
                 </p>
               </div>
+              <div className="pt-2 border-t mt-2" style={{ borderColor: "var(--border-primary)" }}>
+                <span className="label flex items-center gap-1">⭐ Loyalty Points</span>
+                <p className="text-xl font-bold text-yellow-600">
+                  {customer.loyaltyPoints || 0}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -354,6 +360,34 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                   <span>Send Due Reminder on WhatsApp</span>
                 </button>
               )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  window.open(`/print/ledger/${customer.id}`, '_blank');
+                }}
+                style={{
+                  width: "100%",
+                  marginTop: "8px",
+                  padding: "6px 8px",
+                  backgroundColor: "#d4d0c8",
+                  borderTop: "2px solid #ffffff",
+                  borderLeft: "2px solid #ffffff",
+                  borderRight: "2px solid #404040",
+                  borderBottom: "2px solid #404040",
+                  color: "#000000",
+                  fontSize: "11px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                }}
+              >
+                <FileText size={15} color="#000080" />
+                <span>Print Khata Ledger PDF</span>
+              </button>
             </div>
           </div>
         </div>
