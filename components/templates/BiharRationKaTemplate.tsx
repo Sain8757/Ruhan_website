@@ -14,9 +14,22 @@ export function BiharRationKaTemplate({ data }: Props) {
   }
   const displayMembers = members.slice(0, 7);
 
+  const svgChecked = (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline-block', verticalAlign: 'middle', marginBottom: '2px', marginLeft: '4px' }}>
+      <rect x="0.5" y="0.5" width="13" height="13" stroke="black" fill="white"/>
+      <path d="M3 7L6 10L11 3" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+
+  const svgUnchecked = (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ display: 'inline-block', verticalAlign: 'middle', marginBottom: '2px', marginLeft: '4px' }}>
+      <rect x="0.5" y="0.5" width="13" height="13" stroke="black" fill="white"/>
+    </svg>
+  );
+
   const CheckBox = ({ checked, label }: { checked: boolean; label: string }) => (
-    <span className="checkbox-group" style={{ whiteSpace: 'nowrap' }}>
-      <span>{label}</span> <span style={{ fontFamily: 'Arial, sans-serif', fontSize: '18px', lineHeight: 1, verticalAlign: 'middle', position: 'relative', top: '1px' }}>{checked ? '☑' : '☐'}</span>
+    <span className="checkbox-group" style={{ whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center' }}>
+      <span>{label}</span> {checked ? svgChecked : svgUnchecked}
     </span>
   );
 
