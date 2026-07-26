@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback } from "react";
 import { CheckCircle, XCircle, Info, X } from "lucide-react";
 
 type ToastType = "success" | "error" | "info";
@@ -38,12 +38,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => removeToast(id), 4000);
   }, [removeToast]);
 
-  const value = {
+  const value = React.useMemo(() => ({
     toast: addToast,
     success: (message: string) => addToast(message, "success"),
     error: (message: string) => addToast(message, "error"),
     info: (message: string) => addToast(message, "info"),
-  };
+  }), [addToast]);
 
   const icons = {
     success: <CheckCircle size={18} className="text-green-500 shrink-0" />,

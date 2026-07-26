@@ -194,7 +194,7 @@ export default function ServicesPage() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, toast]);
+  }, [statusFilter]);
 
   useEffect(() => {
     fetchServices();
