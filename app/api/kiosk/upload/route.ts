@@ -38,8 +38,14 @@ export async function POST(req: Request) {
 
     // Upload to Cloudinary using upload_stream
     const uploadResult: any = await new Promise((resolve, reject) => {
+      const filenameWithoutExt = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
       const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: `ruhan/services/${service.id}` },
+        { 
+          folder: `ruhan/services/${service.id}`,
+          public_id: filenameWithoutExt,
+          unique_filename: false,
+          overwrite: true
+        },
         (error, result) => {
           if (error) reject(error);
           else resolve(result);

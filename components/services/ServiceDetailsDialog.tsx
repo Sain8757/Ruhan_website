@@ -106,6 +106,9 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
   // WhatsApp template popup
   const [showWATemplates, setShowWATemplates] = useState(false);
 
+  // Document Viewer Modal
+  const [previewImg, setPreviewImg] = useState<string | null>(null);
+
   // ── Load service ─────────────────────────────────────────────
   const loadService = useCallback(() => {
     if (!isOpen || !serviceId) return;
@@ -210,6 +213,14 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
     if (!missingDocs.trim()) { toast.error("Please type the missing document name first"); return; }
     const link = `${window.location.origin}/status`;
     const text = `Hello ${service.customer.name},\nAapke ${service.serviceType} application me '${missingDocs}' missing hai.\nKripya is link par jayen aur ghar baithe upload karein:\n\n🔗 ${link}\n\nMobile No: ${service.customer.mobile}\nTracking ID: ${service.trackingId}\n\nThank you,\nRA Seva Point`;
+    window.open(`https://wa.me/91${service.customer.mobile.replace(/\D/g,"").slice(-10)}?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const sendReuploadWA = (url: string) => {
+    if (!service?.customer?.mobile) { toast.error("No mobile number"); return; }
+    const docName = url.split("/").pop() || "Document";
+    const link = `${window.location.origin}/status`;
+    const text = `Hello ${service.customer.name},\nAapka upload kiya gaya document '${docName}' clear nahi hai ya galat hai.\nKripya is link par jaa kar wapas theek document upload karein:\n\n🔗 ${link}\n\nMobile No: ${service.customer.mobile}\nTracking ID: ${service.trackingId}\n\nThank you,\nRA Seva Point`;
     window.open(`https://wa.me/91${service.customer.mobile.replace(/\D/g,"").slice(-10)}?text=${encodeURIComponent(text)}`, "_blank");
   };
 
@@ -668,18 +679,45 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                           {docUrls.length === 0
                             ? <div style={{ fontSize:"11px",color:"#999",fontStyle:"italic",textAlign:"center",padding:"20px" }}>No documents uploaded yet.</div>
                             : docUrls.map((url,i) => {
-                                const name = url.split("/").pop() || `Document ${i+1}`;
-                                const isImage = /\.(jpg|jpeg|png|gif)$/i.test(url);
+                                // Extract the original filename from the url (e.g. from cloudniary)
+                                const decodedUrl = decodeURIComponent(url);
+                                const name = decodedUrl.split("/").pop() || `Document ${i+1}`;
+                                const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(decodedUrl);
                                 return (
                                   <div key={i} style={{ display:"flex",alignItems:"center",gap:"8px",padding:"5px",borderBottom:"1px solid #ccc" }}>
                                     <span style={{ fontSize:"18px" }}>{isImage ? "🖼" : "📄"}</span>
                                     <span style={{ flex:1,fontSize:"11px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{name}</span>
-                                    <a href={url} target="_blank" rel="noreferrer" style={Btn({fontSize:"10px",padding:"2px 6px"})}><Download size={10}/> View</a>
+                                    {isImage ? (
+                                      <button type="button" onClick={() => setPreviewImg(url)} style={Btn({fontSize:"10px",padding:"2px 6px"})}><Download size={10}/> View</button>
+                                    ) : (
+                                      <a href={url} target="_blank" rel="noreferrer" style={Btn({fontSize:"10px",padding:"2px 6px"})}><Download size={10}/> View</a>
+                                    )}
                                     <button type="button" onClick={() => handleDeleteDoc(url)} style={Btn({fontSize:"10px",padding:"2px 6px",color:"#cc0000"})}><X size={10}/></button>
                                   </div>
                                 );
                               })
                           }
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Preview Image Modal overlay */}
+                    {previewImg && (
+                      <div style={{ position:"fixed",inset:0,zIndex:10000,background:"rgba(0,0,0,0.85)",display:"flex",flexDirection:"column" }}>
+                        <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 20px",background:"#000" }}>
+                          <span style={{ color:"white",fontWeight:"bold",fontSize:"14px" }}>Document Viewer</span>
+                          <button onClick={() => setPreviewImg(null)} style={{ background:"none",border:"none",color:"white",fontSize:"24px",cursor:"pointer" }}>✕</button>
+                        </div>
+                        <div style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px",overflow:"hidden" }}>
+                          <img src={previewImg} alt="Preview" style={{ maxWidth:"100%",maxHeight:"100%",objectFit:"contain",boxShadow:"0 0 20px rgba(255,255,255,0.1)" }} />
+                        </div>
+                        <div style={{ padding:"15px",background:"#111",display:"flex",justifyContent:"center",gap:"15px" }}>
+                          <button onClick={() => setPreviewImg(null)} style={{ ...Btn(),padding:"8px 16px",fontSize:"14px",background:"#d4d0c8",color:"#000" }}>
+                            Close
+                          </button>
+                          <button onClick={() => sendReuploadWA(previewImg)} style={{ ...Btn(),padding:"8px 16px",fontSize:"14px",background:"#25D366",color:"white",borderColor:"#1da851" }}>
+                            📱 Request Re-upload on WhatsApp
+                          </button>
                         </div>
                       </div>
                     )}
