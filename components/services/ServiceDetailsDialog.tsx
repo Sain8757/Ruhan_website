@@ -553,7 +553,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                             <input type="text" style={Inp()} value={referenceNo} onChange={e => setReferenceNo(e.target.value)} placeholder="e.g. 15-digit ARN" />
                           </div>
                           <div>
-                            <label style={{ fontSize:"11px",display:"block",marginBottom:"3px",display:"flex",alignItems:"center",gap:"4px" }}>
+                            <label style={{ fontSize:"11px",marginBottom:"3px",display:"flex",alignItems:"center",gap:"4px" }}>
                               <Clock size={11} style={{ color:"#0055aa" }}/> Callback Reminder:
                             </label>
                             <input type="datetime-local" style={Inp()} value={callbackAt} onChange={e => setCallbackAt(e.target.value)} />
