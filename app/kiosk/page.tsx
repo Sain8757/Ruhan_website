@@ -1,29 +1,142 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { SERVICE_TYPES } from '@/lib/utils';
-import { Loader2, Users } from 'lucide-react';
+import { Loader2, Users, Globe } from 'lucide-react';
+
+// ─── Translations ──────────────────────────────────────────
+const T = {
+  en: {
+    title: "Virtual Waiting Room",
+    subtitle: "RA Seva Point — Self-Service Kiosk",
+    step1: "Step 1 of 3: Identification",
+    step2: "Step 2 of 3: Service Details",
+    step3: "Booking Confirmed!",
+    mobile: "Mobile Number",
+    mobilePlaceholder: "Enter 10 digit mobile",
+    mobileError: "Please enter a valid 10 digit mobile number.",
+    lookingUp: "Looking up...",
+    nameFound: "Welcome back!",
+    fullName: "Full Name",
+    namePlaceholder: "e.g. Rajesh Kumar",
+    service: "Service Required",
+    price: "Approx. Rate",
+    back: "← Back",
+    next: "Next →",
+    submit: "Join Queue",
+    submitting: "Joining Queue...",
+    token: "Your Token",
+    position: "Queue Position",
+    wait: "Est. Wait Time",
+    minutes: "min",
+    ahead: "people ahead",
+    done: "Done",
+    successMsg: "Please wait. Show this token at the counter when called.",
+    systemActive: "System Active",
+    version: "Kiosk v2.0",
+  },
+  hi: {
+    title: "वर्चुअल वेटिंग रूम",
+    subtitle: "RA सेवा पॉइंट — स्व-सेवा कियोस्क",
+    step1: "चरण 1 / 3: पहचान",
+    step2: "चरण 2 / 3: सेवा विवरण",
+    step3: "बुकिंग की पुष्टि हो गई!",
+    mobile: "मोबाइल नंबर",
+    mobilePlaceholder: "10 अंकों का मोबाइल दर्ज करें",
+    mobileError: "कृपया 10 अंकों का वैध मोबाइल नंबर दर्ज करें।",
+    lookingUp: "खोज रहा है...",
+    nameFound: "पुनः स्वागत है!",
+    fullName: "पूरा नाम",
+    namePlaceholder: "जैसे राजेश कुमार",
+    service: "सेवा का प्रकार",
+    price: "अनुमानित शुल्क",
+    back: "← वापस",
+    next: "आगे →",
+    submit: "कतार में जुड़ें",
+    submitting: "जुड़ रहे हैं...",
+    token: "आपका टोकन",
+    position: "कतार में स्थान",
+    wait: "अनुमानित प्रतीक्षा",
+    minutes: "मिनट",
+    ahead: "लोग आगे हैं",
+    done: "हो गया",
+    successMsg: "कृपया प्रतीक्षा करें। बुलाए जाने पर काउंटर पर यह टोकन दिखाएं।",
+    systemActive: "सिस्टम सक्रिय",
+    version: "कियोस्क v2.0",
+  }
+};
+
+// Hardcoded price map (fallback if service master unavailable)
+const PRICE_MAP: Record<string, string> = {
+  "Aadhaar PVC Card": "₹80",
+  "PAN Card": "₹110",
+  "Passport Photo": "₹50",
+  "Photocopy / Print": "₹2/page",
+  "Document Scan": "₹10",
+  "Form Filling": "₹50",
+};
 
 export default function KioskPage() {
+  const [lang, setLang] = useState<'en' | 'hi'>('en');
+  const t = T[lang];
+
   const [step, setStep] = useState(1);
   const [mobile, setMobile] = useState('');
   const [name, setName] = useState('');
+  const [lookingUp, setLookingUp] = useState(false);
+  const [nameFound, setNameFound] = useState(false);
   const [serviceType, setServiceType] = useState(SERVICE_TYPES[0]);
   const [loading, setLoading] = useState(false);
   const [ticket, setTicket] = useState('');
-  const [queuePosition, setQueuePosition] = useState(0);
+  const [tokenLabel, setTokenLabel] = useState('');
+  const [queuePosition, setQueuePosition] = useState(1);
+  const [estimatedWait, setEstimatedWait] = useState(5);
   const [errorMsg, setErrorMsg] = useState('');
-  
-  // Realtime clock for the retro feel
+  const [prices, setPrices] = useState<Record<string, string>>(PRICE_MAP);
+
+  // Live clock
   const [time, setTime] = useState(new Date());
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  // Fetch service prices from service master
+  useEffect(() => {
+    fetch('/api/service-master')
+      .then(r => r.json())
+      .then(data => {
+        if (data && Array.isArray(data.serviceMasters)) {
+          const pm: Record<string, string> = { ...PRICE_MAP };
+          data.serviceMasters.forEach((s: any) => {
+            if (s.name && s.fee) pm[s.name] = `₹${s.fee}`;
+          });
+          setPrices(pm);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Auto-fill customer name by mobile
+  const lookupCustomer = useCallback(async (mob: string) => {
+    if (mob.length !== 10) { setNameFound(false); return; }
+    setLookingUp(true);
+    try {
+      const res = await fetch(`/api/kiosk/lookup?mobile=${mob}`);
+      const data = await res.json();
+      if (data.found) { setName(data.name); setNameFound(true); }
+      else { setNameFound(false); }
+    } catch { setNameFound(false); }
+    finally { setLookingUp(false); }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => lookupCustomer(mobile), 500);
+    return () => clearTimeout(timer);
+  }, [mobile, lookupCustomer]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
     try {
       const res = await fetch('/api/kiosk/submit', {
         method: 'POST',
@@ -31,13 +144,13 @@ export default function KioskPage() {
         body: JSON.stringify({ name, mobile, serviceType })
       });
       const data = await res.json();
-      
       if (!res.ok) throw new Error(data.error);
-      
       setTicket(data.trackingId);
+      setTokenLabel(data.tokenLabel || `T${String(data.queuePosition).padStart(3, '0')}`);
       setQueuePosition(data.queuePosition || 1);
+      setEstimatedWait(data.estimatedWaitMinutes || 5);
       setErrorMsg('');
-      setStep(3); // Success Screen
+      setStep(3);
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to submit request');
     } finally {
@@ -45,172 +158,209 @@ export default function KioskPage() {
     }
   };
 
+  const resetForm = () => {
+    setStep(1); setMobile(''); setName(''); setNameFound(false);
+    setTicket(''); setTokenLabel(''); setErrorMsg('');
+  };
+
+  // Win95 inset style
+  const inset: React.CSSProperties = {
+    borderTop: '2px solid #808080',
+    borderLeft: '2px solid #808080',
+    borderRight: '2px solid #ffffff',
+    borderBottom: '2px solid #ffffff',
+  };
+  const raised: React.CSSProperties = {
+    borderTop: '2px solid #ffffff',
+    borderLeft: '2px solid #ffffff',
+    borderRight: '2px solid #404040',
+    borderBottom: '2px solid #404040',
+  };
+  const btn: React.CSSProperties = {
+    ...raised,
+    background: '#d4d0c8',
+    cursor: 'pointer',
+    padding: '4px 14px',
+    fontFamily: 'Tahoma, sans-serif',
+    fontSize: '13px',
+    fontWeight: 'bold',
+  };
+
   return (
-    <div className="min-h-screen p-4 flex flex-col items-center justify-center" style={{ backgroundColor: '#008080', backgroundImage: 'url("https://www.transparenttextures.com/patterns/cubes.png")' }}>
-      
-      {/* Retro Window Container */}
-      <div 
-        className="w-full max-w-md bg-[#d4d0c8]"
-        style={{
-          borderTop: '2px solid #fff',
-          borderLeft: '2px solid #fff',
-          borderRight: '2px solid #404040',
-          borderBottom: '2px solid #404040',
-          boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-          fontFamily: 'Tahoma, sans-serif'
-        }}
-      >
-        {/* Title Bar */}
-        <div 
-          style={{
-            background: 'linear-gradient(to right, #000080 0%, #1084d0 100%)',
-            color: 'white',
-            padding: '4px 8px',
-            fontWeight: 'bold',
-            fontSize: '14px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
+    <div className="min-h-screen flex flex-col items-center justify-center p-3"
+      style={{ backgroundColor: '#008080', backgroundImage: "repeating-linear-gradient(45deg, rgba(0,0,0,0.04) 0, rgba(0,0,0,0.04) 1px, transparent 0, transparent 50%)", backgroundSize: '10px 10px' }}>
+
+      {/* Language Toggle */}
+      <div className="flex justify-end mb-2 w-full max-w-sm">
+        <button
+          onClick={() => setLang(l => l === 'en' ? 'hi' : 'en')}
+          style={{ ...raised, background: '#d4d0c8', padding: '2px 10px', cursor: 'pointer', fontFamily: 'Tahoma', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}
         >
-          <div className="flex items-center gap-2">
-            <span>🏪</span>
-            <span>Virtual Waiting Room - RA Seva Point</span>
+          <Globe size={12} /> {lang === 'en' ? 'हिन्दी' : 'English'}
+        </button>
+      </div>
+
+      {/* Main Window */}
+      <div className="w-full max-w-sm" style={{ background: '#d4d0c8', ...raised, boxShadow: '4px 4px 15px rgba(0,0,0,0.5)' }}>
+
+        {/* Title Bar */}
+        <div style={{ background: 'linear-gradient(to right, #000080, #1084d0)', padding: '3px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ color: 'white', fontFamily: 'Tahoma', fontWeight: 'bold', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span>🏪</span> {t.title}
           </div>
-          <div className="flex gap-1">
-            <button style={{ background: '#d4d0c8', borderTop: '1px solid #fff', borderLeft: '1px solid #fff', borderRight: '1px solid #404040', borderBottom: '1px solid #404040', color: 'black', width: '16px', height: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 'bold' }}>_</button>
-            <button style={{ background: '#d4d0c8', borderTop: '1px solid #fff', borderLeft: '1px solid #fff', borderRight: '1px solid #404040', borderBottom: '1px solid #404040', color: 'black', width: '16px', height: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: 'bold' }}>X</button>
+          <div style={{ display: 'flex', gap: '2px' }}>
+            {['_', '□', '✕'].map((c, i) => (
+              <button key={i} style={{ background: '#d4d0c8', ...raised, width: '16px', height: '14px', fontSize: '9px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'default' }}>{c}</button>
+            ))}
           </div>
         </div>
 
-        {/* Content Area */}
-        <div className="p-4 flex flex-col gap-4">
-          
-          {/* Header Info */}
-          <div className="flex items-center gap-4 border-b pb-4 border-gray-400">
-            <div className="w-16 h-16 bg-[#000080] flex items-center justify-center shadow-inner" style={{ border: '2px inset #fff' }}>
-              <Users size={32} color="#fff" />
+        {/* Content */}
+        <div className="p-3 flex flex-col gap-3">
+
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '1px solid #808080', paddingBottom: '8px' }}>
+            <div style={{ background: '#000080', ...inset, width: '52px', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Users size={28} color="white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-800" style={{ textShadow: '1px 1px 0px #fff' }}>Welcome to Kiosk</h1>
-              <p className="text-sm text-gray-600">Please join the queue for service.</p>
-              <p className="text-xs mt-1 text-[#000080] font-bold">Time: {time.toLocaleTimeString()}</p>
+              <div style={{ fontFamily: 'Tahoma', fontWeight: 'bold', fontSize: '14px' }}>{t.subtitle}</div>
+              <div style={{ fontFamily: 'Tahoma', fontSize: '11px', color: '#000080', fontWeight: 'bold', marginTop: '2px' }}>
+                🕒 {time.toLocaleTimeString()}
+              </div>
             </div>
           </div>
 
+          {/* Error */}
           {errorMsg && (
-            <div className="bg-red-100 border border-red-500 text-red-700 px-3 py-2 text-sm flex justify-between items-center" style={{ boxShadow: 'inset 1px 1px 0 rgba(0,0,0,0.1)' }}>
-              <span>{errorMsg}</span>
-              <button className="font-bold px-2" onClick={() => setErrorMsg('')}>×</button>
+            <div style={{ background: '#fff0f0', border: '1px solid #cc0000', padding: '6px 8px', fontFamily: 'Tahoma', fontSize: '12px', color: '#cc0000', display: 'flex', justifyContent: 'space-between' }}>
+              <span>⚠ {errorMsg}</span>
+              <button onClick={() => setErrorMsg('')} style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>×</button>
             </div>
           )}
-          
-          {/* Form Steps */}
+
+          {/* STEP 1 */}
           {step === 1 && (
-            <form onSubmit={(e) => { e.preventDefault(); if (mobile.length === 10) { setStep(2); setErrorMsg(''); } else setErrorMsg('Enter exactly 10 digits.'); }} className="flex flex-col gap-4 py-2">
-              <fieldset style={{ border: '2px groove #fff', padding: '10px', margin: '0' }}>
-                <legend style={{ padding: '0 4px' }} className="text-sm">Step 1: Identification</legend>
-                <div className="flex flex-col gap-1">
-                  <label className="text-sm">Mobile Number:</label>
-                  <input 
-                    type="tel"
-                    value={mobile}
-                    onChange={e => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                    className="w-full px-2 py-1 text-base"
-                    style={{ borderTop: '2px solid #808080', borderLeft: '2px solid #808080', borderRight: '2px solid #fff', borderBottom: '2px solid #fff', outline: 'none' }}
-                    placeholder="Enter 10 digit mobile"
-                    required
-                  />
+            <form onSubmit={(e) => { e.preventDefault(); if (mobile.length === 10) { setStep(2); setErrorMsg(''); } else setErrorMsg(t.mobileError); }}>
+              <fieldset style={{ border: '2px groove #c0c0c0', padding: '10px' }}>
+                <legend style={{ fontFamily: 'Tahoma', fontSize: '12px', padding: '0 4px' }}>{t.step1}</legend>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontFamily: 'Tahoma', fontSize: '12px' }}>{t.mobile}:</label>
+                  <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                    <input
+                      type="tel"
+                      value={mobile}
+                      onChange={e => setMobile(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                      style={{ ...inset, flex: 1, padding: '4px 6px', fontFamily: 'Tahoma', fontSize: '14px', outline: 'none', background: 'white' }}
+                      placeholder={t.mobilePlaceholder}
+                      required
+                    />
+                    {lookingUp && <Loader2 size={14} className="animate-spin" color="#000080" />}
+                  </div>
+                  {nameFound && (
+                    <div style={{ background: '#e6ffe6', border: '1px solid #008000', padding: '4px 8px', fontFamily: 'Tahoma', fontSize: '11px', color: '#006600' }}>
+                      ✓ {t.nameFound} {name}
+                    </div>
+                  )}
                 </div>
               </fieldset>
-              
-              <div className="flex justify-end gap-2 mt-2">
-                <button type="submit" className="px-6 py-1 font-bold" style={{ background: '#d4d0c8', borderTop: '2px solid #fff', borderLeft: '2px solid #fff', borderRight: '2px solid #404040', borderBottom: '2px solid #404040', cursor: 'pointer' }}>
-                  Next &gt;
-                </button>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+                <button type="submit" style={btn}>{t.next}</button>
               </div>
             </form>
           )}
 
+          {/* STEP 2 */}
           {step === 2 && (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4 py-2">
-              <fieldset style={{ border: '2px groove #fff', padding: '10px', margin: '0' }}>
-                <legend style={{ padding: '0 4px' }} className="text-sm">Step 2: Service Details</legend>
-                
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm">Full Name:</label>
-                    <input 
+            <form onSubmit={handleSubmit}>
+              <fieldset style={{ border: '2px groove #c0c0c0', padding: '10px' }}>
+                <legend style={{ fontFamily: 'Tahoma', fontSize: '12px', padding: '0 4px' }}>{t.step2}</legend>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label style={{ fontFamily: 'Tahoma', fontSize: '12px' }}>{t.fullName}:</label>
+                    <input
                       type="text"
                       value={name}
                       onChange={e => setName(e.target.value)}
-                      className="w-full px-2 py-1 text-base"
-                      style={{ borderTop: '2px solid #808080', borderLeft: '2px solid #808080', borderRight: '2px solid #fff', borderBottom: '2px solid #fff', outline: 'none' }}
-                      placeholder="e.g. Rajesh Kumar"
+                      style={{ ...inset, padding: '4px 6px', fontFamily: 'Tahoma', fontSize: '13px', outline: 'none', background: 'white' }}
+                      placeholder={t.namePlaceholder}
                       required
                     />
                   </div>
-                  
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm">Service Required:</label>
-                    <select 
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <label style={{ fontFamily: 'Tahoma', fontSize: '12px' }}>{t.service}:</label>
+                    <select
                       value={serviceType}
                       onChange={e => setServiceType(e.target.value)}
-                      className="w-full px-2 py-1 text-base"
-                      style={{ borderTop: '2px solid #808080', borderLeft: '2px solid #808080', borderRight: '2px solid #fff', borderBottom: '2px solid #fff', outline: 'none', background: '#fff' }}
+                      style={{ ...inset, padding: '4px 6px', fontFamily: 'Tahoma', fontSize: '13px', outline: 'none', background: 'white' }}
                     >
                       {SERVICE_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
+
+                  {/* Price Preview */}
+                  {prices[serviceType] && (
+                    <div style={{ background: '#ffffc8', border: '1px solid #cccc00', padding: '5px 8px', fontFamily: 'Tahoma', fontSize: '12px', display: 'flex', justifyContent: 'space-between' }}>
+                      <span>💰 {t.price}:</span>
+                      <strong style={{ color: '#006600' }}>{prices[serviceType]}</strong>
+                    </div>
+                  )}
                 </div>
               </fieldset>
 
-              <div className="flex justify-between items-center mt-2">
-                <button type="button" onClick={() => setStep(1)} className="px-4 py-1" style={{ background: '#d4d0c8', borderTop: '2px solid #fff', borderLeft: '2px solid #fff', borderRight: '2px solid #404040', borderBottom: '2px solid #404040', cursor: 'pointer' }}>
-                  &lt; Back
-                </button>
-                <button type="submit" disabled={loading} className="px-6 py-1 font-bold flex items-center gap-2" style={{ background: '#d4d0c8', borderTop: '2px solid #fff', borderLeft: '2px solid #fff', borderRight: '2px solid #404040', borderBottom: '2px solid #404040', cursor: loading ? 'wait' : 'pointer' }}>
-                  {loading && <Loader2 size={14} className="animate-spin" />}
-                  Submit Request
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
+                <button type="button" onClick={() => setStep(1)} style={btn}>{t.back}</button>
+                <button type="submit" disabled={loading} style={{ ...btn, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {loading && <Loader2 size={12} className="animate-spin" />}
+                  {loading ? t.submitting : t.submit}
                 </button>
               </div>
             </form>
           )}
 
+          {/* STEP 3 — SUCCESS */}
           {step === 3 && (
-            <div className="flex flex-col items-center text-center py-4 gap-4">
-              <div className="w-full bg-white p-4 flex flex-col items-center justify-center shadow-inner" style={{ border: '2px inset #fff', minHeight: '180px' }}>
-                <h2 className="text-2xl font-bold text-[#008000] mb-2" style={{ textShadow: '1px 1px 0px #ccc' }}>Success!</h2>
-                <p className="text-sm mb-4">Your request has been added to the queue.</p>
-                
-                <div className="bg-[#ffffcc] p-4 border border-[#cccc99] w-full max-w-[200px]">
-                  <p className="text-xs text-gray-600 uppercase">Ticket Number</p>
-                  <p className="text-3xl font-bold text-[#000080] font-mono tracking-widest">{ticket}</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <fieldset style={{ border: '2px groove #c0c0c0', padding: '10px' }}>
+                <legend style={{ fontFamily: 'Tahoma', fontSize: '12px', padding: '0 4px', color: '#008000', fontWeight: 'bold' }}>✓ {t.step3}</legend>
+
+                {/* Token Number — Big display */}
+                <div style={{ background: 'white', ...inset, padding: '14px', textAlign: 'center', marginBottom: '10px' }}>
+                  <div style={{ fontFamily: 'Tahoma', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '2px' }}>{t.token}</div>
+                  <div style={{ fontFamily: 'Courier New, monospace', fontSize: '48px', fontWeight: 'bold', color: '#000080', lineHeight: 1.1 }}>{tokenLabel}</div>
+                  <div style={{ fontFamily: 'Tahoma', fontSize: '10px', color: '#888', marginTop: '4px' }}>ID: {ticket}</div>
                 </div>
-                
-                <div className="mt-4 flex items-center justify-center gap-2">
-                  <Users size={18} color="#000080" />
-                  <span className="text-sm font-bold">Queue Position: <span className="text-[#000080] text-lg">{queuePosition}</span></span>
+
+                {/* Queue Info */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                  <div style={{ background: '#e8f0ff', border: '1px solid #aac', padding: '8px', textAlign: 'center' }}>
+                    <div style={{ fontFamily: 'Tahoma', fontSize: '22px', fontWeight: 'bold', color: '#000080' }}>{queuePosition}</div>
+                    <div style={{ fontFamily: 'Tahoma', fontSize: '10px', color: '#555' }}>{t.position}</div>
+                  </div>
+                  <div style={{ background: '#fff8e8', border: '1px solid #cc9', padding: '8px', textAlign: 'center' }}>
+                    <div style={{ fontFamily: 'Tahoma', fontSize: '22px', fontWeight: 'bold', color: '#885500' }}>~{estimatedWait}</div>
+                    <div style={{ fontFamily: 'Tahoma', fontSize: '10px', color: '#555' }}>{t.wait} ({t.minutes})</div>
+                  </div>
                 </div>
-              </div>
-              
-              <button 
-                onClick={() => { setStep(1); setMobile(''); setName(''); }} 
-                className="w-full px-4 py-2 font-bold text-base mt-2" 
-                style={{ background: '#d4d0c8', borderTop: '2px solid #fff', borderLeft: '2px solid #fff', borderRight: '2px solid #404040', borderBottom: '2px solid #404040', cursor: 'pointer' }}
-              >
-                Done
+
+                <p style={{ fontFamily: 'Tahoma', fontSize: '11px', color: '#555', marginTop: '8px', textAlign: 'center' }}>
+                  {t.successMsg}
+                </p>
+              </fieldset>
+
+              <button onClick={resetForm} style={{ ...btn, width: '100%', padding: '8px', fontSize: '14px', textAlign: 'center' }}>
+                {t.done}
               </button>
             </div>
           )}
-
         </div>
-        
+
         {/* Status Bar */}
-        <div className="bg-[#d4d0c8] p-1 text-xs flex justify-between border-t border-gray-400" style={{ borderTop: '2px solid #fff', boxShadow: 'inset 0 1px 0 #808080' }}>
-          <span className="px-2" style={{ borderRight: '2px groove #fff' }}>Step {step} of 3</span>
-          <span className="px-2" style={{ borderRight: '2px groove #fff' }}>System Active</span>
-          <span className="px-2">Virtual Kiosk v1.0</span>
+        <div style={{ borderTop: '2px solid #808080', background: '#d4d0c8', padding: '2px 6px', display: 'flex', justifyContent: 'space-between', fontSize: '11px', fontFamily: 'Tahoma' }}>
+          <span style={{ paddingRight: '8px', borderRight: '1px solid #808080' }}>Step {step}/3</span>
+          <span style={{ paddingRight: '8px', paddingLeft: '8px', borderRight: '1px solid #808080' }}>{t.systemActive}</span>
+          <span style={{ paddingLeft: '8px' }}>{t.version}</span>
         </div>
       </div>
     </div>

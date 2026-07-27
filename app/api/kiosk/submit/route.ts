@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
-const generateUniqueTrackingId = () => Math.random().toString(36).substring(2, 8).toUpperCase();
+const generateTrackingId = () => Math.random().toString(36).substring(2, 8).toUpperCase();
 
 export async function POST(request: Request) {
   try {
@@ -12,27 +12,47 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Upsert Customer (create if they don't exist based on mobile)
-    let customer = await prisma.customer.findUnique({
-      where: { mobile }
-    });
-
+    // Upsert Customer
+    let customer = await prisma.customer.findUnique({ where: { mobile } });
     if (!customer) {
-      customer = await prisma.customer.create({
-        data: { name, mobile }
-      });
+      customer = await prisma.customer.create({ data: { name, mobile } });
     }
 
+    // Generate sequential token number for today
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const lastToken = await prisma.service.findFirst({
+      where: {
+        isKioskRequest: true,
+        createdAt: { gte: todayStart }
+      },
+      orderBy: { tokenNumber: 'desc' },
+      select: { tokenNumber: true }
+    });
+
+    const nextTokenNumber = (lastToken?.tokenNumber || 0) + 1;
+    const trackingId = generateTrackingId();
+
     // Create Service Request
-    const trackingId = await generateUniqueTrackingId();
-    
     const service = await prisma.service.create({
       data: {
         serviceType,
         customerId: customer.id,
         trackingId,
+        tokenNumber: nextTokenNumber,
+        isKioskRequest: true,
         status: 'PENDING',
         notes: 'Submitted via Kiosk QR'
+      }
+    });
+
+    // Count PENDING services ahead (queue position)
+    const pendingAhead = await prisma.service.count({
+      where: {
+        isKioskRequest: true,
+        status: 'PENDING',
+        tokenNumber: { lt: nextTokenNumber }
       }
     });
 
@@ -45,20 +65,18 @@ export async function POST(request: Request) {
           action: 'Self-Service Request',
           entity: 'SERVICE',
           entityId: service.id,
-          details: `${name} requested ${serviceType} via Kiosk`
+          details: `${name} requested ${serviceType} via Kiosk — Token T${String(nextTokenNumber).padStart(3, '0')}`
         }
-      });
+      }).catch(() => {}); // non-critical
     }
-
-    // Get Queue Position
-    const pendingCount = await prisma.service.count({
-      where: { status: 'PENDING' }
-    });
 
     return NextResponse.json({
       success: true,
       trackingId,
-      queuePosition: pendingCount,
+      tokenNumber: nextTokenNumber,
+      tokenLabel: `T${String(nextTokenNumber).padStart(3, '0')}`,
+      queuePosition: pendingAhead + 1,
+      estimatedWaitMinutes: (pendingAhead + 1) * 5,
       message: 'Queue joined successfully'
     });
 

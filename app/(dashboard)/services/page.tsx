@@ -180,9 +180,31 @@ export default function ServicesPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkStatus, setBulkStatus] = useState("");
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  const [callingNext, setCallingNext] = useState(false);
+  const [liveToken, setLiveToken] = useState<string | null>(null);
 
   const toast = useToast();
   const router = useRouter();
+
+  const callNextToken = async () => {
+    setCallingNext(true);
+    try {
+      const res = await fetch('/api/kiosk/call-next', { method: 'POST' });
+      const data = await res.json();
+      if (data.token) {
+        setLiveToken(data.token);
+        toast.success(`Calling: ${data.token} — ${data.customer?.name} (${data.serviceType})`);
+        fetchServices();
+        setTimeout(() => setLiveToken(null), 6000);
+      } else {
+        toast.error('No pending kiosk requests in queue');
+      }
+    } catch {
+      toast.error('Failed to call next token');
+    } finally {
+      setCallingNext(false);
+    }
+  };
 
   const fetchServices = useCallback(async () => {
     setLoading(true);
@@ -309,6 +331,26 @@ export default function ServicesPage() {
               <Plus size={16} />
               New Service
             </button>
+            <button
+              className="legacy-button"
+              style={{ padding: '6px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px', background: liveToken ? '#008000' : '#d4d0c8', color: liveToken ? 'white' : 'black', transition: 'all 0.3s' }}
+              onClick={callNextToken}
+              disabled={callingNext}
+              title="Call next kiosk token"
+            >
+              {callingNext ? <Loader2 size={14} className="animate-spin" /> : '🔔'}
+              {liveToken ? liveToken : 'Call Next'}
+            </button>
+            <a
+              href="/display"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="legacy-button"
+              style={{ padding: '6px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+              title="Open TV Display Board"
+            >
+              🖥️ Display Board
+            </a>
           </>
         }
       />

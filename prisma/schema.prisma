@@ -91,6 +91,8 @@ model Service {
   submittedAt    DateTime?
   approvedAt     DateTime?
   trackingId     String?       @unique // Unique short ID for customer tracking portal
+  tokenNumber    Int?          // Sequential token e.g. T001, T002 for kiosk queue
+  isKioskRequest Boolean       @default(false)
   deadline       DateTime?
   referenceNo    String?       // Government portal application reference number
   vendorId       String?
