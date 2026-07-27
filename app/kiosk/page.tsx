@@ -142,7 +142,7 @@ export default function KioskPage() {
 
   // Fetch service list, prices, and required docs from inventory
   useEffect(() => {
-    fetch('/api/inventory?type=service')
+    fetch('/api/kiosk/services')
       .then(r => r.json())
       .then(data => {
         if (data && Array.isArray(data)) {

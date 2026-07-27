@@ -18,6 +18,31 @@ export async function POST(request: Request) {
       customer = await prisma.customer.create({ data: { name, mobile } });
     }
 
+    // Validation 1: Check active services limit (Max 2)
+    const activeServicesCount = await prisma.service.count({
+      where: {
+        customerId: customer.id,
+        status: { notIn: ['DELIVERED', 'CANCELLED'] }
+      }
+    });
+
+    if (activeServicesCount >= 2) {
+      return NextResponse.json({ error: 'You already have 2 active requests pending. Please wait for them to be processed.' }, { status: 400 });
+    }
+
+    // Validation 2: Check for duplicate exact service type
+    const duplicateService = await prisma.service.findFirst({
+      where: {
+        customerId: customer.id,
+        serviceType: serviceType,
+        status: { notIn: ['DELIVERED', 'CANCELLED'] }
+      }
+    });
+
+    if (duplicateService) {
+      return NextResponse.json({ error: 'A request for this service is already pending.' }, { status: 400 });
+    }
+
     // Generate sequential token number for today
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
@@ -50,18 +75,18 @@ export async function POST(request: Request) {
         trackingId,
         tokenNumber: nextTokenNumber,
         isKioskRequest: true,
-        status: 'PENDING',
+        status: 'SUBMITTED', // Using SUBMITTED as the "Pending Approval" state for Kiosk
         fees: master?.sellingPrice || 0,
         requiredDocs: master?.requiredDocs || [],
         notes: 'Submitted via Kiosk QR'
       }
     });
 
-    // Count PENDING services ahead (queue position)
+    // Count SUBMITTED services ahead (queue position)
     const pendingAhead = await prisma.service.count({
       where: {
         isKioskRequest: true,
-        status: 'PENDING',
+        status: 'SUBMITTED',
         tokenNumber: { lt: nextTokenNumber }
       }
     });
