@@ -701,27 +701,6 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                       </div>
                     )}
 
-                    {/* Preview Image Modal overlay */}
-                    {previewImg && (
-                      <div style={{ position:"fixed",inset:0,zIndex:10000,background:"rgba(0,0,0,0.85)",display:"flex",flexDirection:"column" }}>
-                        <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 20px",background:"#000" }}>
-                          <span style={{ color:"white",fontWeight:"bold",fontSize:"14px" }}>Document Viewer</span>
-                          <button onClick={() => setPreviewImg(null)} style={{ background:"none",border:"none",color:"white",fontSize:"24px",cursor:"pointer" }}>✕</button>
-                        </div>
-                        <div style={{ flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px",overflow:"hidden" }}>
-                          <img src={previewImg} alt="Preview" style={{ maxWidth:"100%",maxHeight:"100%",objectFit:"contain",boxShadow:"0 0 20px rgba(255,255,255,0.1)" }} />
-                        </div>
-                        <div style={{ padding:"15px",background:"#111",display:"flex",justifyContent:"center",gap:"15px" }}>
-                          <button onClick={() => setPreviewImg(null)} style={{ ...Btn(),padding:"8px 16px",fontSize:"14px",background:"#d4d0c8",color:"#000" }}>
-                            Close
-                          </button>
-                          <button onClick={() => sendReuploadWA(previewImg)} style={{ ...Btn(),padding:"8px 16px",fontSize:"14px",background:"#25D366",color:"white",borderColor:"#1da851" }}>
-                            📱 Request Re-upload on WhatsApp
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
                     {/* ═══ COMMENTS TAB ═══ */}
                     {activeTab === "comments" && (
                       <div style={{ display:"flex",flexDirection:"column",gap:"8px",height:"100%" }}>
@@ -915,6 +894,32 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
           </div>
         </div>
       )}
+
+      {/* Preview Image Modal overlay (Root Level) */}
+      {previewImg && (
+        <div style={{ position:"fixed",inset:0,zIndex:100000,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"center",justifyContent:"center" }}>
+          <div style={{ background:"#d4d0c8", ...raised, display:"flex", flexDirection:"column", width:"80%", maxWidth:"700px", maxHeight:"85vh", boxShadow:"0 10px 30px rgba(0,0,0,0.8)" }}>
+            <div style={{ background:"linear-gradient(90deg,#000080,#1084d0)", color:"white", padding:"6px 10px", fontWeight:"bold", fontSize:"13px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+              <span>Document Viewer</span>
+              <button onClick={() => setPreviewImg(null)} style={{ background:"#d4d0c8", color:"black", border:"none", padding:"1px 6px", cursor:"pointer", ...raised, fontWeight:"bold" }}>✕</button>
+            </div>
+            
+            <div style={{ flex:1, background:"#000", display:"flex", alignItems:"center", justifyContent:"center", padding:"10px", overflow:"hidden", minHeight:"300px" }}>
+              <img src={previewImg} alt="Preview" style={{ maxWidth:"100%", maxHeight:"100%", objectFit:"contain" }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; toast.error('Failed to load image'); }} />
+            </div>
+            
+            <div style={{ padding:"10px", display:"flex", justifyContent:"center", gap:"15px" }}>
+              <button onClick={() => setPreviewImg(null)} style={{ ...Btn(), padding:"6px 20px" }}>
+                Close
+              </button>
+              <button onClick={() => sendReuploadWA(previewImg)} style={{ ...Btn(), padding:"6px 16px", background:"#25D366", color:"white", border:"2px solid #1da851" }}>
+                📱 Request Re-upload on WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style>{`@media print { body > *:not(.print-only) { display: none !important; } .print-only { display: block !important; } }`}</style>
     </>
   );
