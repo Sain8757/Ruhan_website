@@ -532,8 +532,8 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
       </div>
-
       </div>
+
     </div>
   );
 }
