@@ -251,279 +251,287 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
           <p>Please keep this token slip for tracking your application status.</p>
           <p className="font-bold mt-1">Thank you for visiting RA Seva Point!</p>
         </div>
-      </div>
-
-      {/* Screen Header (Hidden on Print) */}
-      <div className="bg-[#d4d0c8] min-h-screen text-black font-sans text-xs p-2 no-print border-t border-l border-white border-b border-r border-black shadow-[2px_2px_0px_#000]">
+      </div>      {/* Screen Header (Hidden on Print) */}
+      <div className="bg-[#c0c0c0] min-h-screen text-black font-sans text-xs p-1 md:p-4 no-print flex justify-center">
         
-        {/* Top Header Bar */}
-        <div className="flex justify-between items-start mb-2">
-          <div className="flex items-center gap-2">
-            <Link href="/services" className="bg-[#d4d0c8] p-1 border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white">
-              <ArrowLeft size={16} />
-            </Link>
-            <div className="flex gap-2">
-              <span className="font-bold border border-black bg-[#d4d0c8] px-1 uppercase tracking-tighter">REF: #{service.id.slice(-6).toUpperCase()}</span>
-              <span className="font-bold border border-black bg-[#d4d0c8] px-1 uppercase tracking-tighter">{formatDate(service.createdAt)}</span>
+        {/* Main Dialog Window */}
+        <div className="border-t-white border-l-white border-b-black border-r-black border-[2px] w-full max-w-5xl bg-[#c0c0c0] shadow-[1px_1px_0px_#000]">
+          
+          {/* Windows 95 Title Bar */}
+          <div className="bg-[#0000aa] text-white p-1 flex justify-between items-center font-bold px-2 border-b-2 border-transparent">
+            <div className="flex items-center gap-2">
+              <span className="capitalize text-sm">{service.serviceType} - Status</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Link href="/services" className="bg-[#c0c0c0] text-black w-4 h-4 flex items-center justify-center border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white font-bold leading-none pb-1" title="Close">x</Link>
             </div>
           </div>
-          
-          <div className="flex gap-2">
-            <button onClick={handlePrintToken} className="bg-[#d4d0c8] px-2 py-1 flex items-center gap-1 font-bold border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white">
-              <Printer size={14} /> Print Slip
-            </button>
-            <button onClick={handleGenerateInvoice} disabled={isGeneratingInvoice} className="bg-[#d4d0c8] px-2 py-1 flex items-center gap-1 font-bold border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white">
-              <FileText size={14} /> 1-Click Invoice
-            </button>
+
+          {/* Window Menu Bar (File, Edit, etc) */}
+          <div className="flex gap-4 px-2 py-1 border-b border-gray-400">
+            <span className="cursor-default hover:bg-[#0000aa] hover:text-white px-1"><span className="underline">F</span>ile</span>
+            <span className="cursor-default hover:bg-[#0000aa] hover:text-white px-1"><span className="underline">E</span>dit</span>
+            <span className="cursor-default hover:bg-[#0000aa] hover:text-white px-1"><span className="underline">V</span>iew</span>
+            <span className="cursor-default hover:bg-[#0000aa] hover:text-white px-1"><span className="underline">H</span>elp</span>
           </div>
-        </div>
 
-        {/* Title Area */}
-        <h1 className="text-3xl font-extrabold mb-1 tracking-tight">{service.serviceType} / Status</h1>
-        <div className="flex gap-2 mb-2">
-          <span className="font-bold border border-black bg-[#d4d0c8] px-1 flex items-center gap-1"><span className="w-2 h-2 bg-black inline-block"></span>{STATUS_LABELS[service.status] || service.status}</span>
-          <span className="font-bold border border-black bg-[#d4d0c8] px-1 flex items-center gap-1"><span className="w-2 h-2 bg-black inline-block"></span>{service.paymentStatus}</span>
-        </div>
+          {/* Toolbar area */}
+          <div className="flex justify-between items-center p-2 border-b border-gray-400">
+             <div className="flex items-center gap-3">
+               <span className="border border-black bg-[#c0c0c0] px-1 shadow-[inset_1px_1px_0px_#fff,inset_-1px_-1px_0px_#888] font-bold">REF: #{service.id.slice(-6).toUpperCase()}</span>
+               <span className="border border-black bg-[#c0c0c0] px-1 shadow-[inset_1px_1px_0px_#fff,inset_-1px_-1px_0px_#888] font-bold">{formatDate(service.createdAt)}</span>
+             </div>
+             <div className="flex gap-2">
+               <button onClick={handlePrintToken} className="bg-[#c0c0c0] px-2 py-0.5 flex items-center gap-1 border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white">
+                 <Printer size={12} /> Print Slip
+               </button>
+               <button onClick={handleGenerateInvoice} disabled={isGeneratingInvoice} className="bg-[#c0c0c0] px-2 py-0.5 flex items-center gap-1 border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white">
+                 <FileText size={12} /> 1-Click Invoice
+               </button>
+             </div>
+          </div>
 
-        {/* Main Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-0 border-t-2 border-gray-400 pt-2">
-          
-          {/* Left Sidebar */}
-          <div className="md:border-r-2 md:border-gray-400 p-2 space-y-4">
-            
-            {/* Customer Details */}
-            <div>
-              <h2 className="text-[#89a2cc] font-black uppercase text-sm mb-1 tracking-tight">CUSTOMER DETAILS</h2>
-              <Link href={`/customers/${service.customer.id}`} className="text-[#3b5998] font-bold text-lg hover:underline block leading-tight">
-                {service.customer.name.toUpperCase()}
-              </Link>
-              <div className="text-gray-600 flex items-center gap-1 mt-1">
-                <Phone size={12} /> {service.customer.mobile}
-              </div>
+          <div className="p-3">
+            <div className="flex gap-2 mb-3">
+              <span className="border border-gray-500 border-b-white border-r-white px-2 py-1 bg-[#c0c0c0] flex items-center gap-1 font-bold shadow-sm"><span className="w-2 h-2 bg-black inline-block"></span>{STATUS_LABELS[service.status] || service.status}</span>
+              <span className="border border-gray-500 border-b-white border-r-white px-2 py-1 bg-[#c0c0c0] flex items-center gap-1 font-bold shadow-sm"><span className="w-2 h-2 bg-black inline-block"></span>{service.paymentStatus}</span>
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-4">
               
-              <button onClick={handleSendWhatsApp} className="mt-2 w-full bg-[#d4d0c8] px-2 py-1 flex justify-center items-center gap-1 font-bold border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white text-black">
-                <MessageCircle size={14} /> WhatsApp Update
-              </button>
-            </div>
-
-            {/* Profit Margin */}
-            <div className="bg-[#e6f4ea] border border-black p-2 relative">
-              <h2 className="text-[#2e7d32] font-black uppercase text-xs mb-2 flex items-center gap-1 tracking-tight">
-                <IndianRupee size={12} className="border border-black p-0.5" /> PROFIT MARGIN
-              </h2>
-              <div className="flex justify-between items-center mb-1">
-                <span className="font-bold text-[#2e7d32]">Customer Fees:</span>
-                <span className="font-bold border border-black px-1 bg-white">₹{fees || 0}</span>
-              </div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-bold text-[#2e7d32]">Vendor/Govt Cost:</span>
-                <span className="font-bold border border-black px-1 bg-white">-₹{vendorCost || 0}</span>
-              </div>
-              <div className="flex justify-between items-center bg-[#dcfce7] -mx-2 -mb-2 p-2 border-t border-black">
-                <span className="font-black text-[#2e7d32] uppercase">EST. PROFIT</span>
-                <span className="font-black text-xl border border-black px-1 bg-white tracking-tighter">₹{(Number(fees) || 0) - (Number(vendorCost) || 0)}</span>
-              </div>
-            </div>
-
-            {/* Customer Tracking */}
-            {service.trackingId && (
-              <div>
-                <h2 className="text-[#89a2cc] font-black uppercase text-xs mb-1 tracking-tight">CUSTOMER TRACKING</h2>
-                <div className="text-sm">Tracking ID: <span className="text-blue-600 font-bold">{service.trackingId}</span></div>
-                <div className="flex gap-2 mt-2">
-                  <button onClick={() => {
-                    navigator.clipboard.writeText(`${window.location.origin}/track/${service.trackingId}`);
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 2000);
-                    toast.success("Link copied");
-                  }} className="flex-1 bg-[#d4d0c8] px-1 py-1 flex justify-center items-center gap-1 font-bold border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white">
-                    {copied ? <Check size={12} /> : <Copy size={12} />} Copy Link
-                  </button>
-                  <Link href={`/track/${service.trackingId}`} target="_blank" className="flex-1 bg-[#d4d0c8] px-1 py-1 flex justify-center items-center gap-1 font-bold border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white text-black">
-                    <ExternalLink size={12} /> View Portal
+              {/* Left Column */}
+              <div className="space-y-3">
+                <fieldset className="border-t border-l border-gray-500 border-b border-r border-white p-2">
+                  <legend className="px-1 text-[#0000aa] font-bold -ml-1">Customer Details</legend>
+                  <Link href={`/customers/${service.customer.id}`} className="text-black font-bold hover:underline block leading-tight text-sm">
+                    {service.customer.name.toUpperCase()}
                   </Link>
-                </div>
-              </div>
-            )}
-            
-            {/* Action Required */}
-            {status === "PENDING" && missingDocs && (
-              <div>
-                <h2 className="text-red-500 font-black uppercase text-xs mb-1 tracking-tight bg-[#d4d0c8] border-b border-t border-gray-400 py-0.5 flex items-center gap-1">
-                  <AlertCircle size={12} className="text-red-500 fill-white" /> MISSING DOCUMENTS
-                </h2>
-                <button onClick={() => {
-                   if (!service?.customer?.mobile) return;
-                   const msg = encodeURIComponent(`Namaste ${service.customer.name},\n\nAapka service request (${service.serviceType}) abhi ruka hua hai kyunki kuch documents missing hain:\n\n*${missingDocs}*\n\nKripya jaldi bhejein taaki kaam aage badh sake.\n- RA Seva Point`);
-                   window.open(`https://wa.me/91${service.customer.mobile.replace(/\D/g, '').slice(-10)}?text=${msg}`, '_blank');
-                }} className="w-full mt-1 bg-[#d4d0c8] px-2 py-1 flex justify-center items-center gap-1 font-bold border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white text-black">
-                  <MessageCircle size={12} /> Send Auto-Reminder
-                </button>
-              </div>
-            )}
-
-            {/* Service Info */}
-            <div>
-              <h2 className="text-[#89a2cc] font-black uppercase text-xs mb-1 tracking-tight">SERVICE INFO</h2>
-              <div className="flex justify-between text-[#3b5998]">
-                <span>Service Fee:</span>
-                <span className="font-bold font-mono text-black text-sm">₹{fees || 0}</span>
-              </div>
-              <div className="flex justify-between text-[#3b5998]">
-                <span>Payment Mode:</span>
-                <span className="font-bold uppercase text-black">{paymentMode}</span>
-              </div>
-              <div className="flex justify-between text-[#3b5998]">
-                <span>Assigned To:</span>
-                <span className="font-bold text-black">{service.assignedTo?.name || "RA Seva Admin"}</span>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right Content */}
-          <div className="p-2 md:pl-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="border border-black p-1 bg-[#d4d0c8]">
-                <Settings size={18} />
-              </div>
-              <h2 className="text-[#1a3673] font-bold text-xl tracking-tight">Service Configuration</h2>
-            </div>
-            
-            <form onSubmit={handleUpdate} className="space-y-3">
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="font-bold text-[#1a3673] block mb-1">Workflow Status</label>
-                  <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-1 px-1 focus:outline-none h-[28px]">
-                    <option value="PENDING">Pending</option>
-                    <option value="SUBMITTED">Submitted</option>
-                    <option value="PROCESSING">Processing</option>
-                    <option value="APPROVED">Approved</option>
-                    <option value="DELIVERED">Delivered</option>
-                    <option value="CANCELLED">Cancelled</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="font-bold text-[#1a3673] block mb-1">Payment Status</label>
-                  <select value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-1 px-1 focus:outline-none h-[28px]">
-                    <option value="UNPAID">Unpaid</option>
-                    <option value="PARTIAL">Partial</option>
-                    <option value="PAID">Paid</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="font-bold text-[#1a3673] block mb-1">Payment Mode</label>
-                  <select value={paymentMode} onChange={(e) => setPaymentMode(e.target.value)} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-1 px-1 focus:outline-none h-[28px]">
-                    <option value="CASH">Cash</option>
-                    <option value="UPI">UPI</option>
-                    <option value="CARD">Card / Debit</option>
-                    <option value="PENDING">Pending</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="font-bold text-[#1a3673] block mb-1">Fees Amount (₹)</label>
-                  <input type="number" value={fees} onChange={(e) => setFees(e.target.value === "" ? "" : parseFloat(e.target.value))} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-1 px-1 focus:outline-none h-[28px]" />
-                </div>
-              </div>
-              
-              <div>
-                <label className="font-bold text-[#1a3673] block mb-1">Required Document Checklist</label>
-                <div className="grid grid-cols-2 gap-0 border-t-black border-l-black border-b-white border-r-white border-[2px] bg-white">
-                  {["Aadhaar Card", "PAN Card", "Passport Photo", "Income Proof", "Caste Certificate", "Ration Card"].map((docName) => {
-                    const isChecked = requiredDocs.includes(docName);
-                    return (
-                      <div key={docName} onClick={() => toggleDoc(docName)} className="flex items-center gap-1 p-1 border-b border-r border-[#d4d0c8] hover:bg-[#d4d0c8] cursor-pointer">
-                        <input type="checkbox" checked={isChecked} onChange={() => {}} className="pointer-events-none w-3 h-3" />
-                        <span>{docName}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="flex mt-1">
-                  <input type="text" value={newDocInput} onChange={(e) => setNewDocInput(e.target.value)} placeholder="Add custom required document..." className="flex-1 bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-1 px-1 focus:outline-none h-[28px]" onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); addCustomDoc(); } }} />
-                  <button type="button" onClick={addCustomDoc} className="ml-1 bg-[#d4d0c8] px-3 font-bold border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white flex items-center gap-1">
-                    <Plus size={12} /> Add Doc
+                  <div className="flex items-center gap-1 mt-1 text-gray-800">
+                    <Phone size={10} /> {service.customer.mobile}
+                  </div>
+                  <button onClick={handleSendWhatsApp} className="mt-3 w-full bg-[#c0c0c0] py-0.5 flex justify-center items-center gap-1 border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white text-black font-bold">
+                    <MessageCircle size={12} /> WhatsApp Update
                   </button>
-                </div>
-              </div>
+                </fieldset>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="font-bold text-[#1a3673] block mb-1">Expected Deadline</label>
-                  <input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-1 px-1 focus:outline-none h-[28px]" />
-                </div>
-                <div>
-                  <label className="font-bold text-[#1a3673] block mb-1">Govt. Ref / ARN Number</label>
-                  <input type="text" value={referenceNo} onChange={(e) => setReferenceNo(e.target.value)} placeholder="e.g. 15-digit ARN" className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-1 px-1 focus:outline-none h-[28px]" />
-                </div>
-              </div>
+                <fieldset className="border-t border-l border-gray-500 border-b border-r border-white p-2">
+                  <legend className="px-1 text-[#0000aa] font-bold -ml-1 flex items-center gap-1"><IndianRupee size={10} /> Profit Margin</legend>
+                  <div className="flex justify-between items-center mb-1">
+                    <span>Customer Fees:</span>
+                    <span className="border-t-black border-l-black border-b-white border-r-white border-[2px] px-1 bg-white">₹{fees || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <span>Vendor Cost:</span>
+                    <span className="border-t-black border-l-black border-b-white border-r-white border-[2px] px-1 bg-white text-red-600">-₹{vendorCost || 0}</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-2 pt-1 border-t border-gray-500 border-b border-white">
+                    <span className="font-bold">Est. Profit:</span>
+                    <span className="font-bold text-sm bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] px-1 text-[#0000aa]">₹{(Number(fees) || 0) - (Number(vendorCost) || 0)}</span>
+                  </div>
+                </fieldset>
 
-              <div>
-                <label className="font-bold text-[#1a3673] block mb-1">Assign to Vendor (Outsource)</label>
-                <select value={vendorId} onChange={(e) => setVendorId(e.target.value)} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-1 px-1 focus:outline-none h-[28px]">
-                  <option value="">-- No Vendor (Self) --</option>
-                  {vendors.map((v) => (
-                    <option key={v.id} value={v.id}>{v.name} {v.company ? `(${v.company})` : ""}</option>
-                  ))}
-                </select>
-              </div>
-
-              {vendorId && (
-                <div>
-                  <label className="font-bold text-[#1a3673] block mb-1">Vendor Cost (₹)</label>
-                  <input type="number" value={vendorCost} onChange={(e) => setVendorCost(e.target.value === "" ? "" : parseFloat(e.target.value))} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-1 px-1 focus:outline-none text-red-600 h-[28px]" />
-                </div>
-              )}
-
-              <div>
-                <label className="font-bold text-[#1a3673] mb-1 flex items-center gap-1">
-                  <input type="checkbox" className="mr-1 w-3 h-3" defaultChecked />
-                  Service Task Checklist
-                </label>
-                <div className="space-y-1 ml-4 border-l-2 border-[#d4d0c8] pl-2 py-1">
-                  {tasks.map((task, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <input type="checkbox" checked={task.completed} onChange={() => { const newTasks = [...tasks]; newTasks[idx].completed = !newTasks[idx].completed; setTasks(newTasks); }} className="w-3 h-3" />
-                      <span className={`flex-1 ${task.completed ? "line-through text-gray-500" : ""}`}>{task.title}</span>
-                      <button type="button" onClick={() => setTasks(tasks.filter((_, i) => i !== idx))} className="text-red-600 font-bold px-1.5 py-0.5 border-t-white border-l-white border-b-black border-r-black border-[2px] bg-[#d4d0c8] active:border-t-black active:border-l-black active:border-b-white active:border-r-white leading-none">X</button>
+                {service.trackingId && (
+                  <fieldset className="border-t border-l border-gray-500 border-b border-r border-white p-2">
+                    <legend className="px-1 text-[#0000aa] font-bold -ml-1">Tracking</legend>
+                    <div className="mb-2">ID: <span className="font-bold text-black">{service.trackingId}</span></div>
+                    <div className="flex gap-2">
+                      <button onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/track/${service.trackingId}`);
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                        toast.success("Link copied");
+                      }} className="flex-1 bg-[#c0c0c0] py-0.5 flex justify-center items-center gap-1 border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white">
+                        {copied ? <Check size={10} /> : <Copy size={10} />} Copy
+                      </button>
+                      <Link href={`/track/${service.trackingId}`} target="_blank" className="flex-1 bg-[#c0c0c0] py-0.5 flex justify-center items-center gap-1 border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white">
+                        <ExternalLink size={10} /> View
+                      </Link>
                     </div>
-                  ))}
-                </div>
-                <div className="flex mt-1">
-                  <input type="text" value={newTaskInput} onChange={(e) => setNewTaskInput(e.target.value)} placeholder="Add a new task (e.g. Scan docs)..." className="flex-1 bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-1 px-1 focus:outline-none h-[28px]" onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (newTaskInput.trim()) { setTasks([...tasks, { title: newTaskInput.trim(), completed: false }]); setNewTaskInput(""); } } }} />
-                  <button type="button" onClick={() => { if (newTaskInput.trim()) { setTasks([...tasks, { title: newTaskInput.trim(), completed: false }]); setNewTaskInput(""); } }} className="ml-1 bg-[#d4d0c8] px-3 font-bold border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white flex items-center gap-1">
-                    <Plus size={12} /> Add
-                  </button>
-                </div>
+                  </fieldset>
+                )}
+
+                {status === "PENDING" && missingDocs && (
+                  <fieldset className="border-t border-l border-gray-500 border-b border-r border-white p-2 bg-[#d4d0c8]">
+                    <legend className="px-1 text-red-700 font-bold -ml-1 flex items-center gap-1"><AlertCircle size={10} /> Missing Docs</legend>
+                    <button onClick={() => {
+                       if (!service?.customer?.mobile) return;
+                       const msg = encodeURIComponent(`Namaste ${service.customer.name},\n\nAapka service request (${service.serviceType}) abhi ruka hua hai kyunki kuch documents missing hain:\n\n*${missingDocs}*\n\nKripya jaldi bhejein taaki kaam aage badh sake.\n- RA Seva Point`);
+                       window.open(`https://wa.me/91${service.customer.mobile.replace(/\D/g, '').slice(-10)}?text=${msg}`, '_blank');
+                    }} className="w-full mt-1 bg-[#c0c0c0] py-0.5 flex justify-center items-center gap-1 border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white text-black font-bold">
+                      <MessageCircle size={10} /> Send Reminder
+                    </button>
+                  </fieldset>
+                )}
+                
+                <fieldset className="border-t border-l border-gray-500 border-b border-r border-white p-2">
+                  <legend className="px-1 text-[#0000aa] font-bold -ml-1">Service Info</legend>
+                  <div className="flex justify-between">
+                    <span>Fee:</span>
+                    <span>₹{fees || 0}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Mode:</span>
+                    <span>{paymentMode}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Assignee:</span>
+                    <span>{service.assignedTo?.name || "Admin"}</span>
+                  </div>
+                </fieldset>
               </div>
 
+              {/* Right Column */}
               <div>
-                <label className="font-bold text-[#1a3673] block mb-1">Missing Documents (If any)</label>
-                <textarea value={missingDocs} onChange={(e) => setMissingDocs(e.target.value)} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-1 px-1 focus:outline-none text-red-600 font-bold" rows={2}></textarea>
+                <fieldset className="border-t border-l border-gray-500 border-b border-r border-white p-3 h-full">
+                  <legend className="px-1 text-[#0000aa] font-bold flex items-center gap-1 mx-auto text-sm pb-1">
+                    <Settings size={14} /> Service Configuration
+                  </legend>
+                  
+                  <form onSubmit={handleUpdate} className="space-y-4 mt-2">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col">
+                        <label className="mb-1 font-bold">Workflow Status:</label>
+                        <select value={status} onChange={(e) => setStatus(e.target.value)} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-0.5 px-1 focus:outline-none">
+                          <option value="PENDING">Pending</option>
+                          <option value="SUBMITTED">Submitted</option>
+                          <option value="PROCESSING">Processing</option>
+                          <option value="APPROVED">Approved</option>
+                          <option value="DELIVERED">Delivered</option>
+                          <option value="CANCELLED">Cancelled</option>
+                        </select>
+                      </div>
+                      
+                      <div className="flex flex-col">
+                        <label className="mb-1 font-bold">Payment Status:</label>
+                        <select value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-0.5 px-1 focus:outline-none">
+                          <option value="UNPAID">Unpaid</option>
+                          <option value="PARTIAL">Partial</option>
+                          <option value="PAID">Paid</option>
+                        </select>
+                      </div>
+
+                      <div className="flex flex-col">
+                        <label className="mb-1 font-bold">Payment Mode:</label>
+                        <select value={paymentMode} onChange={(e) => setPaymentMode(e.target.value)} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-0.5 px-1 focus:outline-none">
+                          <option value="CASH">Cash</option>
+                          <option value="UPI">UPI</option>
+                          <option value="CARD">Card / Debit</option>
+                          <option value="PENDING">Pending</option>
+                        </select>
+                      </div>
+                      
+                      <div className="flex flex-col">
+                        <label className="mb-1 font-bold">Fees Amount (₹):</label>
+                        <input type="number" value={fees} onChange={(e) => setFees(e.target.value === "" ? "" : parseFloat(e.target.value))} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-0.5 px-1 focus:outline-none" />
+                      </div>
+                    </div>
+
+                    <fieldset className="border-t border-l border-gray-500 border-b border-r border-white p-2">
+                      <legend className="px-1 text-black font-bold -ml-1">Required Documents</legend>
+                      <div className="grid grid-cols-2 gap-0 border-t-black border-l-black border-b-white border-r-white border-[2px] bg-white max-h-32 overflow-y-auto p-1 mb-2">
+                        {["Aadhaar Card", "PAN Card", "Passport Photo", "Income Proof", "Caste Certificate", "Ration Card"].map((docName) => {
+                          const isChecked = requiredDocs.includes(docName);
+                          return (
+                            <div key={docName} onClick={() => toggleDoc(docName)} className="flex items-center gap-1 p-0.5 hover:bg-[#0000aa] hover:text-white cursor-pointer select-none">
+                              <input type="checkbox" checked={isChecked} onChange={() => {}} className="pointer-events-none w-3 h-3" />
+                              <span className="truncate">{docName}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="flex gap-1">
+                        <input type="text" value={newDocInput} onChange={(e) => setNewDocInput(e.target.value)} placeholder="Add custom doc..." className="flex-1 bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-0.5 px-1 focus:outline-none" onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); addCustomDoc(); } }} />
+                        <button type="button" onClick={addCustomDoc} className="bg-[#c0c0c0] px-3 font-bold border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white flex items-center gap-1">
+                          <Plus size={10} /> Add
+                        </button>
+                      </div>
+                    </fieldset>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col">
+                        <label className="mb-1 font-bold">Expected Deadline:</label>
+                        <input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-0.5 px-1 focus:outline-none" />
+                      </div>
+                      
+                      <div className="flex flex-col">
+                        <label className="mb-1 font-bold">Govt. Ref / ARN Number:</label>
+                        <input type="text" value={referenceNo} onChange={(e) => setReferenceNo(e.target.value)} placeholder="e.g. 15-digit ARN" className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-0.5 px-1 focus:outline-none" />
+                      </div>
+                    </div>
+
+                    <fieldset className="border-t border-l border-gray-500 border-b border-r border-white p-2">
+                      <legend className="px-1 text-black font-bold -ml-1">Outsource to Vendor</legend>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col">
+                          <label className="mb-1">Select Vendor:</label>
+                          <select value={vendorId} onChange={(e) => setVendorId(e.target.value)} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-0.5 px-1 focus:outline-none">
+                            <option value="">-- No Vendor (Self) --</option>
+                            {vendors.map((v) => (
+                              <option key={v.id} value={v.id}>{v.name}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="flex flex-col">
+                          <label className="mb-1 text-red-700">Vendor Cost (₹):</label>
+                          <input type="number" value={vendorCost} onChange={(e) => setVendorCost(e.target.value === "" ? "" : parseFloat(e.target.value))} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-0.5 px-1 focus:outline-none text-red-700 font-bold" disabled={!vendorId} />
+                        </div>
+                      </div>
+                    </fieldset>
+
+                    <fieldset className="border-t border-l border-gray-500 border-b border-r border-white p-2">
+                      <legend className="px-1 text-black font-bold -ml-1">Service Tasks Check</legend>
+                      <div className="space-y-1 bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] p-1 h-24 overflow-y-auto mb-2">
+                        {tasks.map((task, idx) => (
+                          <div key={idx} className="flex items-center gap-1 hover:bg-[#0000aa] hover:text-white group p-0.5">
+                            <input type="checkbox" checked={task.completed} onChange={() => { const newTasks = [...tasks]; newTasks[idx].completed = !newTasks[idx].completed; setTasks(newTasks); }} className="w-3 h-3" />
+                            <span className={`flex-1 truncate ${task.completed ? "line-through text-gray-500 group-hover:text-gray-300" : ""}`}>{task.title}</span>
+                            <button type="button" onClick={() => setTasks(tasks.filter((_, i) => i !== idx))} className="text-black group-hover:text-white px-1 leading-none font-bold">x</button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex gap-1">
+                        <input type="text" value={newTaskInput} onChange={(e) => setNewTaskInput(e.target.value)} placeholder="Add a new task..." className="flex-1 bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-0.5 px-1 focus:outline-none" onKeyDown={(e) => { if(e.key === 'Enter') { e.preventDefault(); if (newTaskInput.trim()) { setTasks([...tasks, { title: newTaskInput.trim(), completed: false }]); setNewTaskInput(""); } } }} />
+                        <button type="button" onClick={() => { if (newTaskInput.trim()) { setTasks([...tasks, { title: newTaskInput.trim(), completed: false }]); setNewTaskInput(""); } }} className="bg-[#c0c0c0] px-3 font-bold border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white flex items-center gap-1">
+                          <Plus size={10} /> Add Task
+                        </button>
+                      </div>
+                    </fieldset>
+
+                    <div className="flex flex-col">
+                      <label className="mb-1 font-bold text-red-700">Missing Documents (If any):</label>
+                      <textarea value={missingDocs} onChange={(e) => setMissingDocs(e.target.value)} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-0.5 px-1 focus:outline-none text-red-700 font-bold" rows={2}></textarea>
+                    </div>
+
+                    <div className="flex flex-col">
+                      <label className="mb-1 font-bold">Notes / Instructions:</label>
+                      <textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-0.5 px-1 focus:outline-none" rows={2}></textarea>
+                    </div>
+
+                    <div className="flex justify-between items-center pt-2 mt-4">
+                      <button type="button" onClick={handleDelete} disabled={deleting} className="bg-[#c0c0c0] text-black font-bold px-4 py-1.5 flex items-center gap-1 border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white">
+                        {deleting ? <Loader2 size={12} className="animate-spin" /> : null} Delete
+                      </button>
+                      
+                      <div className="flex gap-3">
+                         <button type="button" onClick={() => window.history.back()} className="bg-[#c0c0c0] text-black font-bold px-4 py-1.5 flex items-center gap-1 border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white">
+                           Cancel
+                         </button>
+                         <button type="submit" disabled={saving} className="bg-[#c0c0c0] text-black font-bold px-8 py-1.5 flex items-center gap-2 border-t-white border-l-white border-b-black border-r-black border-[3px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white border-black ring-1 ring-black ring-inset shadow-[1px_1px_0px_#fff_inset]">
+                           {saving ? <Loader2 size={12} className="animate-spin" /> : null} Save Updates
+                         </button>
+                      </div>
+                    </div>
+
+                  </form>
+                </fieldset>
               </div>
 
-              <div>
-                <label className="font-bold text-[#1a3673] block mb-1">Notes / Instructions</label>
-                <textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] py-1 px-1 focus:outline-none" rows={2}></textarea>
-              </div>
-
-              <div className="flex justify-between items-center pt-2 mt-4 border-t-2 border-gray-400">
-                <button type="button" onClick={handleDelete} disabled={deleting} className="bg-[#d4d0c8] text-red-600 px-4 py-1 flex items-center gap-1 font-bold border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white">
-                  {deleting ? <Loader2 size={12} className="animate-spin" /> : <Trash2 size={12} />} Delete
-                </button>
-                <button type="submit" disabled={saving} className="bg-[#d4d0c8] px-6 py-1 flex items-center gap-1 font-black border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white">
-                  {saving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />} Save Updates
-                </button>
-              </div>
-
-            </form>
+            </div>
           </div>
-
         </div>
+      </div>
 
       </div>
     </div>
