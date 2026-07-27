@@ -65,14 +65,28 @@ const T = {
   }
 };
 
-// Hardcoded price map (fallback if service master unavailable)
+const SERVICES = [
+  'Aadhaar Print', 'PAN Card', 'Voter ID', 'Passport', 'Driving License',
+  'Income Certificate', 'Caste Certificate', 'Birth Certificate',
+  'Police Clearance', 'Flight Ticket', 'Train Ticket', 'Money Transfer'
+];
+
 const PRICE_MAP: Record<string, string> = {
-  "Aadhaar PVC Card": "₹80",
-  "PAN Card": "₹110",
-  "Passport Photo": "₹50",
-  "Photocopy / Print": "₹2/page",
-  "Document Scan": "₹10",
-  "Form Filling": "₹50",
+  'Aadhaar Print': '₹50',
+  'PAN Card': '₹200',
+  'Voter ID': '₹100',
+  'Passport': '₹1500',
+  'Income Certificate': '₹150',
+  'Caste Certificate': '₹150'
+};
+
+const REQUIRED_DOCS_MAP: Record<string, string[]> = {
+  'PAN Card': ['Aadhaar Front', 'Aadhaar Back', 'Passport Photo'],
+  'Aadhaar Print': ['Aadhaar Slip / Enrollment'],
+  'Passport': ['Aadhaar Card', 'PAN Card', '10th Marksheet'],
+  'Income Certificate': ['Aadhaar Card', 'Ration Card', 'Photo'],
+  'Caste Certificate': ['Aadhaar Card', 'Ration Card', 'Old Certificate'],
+  'Voter ID': ['Aadhaar Card', 'Photo']
 };
 
 export default function KioskPage() {
@@ -165,20 +179,32 @@ export default function KioskPage() {
     setStep(1); setMobile(''); setName(''); setNameFound(false);
     setTicket(''); setTokenLabel(''); setErrorMsg('');
     setUploadedCount(0);
+    setUploadedDocs([]);
   };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [uploadedDocs, setUploadedDocs] = useState<string[]>([]);
+
+  const handleUpload = async (docName: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !ticket) return;
     setUploadingDoc(true);
     try {
       const fd = new FormData();
-      fd.append('file', file);
+      // Rename file to include the specific doc name
+      const prefix = docName === 'Generic' ? 'Doc' : docName.replace(/\s+/g, '_');
+      const ext = file.name.split('.').pop();
+      const newFile = new File([file], `${prefix}_${Date.now()}.${ext}`, { type: file.type });
+      
+      fd.append('file', newFile);
       fd.append('trackingId', ticket);
       const res = await fetch('/api/kiosk/upload', { method: 'POST', body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Upload failed');
+      
       setUploadedCount(c => c + 1);
+      if (docName !== 'Generic') {
+        setUploadedDocs(prev => [...prev, docName]);
+      }
     } catch (err: any) {
       alert(err.message);
     } finally {
@@ -375,19 +401,39 @@ export default function KioskPage() {
 
               {/* Upload Documents Section */}
               <fieldset style={{ border: '2px groove #c0c0c0', padding: '10px' }}>
-                <legend style={{ fontFamily: 'Tahoma', fontSize: '12px', padding: '0 4px', color: '#000080', fontWeight: 'bold' }}>📎 {lang === 'en' ? 'Upload Documents (Optional)' : 'दस्तावेज़ अपलोड करें'}</legend>
+                <legend style={{ fontFamily: 'Tahoma', fontSize: '12px', padding: '0 4px', color: '#000080', fontWeight: 'bold' }}>📎 {lang === 'en' ? 'Required Documents' : 'आवश्यक दस्तावेज़'}</legend>
                 <div style={{ fontSize: '11px', color: '#444', marginBottom: '8px', textAlign: 'center' }}>
-                  {lang === 'en' ? 'Save time! Upload required documents like Aadhaar/PAN from your phone while you wait.' : 'समय बचाएं! अपनी बारी का इंतज़ार करते हुए मोबाइल से दस्तावेज़ अपलोड करें।'}
+                  {lang === 'en' ? 'Save time! Upload these documents from your phone while you wait.' : 'समय बचाएं! अपनी बारी का इंतज़ार करते हुए दस्तावेज़ अपलोड करें।'}
                 </div>
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <input type="file" id="kiosk-upload" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleUpload} />
-                  <button type="button" onClick={() => document.getElementById('kiosk-upload')?.click()} disabled={uploadingDoc}
-                    style={{ ...btn, background: '#0a246a', color: 'white', padding: '10px', fontSize: '14px', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                    {uploadingDoc ? <Loader2 size={16} className="animate-spin" /> : '📸'}
-                    {uploadingDoc ? (lang === 'en' ? 'Uploading...' : 'अपलोड हो रहा है...') : (lang === 'en' ? 'Take Photo or Upload' : 'फोटो लें या अपलोड करें')}
-                  </button>
-                  {uploadedCount > 0 && (
+                  
+                  {REQUIRED_DOCS_MAP[serviceType] ? (
+                    REQUIRED_DOCS_MAP[serviceType].map((doc, idx) => {
+                      const isUploaded = uploadedDocs.includes(doc);
+                      return (
+                        <div key={idx}>
+                          <input type="file" id={`upload-${idx}`} accept="image/*" capture="environment" style={{ display: 'none' }} onChange={(e) => handleUpload(doc, e)} />
+                          <button type="button" onClick={() => document.getElementById(`upload-${idx}`)?.click()} disabled={uploadingDoc || isUploaded}
+                            style={{ ...btn, background: isUploaded ? '#d4edda' : '#0a246a', color: isUploaded ? '#155724' : 'white', padding: '8px', fontSize: '13px', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span>{uploadingDoc ? (lang === 'en' ? 'Uploading...' : 'अपलोड हो रहा है...') : `📸 ${doc}`}</span>
+                            {isUploaded && <span style={{ fontWeight: 'bold' }}>✓ Done</span>}
+                          </button>
+                        </div>
+                      )
+                    })
+                  ) : (
+                    <>
+                      <input type="file" id="kiosk-upload" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={(e) => handleUpload('Generic', e)} />
+                      <button type="button" onClick={() => document.getElementById('kiosk-upload')?.click()} disabled={uploadingDoc}
+                        style={{ ...btn, background: '#0a246a', color: 'white', padding: '10px', fontSize: '14px', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                        {uploadingDoc ? <Loader2 size={16} className="animate-spin" /> : '📸'}
+                        {uploadingDoc ? (lang === 'en' ? 'Uploading...' : 'अपलोड हो रहा है...') : (lang === 'en' ? 'Take Photo or Upload' : 'फोटो लें या अपलोड करें')}
+                      </button>
+                    </>
+                  )}
+
+                  {uploadedCount > 0 && !REQUIRED_DOCS_MAP[serviceType] && (
                     <div style={{ background: '#d4edda', border: '1px solid #c3e6cb', color: '#155724', padding: '6px', fontSize: '11px', textAlign: 'center', fontWeight: 'bold' }}>
                       ✓ {uploadedCount} {lang === 'en' ? 'Document(s) uploaded successfully!' : 'दस्तावेज़ सफलतापूर्वक अपलोड हुए!'}
                     </div>

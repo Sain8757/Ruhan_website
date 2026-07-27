@@ -205,6 +205,14 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
     setShowWATemplates(false);
   };
 
+  const sendMissingDocsWA = () => {
+    if (!service?.customer?.mobile) { toast.error("No mobile number"); return; }
+    if (!missingDocs.trim()) { toast.error("Please type the missing document name first"); return; }
+    const link = `${window.location.origin}/status`;
+    const text = `Hello ${service.customer.name},\nAapke ${serviceType} application me '${missingDocs}' missing hai.\nKripya is link par jayen aur ghar baithe upload karein:\n\n🔗 ${link}\n\nMobile No: ${service.customer.mobile}\nTracking ID: ${service.trackingId}\n\nThank you,\nRA Seva Point`;
+    window.open(`https://wa.me/91${service.customer.mobile.replace(/\D/g,"").slice(-10)}?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
   const handleSync = async () => {
     if (!serviceId) return;
     toast.info("Connecting to Govt API...");
@@ -619,9 +627,14 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
 
                         {/* Missing Docs + Notes */}
                         <div>
-                          <label style={{ fontSize:"11px",fontWeight:"bold",color:"#b30000",display:"flex",alignItems:"center",gap:"4px",marginBottom:"3px" }}>
-                            <AlertTriangle size={11}/> Missing Documents (If any):
-                          </label>
+                          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"3px" }}>
+                            <label style={{ fontSize:"11px",fontWeight:"bold",color:"#b30000",display:"flex",alignItems:"center",gap:"4px" }}>
+                              <AlertTriangle size={11}/> Missing Documents (If any):
+                            </label>
+                            <button type="button" onClick={sendMissingDocsWA} style={{ ...Btn(), fontSize:"10px", padding:"2px 6px", background:"#25D366", color:"white", borderColor:"#1da851" }}>
+                              📱 WhatsApp Request
+                            </button>
+                          </div>
                           <textarea style={{ ...Inp(),resize:"vertical",minHeight:"36px" }} value={missingDocs} onChange={e => setMissingDocs(e.target.value)} placeholder="List missing documents..." />
                         </div>
                         <div>
