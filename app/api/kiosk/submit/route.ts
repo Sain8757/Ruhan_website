@@ -34,6 +34,14 @@ export async function POST(request: Request) {
     const nextTokenNumber = (lastToken?.tokenNumber || 0) + 1;
     const trackingId = generateTrackingId();
 
+    // Fetch Service Master Data
+    const master = await prisma.inventoryItem.findFirst({
+      where: {
+        category: 'Service',
+        name: serviceType
+      }
+    });
+
     // Create Service Request
     const service = await prisma.service.create({
       data: {
@@ -43,6 +51,8 @@ export async function POST(request: Request) {
         tokenNumber: nextTokenNumber,
         isKioskRequest: true,
         status: 'PENDING',
+        fees: master?.sellingPrice || 0,
+        requiredDocs: master?.requiredDocs || [],
         notes: 'Submitted via Kiosk QR'
       }
     });

@@ -51,15 +51,32 @@ export default function NewServiceDialog({ isOpen, onClose, onSuccess }: NewServ
     }
   }, [isOpen]);
 
-  const applyServicePreset = (serviceType: string) => {
+  const applyServicePreset = async (serviceType: string) => {
     const preset = findCatalogItem(serviceType);
+    let masterFee = preset ? String(preset.fee) : "";
+    let masterDocs = preset ? preset.documents : [];
+    
+    try {
+      const res = await fetch(`/api/inventory?q=${encodeURIComponent(serviceType)}&type=service`);
+      if (res.ok) {
+        const data = await res.json();
+        const master = data.find((item: any) => item.name === serviceType);
+        if (master) {
+          masterFee = String(master.sellingPrice);
+          masterDocs = master.requiredDocs || [];
+        }
+      }
+    } catch (e) {
+      console.error("Failed to fetch service master", e);
+    }
+
     setForm((current) => {
       const replacedMessage = preset ? preset.message.replace(/{name}/g, selectedCustomer ? selectedCustomer.name : '{name}') : '';
       return {
         ...current,
         serviceType,
-        fees: preset ? String(preset.fee) : current.fees,
-        requiredDocs: preset ? preset.documents : current.requiredDocs,
+        fees: masterFee || current.fees,
+        requiredDocs: masterDocs.length > 0 ? masterDocs : current.requiredDocs,
         notes: preset
           ? `${replacedMessage}\nEstimated time: ${preset.estimate}${preset.portal ? `\nPortal: ${preset.portal}` : ""}`
           : current.notes,

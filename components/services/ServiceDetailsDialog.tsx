@@ -73,6 +73,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
   const [fees,          setFees]          = useState(0);
   const [notes,         setNotes]         = useState("");
   const [requiredDocs,  setRequiredDocs]  = useState<string[]>([]);
+  const [masterDocs,    setMasterDocs]    = useState<string[]>([]);
   const [customDoc,     setCustomDoc]     = useState("");
   const [deadline,      setDeadline]      = useState("");
   const [referenceNo,   setReferenceNo]   = useState("");
@@ -143,6 +144,23 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
           .then(r => r.json())
           .then(d => setRelatedServices((d.services || []).filter((s: any) => s.id !== data.id)))
           .catch(() => {});
+          
+        // Fetch Service Master Data
+        fetch(`/api/inventory?q=${encodeURIComponent(data.serviceType)}&type=service`)
+          .then(r => r.json())
+          .then(inv => {
+            const master = inv.find((item: any) => item.name === data.serviceType);
+            if (master) {
+              setMasterDocs(master.requiredDocs || []);
+              if (!data.fees || data.fees === 0) {
+                setFees(master.sellingPrice || 0);
+                setPayAmount(String(master.sellingPrice || 0));
+              }
+            } else {
+              setMasterDocs([]);
+            }
+          })
+          .catch(() => setMasterDocs([]));
       })
       .catch(err => { toast.error(err.message); onClose(); });
   }, [isOpen, serviceId]);
@@ -358,8 +376,22 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
     finally { setCollecting(false); }
   };
 
-  const toggleDoc  = (doc: string) => setRequiredDocs(p => p.includes(doc) ? p.filter(d => d !== doc) : [...p, doc]);
-  const addCustomDoc = () => { const d = customDoc.trim(); if (d && !requiredDocs.includes(d)) { setRequiredDocs(p => [...p, d]); setCustomDoc(""); } };
+  const isDocUploaded = (doc: string) => docUrls.some(url => decodeURIComponent(url).toLowerCase().includes(doc.toLowerCase()));
+  const toggleDoc = (doc: string) => {
+    if (isDocUploaded(doc)) { toast.info("Document is uploaded, can't be unchecked manually."); return; }
+    setRequiredDocs(p => {
+      if (p.includes(`[X] ${doc}`)) return p.filter(d => d !== `[X] ${doc}`).concat(doc);
+      if (p.includes(doc)) return p.filter(d => d !== doc).concat(`[X] ${doc}`);
+      return [...p, `[X] ${doc}`];
+    });
+  };
+  const addCustomDoc = () => { 
+    const d = customDoc.trim(); 
+    if (d && !requiredDocs.includes(d) && !requiredDocs.includes(`[X] ${d}`)) { 
+      setRequiredDocs(p => [...p, d]); 
+      setCustomDoc(""); 
+    } 
+  };
   const addTask    = () => { const t = newTask.trim(); if (t) { setTasks(p => [...p, {text:t,done:false}]); setNewTask(""); } };
   const toggleTask = (i: number) => setTasks(p => p.map((t,idx) => idx===i ? {...t,done:!t.done} : t));
   const toggleTag  = (tag: string) => setTags(p => p.includes(tag) ? p.filter(t => t !== tag) : [...p, tag]);
@@ -600,24 +632,26 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
 
                         {/* Required Docs */}
                         <div style={{ ...groove,padding:"8px",background:"#d4d0c8" }}>
-                          <SHead icon="📁" label="Required Documents" />
-                          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"2px 10px",marginBottom:"7px" }}>
-                            {COMMON_DOCS.map(doc => (
-                              <label key={doc} style={{ display:"flex",alignItems:"center",gap:"5px",fontSize:"11px",cursor:"pointer",padding:"2px 0" }}>
-                                <input type="checkbox" checked={requiredDocs.includes(doc)} onChange={() => toggleDoc(doc)} /> {doc}
-                              </label>
-                            ))}
+                          <SHead icon="📁" label="Required Documents Checklist" />
+                          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:"2px 10px",marginBottom:"7px" }}>
+                            {Array.from(new Set([...requiredDocs.map(d => d.replace("[X] ", "")), ...masterDocs])).map(doc => {
+                              const uploaded = isDocUploaded(doc);
+                              const manualChecked = requiredDocs.includes(`[X] ${doc}`);
+                              const isChecked = uploaded || manualChecked;
+                              return (
+                                <label key={doc} style={{ display:"flex",alignItems:"center",gap:"5px",fontSize:"11px",cursor:"pointer",padding:"2px 0",color: isChecked ? "#006600" : "inherit" }}>
+                                  <input type="checkbox" checked={isChecked} onChange={() => toggleDoc(doc)} /> 
+                                  <span style={{ textDecoration: isChecked ? "line-through" : "none" }}>{doc}</span>
+                                  {uploaded && <span title="Uploaded">✅</span>}
+                                </label>
+                              );
+                            })}
                           </div>
                           <div style={{ display:"flex",gap:"4px" }}>
-                            <input type="text" style={Inp({flex:1})} value={customDoc} onChange={e => setCustomDoc(e.target.value)} placeholder="Add custom doc..."
+                            <input type="text" style={Inp({flex:1})} value={customDoc} onChange={e => setCustomDoc(e.target.value)} placeholder="Add custom document..."
                               onKeyDown={e => { if(e.key==="Enter"){ e.preventDefault(); addCustomDoc(); }}} />
                             <button type="button" style={Btn()} onClick={addCustomDoc}>+ Add</button>
                           </div>
-                          {requiredDocs.filter(d => !COMMON_DOCS.includes(d)).map(d => (
-                            <span key={d} style={{ display:"inline-flex",alignItems:"center",gap:"4px",background:"#e8f0ff",border:"1px solid #93b4e8",padding:"1px 6px",fontSize:"11px",marginTop:"4px",marginRight:"4px" }}>
-                              {d}<button type="button" onClick={() => setRequiredDocs(p=>p.filter(x=>x!==d))} style={{ background:"none",border:"none",cursor:"pointer",color:"#cc0000",fontWeight:"bold",padding:0 }}>×</button>
-                            </span>
-                          ))}
                         </div>
 
                         {/* Deadline + ARN + Callback */}
