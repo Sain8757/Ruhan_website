@@ -905,15 +905,33 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
             </div>
             
             <div style={{ flex:1, background:"#000", display:"flex", alignItems:"center", justifyContent:"center", padding:"10px", overflow:"hidden", minHeight:"300px" }}>
-              <img src={previewImg} alt="Preview" style={{ maxWidth:"100%", maxHeight:"100%", objectFit:"contain" }} onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; toast.error('Failed to load image'); }} />
+              <img 
+                src={previewImg} 
+                alt="Preview" 
+                style={{ maxWidth:"100%", maxHeight:"100%", objectFit:"contain" }} 
+                onError={(e) => { 
+                  toast.error('Failed to load preview. Please use Download or View in New Tab.'); 
+                }} 
+              />
             </div>
             
-            <div style={{ padding:"10px", display:"flex", justifyContent:"center", gap:"15px" }}>
+            <div style={{ padding:"10px", display:"flex", justifyContent:"center", flexWrap: "wrap", gap:"10px", background:"#111" }}>
               <button onClick={() => setPreviewImg(null)} style={{ ...Btn(), padding:"6px 20px" }}>
                 Close
               </button>
               <button onClick={() => sendReuploadWA(previewImg)} style={{ ...Btn(), padding:"6px 16px", background:"#25D366", color:"white", border:"2px solid #1da851" }}>
-                📱 Request Re-upload on WhatsApp
+                📱 Request Re-upload
+              </button>
+              <button onClick={() => {
+                const parts = previewImg.split('/upload/');
+                const filename = decodeURIComponent(previewImg.split('/').pop() || 'document.jpg');
+                const dlUrl = parts.length === 2 ? `${parts[0]}/upload/fl_attachment:${filename}/${parts[1]}` : previewImg;
+                window.open(dlUrl, '_blank');
+              }} style={{ ...Btn(), padding:"6px 16px", background:"#1084d0", color:"white", border:"2px solid #000080" }}>
+                ⬇️ Download
+              </button>
+              <button onClick={() => window.open(previewImg, '_blank')} style={{ ...Btn(), padding:"6px 16px" }}>
+                ↗️ Open in New Tab
               </button>
             </div>
           </div>
