@@ -65,29 +65,13 @@ const T = {
   }
 };
 
-const SERVICES = [
+const DEFAULT_SERVICES = [
   'Aadhaar Print', 'PAN Card', 'Voter ID', 'Passport', 'Driving License',
-  'Income Certificate', 'Caste Certificate', 'Birth Certificate',
-  'Police Clearance', 'Flight Ticket', 'Train Ticket', 'Money Transfer'
+  'Income Certificate', 'Caste Certificate', 'Birth Certificate'
 ];
 
-const PRICE_MAP: Record<string, string> = {
-  'Aadhaar Print': '₹50',
-  'PAN Card': '₹200',
-  'Voter ID': '₹100',
-  'Passport': '₹1500',
-  'Income Certificate': '₹150',
-  'Caste Certificate': '₹150'
-};
-
-const REQUIRED_DOCS_MAP: Record<string, string[]> = {
-  'PAN Card': ['Aadhaar Front', 'Aadhaar Back', 'Passport Photo'],
-  'Aadhaar Print': ['Aadhaar Slip / Enrollment'],
-  'Passport': ['Aadhaar Card', 'PAN Card', '10th Marksheet'],
-  'Income Certificate': ['Aadhaar Card', 'Ration Card', 'Photo'],
-  'Caste Certificate': ['Aadhaar Card', 'Ration Card', 'Old Certificate'],
-  'Voter ID': ['Aadhaar Card', 'Photo']
-};
+const DEFAULT_PRICE_MAP: Record<string, string> = {};
+const DEFAULT_REQUIRED_DOCS_MAP: Record<string, string[]> = {};
 
 export default function KioskPage() {
   const [lang, setLang] = useState<'en' | 'hi'>('en');
@@ -98,7 +82,9 @@ export default function KioskPage() {
   const [name, setName] = useState('');
   const [lookingUp, setLookingUp] = useState(false);
   const [nameFound, setNameFound] = useState(false);
-  const [serviceType, setServiceType] = useState(SERVICE_TYPES[0]);
+  
+  const [availableServices, setAvailableServices] = useState<string[]>(DEFAULT_SERVICES);
+  const [serviceType, setServiceType] = useState(DEFAULT_SERVICES[0]);
   const [loading, setLoading] = useState(false);
   const [ticket, setTicket] = useState('');
   const [tokenLabel, setTokenLabel] = useState('');
@@ -108,7 +94,8 @@ export default function KioskPage() {
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [uploadedCount, setUploadedCount] = useState(0);
   const [errorMsg, setErrorMsg] = useState('');
-  const [prices, setPrices] = useState<Record<string, string>>(PRICE_MAP);
+  const [prices, setPrices] = useState<Record<string, string>>(DEFAULT_PRICE_MAP);
+  const [requiredDocsMap, setRequiredDocsMap] = useState<Record<string, string[]>>(DEFAULT_REQUIRED_DOCS_MAP);
 
   // Live clock
   const [time, setTime] = useState(new Date());
@@ -117,17 +104,32 @@ export default function KioskPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Fetch service prices from service master
+  // Fetch service list, prices, and required docs from inventory
   useEffect(() => {
-    fetch('/api/service-master')
+    fetch('/api/inventory?type=service')
       .then(r => r.json())
       .then(data => {
-        if (data && Array.isArray(data.serviceMasters)) {
-          const pm: Record<string, string> = { ...PRICE_MAP };
-          data.serviceMasters.forEach((s: any) => {
-            if (s.name && s.fee) pm[s.name] = `₹${s.fee}`;
+        if (data && Array.isArray(data)) {
+          const pm: Record<string, string> = {};
+          const rdm: Record<string, string[]> = {};
+          const sNames: string[] = [];
+          
+          data.forEach((s: any) => {
+            if (s.name) {
+              sNames.push(s.name);
+              pm[s.name] = `₹${s.sellingPrice || 0}`;
+              if (s.requiredDocs && Array.isArray(s.requiredDocs) && s.requiredDocs.length > 0) {
+                rdm[s.name] = s.requiredDocs;
+              }
+            }
           });
-          setPrices(pm);
+          
+          if (sNames.length > 0) {
+            setAvailableServices(sNames);
+            setServiceType(sNames[0]);
+            setPrices(pm);
+            setRequiredDocsMap(rdm);
+          }
         }
       })
       .catch(() => {});
@@ -345,7 +347,7 @@ export default function KioskPage() {
                       onChange={e => setServiceType(e.target.value)}
                       style={{ ...inset, padding: '4px 6px', fontFamily: 'Tahoma', fontSize: '13px', outline: 'none', background: 'white' }}
                     >
-                      {SERVICE_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
+                      {availableServices.map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </div>
 
@@ -408,8 +410,8 @@ export default function KioskPage() {
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   
-                  {REQUIRED_DOCS_MAP[serviceType] ? (
-                    REQUIRED_DOCS_MAP[serviceType].map((doc, idx) => {
+                  {requiredDocsMap[serviceType] ? (
+                    requiredDocsMap[serviceType].map((doc, idx) => {
                       const isUploaded = uploadedDocs.includes(doc);
                       return (
                         <div key={idx}>
@@ -433,7 +435,7 @@ export default function KioskPage() {
                     </>
                   )}
 
-                  {uploadedCount > 0 && !REQUIRED_DOCS_MAP[serviceType] && (
+                  {uploadedCount > 0 && !requiredDocsMap[serviceType] && (
                     <div style={{ background: '#d4edda', border: '1px solid #c3e6cb', color: '#155724', padding: '6px', fontSize: '11px', textAlign: 'center', fontWeight: 'bold' }}>
                       ✓ {uploadedCount} {lang === 'en' ? 'Document(s) uploaded successfully!' : 'दस्तावेज़ सफलतापूर्वक अपलोड हुए!'}
                     </div>

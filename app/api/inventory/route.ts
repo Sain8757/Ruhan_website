@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
       quantity: parseInt(body.quantity) || 0,
       minStock: parseInt(body.minStock) || 5,
       unit: body.unit || "piece",
+      requiredDocs: body.requiredDocs || [],
     },
   });
 

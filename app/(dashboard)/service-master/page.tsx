@@ -15,6 +15,7 @@ interface InventoryItem {
   quantity: number;
   minStock: number;
   unit: string;
+  requiredDocs: string[];
 }
 
 export default function ServiceMasterPage() {
@@ -37,6 +38,7 @@ export default function ServiceMasterPage() {
     quantity: "99999",
     minStock: "0",
     unit: "service",
+    requiredDocs: [] as string[],
   };
   const [form, setForm] = useState(defaultForm);
 
@@ -87,6 +89,7 @@ export default function ServiceMasterPage() {
         quantity: "",
         minStock: "10",
         unit: "piece",
+        requiredDocs: [],
       });
       fetchItems();
     } catch {
@@ -106,6 +109,7 @@ export default function ServiceMasterPage() {
       quantity: "",
       minStock: "10",
       unit: "piece",
+      requiredDocs: [],
     });
     setModalOpen(true);
   };
@@ -120,6 +124,7 @@ export default function ServiceMasterPage() {
       quantity: item.quantity.toString(),
       minStock: item.minStock.toString(),
       unit: item.unit,
+      requiredDocs: item.requiredDocs || [],
     });
     setModalOpen(true);
   };
@@ -253,6 +258,29 @@ export default function ServiceMasterPage() {
                   onChange={(e) => setForm({ ...form, sellingPrice: e.target.value })}
                   required
                 />
+              </div>
+
+              <div>
+                <label className="label mb-2">Required Documents (Kiosk)</label>
+                <div className="grid grid-cols-2 gap-2 p-3 border border-slate-200 rounded-lg bg-slate-50">
+                  {["Aadhaar Card", "PAN Card", "Passport Photo", "Income Proof", "Caste Certificate", "Ration Card", "Voter ID", "Birth Certificate", "Residence Proof", "Driving Licence", "Marriage Certificate", "Death Certificate"].map(doc => (
+                    <label key={doc} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={form.requiredDocs.includes(doc)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setForm({ ...form, requiredDocs: [...form.requiredDocs, doc] });
+                          } else {
+                            setForm({ ...form, requiredDocs: form.requiredDocs.filter(d => d !== doc) });
+                          }
+                        }}
+                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      {doc}
+                    </label>
+                  ))}
+                </div>
               </div>
 
               <div className="modal-actions pt-4">

@@ -14,7 +14,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await req.json();
-    const { name, category, purchasePrice, sellingPrice, quantity, minStock, unit } = body;
+    const { name, category, purchasePrice, sellingPrice, quantity, minStock, unit, requiredDocs } = body;
 
     if (!name || purchasePrice == null || sellingPrice == null || quantity == null) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -30,6 +30,7 @@ export async function PUT(
         quantity: parseInt(quantity, 10),
         minStock: parseInt(minStock || "5", 10),
         unit: unit || "piece",
+        requiredDocs: requiredDocs || [],
       },
     });
 

@@ -200,6 +200,7 @@ model InventoryItem {
   quantity       Int                     @default(0)
   minStock       Int                     @default(5)
   unit           String                  @default("piece")
+  requiredDocs   String[]                @default([])
   createdAt      DateTime                @default(now())
   updatedAt      DateTime                @updatedAt
   transactions   InventoryTransaction[]
