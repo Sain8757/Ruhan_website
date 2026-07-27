@@ -1,7 +1,9 @@
 "use client";
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { SERVICE_TYPES } from '@/lib/utils';
-import { Loader2, Users, Globe } from 'lucide-react';
+import { Loader2, Users, Globe, Upload } from 'lucide-react';
+import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
 
 // ─── Translations ──────────────────────────────────────────
 const T = {
@@ -76,6 +78,40 @@ const DEFAULT_REQUIRED_DOCS_MAP: Record<string, string[]> = {};
 export default function KioskPage() {
   const [lang, setLang] = useState<'en' | 'hi'>('en');
   const t = T[lang];
+
+  // Utility to generate cropped image
+  const getCroppedImg = async (image: HTMLImageElement, crop: PixelCrop, fileName: string): Promise<File> => {
+    const canvas = document.createElement('canvas');
+    const scaleX = image.naturalWidth / image.width;
+    const scaleY = image.naturalHeight / image.height;
+    canvas.width = crop.width;
+    canvas.height = crop.height;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) throw new Error('No 2d context');
+
+    ctx.drawImage(
+      image,
+      crop.x * scaleX,
+      crop.y * scaleY,
+      crop.width * scaleX,
+      crop.height * scaleY,
+      0,
+      0,
+      crop.width,
+      crop.height
+    );
+
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('Canvas is empty'));
+          return;
+        }
+        resolve(new File([blob], fileName, { type: 'image/jpeg' }));
+      }, 'image/jpeg', 0.85);
+    });
+  };
 
   const [step, setStep] = useState(1);
   const [mobile, setMobile] = useState('');
@@ -181,37 +217,79 @@ export default function KioskPage() {
     setStep(1); setMobile(''); setName(''); setNameFound(false);
     setTicket(''); setTokenLabel(''); setErrorMsg('');
     setUploadedCount(0);
-    setUploadedDocs([]);
+    setUploadedParts({});
   };
 
-  const [uploadedDocs, setUploadedDocs] = useState<string[]>([]);
+  const [uploadedParts, setUploadedParts] = useState<Record<string, string[]>>({});
+  
+  // Crop & Options State
+  const [activeDoc, setActiveDoc] = useState<string | null>(null);
+  const [docMenuOpen, setDocMenuOpen] = useState(false);
+  const [uploadOption, setUploadOption] = useState<'Front' | 'Back' | 'Single' | null>(null);
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [cropImgSrc, setCropImgSrc] = useState('');
+  const [crop, setCrop] = useState<Crop>({ unit: '%', width: 90, height: 90, x: 5, y: 5 });
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null);
 
-  const handleUpload = async (docName: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !ticket) return;
+  const handleDocClick = (docName: string) => {
+    setActiveDoc(docName);
+    setDocMenuOpen(true);
+  };
+
+  const handleOptionSelect = (opt: 'Front' | 'Back' | 'Single') => {
+    setUploadOption(opt);
+    setDocMenuOpen(false);
+    document.getElementById('hidden-kiosk-upload')?.click();
+  };
+
+  const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        setCropImgSrc(reader.result?.toString() || '');
+        setCropModalOpen(true);
+      });
+      reader.readAsDataURL(e.target.files[0]);
+      e.target.value = ''; // reset
+    }
+  };
+
+  const handleCropAndUpload = async () => {
+    if (!imgRef.current || !completedCrop || !completedCrop.width || !completedCrop.height || !activeDoc || !uploadOption) return;
+    
     setUploadingDoc(true);
+    setCropModalOpen(false);
     try {
-      const fd = new FormData();
-      // Rename file to include the specific doc name
-      const prefix = docName === 'Generic' ? 'Doc' : docName.replace(/\s+/g, '_');
-      const ext = file.name.split('.').pop();
-      const newFile = new File([file], `${prefix}_${Date.now()}.${ext}`, { type: file.type });
+      // Format: Md_Shahanawaz_Alam_front_Aadhaar_Card.jpg
+      const cleanName = name.trim().replace(/[^a-zA-Z0-9]/g, '_');
+      const cleanDoc = activeDoc === 'Generic' ? 'Doc' : activeDoc.trim().replace(/[^a-zA-Z0-9]/g, '_');
+      const optStr = uploadOption.toLowerCase();
+      const fileName = `${cleanName}_${optStr}_${cleanDoc}.jpg`;
+
+      const croppedFile = await getCroppedImg(imgRef.current, completedCrop, fileName);
       
-      fd.append('file', newFile);
+      const fd = new FormData();
+      fd.append('file', croppedFile);
       fd.append('trackingId', ticket);
       const res = await fetch('/api/kiosk/upload', { method: 'POST', body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Upload failed');
       
       setUploadedCount(c => c + 1);
-      if (docName !== 'Generic') {
-        setUploadedDocs(prev => [...prev, docName]);
+      if (activeDoc !== 'Generic') {
+        setUploadedParts(prev => ({
+          ...prev,
+          [activeDoc]: [...(prev[activeDoc] || []), uploadOption]
+        }));
       }
     } catch (err: any) {
       alert(err.message);
     } finally {
       setUploadingDoc(false);
-      e.target.value = '';
+      setCropImgSrc('');
+      setActiveDoc(null);
+      setUploadOption(null);
     }
   };
 
@@ -410,24 +488,32 @@ export default function KioskPage() {
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   
+                  {/* Hidden File Input used by all documents */}
+                  <input type="file" id="hidden-kiosk-upload" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={onSelectFile} />
+
                   {requiredDocsMap[serviceType] ? (
                     requiredDocsMap[serviceType].map((doc, idx) => {
-                      const isUploaded = uploadedDocs.includes(doc);
+                      const parts = uploadedParts[doc] || [];
+                      const isComplete = parts.includes('Single') || (parts.includes('Front') && parts.includes('Back'));
+                      
+                      let statusText = '';
+                      if (parts.length > 0) {
+                        statusText = parts.map(p => `✓ ${p}`).join(' ');
+                      }
+
                       return (
                         <div key={idx}>
-                          <input type="file" id={`upload-${idx}`} accept="image/*" capture="environment" style={{ display: 'none' }} onChange={(e) => handleUpload(doc, e)} />
-                          <button type="button" onClick={() => document.getElementById(`upload-${idx}`)?.click()} disabled={uploadingDoc || isUploaded}
-                            style={{ ...btn, background: isUploaded ? '#d4edda' : '#0a246a', color: isUploaded ? '#155724' : 'white', padding: '8px', fontSize: '13px', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span>{uploadingDoc ? (lang === 'en' ? 'Uploading...' : 'अपलोड हो रहा है...') : `📸 ${doc}`}</span>
-                            {isUploaded && <span style={{ fontWeight: 'bold' }}>✓ Done</span>}
+                          <button type="button" onClick={() => handleDocClick(doc)} disabled={uploadingDoc}
+                            style={{ ...btn, background: isComplete ? '#d4edda' : '#0a246a', color: isComplete ? '#155724' : 'white', padding: '8px', fontSize: '13px', width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span>{uploadingDoc && activeDoc === doc ? (lang === 'en' ? 'Uploading...' : 'अपलोड हो रहा है...') : `📸 ${doc}`}</span>
+                            {statusText && <span style={{ fontWeight: 'bold', fontSize: '11px' }}>{statusText}</span>}
                           </button>
                         </div>
                       )
                     })
                   ) : (
                     <>
-                      <input type="file" id="kiosk-upload" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={(e) => handleUpload('Generic', e)} />
-                      <button type="button" onClick={() => document.getElementById('kiosk-upload')?.click()} disabled={uploadingDoc}
+                      <button type="button" onClick={() => handleDocClick('Generic')} disabled={uploadingDoc}
                         style={{ ...btn, background: '#0a246a', color: 'white', padding: '10px', fontSize: '14px', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
                         {uploadingDoc ? <Loader2 size={16} className="animate-spin" /> : '📸'}
                         {uploadingDoc ? (lang === 'en' ? 'Uploading...' : 'अपलोड हो रहा है...') : (lang === 'en' ? 'Take Photo or Upload' : 'फोटो लें या अपलोड करें')}
@@ -457,6 +543,62 @@ export default function KioskPage() {
           <span style={{ paddingLeft: '8px' }}>{t.version}</span>
         </div>
       </div>
+
+      {/* OVERLAYS: Menus and Modals */}
+      
+      {/* 1. Document Option Menu */}
+      {docMenuOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#d4d0c8', ...raised, padding: '10px', width: '250px' }}>
+            <div style={{ background: '#000080', color: 'white', padding: '4px 8px', fontWeight: 'bold', fontSize: '12px', fontFamily: 'Tahoma', marginBottom: '10px', display: 'flex', justifyContent: 'space-between' }}>
+              <span>Select Part to Upload</span>
+              <button onClick={() => setDocMenuOpen(false)} style={{ background: '#d4d0c8', color: 'black', border: 'none', padding: '0 4px', cursor: 'pointer', ...raised, fontSize: '10px', fontWeight: 'bold' }}>X</button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <button onClick={() => handleOptionSelect('Front')} style={{ ...btn, padding: '10px' }}>Upload FRONT</button>
+              <button onClick={() => handleOptionSelect('Back')} style={{ ...btn, padding: '10px' }}>Upload BACK</button>
+              <button onClick={() => handleOptionSelect('Single')} style={{ ...btn, padding: '10px' }}>Single / Full Page</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Cropper Modal */}
+      {cropModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 200, display: 'flex', flexDirection: 'column', padding: '10px' }}>
+          <div style={{ background: '#d4d0c8', ...raised, flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ background: '#000080', color: 'white', padding: '6px 8px', fontWeight: 'bold', fontSize: '14px', fontFamily: 'Tahoma', display: 'flex', justifyContent: 'space-between' }}>
+              <span>Crop Image</span>
+              <button onClick={() => { setCropModalOpen(false); setCropImgSrc(''); }} style={{ background: '#d4d0c8', color: 'black', border: 'none', padding: '2px 6px', cursor: 'pointer', ...raised, fontSize: '12px', fontWeight: 'bold' }}>X</button>
+            </div>
+            
+            <div style={{ flex: 1, overflow: 'auto', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '10px' }}>
+              {cropImgSrc && (
+                <ReactCrop
+                  crop={crop}
+                  onChange={(_, percentCrop) => setCrop(percentCrop)}
+                  onComplete={(c) => setCompletedCrop(c)}
+                >
+                  <img
+                    ref={imgRef}
+                    src={cropImgSrc}
+                    style={{ maxHeight: 'calc(100vh - 120px)', maxWidth: '100%', objectFit: 'contain' }}
+                    alt="Crop me"
+                  />
+                </ReactCrop>
+              )}
+            </div>
+
+            <div style={{ padding: '10px', display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+              <button onClick={() => { setCropModalOpen(false); setCropImgSrc(''); }} style={{ ...btn, flex: 1, padding: '10px', background: '#e0e0e0' }}>Cancel</button>
+              <button onClick={handleCropAndUpload} style={{ ...btn, flex: 2, padding: '10px', background: '#008000', color: 'white' }}>
+                ✓ Crop & Upload
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
