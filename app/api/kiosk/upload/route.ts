@@ -1,7 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
+import { v2 as cloudinary } from 'cloudinary';
+
+// Configure Cloudinary using environment variables
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function POST(req: Request) {
   try {
@@ -13,10 +19,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing file or trackingId' }, { status: 400 });
     }
 
-    // Verify the service belongs to this trackingId and is a Kiosk request
     const service = await prisma.service.findUnique({
       where: { trackingId },
-      select: { id: true, isKioskRequest: true, serviceDocUrls: true, customer: { select: { id: true } } }
+      select: { id: true, isKioskRequest: true, serviceDocUrls: true }
     });
 
     if (!service || !service.isKioskRequest) {
@@ -31,15 +36,19 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Save under the service ID directory
-    const uploadDir = join(process.cwd(), 'public', 'uploads', 'services', service.id);
-    await mkdir(uploadDir, { recursive: true });
+    // Upload to Cloudinary using upload_stream
+    const uploadResult: any = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: `ruhan/services/${service.id}` },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      uploadStream.end(buffer);
+    });
 
-    const filename = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-    const filepath = join(uploadDir, filename);
-    await writeFile(filepath, buffer);
-
-    const publicUrl = `/uploads/services/${service.id}/${filename}`;
+    const publicUrl = uploadResult.secure_url;
 
     // Add to service documents
     const existing = service.serviceDocUrls || [];
@@ -57,14 +66,14 @@ export async function POST(req: Request) {
           action: 'DOCUMENT_UPLOADED',
           entity: 'Service',
           entityId: service.id,
-          details: `Customer uploaded file: ${file.name}`
+          details: `Customer uploaded file: ${file.name} (Kiosk)`
         }
       }).catch(() => {});
     }
 
     return NextResponse.json({ success: true, url: publicUrl, filename: file.name });
   } catch (error) {
-    console.error('Kiosk Upload Error:', error);
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+    console.error('Kiosk Cloudinary Upload Error:', error);
+    return NextResponse.json({ error: 'Cloudinary upload failed' }, { status: 500 });
   }
 }
