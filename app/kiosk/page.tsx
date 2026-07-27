@@ -489,7 +489,7 @@ export default function KioskPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   
                   {/* Hidden File Input used by all documents */}
-                  <input type="file" id="hidden-kiosk-upload" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={onSelectFile} />
+                  <input type="file" id="hidden-kiosk-upload" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" style={{ display: 'none' }} onChange={onSelectFile} />
 
                   {requiredDocsMap[serviceType] ? (
                     requiredDocsMap[serviceType].map((doc, idx) => {
