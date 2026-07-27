@@ -236,11 +236,25 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
     window.open(`https://wa.me/91${service.customer.mobile.replace(/\D/g,"").slice(-10)}?text=${encodeURIComponent(text)}`, "_blank");
   };
 
-  const sendReuploadWA = (url: string) => {
+  const sendReuploadWA = async (url: string) => {
     if (!service?.customer?.mobile) { toast.error("No mobile number"); return; }
     const docName = decodeURIComponent(url.split("/").pop() || "Document");
     const link = `${window.location.origin}/status`;
     const text = `Hello ${service.customer.name},\nAapka upload kiya gaya document '${docName}' clear nahi hai ya galat hai.\nKripya is link par jaa kar wapas theek document upload karein:\n\n🔗 ${link}\n\nMobile No: ${service.customer.mobile}\nTracking ID: ${service.trackingId}\n\nThank you,\nRA Seva Point`;
+    
+    try {
+      const newMissingDocs = missingDocs ? `${missingDocs}, ${docName}` : docName;
+      await fetch(`/api/services/${service.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ missingDocs: newMissingDocs })
+      });
+      setMissingDocs(newMissingDocs);
+      toast.success(`Requested re-upload for ${docName}`);
+    } catch (e) {
+      console.error(e);
+    }
+
     window.open(`https://wa.me/91${service.customer.mobile.replace(/\D/g,"").slice(-10)}?text=${encodeURIComponent(text)}`, "_blank");
   };
 

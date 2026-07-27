@@ -7,9 +7,9 @@ import { useSearchParams } from 'next/navigation';
 
 function CustomerStatusContent() {
   const searchParams = useSearchParams();
-  const initialQuery = searchParams?.get('query') || '';
   
-  const [query, setQuery] = useState(initialQuery);
+  const [mobile, setMobile] = useState(searchParams?.get('mobile') || '');
+  const [trackingId, setTrackingId] = useState(searchParams?.get('trackingId') || '');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   
@@ -56,7 +56,7 @@ function CustomerStatusContent() {
     setUploadedCount(0);
     
     try {
-      const res = await fetch(`/api/customer/status?query=${encodeURIComponent(searchQuery)}`);
+      const res = await fetch(`/api/customer/status?mobile=${encodeURIComponent(mobile)}&trackingId=${encodeURIComponent(trackingId)}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch status');
       
@@ -73,15 +73,15 @@ function CustomerStatusContent() {
   };
 
   useEffect(() => {
-    if (initialQuery) {
-      fetchStatus(initialQuery);
+    if (mobile && trackingId) {
+      fetchStatus('');
     }
-  }, [initialQuery]);
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query) return;
-    await fetchStatus(query);
+    if (!mobile || !trackingId) return;
+    await fetchStatus('');
   };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,17 +127,29 @@ function CustomerStatusContent() {
           {!selectedService && services.length === 0 && (
             <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <div style={{ textAlign: 'center', fontFamily: 'Tahoma', fontSize: '12px', color: '#444', marginBottom: '8px' }}>
-                Enter your Mobile Number or Tracking ID to check status.
+                Enter your Mobile Number AND Tracking ID to check status.
               </div>
               
               <div>
-                <label style={{ fontFamily: 'Tahoma', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Mobile No. OR Tracking ID:</label>
+                <label style={{ fontFamily: 'Tahoma', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Mobile No:</label>
                 <input 
                   type="text" 
-                  value={query} 
-                  onChange={e => setQuery(e.target.value)} 
+                  value={mobile} 
+                  onChange={e => setMobile(e.target.value)} 
                   required 
-                  placeholder="e.g. 9876543210 or BE9ZZF" 
+                  placeholder="e.g. 9876543210" 
+                  style={{ ...inset, width: '100%', padding: '8px', fontSize: '14px', fontFamily: 'Tahoma' }} 
+                />
+              </div>
+
+              <div>
+                <label style={{ fontFamily: 'Tahoma', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Tracking ID:</label>
+                <input 
+                  type="text" 
+                  value={trackingId} 
+                  onChange={e => setTrackingId(e.target.value)} 
+                  required 
+                  placeholder="e.g. BE9ZZF" 
                   style={{ ...inset, width: '100%', padding: '8px', fontSize: '14px', fontFamily: 'Tahoma' }} 
                 />
               </div>
@@ -155,51 +167,7 @@ function CustomerStatusContent() {
             </form>
           )}
 
-          {/* LIST VIEW (If Mobile Number has multiple services) */}
-          {!selectedService && services.length > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div style={{ fontFamily: 'Tahoma', fontSize: '13px', fontWeight: 'bold', color: '#000080', borderBottom: '1px solid #808080', paddingBottom: '4px' }}>
-                Found {services.length} Applications
-              </div>
-              
-              <div style={{ ...inset, background: '#fff', maxHeight: '300px', overflowY: 'auto', padding: '2px' }}>
-                {services.map((s, idx) => (
-                  <div 
-                    key={idx}
-                    onClick={() => setSelectedService(s)}
-                    style={{ 
-                      padding: '8px', 
-                      borderBottom: '1px solid #eee', 
-                      cursor: 'pointer', 
-                      display: 'flex', 
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      background: idx % 2 === 0 ? '#fafafa' : '#fff'
-                    }}
-                    onMouseOver={(e) => (e.currentTarget.style.background = '#e8f0ff')}
-                    onMouseOut={(e) => (e.currentTarget.style.background = idx % 2 === 0 ? '#fafafa' : '#fff')}
-                  >
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontFamily: 'Tahoma', fontSize: '13px', fontWeight: 'bold', color: '#000', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.serviceType}</div>
-                      <div style={{ fontFamily: 'Tahoma', fontSize: '11px', color: '#666', marginTop: '2px' }}>ID: {s.trackingId} • {format(new Date(s.createdAt), "dd MMM yy")}</div>
-                    </div>
-                    <div style={{ 
-                      fontFamily: 'Tahoma', fontSize: '10px', fontWeight: 'bold', 
-                      background: s.status === 'DELIVERED' ? '#d4edda' : '#fff3cd', 
-                      color: s.status === 'DELIVERED' ? '#155724' : '#856404',
-                      padding: '2px 6px', border: '1px solid #ccc'
-                    }}>
-                      {s.status}
-                    </div>
-                  </div>
-                ))}
-              </div>
 
-              <button onClick={() => { setServices([]); setQuery(''); }} style={{ ...btn, marginTop: '8px' }}>
-                <ArrowLeft size={14} /> Back to Search
-              </button>
-            </div>
-          )}
 
           {/* DETAIL VIEW */}
           {selectedService && (
@@ -266,11 +234,11 @@ function CustomerStatusContent() {
                   )}
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <input type="file" id="kiosk-upload" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleUpload} />
+                    <input type="file" id="kiosk-upload" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" style={{ display: 'none' }} onChange={handleUpload} />
                     <button type="button" onClick={() => document.getElementById('kiosk-upload')?.click()} disabled={uploadingDoc}
                       style={{ ...btn, background: '#0a246a', color: 'white', padding: '8px', fontSize: '13px', width: '100%' }}>
                       {uploadingDoc ? <Loader2 size={14} className="animate-spin" /> : <FileUp size={14} />}
-                      {uploadingDoc ? 'Uploading...' : 'Take Photo / Upload'}
+                      {uploadingDoc ? 'Uploading...' : 'Take Photo / Select File'}
                     </button>
                     
                     {uploadedCount > 0 && (
@@ -285,12 +253,10 @@ function CustomerStatusContent() {
               <button 
                 onClick={() => {
                   setSelectedService(null);
-                  // If we came from a multi-service search, we can go back to the list.
-                  // If we came from a single ID search, clear everything.
-                  if (services.length <= 1) {
-                    setServices([]);
-                    setQuery('');
-                  }
+                  setSelectedService(null);
+                  setServices([]);
+                  setMobile('');
+                  setTrackingId('');
                 }} 
                 style={{ ...btn, width: '100%', marginTop: '4px', height: '36px' }}
               >

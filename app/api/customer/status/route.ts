@@ -4,47 +4,30 @@ import { prisma } from '@/lib/db';
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const query = searchParams.get('query');
+    const mobile = searchParams.get('mobile');
+    const trackingId = searchParams.get('trackingId');
 
-    if (!query) {
-      return NextResponse.json({ error: 'Please enter a Mobile Number or Tracking ID' }, { status: 400 });
+    if (!mobile || !trackingId) {
+      return NextResponse.json({ error: 'Please enter both Mobile Number and Tracking ID' }, { status: 400 });
     }
 
-    const cleanQuery = query.trim().toUpperCase();
+    const cleanMobile = mobile.trim();
+    const cleanTrackingId = trackingId.trim().toUpperCase();
     
-    // Check if it's a mobile number (10 digits)
-    const isMobile = /^\d{10}$/.test(cleanQuery);
+    // Find service by tracking ID and verify mobile
+    const service = await prisma.service.findUnique({
+      where: { trackingId: cleanTrackingId },
+      include: {
+        customer: { select: { name: true, mobile: true } }
+      }
+    });
 
     let services: any[] = [];
 
-    if (isMobile) {
-      // Find customer by mobile first, then their services
-      const customer = await prisma.customer.findFirst({
-        where: { mobile: cleanQuery },
-        include: {
-          services: {
-            orderBy: { createdAt: 'desc' }
-          }
-        }
-      });
-      if (customer) {
-        services = customer.services.map(s => ({ ...s, customerName: customer.name }));
-      }
+    if (service && service.customer.mobile === cleanMobile) {
+      services = [{ ...service, customerName: service.customer.name }];
     } else {
-      // Find by tracking ID
-      const service = await prisma.service.findUnique({
-        where: { trackingId: cleanQuery },
-        include: {
-          customer: { select: { name: true } }
-        }
-      });
-      if (service) {
-        services = [{ ...service, customerName: service.customer.name }];
-      }
-    }
-
-    if (services.length === 0) {
-      return NextResponse.json({ error: 'No records found for this input' }, { status: 404 });
+      return NextResponse.json({ error: 'Invalid Mobile Number or Tracking ID' }, { status: 404 });
     }
 
     // Return safe public data
