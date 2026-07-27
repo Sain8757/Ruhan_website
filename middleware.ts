@@ -4,8 +4,11 @@ import { NextResponse } from "next/server";
 export default auth((req) => {
   const isAuthenticated = !!req.auth;
   const isAuthPage = req.nextUrl.pathname.startsWith("/login");
+  const isPublicPage = req.nextUrl.pathname.startsWith("/kiosk") || 
+                       req.nextUrl.pathname.startsWith("/status") || 
+                       req.nextUrl.pathname.startsWith("/track");
 
-  if (!isAuthenticated && !isAuthPage) {
+  if (!isAuthenticated && !isAuthPage && !isPublicPage) {
     const loginUrl = new URL("/login", req.nextUrl.origin);
     return NextResponse.redirect(loginUrl);
   }
