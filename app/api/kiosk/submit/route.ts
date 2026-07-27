@@ -50,9 +50,15 @@ export async function POST(request: Request) {
       });
     }
 
+    // Get Queue Position
+    const pendingCount = await prisma.service.count({
+      where: { status: 'PENDING' }
+    });
+
     return NextResponse.json({
       success: true,
       trackingId,
+      queuePosition: pendingCount,
       message: 'Queue joined successfully'
     });
 
