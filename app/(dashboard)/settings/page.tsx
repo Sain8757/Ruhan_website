@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Database, Download, Loader2, Printer, RotateCcw, Save, Store } from "lucide-react";
+import { Database, Download, Loader2, Printer, RotateCcw, Save, Store, Sparkles, Trash2, Plus } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 import { useDownload } from "@/contexts/DownloadContext";
 import PageHeader from "@/components/layout/PageHeader";
@@ -14,6 +14,7 @@ const DEFAULT_SETTINGS = {
   shopAddress: "",
   shopPhone: "",
   shopEmail: "",
+  geminiApiKeys: "[]",
 };
 
 export default function SettingsPage() {
@@ -30,6 +31,8 @@ export default function SettingsPage() {
   const [shopAddress, setShopAddress] = useState(DEFAULT_SETTINGS.shopAddress);
   const [shopPhone, setShopPhone] = useState(DEFAULT_SETTINGS.shopPhone);
   const [shopEmail, setShopEmail] = useState(DEFAULT_SETTINGS.shopEmail);
+  const [apiKeys, setApiKeys] = useState<string[]>([]);
+  const [newKey, setNewKey] = useState("");
 
   // Load settings from database
   useEffect(() => {
@@ -43,6 +46,11 @@ export default function SettingsPage() {
         setShopAddress(data.shopAddress || "");
         setShopPhone(data.shopPhone || "");
         setShopEmail(data.shopEmail || "");
+        try {
+          setApiKeys(JSON.parse(data.geminiApiKeys || "[]"));
+        } catch {
+          setApiKeys([]);
+        }
       })
       .catch(() => {
         toast.error("Could not load settings — using defaults");
@@ -65,6 +73,7 @@ export default function SettingsPage() {
           shopAddress,
           shopPhone,
           shopEmail,
+          geminiApiKeys: JSON.stringify(apiKeys),
         }),
       });
       if (!res.ok) throw new Error("Save failed");
@@ -84,6 +93,7 @@ export default function SettingsPage() {
     setShopAddress("");
     setShopPhone("");
     setShopEmail("");
+    setApiKeys([]);
   };
 
   const handleBackup = async () => {
@@ -137,6 +147,10 @@ export default function SettingsPage() {
             <a href="/settings/online-services" className="settings-nav-item">
               <Store size={16} />
               Online Services Admin
+            </a>
+            <a href="#ai-configuration" className="settings-nav-item">
+              <Sparkles size={16} />
+              AI Configuration
             </a>
           </nav>
         </aside>
@@ -315,6 +329,90 @@ export default function SettingsPage() {
                   <>
                     <Download size={16} />
                     Export Full Database Backup
+                  </>
+                )}
+              </button>
+            </div>
+          </section>
+
+          <section id="ai-configuration" className="form-card space-y-6 scroll-mt-24">
+            <div className="flex items-start gap-3">
+              <span className="icon-badge">
+                <Sparkles size={20} />
+              </span>
+              <div>
+                <h2 className="section-title mb-1">AI Configuration (Gemini API)</h2>
+                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                  Add multiple Gemini API keys. The system will automatically rotate them if one exceeds its free quota limit.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="Paste Gemini API Key (e.g. AIzaSy...)"
+                  value={newKey}
+                  onChange={(e) => setNewKey(e.target.value)}
+                  style={{ flex: 1 }}
+                />
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => {
+                    if (newKey.trim()) {
+                      if (!apiKeys.includes(newKey.trim())) {
+                        setApiKeys([...apiKeys, newKey.trim()]);
+                        setNewKey("");
+                      } else {
+                        toast.error("Key already exists!");
+                      }
+                    }
+                  }}
+                >
+                  <Plus size={16} /> Add Key
+                </button>
+              </div>
+
+              {apiKeys.length > 0 ? (
+                <div className="border rounded-md overflow-hidden" style={{ borderColor: "var(--border-primary)" }}>
+                  {apiKeys.map((key, index) => (
+                    <div key={index} className="flex justify-between items-center p-3 border-b last:border-0 bg-white" style={{ borderColor: "var(--border-primary)" }}>
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded text-gray-700">Key #{index + 1}</span>
+                        <span className="font-mono text-sm">
+                          {key.substring(0, 10)}...{key.substring(key.length - 4)}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setApiKeys(apiKeys.filter((_, i) => i !== index))}
+                        className="text-red-500 hover:text-red-700 p-1"
+                        title="Remove Key"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center p-6 bg-gray-50 border border-dashed rounded-md text-gray-500 text-sm">
+                  No API keys added. AI Auto-fill will run in Simulator Mode.
+                </div>
+              )}
+            </div>
+            
+            <div className="form-actions justify-end border-t pt-5 mt-4" style={{ borderColor: "var(--border-primary)" }}>
+              <button type="button" onClick={handleSave} className="btn-primary" disabled={saving}>
+                {saving ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" /> Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} /> Save Settings
                   </>
                 )}
               </button>

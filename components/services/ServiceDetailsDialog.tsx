@@ -88,6 +88,22 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
     window.open(`https://wa.me/91${service.customer.mobile}?text=${msg}`, '_blank');
   };
 
+  const handleSyncStatus = async () => {
+    if (!serviceId) return;
+    try {
+      toast.info("Connecting to Govt API...");
+      const res = await fetch(`/api/services/${serviceId}/sync`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Sync failed");
+      
+      setStatus(data.status);
+      toast.success(data.message);
+      if (onSuccess) onSuccess();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -133,8 +149,13 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
             <legend>Status Updates</legend>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               <div>
-                <label>Workflow Status:</label>
-                <select className="legacy-input" style={{ width: '100%' }} value={status} onChange={(e) => setStatus(e.target.value)}>
+                <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>Workflow Status:</span>
+                  <button type="button" onClick={handleSyncStatus} style={{ fontSize: '10px', padding: '1px 4px', background: '#e0e0e0', cursor: 'pointer', border: '1px solid #999', borderRadius: '3px' }}>
+                    🔄 Sync Govt API
+                  </button>
+                </label>
+                <select className="legacy-input" style={{ width: '100%', marginTop: '2px' }} value={status} onChange={(e) => setStatus(e.target.value)}>
                   <option value="PENDING">Pending</option>
                   <option value="SUBMITTED">Submitted</option>
                   <option value="PROCESSING">Processing</option>

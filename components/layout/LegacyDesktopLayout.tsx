@@ -14,6 +14,7 @@ import { WORKSPACE_MODULES } from "@/lib/workspace";
 import { signOut } from "next-auth/react";
 import { DownloadProvider } from "@/contexts/DownloadContext";
 import AIAssistant from "@/components/ai/AIAssistant";
+import { QRCodeSVG } from "qrcode.react";
 
 const iconMap: Record<string, React.ComponentType<{ size?: number; color?: string; className?: string }>> = {
   LayoutDashboard,
@@ -41,7 +42,12 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAI, setShowAI] = useState(false);
+  const [showKioskQR, setShowKioskQR] = useState(false);
   
+  const [kioskUrl, setKioskUrl] = useState("");
+  useEffect(() => {
+    setKioskUrl(window.location.origin + "/kiosk");
+  }, []);
   const [notifications, setNotifications] = useState<{
     pendingServices: any[];
     lowStockItems: any[];
@@ -223,6 +229,16 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
               >
                 <Sparkles size={16} color="#4285F4" />
               </button>
+              
+              {/* Kiosk QR Button */}
+              <button
+                className="legacy-toolbar-btn"
+                title="Show Kiosk QR Code"
+                onClick={() => setShowKioskQR(true)}
+                style={{ background: "#d4d0c8", padding: "2px 4px", cursor: "pointer" }}
+              >
+                <QrCode size={16} color="#000" />
+              </button>
             </div>
           </div>
 
@@ -391,6 +407,78 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
 
         {/* AI Assistant Modal */}
         <AIAssistant isOpen={showAI} onClose={() => setShowAI(false)} />
+
+        {/* Kiosk QR Modal */}
+        {showKioskQR && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0,0,0,0.5)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 9999,
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "#d4d0c8",
+                borderTop: "2px solid #fff",
+                borderLeft: "2px solid #fff",
+                borderRight: "2px solid #404040",
+                borderBottom: "2px solid #404040",
+                padding: "2px",
+                width: "350px",
+                boxShadow: "2px 2px 5px rgba(0,0,0,0.5)",
+              }}
+            >
+              <div
+                style={{
+                  background: "linear-gradient(to right, #000080 0%, #1084d0 100%)",
+                  color: "white",
+                  padding: "2px 4px",
+                  fontWeight: "bold",
+                  fontSize: "12px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <span>Shop Kiosk QR Code</span>
+                <button
+                  onClick={() => setShowKioskQR(false)}
+                  style={{
+                    background: "#d4d0c8",
+                    borderTop: "1px solid #fff",
+                    borderLeft: "1px solid #fff",
+                    borderRight: "1px solid #404040",
+                    borderBottom: "1px solid #404040",
+                    color: "black",
+                    width: "16px",
+                    height: "14px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "10px",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                  }}
+                >
+                  X
+                </button>
+              </div>
+              <div style={{ padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", background: "#fff", margin: "2px" }}>
+                <p style={{ marginBottom: "16px", textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>Scan to Join Queue</p>
+                <QRCodeSVG value={kioskUrl} size={250} />
+                <p style={{ marginTop: "16px", textAlign: "center", fontSize: "11px", color: "#666" }}>Customers can scan this to self-book services from their phone.</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Logout Confirmation Modal */}
         {showLogoutConfirm && (

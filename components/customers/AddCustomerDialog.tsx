@@ -71,10 +71,57 @@ export default function AddCustomerDialog({ isOpen, onClose, onSuccess, zIndex, 
     }
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsSubmitting(true);
+    toast.info('AI is reading the document...');
+    
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const response = await fetch('/api/ai/ocr', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error('AI OCR Failed');
+      
+      const result = await response.json();
+      if (result.success && result.data) {
+        setFormData(prev => ({
+          ...prev,
+          name: result.data.name || prev.name,
+          mobile: result.data.mobile || prev.mobile,
+          address: result.data.address || prev.address,
+          aadhaarNumber: result.data.aadhaarNumber || prev.aadhaarNumber,
+          panNumber: result.data.panNumber || prev.panNumber,
+        }));
+        toast.success('Auto-filled via AI!');
+      }
+    } catch (error: any) {
+      toast.error('Failed to parse document');
+    } finally {
+      setIsSubmitting(false);
+      // Reset file input
+      e.target.value = '';
+    }
+  };
+
   return (
     <LegacyDialog isOpen={isOpen} onClose={onClose} title="Add New Customer" width="450px" zIndex={zIndex}>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         
+        {/* AI Magic Button */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '-4px' }}>
+          <label className="legacy-button" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer', background: '#000080', color: 'white' }}>
+            <span>🤖</span> AI Auto-Fill
+            <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileUpload} disabled={isSubmitting} />
+          </label>
+        </div>
+
         {/* Customer Details Fieldset */}
         <div className="legacy-fieldset" style={{ marginTop: '12px' }}>
           <div className="legacy-legend">Customer Details</div>

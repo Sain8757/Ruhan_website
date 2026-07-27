@@ -11,6 +11,7 @@ const DEFAULTS: Record<string, string> = {
   shopAddress: "",
   shopPhone: "",
   shopEmail: "",
+  geminiApiKeys: "[]",
 };
 
 export async function GET() {
