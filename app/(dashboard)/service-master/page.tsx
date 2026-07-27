@@ -25,6 +25,7 @@ export default function ServiceMasterPage() {
   const [query, setQuery] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [customDoc, setCustomDoc] = useState("");
   
   // Track editing state
   const [editItemId, setEditItemId] = useState<string | null>(null);
@@ -263,7 +264,12 @@ export default function ServiceMasterPage() {
               <div>
                 <label className="label mb-2">Required Documents (Kiosk)</label>
                 <div className="grid grid-cols-2 gap-2 p-3 border border-slate-200 rounded-lg bg-slate-50">
-                  {["Aadhaar Card", "PAN Card", "Passport Photo", "Income Proof", "Caste Certificate", "Ration Card", "Voter ID", "Birth Certificate", "Residence Proof", "Driving Licence", "Marriage Certificate", "Death Certificate"].map(doc => (
+                  {Array.from(new Set([
+                    "Aadhaar Card", "PAN Card", "Passport Photo", "Income Proof", 
+                    "Caste Certificate", "Ration Card", "Voter ID", "Birth Certificate", 
+                    "Residence Proof", "Driving Licence", "Marriage Certificate", "Death Certificate",
+                    ...form.requiredDocs
+                  ])).map(doc => (
                     <label key={doc} className="flex items-center gap-2 text-sm cursor-pointer">
                       <input 
                         type="checkbox" 
@@ -280,6 +286,37 @@ export default function ServiceMasterPage() {
                       {doc}
                     </label>
                   ))}
+                </div>
+                
+                <div className="mt-2 flex gap-2">
+                  <input
+                    type="text"
+                    className="input-field flex-1 text-sm py-1.5 px-2 h-auto"
+                    placeholder="Type custom document name..."
+                    value={customDoc}
+                    onChange={(e) => setCustomDoc(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (customDoc.trim() && !form.requiredDocs.includes(customDoc.trim())) {
+                          setForm({ ...form, requiredDocs: [...form.requiredDocs, customDoc.trim()] });
+                          setCustomDoc("");
+                        }
+                      }
+                    }}
+                  />
+                  <button 
+                    type="button" 
+                    className="btn-secondary text-sm py-1.5 px-3 h-auto whitespace-nowrap"
+                    onClick={() => {
+                      if (customDoc.trim() && !form.requiredDocs.includes(customDoc.trim())) {
+                        setForm({ ...form, requiredDocs: [...form.requiredDocs, customDoc.trim()] });
+                        setCustomDoc("");
+                      }
+                    }}
+                  >
+                    Add Doc
+                  </button>
                 </div>
               </div>
 
