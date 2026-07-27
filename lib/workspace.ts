@@ -17,7 +17,8 @@ export type WorkspaceIcon =
   | "Bell"
   | "DatabaseBackup"
   | "QrCode"
-  | "FileImage";
+  | "FileImage"
+  | "MessageCircle";
 
 export type WorkspaceSection = "Core" | "Tools" | "Inventory" | "Business";
 
@@ -192,6 +193,14 @@ export const WORKSPACE_MODULES: WorkspaceModule[] = [
     icon: "BookOpen",
     section: "Business",
     keywords: ["expenses", "profit", "ledger", "kharcha"],
+  },
+  {
+    id: "marketing",
+    label: "WhatsApp Marketing",
+    href: "/marketing",
+    icon: "MessageCircle",
+    section: "Business",
+    keywords: ["whatsapp", "bulk", "campaign", "marketing", "messages"],
   },
   {
     id: "reports",

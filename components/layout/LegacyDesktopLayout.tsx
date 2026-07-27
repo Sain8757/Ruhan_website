@@ -32,6 +32,7 @@ const iconMap: Record<string, React.ComponentType<{ size?: number; color?: strin
   Settings,
   QrCode,
   FileImage,
+  MessageCircle,
 };
 
 function LegacyDesktopInner({ children }: { children: React.ReactNode }) {

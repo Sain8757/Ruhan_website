@@ -60,6 +60,16 @@ const MOCK_CHART = [
   { date: "Sun", revenue: 0, invoices: 0 },
 ];
 
+const formatChartDate = (dateStr: string) => {
+  if (dateStr.length === 3) return dateStr; // Already "Mon", "Tue"
+  try {
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? dateStr : format(d, "EEE"); // "Mon", "Tue"
+  } catch {
+    return dateStr;
+  }
+};
+
 // Animated counter hook
 function useCountUp(target: number, duration = 1200) {
   const [count, setCount] = useState(0);
@@ -619,7 +629,7 @@ export default function DashboardPage() {
           </div>
           <div className="flex-1">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data?.chartData?.length ? data.chartData : MOCK_CHART}>
+              <AreaChart data={(data?.chartData?.length ? data.chartData : MOCK_CHART).map(d => ({...d, displayDate: formatChartDate(d.date)}))}>
               <defs>
                 <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#4f6ef7" stopOpacity={0.25} />
@@ -628,7 +638,7 @@ export default function DashboardPage() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-secondary)" vertical={false} />
               <XAxis
-                dataKey="date"
+                dataKey="displayDate"
                 tick={{ fontSize: 11.5, fill: "var(--text-muted)", fontFamily: "inherit" }}
                 axisLine={false}
                 tickLine={false}
@@ -769,10 +779,10 @@ export default function DashboardPage() {
           </p>
           <div className="flex-1">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={MOCK_CHART} barSize={32}>
+              <BarChart data={(data?.chartData?.length ? data.chartData : MOCK_CHART).map(d => ({...d, displayDate: formatChartDate(d.date)}))} barSize={32}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-secondary)" vertical={false} />
               <XAxis
-                dataKey="date"
+                dataKey="displayDate"
                 tick={{ fontSize: 11, fill: "var(--text-muted)", fontFamily: "inherit" }}
                 axisLine={false}
                 tickLine={false}
@@ -784,10 +794,10 @@ export default function DashboardPage() {
               />
               <Tooltip content={<BarTooltip />} cursor={{ fill: "rgba(79,110,247,0.06)", radius: 8 }} />
               <Bar dataKey="invoices" radius={[6, 6, 0, 0]}>
-                {MOCK_CHART.map((_, index) => (
+                {(data?.chartData?.length ? data.chartData : MOCK_CHART).map((_, index, arr) => (
                   <Cell
                     key={`cell-${index}`}
-                    fill={index === MOCK_CHART.length - 2 ? "#4f6ef7" : "rgba(79,110,247,0.25)"}
+                    fill={index === arr.length - 1 ? "#4f6ef7" : "rgba(79,110,247,0.25)"}
                   />
                 ))}
               </Bar>

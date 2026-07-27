@@ -26,6 +26,7 @@ import {
   FileImage,
   QrCode,
   MessageSquare,
+  MessageCircle,
   Package,
   Receipt,
   ScanLine,
@@ -91,6 +92,7 @@ const iconMap = {
   DatabaseBackup,
   QrCode,
   FileImage,
+  MessageCircle,
 } satisfies Record<WorkspaceIcon, React.ComponentType<{ size?: number; className?: string }>>;
 
 const recordIconMap = {

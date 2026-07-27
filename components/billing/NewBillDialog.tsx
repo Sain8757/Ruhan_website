@@ -158,6 +158,7 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess }: NewBillDia
   
   const [items, setItems] = useState<InvoiceItemInput[]>([{ name: "", quantity: 1, price: 0 }]);
   const [discount, setDiscount] = useState(0);
+  const [pointsRedeemed, setPointsRedeemed] = useState(0);
   const [gst, setGst] = useState(0);
   const [paymentMode, setPaymentMode] = useState("CASH");
   const [paymentStatus, setPaymentStatus] = useState("PAID");
@@ -181,7 +182,7 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess }: NewBillDia
   }, [customerSearch]);
 
   const subtotal = items.reduce((sum, item) => sum + item.quantity * item.price, 0);
-  const total = subtotal - discount + (subtotal * gst) / 100;
+  const total = subtotal - discount - pointsRedeemed + (subtotal * gst) / 100;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -199,7 +200,7 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess }: NewBillDia
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customerId: selectedCustomer.id,
-          items, discount, gst, paymentMode, paymentStatus,
+          items, discount, pointsRedeemed, gst, paymentMode, paymentStatus,
           amountPaid: finalAmountPaid, notes,
           type, dueDate: dueDate ? new Date(dueDate).toISOString() : null,
         }),
@@ -229,8 +230,13 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess }: NewBillDia
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <strong>{selectedCustomer.name}</strong> - {selectedCustomer.mobile}
+                  {selectedCustomer.loyaltyPoints > 0 && (
+                    <span style={{ marginLeft: '8px', padding: '2px 6px', background: '#e0c034', color: '#000', fontSize: '10px', fontWeight: 'bold', borderRadius: '4px' }}>
+                      ⭐ {selectedCustomer.loyaltyPoints} Points Available
+                    </span>
+                  )}
                 </div>
-                <button type="button" className="legacy-button" onClick={() => setSelectedCustomer(null)}>Change</button>
+                <button type="button" className="legacy-button" onClick={() => { setSelectedCustomer(null); setPointsRedeemed(0); }}>Change</button>
               </div>
             ) : (
               <div style={{ position: 'relative' }}>
@@ -339,6 +345,18 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess }: NewBillDia
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <label>Discount:</label>
                 <input type="number" className="legacy-input" style={{ width: '60px', textAlign: 'right' }} value={discount||""} onChange={(e) => setDiscount(parseFloat(e.target.value)||0)} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <label>Redeem Pts:</label>
+                <input 
+                  type="number" 
+                  className="legacy-input" 
+                  style={{ width: '60px', textAlign: 'right' }} 
+                  value={pointsRedeemed||""} 
+                  max={selectedCustomer?.loyaltyPoints || 0}
+                  onChange={(e) => setPointsRedeemed(Math.min(parseFloat(e.target.value)||0, selectedCustomer?.loyaltyPoints || 0))} 
+                  disabled={!selectedCustomer?.loyaltyPoints}
+                />
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <label>GST (%):</label>

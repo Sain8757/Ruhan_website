@@ -56,8 +56,15 @@ export async function POST(req: NextRequest) {
     0
   );
   const discount = parseFloat(body.discount) || 0;
+  const pointsRedeemed = parseInt(body.pointsRedeemed) || 0;
+  const totalDiscount = discount + (pointsRedeemed); // 1 point = 1 Rs discount
+  
   const gst = parseFloat(body.gst) || 0;
-  const total = subtotal - discount + (subtotal * gst) / 100;
+  const total = subtotal - totalDiscount + (subtotal * gst) / 100;
+
+  // Calculate points earned (10 points per 100 Rs, approx 10% value, let's say 1 point per 10 Rs spent)
+  // Let's make it simple: 2 points for every 100 Rs.
+  const pointsEarned = Math.floor(total / 50);
 
   const invoice = await prisma.invoice.create({
     data: {
@@ -65,7 +72,7 @@ export async function POST(req: NextRequest) {
       customerId: body.customerId,
       createdById: (session.user as any).id,
       subtotal,
-      discount,
+      discount: totalDiscount,
       gst,
       total,
       amountPaid: Number(body.amountPaid) || 0,
@@ -110,5 +117,15 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return NextResponse.json(invoice, { status: 201 });
+  // Update customer loyalty points
+  await prisma.customer.update({
+    where: { id: body.customerId },
+    data: {
+      loyaltyPoints: {
+        increment: pointsEarned - pointsRedeemed
+      }
+    }
+  });
+
+  return NextResponse.json({ ...invoice, pointsEarned, pointsRedeemed }, { status: 201 });
 }
