@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
     const service = await prisma.service.findUnique({
       where: { trackingId },
-      select: { id: true, isKioskRequest: true, serviceDocUrls: true }
+      select: { id: true, isKioskRequest: true, serviceDocUrls: true, customerId: true }
     });
 
     if (!service || !service.isKioskRequest) {
@@ -56,6 +56,18 @@ export async function POST(req: Request) {
       where: { id: service.id },
       data: { serviceDocUrls: [...existing, publicUrl] }
     });
+
+    // Auto-Save to Permanent Locker (Customer.documents)
+    if (service.customerId) {
+      await prisma.document.create({
+        data: {
+          customerId: service.customerId,
+          name: file.name,
+          url: publicUrl,
+          type: 'Auto-Sync'
+        }
+      });
+    }
 
     // Log Activity (system user)
     const systemUser = await prisma.user.findFirst({ where: { role: 'ADMIN' } });

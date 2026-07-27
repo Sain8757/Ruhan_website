@@ -28,6 +28,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const body = await req.json();
 
+    const oldService = await prisma.service.findUnique({ where: { id } });
+    if (!oldService) return NextResponse.json({ error: "Service not found" }, { status: 404 });
+
+    const userId = (session.user as any)?.id || "admin-hardcoded";
+
     const service = await prisma.service.update({
       where: { id },
       data: {
@@ -51,8 +56,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       },
     });
 
-    const userId = (session.user as any)?.id;
-    if (userId && userId !== "admin-hardcoded") {
+    if (userId !== "admin-hardcoded") {
       await prisma.activityLog.create({
         data: {
           userId: userId,
@@ -62,6 +66,37 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
           details: `Updated service status to ${service.status}`,
         },
       });
+    }
+
+    // Auto-Billing logic
+    if (body.status === "DELIVERED" && oldService.status !== "DELIVERED" && service.fees > 0) {
+      const existingInvoice = await prisma.invoice.findFirst({
+        where: { notes: { contains: service.id } }
+      });
+      if (!existingInvoice) {
+        const invNumber = 'INV-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+        await prisma.invoice.create({
+          data: {
+            invoiceNumber: invNumber,
+            customerId: service.customerId,
+            createdById: userId,
+            subtotal: service.fees,
+            total: service.fees,
+            amountPaid: service.paymentStatus === 'PAID' ? service.fees : 0,
+            paymentMode: service.paymentMode,
+            paymentStatus: service.paymentStatus,
+            notes: `Auto-generated for Service ID: ${service.id}`,
+            items: {
+              create: [{
+                name: service.serviceType,
+                quantity: 1,
+                price: service.fees,
+                total: service.fees
+              }]
+            }
+          }
+        });
+      }
     }
 
     return NextResponse.json(service);

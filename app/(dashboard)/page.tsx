@@ -35,6 +35,7 @@ import {
 } from "recharts";
 import { formatCurrency, SERVICE_STATUS_COLORS } from "@/lib/utils";
 import { format } from "date-fns";
+import BulkRemindersWidget from "@/components/dashboard/BulkRemindersWidget";
 
 interface DashboardData {
   todayIncome: number;
@@ -602,6 +603,8 @@ export default function DashboardPage() {
             );
           })}
         </div>
+        
+        <BulkRemindersWidget />
       </section>
 
       {/* ===== CHARTS ROW ===== */}
