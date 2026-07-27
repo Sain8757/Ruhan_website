@@ -108,6 +108,8 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
 
   // Document Viewer Modal
   const [previewImg, setPreviewImg] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [originalUrl, setOriginalUrl] = useState<string | null>(null);
 
   // ── Load service ─────────────────────────────────────────────
   const loadService = useCallback(() => {
@@ -227,8 +229,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
   const handleDownload = async (url: string) => {
     try {
       toast.info("Downloading...");
-      const fetchUrl = (url.includes('res.cloudinary.com') && !url.match(/\.[a-zA-Z]{3,4}$/)) ? url + '.jpg' : url;
-      const response = await fetch(fetchUrl);
+      const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to fetch image");
       
       const blob = await response.blob();
@@ -247,8 +248,28 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
     } catch (error) {
       console.error(error);
       toast.error("Direct download failed. Opening in new tab.");
-      const fallbackUrl = (url.includes('res.cloudinary.com') && !url.match(/\.[a-zA-Z]{3,4}$/)) ? url + '.jpg' : url;
-      window.open(fallbackUrl, '_blank');
+      window.open(url, '_blank');
+    }
+  };
+
+  const openPreview = async (url: string) => {
+    setOriginalUrl(url);
+    if (url.includes('res.cloudinary.com') && !url.match(/\.[a-zA-Z]{3,4}$/)) {
+      setPreviewLoading(true);
+      setPreviewImg(null); // Clear previous
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Failed to load");
+        const blob = await res.blob();
+        setPreviewImg(URL.createObjectURL(blob));
+      } catch (e) {
+        console.error(e);
+        setPreviewImg(url); // fallback
+      } finally {
+        setPreviewLoading(false);
+      }
+    } else {
+      setPreviewImg(url);
     }
   };
 
@@ -717,7 +738,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                                     <span style={{ fontSize:"18px" }}>{isImage ? "🖼" : "📄"}</span>
                                     <span style={{ flex:1,fontSize:"11px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{name}</span>
                                     {isImage ? (
-                                      <button type="button" onClick={() => setPreviewImg(url)} style={Btn({fontSize:"10px",padding:"2px 6px"})}><Download size={10}/> View</button>
+                                      <button type="button" onClick={() => openPreview(url)} style={Btn({fontSize:"10px",padding:"2px 6px"})}><Download size={10}/> View</button>
                                     ) : (
                                       <a href={url} target="_blank" rel="noreferrer" style={Btn({fontSize:"10px",padding:"2px 6px"})}><Download size={10}/> View</a>
                                     )}
@@ -925,38 +946,44 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
       )}
 
       {/* Preview Image Modal overlay (Root Level) */}
-      {previewImg && (
+      {(previewImg || previewLoading) && (
         <div style={{ position:"fixed",inset:0,zIndex:100000,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"center",justifyContent:"center" }}>
           <div style={{ background:"#d4d0c8", ...raised, display:"flex", flexDirection:"column", width:"80%", maxWidth:"700px", maxHeight:"85vh", boxShadow:"0 10px 30px rgba(0,0,0,0.8)" }}>
             <div style={{ background:"linear-gradient(90deg,#000080,#1084d0)", color:"white", padding:"6px 10px", fontWeight:"bold", fontSize:"13px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
               <span>Document Viewer</span>
-              <button onClick={() => setPreviewImg(null)} style={{ background:"#d4d0c8", color:"black", border:"none", padding:"1px 6px", cursor:"pointer", ...raised, fontWeight:"bold" }}>✕</button>
+              <button onClick={() => { setPreviewImg(null); setPreviewLoading(false); }} style={{ background:"#d4d0c8", color:"black", border:"none", padding:"1px 6px", cursor:"pointer", ...raised, fontWeight:"bold" }}>✕</button>
             </div>
             
             <div style={{ flex:1, background:"#000", display:"flex", alignItems:"center", justifyContent:"center", padding:"10px", overflow:"hidden", minHeight:"300px" }}>
-              <img 
-                src={(previewImg.includes('res.cloudinary.com') && !previewImg.match(/\.[a-zA-Z]{3,4}$/)) ? previewImg + '.jpg' : previewImg} 
-                alt="Preview" 
-                style={{ maxWidth:"100%", maxHeight:"100%", objectFit:"contain" }} 
-                onError={(e) => { 
-                  toast.error('Failed to load preview. Please use Download or View in New Tab.'); 
-                }} 
-              />
+              {previewLoading ? (
+                <div style={{ color:"white", display:"flex", flexDirection:"column", alignItems:"center", gap:"10px" }}>
+                  <Loader2 className="animate-spin" size={32} />
+                  <span>Loading Image...</span>
+                </div>
+              ) : (
+                <img 
+                  src={previewImg || undefined} 
+                  alt="Preview" 
+                  style={{ maxWidth:"100%", maxHeight:"100%", objectFit:"contain" }} 
+                  onError={(e) => { 
+                    toast.error('Failed to load preview. Please use Download or View in New Tab.'); 
+                  }} 
+                />
+              )}
             </div>
             
             <div style={{ padding:"10px", display:"flex", justifyContent:"center", flexWrap: "wrap", gap:"10px", background:"#111" }}>
-              <button onClick={() => setPreviewImg(null)} style={{ ...Btn(), padding:"6px 20px" }}>
+              <button onClick={() => { setPreviewImg(null); setPreviewLoading(false); }} style={{ ...Btn(), padding:"6px 20px" }}>
                 Close
               </button>
-              <button onClick={() => sendReuploadWA(previewImg)} style={{ ...Btn(), padding:"6px 16px", background:"#25D366", color:"white", border:"2px solid #1da851" }}>
+              <button onClick={() => sendReuploadWA(originalUrl || '')} style={{ ...Btn(), padding:"6px 16px", background:"#25D366", color:"white", border:"2px solid #1da851" }}>
                 📱 Request Re-upload
               </button>
-              <button onClick={() => handleDownload(previewImg)} style={{ ...Btn(), padding:"6px 16px", background:"#1084d0", color:"white", border:"2px solid #000080" }}>
+              <button onClick={() => handleDownload(originalUrl || '')} style={{ ...Btn(), padding:"6px 16px", background:"#1084d0", color:"white", border:"2px solid #000080" }}>
                 ⬇️ Download
               </button>
               <button onClick={() => {
-                const fallbackUrl = (previewImg.includes('res.cloudinary.com') && !previewImg.match(/\.[a-zA-Z]{3,4}$/)) ? previewImg + '.jpg' : previewImg;
-                window.open(fallbackUrl, '_blank');
+                window.open(originalUrl || '', '_blank');
               }} style={{ ...Btn(), padding:"6px 16px" }}>
                 ↗️ Open in New Tab
               </button>
