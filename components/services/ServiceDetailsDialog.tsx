@@ -288,14 +288,24 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !serviceId) return;
+    
+    // Prompt for rename
+    const ext = file.name.split('.').pop() || '';
+    const defaultName = file.name.includes('.') ? file.name.substring(0, file.name.lastIndexOf('.')) : file.name;
+    let customName = window.prompt("Enter file name (without extension):", defaultName);
+    if (customName === null) return;
+    if (customName.trim() === "") customName = defaultName;
+    const finalFileName = `${customName.trim()}.${ext}`;
+    const renamedFile = new File([file], finalFileName, { type: file.type });
+
     setUploading(true);
     try {
-      const fd = new FormData(); fd.append("file", file);
+      const fd = new FormData(); fd.append("file", renamedFile);
       const res = await fetch(`/api/services/${serviceId}/upload`, { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Upload failed");
       setDocUrls(prev => [...prev, data.url]);
-      toast.success(`${file.name} uploaded!`);
+      toast.success(`${finalFileName} uploaded!`);
     } catch (err: any) { toast.error(err.message); }
     finally { setUploading(false); if (fileInputRef.current) fileInputRef.current.value = ""; }
   };
@@ -737,10 +747,11 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                                   <div key={i} style={{ display:"flex",alignItems:"center",gap:"8px",padding:"5px",borderBottom:"1px solid #ccc" }}>
                                     <span style={{ fontSize:"18px" }}>{isImage ? "🖼" : "📄"}</span>
                                     <span style={{ flex:1,fontSize:"11px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{name}</span>
+                                    <button type="button" onClick={() => handleDownload(url)} style={Btn({fontSize:"10px",padding:"2px 6px"})}><Download size={10}/> D/L</button>
                                     {isImage ? (
-                                      <button type="button" onClick={() => openPreview(url)} style={Btn({fontSize:"10px",padding:"2px 6px"})}><Download size={10}/> View</button>
+                                      <button type="button" onClick={() => openPreview(url)} style={Btn({fontSize:"10px",padding:"2px 6px"})}>View</button>
                                     ) : (
-                                      <a href={url} target="_blank" rel="noreferrer" style={Btn({fontSize:"10px",padding:"2px 6px"})}><Download size={10}/> View</a>
+                                      <a href={url} target="_blank" rel="noreferrer" style={Btn({fontSize:"10px",padding:"2px 6px"})}>View</a>
                                     )}
                                     <button type="button" onClick={() => handleDeleteDoc(url)} style={Btn({fontSize:"10px",padding:"2px 6px",color:"#cc0000"})}><X size={10}/></button>
                                   </div>
