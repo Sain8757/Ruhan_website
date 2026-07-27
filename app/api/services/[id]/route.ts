@@ -21,49 +21,54 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const session = await auth();
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { id } = await params;
-  const body = await req.json();
+    const { id } = await params;
+    const body = await req.json();
 
-  const service = await prisma.service.update({
-    where: { id },
-    data: {
-      status: body.status,
-      fees: parseFloat(body.fees) || 0,
-      paymentStatus: body.paymentStatus,
-      paymentMode: body.paymentMode,
-      notes: body.notes || null,
-      requiredDocs: body.requiredDocs !== undefined ? body.requiredDocs : undefined,
-      submittedAt: body.status === "SUBMITTED" ? new Date() : undefined,
-      approvedAt: body.status === "APPROVED" ? new Date() : undefined,
-      deliveredAt: body.status === "DELIVERED" ? new Date() : undefined,
-      deadline: body.deadline !== undefined ? (body.deadline ? new Date(body.deadline) : null) : undefined,
-      referenceNo: body.referenceNo !== undefined ? body.referenceNo : undefined,
-      vendorId: body.vendorId !== undefined ? body.vendorId : undefined,
-      vendorCost: body.vendorCost !== undefined ? parseFloat(body.vendorCost) : undefined,
-      missingDocs: body.missingDocs !== undefined ? body.missingDocs : undefined,
-      tasks: body.tasks !== undefined ? body.tasks : undefined,
-      tags: body.tags !== undefined ? body.tags : undefined,
-      callbackAt: body.callbackAt !== undefined ? (body.callbackAt ? new Date(body.callbackAt) : null) : undefined,
-    },
-  });
-
-  const userId = (session.user as any).id;
-  if (userId !== "admin-hardcoded") {
-    await prisma.activityLog.create({
+    const service = await prisma.service.update({
+      where: { id },
       data: {
-        userId: userId,
-        action: "UPDATE_SERVICE_STATUS",
-        entity: "Service",
-        entityId: service.id,
-        details: `Updated service status to ${service.status}`,
+        status: body.status,
+        fees: parseFloat(body.fees) || 0,
+        paymentStatus: body.paymentStatus,
+        paymentMode: body.paymentMode,
+        notes: body.notes || null,
+        requiredDocs: body.requiredDocs !== undefined ? body.requiredDocs : undefined,
+        submittedAt: body.status === "SUBMITTED" ? new Date() : undefined,
+        approvedAt: body.status === "APPROVED" ? new Date() : undefined,
+        deliveredAt: body.status === "DELIVERED" ? new Date() : undefined,
+        deadline: body.deadline !== undefined ? (body.deadline ? new Date(body.deadline) : null) : undefined,
+        referenceNo: body.referenceNo !== undefined ? (body.referenceNo || null) : undefined,
+        vendorId: body.vendorId !== undefined ? (body.vendorId || null) : undefined,
+        vendorCost: body.vendorCost !== undefined ? parseFloat(body.vendorCost) : undefined,
+        missingDocs: body.missingDocs !== undefined ? (body.missingDocs || null) : undefined,
+        tasks: body.tasks !== undefined ? body.tasks : undefined,
+        tags: body.tags !== undefined ? body.tags : undefined,
+        callbackAt: body.callbackAt !== undefined ? (body.callbackAt ? new Date(body.callbackAt) : null) : undefined,
       },
     });
-  }
 
-  return NextResponse.json(service);
+    const userId = (session.user as any)?.id;
+    if (userId && userId !== "admin-hardcoded") {
+      await prisma.activityLog.create({
+        data: {
+          userId: userId,
+          action: "UPDATE_SERVICE_STATUS",
+          entity: "Service",
+          entityId: service.id,
+          details: `Updated service status to ${service.status}`,
+        },
+      });
+    }
+
+    return NextResponse.json(service);
+  } catch (error: any) {
+    console.error("PUT /api/services/[id] Error:", error);
+    return NextResponse.json({ error: error.message || "Failed to update service" }, { status: 500 });
+  }
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
