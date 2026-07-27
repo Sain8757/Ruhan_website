@@ -218,10 +218,38 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
 
   const sendReuploadWA = (url: string) => {
     if (!service?.customer?.mobile) { toast.error("No mobile number"); return; }
-    const docName = url.split("/").pop() || "Document";
+    const docName = decodeURIComponent(url.split("/").pop() || "Document");
     const link = `${window.location.origin}/status`;
     const text = `Hello ${service.customer.name},\nAapka upload kiya gaya document '${docName}' clear nahi hai ya galat hai.\nKripya is link par jaa kar wapas theek document upload karein:\n\n🔗 ${link}\n\nMobile No: ${service.customer.mobile}\nTracking ID: ${service.trackingId}\n\nThank you,\nRA Seva Point`;
     window.open(`https://wa.me/91${service.customer.mobile.replace(/\D/g,"").slice(-10)}?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const handleDownload = async (url: string) => {
+    try {
+      toast.info("Downloading...");
+      const fetchUrl = (url.includes('res.cloudinary.com') && !url.match(/\.[a-zA-Z]{3,4}$/)) ? url + '.jpg' : url;
+      const response = await fetch(fetchUrl);
+      if (!response.ok) throw new Error("Failed to fetch image");
+      
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      
+      let filename = decodeURIComponent(url.split('/').pop() || 'document');
+      if (!filename.match(/\.[a-zA-Z]{3,4}$/)) filename += '.jpg';
+      
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error(error);
+      toast.error("Direct download failed. Opening in new tab.");
+      const fallbackUrl = (url.includes('res.cloudinary.com') && !url.match(/\.[a-zA-Z]{3,4}$/)) ? url + '.jpg' : url;
+      window.open(fallbackUrl, '_blank');
+    }
   };
 
   const handleSync = async () => {
@@ -681,8 +709,9 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                             : docUrls.map((url,i) => {
                                 // Extract the original filename from the url (e.g. from cloudniary)
                                 const decodedUrl = decodeURIComponent(url);
-                                const name = decodedUrl.split("/").pop() || `Document ${i+1}`;
-                                const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(decodedUrl);
+                                let name = decodedUrl.split("/").pop() || `Document ${i+1}`;
+                                if (!name.match(/\.[a-zA-Z]{3,4}$/)) name += '.jpg'; // Display with extension
+                                const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(name) || url.includes('res.cloudinary.com');
                                 return (
                                   <div key={i} style={{ display:"flex",alignItems:"center",gap:"8px",padding:"5px",borderBottom:"1px solid #ccc" }}>
                                     <span style={{ fontSize:"18px" }}>{isImage ? "🖼" : "📄"}</span>
@@ -906,7 +935,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
             
             <div style={{ flex:1, background:"#000", display:"flex", alignItems:"center", justifyContent:"center", padding:"10px", overflow:"hidden", minHeight:"300px" }}>
               <img 
-                src={previewImg} 
+                src={(previewImg.includes('res.cloudinary.com') && !previewImg.match(/\.[a-zA-Z]{3,4}$/)) ? previewImg + '.jpg' : previewImg} 
                 alt="Preview" 
                 style={{ maxWidth:"100%", maxHeight:"100%", objectFit:"contain" }} 
                 onError={(e) => { 
@@ -922,15 +951,13 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
               <button onClick={() => sendReuploadWA(previewImg)} style={{ ...Btn(), padding:"6px 16px", background:"#25D366", color:"white", border:"2px solid #1da851" }}>
                 📱 Request Re-upload
               </button>
-              <button onClick={() => {
-                const parts = previewImg.split('/upload/');
-                const filename = decodeURIComponent(previewImg.split('/').pop() || 'document.jpg');
-                const dlUrl = parts.length === 2 ? `${parts[0]}/upload/fl_attachment:${filename}/${parts[1]}` : previewImg;
-                window.open(dlUrl, '_blank');
-              }} style={{ ...Btn(), padding:"6px 16px", background:"#1084d0", color:"white", border:"2px solid #000080" }}>
+              <button onClick={() => handleDownload(previewImg)} style={{ ...Btn(), padding:"6px 16px", background:"#1084d0", color:"white", border:"2px solid #000080" }}>
                 ⬇️ Download
               </button>
-              <button onClick={() => window.open(previewImg, '_blank')} style={{ ...Btn(), padding:"6px 16px" }}>
+              <button onClick={() => {
+                const fallbackUrl = (previewImg.includes('res.cloudinary.com') && !previewImg.match(/\.[a-zA-Z]{3,4}$/)) ? previewImg + '.jpg' : previewImg;
+                window.open(fallbackUrl, '_blank');
+              }} style={{ ...Btn(), padding:"6px 16px" }}>
                 ↗️ Open in New Tab
               </button>
             </div>
