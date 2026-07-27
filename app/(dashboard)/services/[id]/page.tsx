@@ -527,13 +527,10 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
                   </form>
                 </fieldset>
               </div>
-
             </div>
           </div>
         </div>
       </div>
-      </div>
-
     </div>
   );
 }
