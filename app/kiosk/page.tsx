@@ -90,6 +90,9 @@ export default function KioskPage() {
   const [tokenLabel, setTokenLabel] = useState('');
   const [queuePosition, setQueuePosition] = useState(1);
   const [estimatedWait, setEstimatedWait] = useState(5);
+
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [uploadedCount, setUploadedCount] = useState(0);
   const [errorMsg, setErrorMsg] = useState('');
   const [prices, setPrices] = useState<Record<string, string>>(PRICE_MAP);
 
@@ -161,6 +164,27 @@ export default function KioskPage() {
   const resetForm = () => {
     setStep(1); setMobile(''); setName(''); setNameFound(false);
     setTicket(''); setTokenLabel(''); setErrorMsg('');
+    setUploadedCount(0);
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !ticket) return;
+    setUploadingDoc(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('trackingId', ticket);
+      const res = await fetch('/api/kiosk/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      setUploadedCount(c => c + 1);
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setUploadingDoc(false);
+      e.target.value = '';
+    }
   };
 
   // Win95 inset style
@@ -347,6 +371,28 @@ export default function KioskPage() {
                 <p style={{ fontFamily: 'Tahoma', fontSize: '11px', color: '#555', marginTop: '8px', textAlign: 'center' }}>
                   {t.successMsg}
                 </p>
+              </fieldset>
+
+              {/* Upload Documents Section */}
+              <fieldset style={{ border: '2px groove #c0c0c0', padding: '10px' }}>
+                <legend style={{ fontFamily: 'Tahoma', fontSize: '12px', padding: '0 4px', color: '#000080', fontWeight: 'bold' }}>📎 {lang === 'en' ? 'Upload Documents (Optional)' : 'दस्तावेज़ अपलोड करें'}</legend>
+                <div style={{ fontSize: '11px', color: '#444', marginBottom: '8px', textAlign: 'center' }}>
+                  {lang === 'en' ? 'Save time! Upload required documents like Aadhaar/PAN from your phone while you wait.' : 'समय बचाएं! अपनी बारी का इंतज़ार करते हुए मोबाइल से दस्तावेज़ अपलोड करें।'}
+                </div>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <input type="file" id="kiosk-upload" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleUpload} />
+                  <button type="button" onClick={() => document.getElementById('kiosk-upload')?.click()} disabled={uploadingDoc}
+                    style={{ ...btn, background: '#0a246a', color: 'white', padding: '10px', fontSize: '14px', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                    {uploadingDoc ? <Loader2 size={16} className="animate-spin" /> : '📸'}
+                    {uploadingDoc ? (lang === 'en' ? 'Uploading...' : 'अपलोड हो रहा है...') : (lang === 'en' ? 'Take Photo or Upload' : 'फोटो लें या अपलोड करें')}
+                  </button>
+                  {uploadedCount > 0 && (
+                    <div style={{ background: '#d4edda', border: '1px solid #c3e6cb', color: '#155724', padding: '6px', fontSize: '11px', textAlign: 'center', fontWeight: 'bold' }}>
+                      ✓ {uploadedCount} {lang === 'en' ? 'Document(s) uploaded successfully!' : 'दस्तावेज़ सफलतापूर्वक अपलोड हुए!'}
+                    </div>
+                  )}
+                </div>
               </fieldset>
 
               <button onClick={resetForm} style={{ ...btn, width: '100%', padding: '8px', fontSize: '14px', textAlign: 'center' }}>
