@@ -256,7 +256,7 @@ export default function ScanningModal({ imageSrc, onComplete }: ScanningModalPro
         <div className="p-4 flex items-center justify-center bg-gray-100 overflow-y-auto" style={{ minHeight: "60vh" }}>
           {status === "scanning" ? (
             <div className="relative w-64 h-80 bg-white shadow-md rounded-md overflow-hidden border border-gray-200">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+              { }
               <img 
                 src={imageSrc} 
                 alt="Scanning" 

@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
+"use client";
 import React, { useState, useEffect } from "react";
 import LegacyDialog from "@/components/layout/LegacyDialog";
 import { useToast } from "@/contexts/ToastContext";

@@ -235,8 +235,8 @@ export default function PvcCardStudioPage() {
     try {
       const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const pageWidth = 210;
-      let startX = (pageWidth - (CARD_WIDTH_MM * 2 + 6)) / 2;
-      let startY = 25;
+      const startX = (pageWidth - (CARD_WIDTH_MM * 2 + 6)) / 2;
+      const startY = 25;
 
       if (croppedFront && croppedBack) {
         // Clean Side-by-Side Dual PVC Layout (No text headers)

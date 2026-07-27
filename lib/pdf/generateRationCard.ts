@@ -52,7 +52,7 @@ export async function generateRationCardPDF(data: FormValues): Promise<string> {
     try {
       const base64Data = data.photoBase64.split(',')[1] || data.photoBase64;
       const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-      let image = data.photoBase64.includes('image/png') ? await pdfDoc.embedPng(imageBytes) : await pdfDoc.embedJpg(imageBytes);
+      const image = data.photoBase64.includes('image/png') ? await pdfDoc.embedPng(imageBytes) : await pdfDoc.embedJpg(imageBytes);
       page1.drawImage(image, { x: 430, y: 540, width: 100, height: 120 });
     } catch (e) {
       console.error("Error embedding photo", e);
@@ -143,7 +143,7 @@ export async function generateRationCardPDF(data: FormValues): Promise<string> {
     try {
       const base64Data = data.signatureBase64.split(',')[1] || data.signatureBase64;
       const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
-      let image = data.signatureBase64.includes('image/png') ? await pdfDoc.embedPng(imageBytes) : await pdfDoc.embedJpg(imageBytes);
+      const image = data.signatureBase64.includes('image/png') ? await pdfDoc.embedPng(imageBytes) : await pdfDoc.embedJpg(imageBytes);
       page3.drawImage(image, { x: 380, y: 440, width: 120, height: 40 });
       page3.drawImage(image, { x: 380, y: 530, width: 120, height: 40 }); // Two signature slots usually (Declaration & End)
     } catch (e) {

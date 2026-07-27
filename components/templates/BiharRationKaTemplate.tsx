@@ -5,6 +5,16 @@ interface Props {
   data: BiharRationKaData;
 }
 
+const checkedIcon = "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%2214%22%20height%3D%2214%22%20fill%3D%22white%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%2F%3E%3Cpath%20d%3D%22M4%208%20L7%2011%20L12%204%22%20stroke%3D%22black%22%20stroke-width%3D%222.5%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E";
+const uncheckedIcon = "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%2214%22%20height%3D%2214%22%20fill%3D%22white%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%2F%3E%3C%2Fsvg%3E";
+
+const CheckBox = ({ checked, label }: { checked: boolean; label: string }) => (
+  <span className="checkbox-group" style={{ whiteSpace: 'nowrap' }}>
+    <span>{label}</span>
+    <img src={checked ? checkedIcon : uncheckedIcon} alt={checked ? 'Yes' : 'No'} style={{ width: '14px', height: '14px', display: 'inline-block', verticalAlign: 'middle', marginLeft: '4px', marginBottom: '2px' }} />
+  </span>
+);
+
 export function BiharRationKaTemplate({ data }: Props) {
   
   // Array of 7 members for page 1 table
@@ -13,15 +23,6 @@ export function BiharRationKaTemplate({ data }: Props) {
     members.push({ name: '', fatherHusbandName: '', gender: '', age: '', maritalStatus: '', relation: '', aadhaar: '', mobile: '', occupation: '', incomeSource: '', monthlyIncome: '' });
   }
   const displayMembers = members.slice(0, 7);
-  const checkedIcon = "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%2214%22%20height%3D%2214%22%20fill%3D%22white%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%2F%3E%3Cpath%20d%3D%22M4%208%20L7%2011%20L12%204%22%20stroke%3D%22black%22%20stroke-width%3D%222.5%22%20fill%3D%22none%22%2F%3E%3C%2Fsvg%3E";
-  const uncheckedIcon = "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%3E%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%2214%22%20height%3D%2214%22%20fill%3D%22white%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%2F%3E%3C%2Fsvg%3E";
-
-  const CheckBox = ({ checked, label }: { checked: boolean; label: string }) => (
-    <span className="checkbox-group" style={{ whiteSpace: 'nowrap' }}>
-      <span>{label}</span>
-      <img src={checked ? checkedIcon : uncheckedIcon} alt={checked ? 'Yes' : 'No'} style={{ width: '14px', height: '14px', display: 'inline-block', verticalAlign: 'middle', marginLeft: '4px', marginBottom: '2px' }} />
-    </span>
-  );
 
   return (
     <div className="ration-ka-wrapper bg-white" style={{ width: '210mm', margin: '0 auto', boxSizing: 'border-box' }}>

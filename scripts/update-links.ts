@@ -441,7 +441,7 @@ const updates = [
 
 async function updateLinks() {
   for (const update of updates) {
-    let category = await prisma.onlineServiceCategory.findFirst({
+    const category = await prisma.onlineServiceCategory.findFirst({
       where: { order: update.order }
     });
 

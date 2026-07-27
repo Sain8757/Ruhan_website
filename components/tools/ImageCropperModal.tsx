@@ -78,7 +78,6 @@ export default function ImageCropperModal({
             onComplete={(c) => setCompletedCrop(c)}
             className="inline-block"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
               ref={imgRef} 
               src={imageSrc} 

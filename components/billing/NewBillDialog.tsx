@@ -191,7 +191,7 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess }: NewBillDia
     }
     
     setLoading(true);
-    let finalAmountPaid = paymentStatus === "PAID" ? total : paymentStatus === "PARTIAL" ? (Number(amountPaid) || 0) : 0;
+    const finalAmountPaid = paymentStatus === "PAID" ? total : paymentStatus === "PARTIAL" ? (Number(amountPaid) || 0) : 0;
 
     try {
       const res = await fetch("/api/invoices", {

@@ -421,7 +421,7 @@ export default function SignatureResizer() {
                   </div>
                   
                   <div className="relative aspect-[4/3] bg-gray-50/50 rounded-lg border border-gray-100 overflow-hidden mb-4 flex items-center justify-center">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    { }
                     <img src={item.croppedPreviewUrl || item.previewUrl} alt="preview" className="max-h-full max-w-full object-contain p-2" />
                     
                     {item.cropDimensions && (
@@ -612,7 +612,7 @@ export default function SignatureResizer() {
                     onChange={(_, percentCrop) => setTempCrop(percentCrop)}
                     className="max-w-full rounded-lg shadow-sm overflow-hidden"
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    { }
                     <img
                       ref={imageRef}
                       src={croppingItem.previewUrl}

@@ -255,7 +255,7 @@ export default function EditBillDialog({
     }
 
     setLoading(true);
-    let finalAmountPaid =
+    const finalAmountPaid =
       paymentStatus === "PAID"
         ? total
         : paymentStatus === "PARTIAL"

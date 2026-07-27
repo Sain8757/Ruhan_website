@@ -384,7 +384,7 @@ export default function MultiIdCropperPage() {
                     <span className="text-sm font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>Front Side</span>
                     {doc.frontImage ? (
                       <div className="relative group rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 aspect-video flex items-center justify-center">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        { }
                         <img src={doc.frontImage} alt={`${doc.type} Front`} className="max-h-full object-contain" />
                         <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <button 
@@ -416,7 +416,7 @@ export default function MultiIdCropperPage() {
                       <span className="text-sm font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>Back Side (Optional)</span>
                       {doc.backImage ? (
                         <div className="relative group rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 aspect-video flex items-center justify-center">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          { }
                           <img src={doc.backImage} alt={`${doc.type} Back`} className="max-h-full object-contain" />
                           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                             <button 
