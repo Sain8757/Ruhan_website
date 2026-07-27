@@ -1,11 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Loader2, Search, FileUp, CheckCircle, AlertTriangle, ArrowLeft, Clock, MessageSquare, CreditCard } from 'lucide-react';
 import { format } from "date-fns";
+import { useSearchParams } from 'next/navigation';
 
-export default function CustomerStatusPage() {
-  const [query, setQuery] = useState('');
+function CustomerStatusContent() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams?.get('query') || '';
+  
+  const [query, setQuery] = useState(initialQuery);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   
@@ -44,9 +48,7 @@ export default function CustomerStatusPage() {
     gap: '6px'
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query) return;
+  const fetchStatus = async (searchQuery: string) => {
     setLoading(true);
     setErrorMsg('');
     setServices([]);
@@ -54,7 +56,7 @@ export default function CustomerStatusPage() {
     setUploadedCount(0);
     
     try {
-      const res = await fetch(`/api/customer/status?query=${encodeURIComponent(query)}`);
+      const res = await fetch(`/api/customer/status?query=${encodeURIComponent(searchQuery)}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch status');
       
@@ -68,6 +70,18 @@ export default function CustomerStatusPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    if (initialQuery) {
+      fetchStatus(initialQuery);
+    }
+  }, [initialQuery]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!query) return;
+    await fetchStatus(query);
   };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -293,5 +307,17 @@ export default function CustomerStatusPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CustomerStatusPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#008080' }}>
+        <Loader2 size={32} className="animate-spin text-white" />
+      </div>
+    }>
+      <CustomerStatusContent />
+    </Suspense>
   );
 }

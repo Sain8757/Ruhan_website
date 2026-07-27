@@ -441,7 +441,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                     {service.tokenNumber && <div style={{ fontSize:"11px",marginBottom:"4px" }}>Token: <strong style={{ color:"#000080" }}>T{String(service.tokenNumber).padStart(3,"0")}</strong></div>}
                     <div style={{ display:"flex",gap:"4px" }}>
                       <button type="button" onClick={() => { navigator.clipboard.writeText(service.trackingId||""); toast.success("Copied!"); }} style={Btn({flex:1,justifyContent:"center",fontSize:"10px"})}><Copy size={9}/> Copy</button>
-                      <button type="button" onClick={() => window.open(`/track/${service.trackingId}`,"_blank")} style={Btn({flex:1,justifyContent:"center",fontSize:"10px"})}><ExternalLink size={9}/> View</button>
+                      <button type="button" onClick={() => window.open(`/status?query=${service.trackingId}`,"_blank")} style={Btn({flex:1,justifyContent:"center",fontSize:"10px"})}><ExternalLink size={9}/> View</button>
                     </div>
                   </div>
 
