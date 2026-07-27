@@ -422,7 +422,7 @@ export default function ServicesPage() {
       ) : view === "kanban" ? (
         <KanbanBoard 
             services={filtered} 
-            onSelect={setSelectedService} 
+            onSelect={(s) => { setSelectedService(s); setIsDetailsOpen(true); }}
             onStatusChange={handleStatusChange} 
           />
       ) : (
@@ -451,7 +451,7 @@ export default function ServicesPage() {
                 <tr
                   key={s.id}
                   className={`cursor-pointer ${selectedIds.has(s.id) ? 'bg-blue-50' : ''}`}
-                  onClick={() => setSelectedService(s)}
+                  onClick={() => { setSelectedService(s); setIsDetailsOpen(true); }}
                 >
                   <td onClick={(e) => toggleSelection(s.id, e)}>
                     <input 
@@ -505,62 +505,9 @@ export default function ServicesPage() {
         onSuccess={fetchServices}
       />
 
-      <LegacyDialog
-        isOpen={!!selectedService && !isDetailsOpen}
-        onClose={() => setSelectedService(null)}
-        title="Service Status"
-        width="350px"
-      >
-        {selectedService && (
-          <div style={{ padding: '8px' }}>
-            <fieldset className="legacy-fieldset" style={{ marginBottom: '8px' }}>
-              <legend>Customer</legend>
-              <div className="font-semibold text-lg" style={{ color: "black" }}>{selectedService.customer.name}</div>
-              <div className="text-xs" style={{ color: "black" }}>{selectedService.customer.mobile}</div>
-            </fieldset>
-
-            <fieldset className="legacy-fieldset" style={{ marginBottom: '8px' }}>
-              <legend>Service Request</legend>
-              <div className="font-medium" style={{ color: "black" }}>{selectedService.serviceType}</div>
-            </fieldset>
-
-            <fieldset className="legacy-fieldset" style={{ marginBottom: '12px' }}>
-              <legend>Current Status</legend>
-              <span className={`badge ${SERVICE_STATUS_COLORS[selectedService.status]} text-sm px-3 py-1`}>
-                {STATUS_LABELS[selectedService.status]}
-              </span>
-            </fieldset>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-              <button 
-                type="button"
-                className="legacy-button"
-                style={{ color: '#e81123', fontWeight: 'bold' }}
-                onClick={async () => {
-                  if (!confirm("Are you sure you want to delete this service record?")) return;
-                  try {
-                    const res = await fetch(`/api/services/${selectedService.id}`, { method: "DELETE" });
-                    if (!res.ok) throw new Error("Failed to delete service");
-                    toast.success("Service record deleted");
-                    setSelectedService(null);
-                    fetchServices();
-                  } catch (err: any) {
-                    toast.error(err.message);
-                  }
-                }}
-              >
-                Delete
-              </button>
-              <button className="legacy-button" onClick={() => setSelectedService(null)}>Close</button>
-              <button className="legacy-button" onClick={() => router.push(`/services/${selectedService.id}`)} style={{ fontWeight: 'bold' }}>View Full Details</button>
-            </div>
-          </div>
-        )}
-      </LegacyDialog>
-
       <ServiceDetailsDialog
         isOpen={isDetailsOpen}
-        onClose={() => setIsDetailsOpen(false)}
+        onClose={() => { setIsDetailsOpen(false); setSelectedService(null); }}
         serviceId={selectedService?.id || null}
         onSuccess={() => {
           setIsDetailsOpen(false);
