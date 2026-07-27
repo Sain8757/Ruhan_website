@@ -101,6 +101,10 @@ model Service {
   missingDocs    String?
   deliveredAt    DateTime?
   tasks          Json?
+  tags           String[]         // e.g. ["urgent", "govt-portal", "outsourced"]
+  callbackAt     DateTime?        // Appointment/callback reminder
+  comments       Json?            // Internal comment thread [{text,author,createdAt}]
+  serviceDocUrls String[]         // Uploaded document URLs
 
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt

@@ -45,6 +45,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       vendorCost: body.vendorCost !== undefined ? parseFloat(body.vendorCost) : undefined,
       missingDocs: body.missingDocs !== undefined ? body.missingDocs : undefined,
       tasks: body.tasks !== undefined ? body.tasks : undefined,
+      tags: body.tags !== undefined ? body.tags : undefined,
+      callbackAt: body.callbackAt !== undefined ? (body.callbackAt ? new Date(body.callbackAt) : null) : undefined,
     },
   });
 
