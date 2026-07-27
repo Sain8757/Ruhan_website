@@ -213,7 +213,7 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
   if (!service) return null;
 
   return (
-    <div className="max-w-4xl mx-auto pb-12">
+    <div className="w-full pb-12">
       {/* Printable Service Token Slip (Hidden on screen, visible on print) */}
       <div className="hidden print:block text-black font-mono p-6 border-2 border-black max-w-lg mx-auto">
         <div className="text-center pb-2 border-b-2 border-black mb-3">
@@ -252,10 +252,10 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
           <p className="font-bold mt-1">Thank you for visiting RA Seva Point!</p>
         </div>
       </div>      {/* Screen Header (Hidden on Print) */}
-      <div className="bg-[#c0c0c0] min-h-screen text-black font-sans text-xs p-1 md:p-4 no-print flex justify-center">
+      <div className="bg-[#c0c0c0] min-h-screen text-black font-sans text-xs p-1 md:p-2 no-print flex justify-center">
         
         {/* Main Dialog Window */}
-        <div className="border-t-white border-l-white border-b-black border-r-black border-[2px] w-full max-w-5xl bg-[#c0c0c0] shadow-[1px_1px_0px_#000]">
+        <div className="border-t-white border-l-white border-b-black border-r-black border-[2px] w-full bg-[#c0c0c0]">
           
           {/* Windows 95 Title Bar */}
           <div className="bg-[#0000aa] text-white p-1 flex justify-between items-center font-bold px-2 border-b-2 border-transparent">
