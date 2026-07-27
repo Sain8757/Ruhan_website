@@ -4,43 +4,67 @@ import { prisma } from '@/lib/db';
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const mobile = searchParams.get('mobile');
-    const trackingId = searchParams.get('trackingId');
+    const query = searchParams.get('query');
 
-    if (!mobile || !trackingId) {
-      return NextResponse.json({ error: 'Mobile and Tracking ID required' }, { status: 400 });
+    if (!query) {
+      return NextResponse.json({ error: 'Please enter a Mobile Number or Tracking ID' }, { status: 400 });
     }
 
-    // Clean tracking ID (remove spaces, uppercase)
-    const cleanId = trackingId.trim().toUpperCase();
-    const cleanMobile = mobile.trim();
+    const cleanQuery = query.trim().toUpperCase();
+    
+    // Check if it's a mobile number (10 digits)
+    const isMobile = /^\d{10}$/.test(cleanQuery);
 
-    // Look up service by tracking ID, and ensure the customer's mobile matches
-    const service = await prisma.service.findUnique({
-      where: { trackingId: cleanId },
-      include: {
-        customer: { select: { mobile: true, name: true } }
+    let services: any[] = [];
+
+    if (isMobile) {
+      // Find customer by mobile first, then their services
+      const customer = await prisma.customer.findFirst({
+        where: { mobile: cleanQuery },
+        include: {
+          services: {
+            orderBy: { createdAt: 'desc' }
+          }
+        }
+      });
+      if (customer) {
+        services = customer.services.map(s => ({ ...s, customerName: customer.name }));
       }
-    });
+    } else {
+      // Find by tracking ID
+      const service = await prisma.service.findUnique({
+        where: { trackingId: cleanQuery },
+        include: {
+          customer: { select: { name: true } }
+        }
+      });
+      if (service) {
+        services = [{ ...service, customerName: service.customer.name }];
+      }
+    }
 
-    if (!service || service.customer.mobile !== cleanMobile) {
-      return NextResponse.json({ error: 'Invalid Tracking ID or Mobile Number' }, { status: 404 });
+    if (services.length === 0) {
+      return NextResponse.json({ error: 'No records found for this input' }, { status: 404 });
     }
 
     // Return safe public data
+    const safeServices = services.map(s => ({
+      id: s.id,
+      serviceType: s.serviceType,
+      status: s.status,
+      trackingId: s.trackingId,
+      missingDocs: s.missingDocs,
+      fees: s.fees,
+      paymentStatus: s.paymentStatus,
+      paymentMode: s.paymentMode,
+      notes: s.notes, // Publicly exposing notes as requested
+      createdAt: s.createdAt,
+      customerName: s.customerName
+    }));
+
     return NextResponse.json({
       success: true,
-      service: {
-        id: service.id,
-        serviceType: service.serviceType,
-        status: service.status,
-        trackingId: service.trackingId,
-        missingDocs: service.missingDocs,
-        fees: service.fees,
-        paymentStatus: service.paymentStatus,
-        createdAt: service.createdAt,
-        customerName: service.customer.name
-      }
+      services: safeServices
     });
 
   } catch (error) {
