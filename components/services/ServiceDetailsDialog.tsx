@@ -209,7 +209,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
     if (!service?.customer?.mobile) { toast.error("No mobile number"); return; }
     if (!missingDocs.trim()) { toast.error("Please type the missing document name first"); return; }
     const link = `${window.location.origin}/status`;
-    const text = `Hello ${service.customer.name},\nAapke ${serviceType} application me '${missingDocs}' missing hai.\nKripya is link par jayen aur ghar baithe upload karein:\n\n🔗 ${link}\n\nMobile No: ${service.customer.mobile}\nTracking ID: ${service.trackingId}\n\nThank you,\nRA Seva Point`;
+    const text = `Hello ${service.customer.name},\nAapke ${service.serviceType} application me '${missingDocs}' missing hai.\nKripya is link par jayen aur ghar baithe upload karein:\n\n🔗 ${link}\n\nMobile No: ${service.customer.mobile}\nTracking ID: ${service.trackingId}\n\nThank you,\nRA Seva Point`;
     window.open(`https://wa.me/91${service.customer.mobile.replace(/\D/g,"").slice(-10)}?text=${encodeURIComponent(text)}`, "_blank");
   };
 
