@@ -191,33 +191,8 @@ function Field({ label, value, big }: { label: string; value: string; big?: bool
 }
 
 // ─── SVG Assets ──────────────────────────────
-const EmblemSvg = () => (
-  <svg width="40" height="50" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
-    <g fill="#000">
-      <path d="M45,20 C45,10 55,10 55,20 C65,15 70,25 60,30 C65,40 55,45 50,40 C45,45 35,40 40,30 C30,25 35,15 45,20 Z" />
-      <rect x="40" y="45" width="20" height="40" />
-      <circle cx="50" cy="95" r="10" fill="none" stroke="#000" strokeWidth="2" />
-      <path d="M50,85 L50,105 M40,95 L60,95" stroke="#000" strokeWidth="2" />
-      <rect x="25" y="105" width="50" height="10" />
-      <text x="50" y="125" fontSize="12" fontWeight="bold" textAnchor="middle">सत्यमेव जयते</text>
-    </g>
-  </svg>
-);
+// Replaced with actual images for perfect accuracy
 
-const AadhaarLogoSvg = () => (
-  <svg width="60" height="40" viewBox="0 0 100 65" xmlns="http://www.w3.org/2000/svg">
-    <g transform="translate(50,30)">
-      {/* Sun rays */}
-      <path d="M-40,0 A40,40 0 0,1 40,0" fill="none" stroke="#ff9933" strokeWidth="4" strokeDasharray="6 4" />
-      <path d="M-30,0 A30,30 0 0,1 30,0" fill="none" stroke="#ff9933" strokeWidth="3" />
-      {/* Fingerprint base */}
-      <path d="M-20,0 C-20,-20 20,-20 20,0 C20,15 5,20 0,25 C-5,20 -20,15 -20,0 Z" fill="none" stroke="#d32f2f" strokeWidth="3" />
-      <path d="M-12,0 C-12,-12 12,-12 12,0 C12,10 3,15 0,18 C-3,15 -12,10 -12,0 Z" fill="none" stroke="#d32f2f" strokeWidth="3" />
-      <path d="M-5,0 C-5,-5 5,-5 5,0 C5,5 0,8 0,10 C0,8 -5,5 -5,0 Z" fill="none" stroke="#d32f2f" strokeWidth="3" />
-    </g>
-    <text x="50" y="60" fontSize="16" fontWeight="bold" fill="#d32f2f" textAnchor="middle">आधार</text>
-  </svg>
-);
 
 // ─── Aadhaar Card Renderer ──────────────────────
 function AadhaarCardPreview({ data }: { data: AadhaarData }) {
@@ -262,24 +237,9 @@ function AadhaarCardPreview({ data }: { data: AadhaarData }) {
         {/* Main Front Body */}
         <div style={{ flex: 1, padding: "5px 10px 5px 10px", display: "flex", flexDirection: "column" }}>
           
-          {/* Header */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", position: "relative" }}>
-            <EmblemSvg />
-            
-            {/* Swoosh background */}
-            <div style={{
-              position: "absolute", left: "40px", right: "60px", top: "50%", transform: "translateY(-50%)", height: "25px", zIndex: 0
-            }}>
-               <div style={{ position: "absolute", top: 0, left: "10%", width: "80%", height: "12px", background: "#f2933d", borderRadius: "10px", opacity: 0.6, transform: "rotate(-2deg)" }}></div>
-               <div style={{ position: "absolute", bottom: 0, left: "10%", width: "80%", height: "12px", background: "#49a852", borderRadius: "10px", opacity: 0.6, transform: "rotate(2deg)" }}></div>
-            </div>
-
-            <div style={{ textAlign: "center", zIndex: 1 }}>
-              <div style={{ fontSize: "14px", fontWeight: "bold", color: "#000" }}>भारत सरकार</div>
-              <div style={{ fontSize: "12.5px", color: "#000" }}>Government of India</div>
-            </div>
-            
-            <div style={{ zIndex: 1 }}><AadhaarLogoSvg /></div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+            <img src="/gov-logo.png" alt="Government of India" style={{ height: "32px", objectFit: "contain" }} />
+            <img src="/aadhaar-logo.png" alt="Aadhaar Logo" style={{ height: "32px", objectFit: "contain" }} />
           </div>
 
           <div style={{ height: "1px", background: "#ccc", margin: "0 -10px 5px -10px" }} />
@@ -396,24 +356,9 @@ function AadhaarCardPreview({ data }: { data: AadhaarData }) {
         {/* Main Back Body */}
         <div style={{ flex: 1, padding: "5px 10px 0 10px", display: "flex", flexDirection: "column" }}>
           
-          {/* Header */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", position: "relative" }}>
-            <EmblemSvg />
-            
-            {/* Swoosh background */}
-            <div style={{
-              position: "absolute", left: "40px", right: "60px", top: "50%", transform: "translateY(-50%)", height: "25px", zIndex: 0
-            }}>
-               <div style={{ position: "absolute", top: 0, left: "10%", width: "80%", height: "12px", background: "#f2933d", borderRadius: "10px", opacity: 0.6, transform: "rotate(-2deg)" }}></div>
-               <div style={{ position: "absolute", bottom: 0, left: "10%", width: "80%", height: "12px", background: "#49a852", borderRadius: "10px", opacity: 0.6, transform: "rotate(2deg)" }}></div>
-            </div>
-
-            <div style={{ textAlign: "center", zIndex: 1 }}>
-              <div style={{ fontSize: "13px", fontWeight: "bold", color: "#000" }}>भारतीय विशिष्ट पहचान प्राधिकरण</div>
-              <div style={{ fontSize: "11px", color: "#000" }}>Unique Identification Authority of India</div>
-            </div>
-            
-            <div style={{ zIndex: 1 }}><AadhaarLogoSvg /></div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+            <img src="/gov-logo.png" alt="Government of India" style={{ height: "32px", objectFit: "contain" }} />
+            <img src="/aadhaar-logo.png" alt="Aadhaar Logo" style={{ height: "32px", objectFit: "contain" }} />
           </div>
 
           <div style={{ height: "1px", background: "#ccc", margin: "0 -10px 5px -10px" }} />
