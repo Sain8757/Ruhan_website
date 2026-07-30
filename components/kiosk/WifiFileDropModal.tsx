@@ -10,6 +10,7 @@ export function WifiFileDropModal({ onClose }: { onClose: () => void }) {
   const [dropUrl, setDropUrl] = useState("");
   const [pcToMobileUrl, setPcToMobileUrl] = useState("");
   const [isUploadingToMobile, setIsUploadingToMobile] = useState(false);
+  const [previewFile, setPreviewFile] = useState<{url: string, type: string, name: string} | null>(null);
   const pcFileInputRef = useRef<HTMLInputElement>(null);
   
   useEffect(() => {
@@ -394,14 +395,12 @@ export function WifiFileDropModal({ onClose }: { onClose: () => void }) {
                               </div>
                               
                               <div style={{ display: "flex", gap: "4px", marginTop: "auto" }}>
-                                <a 
-                                  href={file.url} 
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  style={{ flex: 1, background: "#e5e7eb", color: "#374151", padding: "4px 0", borderRadius: "4px", fontSize: "10px", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", gap: "2px", textDecoration: "none" }}
+                                <button 
+                                  onClick={() => setPreviewFile({url: file.url, type: file.type, name: file.filename})}
+                                  style={{ flex: 1, background: "#e5e7eb", color: "#374151", border: "none", padding: "4px 0", borderRadius: "4px", fontSize: "10px", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", gap: "2px", cursor: "pointer" }}
                                 >
                                   <ExternalLink size={10} /> View
-                                </a>
+                                </button>
                                 <a 
                                   href={getDownloadUrl(file.url)}
                                   download={file.filename}
@@ -428,6 +427,26 @@ export function WifiFileDropModal({ onClose }: { onClose: () => void }) {
           </div>
         </div>
       </div>
+
+      {previewFile && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0,0,0,0.85)", zIndex: 10000,
+          display: "flex", flexDirection: "column", padding: "20px"
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", color: "white", marginBottom: "15px", alignItems: "center" }}>
+            <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "bold" }}>{previewFile.name}</h3>
+            <button onClick={() => setPreviewFile(null)} style={{ background: "none", border: "none", color: "white", cursor: "pointer", fontSize: "24px", fontWeight: "bold", lineHeight: "1" }}>&times;</button>
+          </div>
+          <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", overflow: "hidden", background: "#222", borderRadius: "8px" }}>
+            {previewFile.type.startsWith('image/') ? (
+              <img src={previewFile.url} alt={previewFile.name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+            ) : (
+              <iframe src={previewFile.url} style={{ width: "100%", height: "100%", border: "none", background: "white" }} title={previewFile.name} />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
