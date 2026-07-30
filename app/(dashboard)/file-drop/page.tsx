@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Download, Printer, RefreshCw, Smartphone, Clock, File as FileIcon, ExternalLink, Image as ImageIcon, Loader2 } from "lucide-react";
+import { Download, Printer, RefreshCw, Smartphone, Clock, File as FileIcon, ExternalLink, Image as ImageIcon, Loader2, Trash2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 
 export default function FileDropDashboard() {
@@ -80,6 +80,21 @@ export default function FileDropDashboard() {
     img.src = "data:image/svg+xml;base64," + btoa(svgData);
   };
 
+  const deleteFile = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this file?")) return;
+    
+    // Optimistic UI update
+    setFiles(prev => prev.filter(f => f.id !== id));
+    
+    try {
+      await fetch(`/api/drop/delete?id=${id}`, { method: 'DELETE' });
+    } catch (error) {
+      console.error("Failed to delete file", error);
+      // Re-fetch files in case of error
+      fetchFiles();
+    }
+  };
+
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -155,7 +170,7 @@ export default function FileDropDashboard() {
                     <div key={file.id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col">
                       
                       {/* Live Preview Area */}
-                      <div className="h-32 bg-gray-100 flex items-center justify-center border-b border-gray-100 relative">
+                      <div className="h-32 bg-gray-100 flex items-center justify-center border-b border-gray-100 relative group">
                         {file.type.startsWith('image/') ? (
                           <img src={file.url} alt={file.filename} className="w-full h-full object-cover" />
                         ) : (
@@ -164,6 +179,15 @@ export default function FileDropDashboard() {
                             <span className="text-xs font-bold mt-2">PDF DOCUMENT</span>
                           </div>
                         )}
+                        
+                        {/* Delete Button */}
+                        <button
+                          onClick={() => deleteFile(file.id)}
+                          className="absolute top-2 right-2 bg-white/90 hover:bg-red-500 hover:text-white text-red-500 p-2 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-all"
+                          title="Delete file"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
 
                       <div className="p-4 flex-1 flex flex-col justify-between">
