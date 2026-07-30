@@ -11,6 +11,12 @@ export function WifiFileDropModal({ onClose }: { onClose: () => void }) {
   const [pcToMobileUrl, setPcToMobileUrl] = useState("");
   const [isUploadingToMobile, setIsUploadingToMobile] = useState(false);
   const [previewFile, setPreviewFile] = useState<{url: string, type: string, name: string} | null>(null);
+  
+  const [moveToCrmData, setMoveToCrmData] = useState<{customer: string, mobile: string, files: any[]} | null>(null);
+  const [crmServiceType, setCrmServiceType] = useState("Online Form");
+  const [crmFees, setCrmFees] = useState("100");
+  const [isMovingToCrm, setIsMovingToCrm] = useState(false);
+
   const pcFileInputRef = useRef<HTMLInputElement>(null);
   
   useEffect(() => {
@@ -132,13 +138,46 @@ export function WifiFileDropModal({ onClose }: { onClose: () => void }) {
     }
   };
 
-  // Group files by customer name
+  // Group files by customer name and mobile
   const groupedFiles = files.reduce((acc, file) => {
+    const mobile = file.mobileNumber || "No Number";
     const name = file.customerName || "Unknown Customer";
-    if (!acc[name]) acc[name] = [];
-    acc[name].push(file);
+    const key = `${name} | ${mobile}`;
+    if (!acc[key]) acc[key] = { customerName: name, mobileNumber: mobile, files: [] };
+    acc[key].files.push(file);
     return acc;
-  }, {} as Record<string, any[]>);
+  }, {} as Record<string, { customerName: string, mobileNumber: string, files: any[] }>);
+
+  const handleMoveToCrm = async () => {
+    if (!moveToCrmData) return;
+    setIsMovingToCrm(true);
+    try {
+      const res = await fetch("/api/drop/to-service", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: moveToCrmData.customer,
+          mobileNumber: moveToCrmData.mobile,
+          serviceType: crmServiceType,
+          fees: crmFees,
+          files: moveToCrmData.files
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMoveToCrmData(null);
+        fetchFiles();
+        alert("Files successfully moved to Services!");
+      } else {
+        alert(data.error || "Failed to move to services");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error moving to services");
+    } finally {
+      setIsMovingToCrm(false);
+    }
+  };
 
   return (
     <div style={{
@@ -341,15 +380,24 @@ export function WifiFileDropModal({ onClose }: { onClose: () => void }) {
                 </div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: "25px" }}>
-                  {(Object.entries(groupedFiles) as [string, any[]][]).map(([customer, customerFiles]) => (
-                    <div key={customer} style={{ background: "#fff", borderRadius: "10px", border: "1px solid #e5e7eb", overflow: "hidden", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>
-                      <div style={{ background: "#1084d0", color: "#fff", padding: "10px 15px", display: "flex", alignItems: "center", gap: "8px", fontWeight: "bold", fontSize: "14px" }}>
-                        <FolderOpen size={16} />
-                        {customer} <span style={{ fontSize: "11px", background: "rgba(255,255,255,0.2)", padding: "2px 6px", borderRadius: "10px", marginLeft: "5px" }}>{customerFiles.length} files</span>
+                  {Object.entries(groupedFiles).map(([key, groupData]: [string, any]) => (
+                    <div key={key} style={{ background: "#fff", borderRadius: "10px", border: "1px solid #e5e7eb", overflow: "hidden", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>
+                      <div style={{ background: "#1084d0", color: "#fff", padding: "10px 15px", display: "flex", alignItems: "center", justifyContent: "space-between", fontWeight: "bold", fontSize: "14px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <FolderOpen size={16} />
+                          {groupData.customerName} <span style={{ fontSize: "11px", background: "rgba(255,255,255,0.2)", padding: "2px 6px", borderRadius: "10px", marginLeft: "5px" }}>{groupData.mobileNumber}</span>
+                          <span style={{ fontSize: "11px", background: "rgba(255,255,255,0.2)", padding: "2px 6px", borderRadius: "10px", marginLeft: "5px" }}>{groupData.files.length} files</span>
+                        </div>
+                        <button 
+                          onClick={() => setMoveToCrmData({ customer: groupData.customerName, mobile: groupData.mobileNumber, files: groupData.files })}
+                          style={{ background: "#16a34a", color: "white", border: "none", padding: "5px 10px", borderRadius: "6px", fontSize: "12px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
+                        >
+                          <Send size={12} /> Move to Services
+                        </button>
                       </div>
                       
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "15px", padding: "15px" }}>
-                        {customerFiles.map((file) => (
+                        {groupData.files.map((file: any) => (
                           <div key={file.id} style={{
                             background: "#f9fafb",
                             border: "1px solid #e5e7eb",
@@ -444,6 +492,66 @@ export function WifiFileDropModal({ onClose }: { onClose: () => void }) {
             ) : (
               <iframe src={previewFile.url} style={{ width: "100%", height: "100%", border: "none", background: "white" }} title={previewFile.name} />
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Move to CRM Dialog */}
+      {moveToCrmData && (
+        <div style={{
+          position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
+          background: "rgba(0,0,0,0.6)", zIndex: 20000,
+          display: "flex", justifyContent: "center", alignItems: "center"
+        }}>
+          <div style={{ background: "white", padding: "25px", borderRadius: "12px", width: "400px", maxWidth: "90%", boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}>
+            <h3 style={{ marginTop: 0, marginBottom: "20px", display: "flex", alignItems: "center", gap: "10px", color: "#1084d0", fontSize: "20px" }}>
+              <Send size={20} /> Move to Services
+            </h3>
+            
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ display: "block", fontSize: "13px", fontWeight: "bold", color: "#666", marginBottom: "5px" }}>Customer</label>
+              <div style={{ background: "#f3f4f6", padding: "12px", borderRadius: "8px", fontSize: "15px", fontWeight: "bold", color: "#111" }}>
+                {moveToCrmData.customer} <span style={{ color: "#666", fontWeight: "normal" }}>({moveToCrmData.mobile})</span>
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "15px" }}>
+              <label style={{ display: "block", fontSize: "13px", fontWeight: "bold", color: "#666", marginBottom: "5px" }}>Service Type</label>
+              <input 
+                type="text" 
+                value={crmServiceType}
+                onChange={(e) => setCrmServiceType(e.target.value)}
+                placeholder="e.g. Online Form, File Print..."
+                style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ccc", fontSize: "15px", boxSizing: "border-box", outline: "none" }}
+              />
+            </div>
+
+            <div style={{ marginBottom: "25px" }}>
+              <label style={{ display: "block", fontSize: "13px", fontWeight: "bold", color: "#666", marginBottom: "5px" }}>Fees (₹)</label>
+              <input 
+                type="number" 
+                value={crmFees}
+                onChange={(e) => setCrmFees(e.target.value)}
+                placeholder="e.g. 100"
+                style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ccc", fontSize: "15px", boxSizing: "border-box", outline: "none" }}
+              />
+            </div>
+
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button 
+                onClick={() => setMoveToCrmData(null)}
+                style={{ flex: 1, padding: "12px", background: "#f3f4f6", color: "#444", border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: "bold", cursor: "pointer", transition: "background 0.2s" }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleMoveToCrm}
+                disabled={isMovingToCrm}
+                style={{ flex: 1, padding: "12px", background: "#1084d0", color: "white", border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: "bold", cursor: isMovingToCrm ? "not-allowed" : "pointer", opacity: isMovingToCrm ? 0.7 : 1, transition: "background 0.2s" }}
+              >
+                {isMovingToCrm ? "Moving..." : "Confirm & Move"}
+              </button>
+            </div>
           </div>
         </div>
       )}

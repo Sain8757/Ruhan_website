@@ -348,6 +348,7 @@ model FileDrop {
   size         Int
   type         String   @default("unknown")
   customerName String?
+  mobileNumber String?
   direction    String   @default("MOBILE_TO_PC") // "MOBILE_TO_PC" or "PC_TO_MOBILE"
   createdAt    DateTime @default(now())
 }

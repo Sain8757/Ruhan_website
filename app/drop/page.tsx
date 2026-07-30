@@ -8,6 +8,7 @@ import 'react-image-crop/dist/ReactCrop.css';
 export default function FileDropPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [customerName, setCustomerName] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0); // 0 to 100
   const [isSuccess, setIsSuccess] = useState(false);
@@ -106,8 +107,8 @@ export default function FileDropPage() {
 
   const handleUpload = async () => {
     if (files.length === 0) return;
-    if (!customerName.trim()) {
-      setError("Please enter your name first.");
+    if (!customerName.trim() || !mobileNumber.trim()) {
+      setError("Please enter your name and mobile number first.");
       return;
     }
     
@@ -122,6 +123,7 @@ export default function FileDropPage() {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("customerName", customerName);
+      formData.append("mobileNumber", mobileNumber);
       formData.append("direction", "MOBILE_TO_PC");
 
       try {
@@ -181,18 +183,33 @@ export default function FileDropPage() {
 
         {!isSuccess ? (
           <>
-            <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", fontSize: "13px", fontWeight: "bold", color: "#444", marginBottom: "5px" }}>Your Name *</label>
-              <input 
-                type="text" 
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="Enter your name"
-                style={{ 
-                  width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ccc",
-                  fontSize: "16px", outline: "none", boxSizing: "border-box"
-                }}
-              />
+            <div style={{ marginBottom: "15px", display: "flex", gap: "10px" }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: "bold", color: "#444", marginBottom: "5px" }}>Your Name *</label>
+                <input 
+                  type="text" 
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="Enter name"
+                  style={{ 
+                    width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ccc",
+                    fontSize: "16px", outline: "none", boxSizing: "border-box"
+                  }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: "block", fontSize: "13px", fontWeight: "bold", color: "#444", marginBottom: "5px" }}>Mobile Number *</label>
+                <input 
+                  type="tel" 
+                  value={mobileNumber}
+                  onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  placeholder="10-digit number"
+                  style={{ 
+                    width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ccc",
+                    fontSize: "16px", outline: "none", boxSizing: "border-box"
+                  }}
+                />
+              </div>
             </div>
 
             <div style={{ marginBottom: "15px" }}>
@@ -267,17 +284,17 @@ export default function FileDropPage() {
 
             <button 
               onClick={handleUpload}
-              disabled={files.length === 0 || !customerName.trim() || isUploading}
+              disabled={files.length === 0 || !customerName.trim() || !mobileNumber.trim() || mobileNumber.length !== 10 || isUploading}
               style={{
                 width: "100%",
                 padding: "16px",
-                backgroundColor: files.length === 0 || !customerName.trim() || isUploading ? "#ccc" : "#000080",
+                backgroundColor: files.length === 0 || !customerName.trim() || !mobileNumber.trim() || mobileNumber.length !== 10 || isUploading ? "#ccc" : "#000080",
                 color: "white",
                 border: "none",
                 borderRadius: "12px",
                 fontSize: "16px",
                 fontWeight: "bold",
-                cursor: files.length === 0 || !customerName.trim() || isUploading ? "not-allowed" : "pointer",
+                cursor: files.length === 0 || !customerName.trim() || !mobileNumber.trim() || mobileNumber.length !== 10 || isUploading ? "not-allowed" : "pointer",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

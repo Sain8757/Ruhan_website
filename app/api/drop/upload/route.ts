@@ -13,6 +13,7 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const file = formData.get('file') as File;
     const customerName = formData.get('customerName') as string || null;
+    const mobileNumber = formData.get('mobileNumber') as string || null;
     const direction = formData.get('direction') as string || "MOBILE_TO_PC";
 
     if (!file) {
@@ -56,6 +57,7 @@ export async function POST(req: Request) {
         size: file.size,
         type: file.type || "unknown",
         customerName: customerName,
+        mobileNumber: mobileNumber,
         direction: direction
       }
     });
