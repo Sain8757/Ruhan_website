@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
-import { startOfDay, startOfMonth, endOfDay, subDays, format } from "date-fns";
+import { startOfDay, startOfMonth, endOfDay, subDays, format, startOfYesterday, endOfYesterday, subMonths } from "date-fns";
 
 export async function GET() {
   const session = await auth();
@@ -11,6 +11,12 @@ export async function GET() {
   const startToday = startOfDay(today);
   const endToday = endOfDay(today);
   const startMonth = startOfMonth(today);
+  const yesterdayStart = startOfYesterday();
+  const yesterdayEnd = endOfYesterday();
+  const lastWeekDayStart = startOfDay(subDays(today, 7));
+  const lastWeekDayEnd = endOfDay(subDays(today, 7));
+  const lastMonthStart = startOfMonth(subMonths(today, 1));
+  const lastMonthEnd = endOfDay(subDays(startMonth, 1));
 
   const [
     todayInvoices,
@@ -27,6 +33,14 @@ export async function GET() {
     invoicesLast7,
     servicesLast7,
     partialInvoicesCount,
+    yesterdayInvoices,
+    yesterdayServicesRevenue,
+    yesterdayCustomers,
+    lastWeekDayInvoices,
+    lastWeekDayServicesRevenue,
+    lastMonthInvoices,
+    lastMonthServicesRevenue,
+    topServicesRaw,
   ] = await Promise.all([
     // Today's invoices
     prisma.invoice.aggregate({
@@ -115,6 +129,69 @@ export async function GET() {
     prisma.invoice.count({
       where: { paymentStatus: "PARTIAL" }
     }),
+    // Yesterday invoices
+    prisma.invoice.aggregate({
+      where: {
+        createdAt: { gte: yesterdayStart, lte: yesterdayEnd },
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
+      },
+      _sum: { amountPaid: true },
+      _count: true,
+    }),
+    // Yesterday services
+    prisma.service.aggregate({
+      where: {
+        createdAt: { gte: yesterdayStart, lte: yesterdayEnd },
+        paymentStatus: "PAID",
+      },
+      _sum: { fees: true },
+    }),
+    // Yesterday customers
+    prisma.customer.count({
+      where: { createdAt: { gte: yesterdayStart, lte: yesterdayEnd } },
+    }),
+    // Last week same day invoices
+    prisma.invoice.aggregate({
+      where: {
+        createdAt: { gte: lastWeekDayStart, lte: lastWeekDayEnd },
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
+      },
+      _sum: { amountPaid: true },
+    }),
+    // Last week same day services
+    prisma.service.aggregate({
+      where: {
+        createdAt: { gte: lastWeekDayStart, lte: lastWeekDayEnd },
+        paymentStatus: "PAID",
+      },
+      _sum: { fees: true },
+    }),
+    // Last month invoices
+    prisma.invoice.aggregate({
+      where: {
+        createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
+      },
+      _sum: { amountPaid: true },
+    }),
+    // Last month services
+    prisma.service.aggregate({
+      where: {
+        createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
+        paymentStatus: "PAID",
+      },
+      _sum: { fees: true },
+    }),
+    // Top services last 30 days
+    prisma.service.groupBy({
+      by: ["serviceType"],
+      where: {
+        createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
+      },
+      _count: { serviceType: true },
+      orderBy: { _count: { serviceType: "desc" } },
+      take: 6,
+    }),
   ]);
 
   // Build daily chart data for last 7 days
@@ -145,18 +222,46 @@ export async function GET() {
     invoices: data.invoices,
   }));
 
+  // Calculate real % changes
+  const todayIncome = (todayInvoices._sum.amountPaid || 0) + (todayServicesRevenue._sum.fees || 0);
+  const yesterdayIncome = (yesterdayInvoices._sum.amountPaid || 0) + (yesterdayServicesRevenue._sum.fees || 0);
+  const lastWeekDayIncome = (lastWeekDayInvoices._sum.amountPaid || 0) + (lastWeekDayServicesRevenue._sum.fees || 0);
+  const monthlyRevenue = (monthlyInvoices._sum.amountPaid || 0) + (monthlyServicesRevenue._sum.fees || 0);
+  const lastMonthRevenue = (lastMonthInvoices._sum.amountPaid || 0) + (lastMonthServicesRevenue._sum.fees || 0);
+
+  const calcChange = (current: number, previous: number): { value: string; positive: boolean } => {
+    if (previous === 0) return current > 0 ? { value: "+100%", positive: true } : { value: "—", positive: true };
+    const pct = ((current - previous) / previous) * 100;
+    return {
+      value: `${pct >= 0 ? "+" : ""}${pct.toFixed(1)}%`,
+      positive: pct >= 0,
+    };
+  };
+
+  const topServices = topServicesRaw.map((s: { serviceType: string; _count: { serviceType: number } }) => ({
+    name: s.serviceType,
+    count: s._count.serviceType,
+  }));
+
   return NextResponse.json({
-    todayIncome: (todayInvoices._sum.amountPaid || 0) + (todayServicesRevenue._sum.fees || 0),
+    todayIncome,
     todayTransactions: todayInvoices._count,
     todayCustomers,
     pendingServices,
     completedToday,
     totalCustomers,
-    monthlyRevenue: (monthlyInvoices._sum.amountPaid || 0) + (monthlyServicesRevenue._sum.fees || 0),
+    monthlyRevenue,
     recentServices,
     recentActivities,
     lowStockItems,
     chartData,
     partialInvoicesCount,
+    topServices,
+    percentChanges: {
+      income: calcChange(todayIncome, yesterdayIncome),
+      customers: calcChange(todayCustomers, yesterdayCustomers),
+      monthlyRevenue: calcChange(monthlyRevenue, lastMonthRevenue),
+      weeklyIncome: calcChange(todayIncome, lastWeekDayIncome),
+    },
   });
 }

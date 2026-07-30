@@ -1424,7 +1424,92 @@ body::before {
   }
 
   .print-only { display: none; }
+
+  /* ===== SKELETON LOADING ===== */
+  .skeleton-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-card);
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skeleton-box {
+    background: linear-gradient(
+      90deg,
+      var(--bg-tertiary) 25%,
+      rgba(79, 110, 247, 0.07) 50%,
+      var(--bg-tertiary) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s infinite;
+    border-radius: var(--radius-md);
+  }
+
+  .dark .skeleton-box {
+    background: linear-gradient(
+      90deg,
+      rgba(255,255,255,0.04) 25%,
+      rgba(79, 110, 247, 0.08) 50%,
+      rgba(255,255,255,0.04) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.8s infinite;
+  }
+
+  /* ===== DARK MODE SMOOTH TRANSITION ===== */
+  html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  /* ===== GOAL PROGRESS BAR ===== */
+  .goal-progress-track {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--bg-tertiary);
+    overflow: hidden;
+  }
+
+  .goal-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* ===== REFRESH SPIN ===== */
+  @keyframes spin-once {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* Table row click hint */
+  .data-table tbody tr.cursor-pointer:hover {
+    background: rgba(79, 110, 247, 0.06);
+    cursor: pointer;
+  }
+
+  .data-table tbody tr.cursor-pointer:hover td:first-child::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--brand-primary);
+    border-radius: 0 2px 2px 0;
+  }
+
+  .data-table tbody tr.cursor-pointer td:first-child {
+    position: relative;
+  }
 }
+
 
 /* ===== ANIMATIONS ===== */
 @keyframes fadeIn {

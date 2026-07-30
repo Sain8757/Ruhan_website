@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import {
   TrendingUp,
@@ -19,7 +19,9 @@ import {
   Sparkles,
   ChevronRight,
   Zap,
-  Star,
+  RefreshCw,
+  AlertCircle,
+  BarChart2,
 } from "lucide-react";
 import {
   XAxis,
@@ -36,6 +38,14 @@ import {
 import { formatCurrency, SERVICE_STATUS_COLORS } from "@/lib/utils";
 import { format } from "date-fns";
 import BulkRemindersWidget from "@/components/dashboard/BulkRemindersWidget";
+import GoalTrackerWidget from "@/components/dashboard/GoalTrackerWidget";
+import TopServicesWidget from "@/components/dashboard/TopServicesWidget";
+import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton";
+
+interface PercentChange {
+  value: string;
+  positive: boolean;
+}
 
 interface DashboardData {
   todayIncome: number;
@@ -45,13 +55,49 @@ interface DashboardData {
   completedToday: number;
   totalCustomers: number;
   monthlyRevenue: number;
-  recentServices: any[];
-  recentActivities: any[];
-  chartData: any[];
+  recentServices: RecentService[];
+  recentActivities: RecentActivity[];
+  chartData: ChartDataPoint[];
   partialInvoicesCount: number;
+  topServices: TopService[];
+  percentChanges: {
+    income: PercentChange;
+    customers: PercentChange;
+    monthlyRevenue: PercentChange;
+    weeklyIncome: PercentChange;
+  };
 }
 
-const MOCK_CHART = [
+interface RecentService {
+  id: string;
+  serviceType: string;
+  status: string;
+  fees: number;
+  createdAt: string;
+  customer: { name: string; mobile: string } | null;
+}
+
+interface RecentActivity {
+  id: string;
+  action: string;
+  entity: string;
+  entityId: string | null;
+  details: string | null;
+  createdAt: string;
+}
+
+interface ChartDataPoint {
+  date: string;
+  revenue: number;
+  invoices: number;
+}
+
+interface TopService {
+  name: string;
+  count: number;
+}
+
+const MOCK_CHART: ChartDataPoint[] = [
   { date: "Mon", revenue: 0, invoices: 0 },
   { date: "Tue", revenue: 0, invoices: 0 },
   { date: "Wed", revenue: 0, invoices: 0 },
@@ -62,10 +108,10 @@ const MOCK_CHART = [
 ];
 
 const formatChartDate = (dateStr: string) => {
-  if (dateStr.length === 3) return dateStr; // Already "Mon", "Tue"
+  if (dateStr.length === 3) return dateStr;
   try {
     const d = new Date(dateStr);
-    return isNaN(d.getTime()) ? dateStr : format(d, "EEE"); // "Mon", "Tue"
+    return isNaN(d.getTime()) ? dateStr : format(d, "EEE");
   } catch {
     return dateStr;
   }
@@ -80,7 +126,6 @@ function useCountUp(target: number, duration = 1200) {
     const start = performance.now();
     const animate = (now: number) => {
       const progress = Math.min((now - start) / duration, 1);
-      // Ease out cubic
       const ease = 1 - Math.pow(1 - progress, 3);
       setCount(Math.floor(ease * target));
       if (progress < 1) {
@@ -101,7 +146,7 @@ interface StatCardProps {
   value: number;
   displayValue?: string;
   subtitle?: string;
-  icon: any;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
   gradient: string;
   accentColor: string;
   change?: string;
@@ -124,17 +169,17 @@ function StatCard({
   href,
 }: StatCardProps) {
   const animatedValue = useCountUp(value);
-  const Component = href ? Link : ("div" as any);
+  const Component = href ? Link : ("div" as React.ElementType);
 
   return (
     <Component
       href={href}
-      className={`stat-card animate-slide-up flex flex-col justify-between ${href ? 'hover:scale-[1.01] hover:shadow-md transition-all cursor-pointer' : ''}`}
-      style={{ 
-        animationDelay: `${delay}ms`, 
+      className={`stat-card animate-slide-up flex flex-col justify-between ${href ? "hover:scale-[1.01] hover:shadow-md transition-all cursor-pointer" : ""}`}
+      style={{
+        animationDelay: `${delay}ms`,
         animationFillMode: "both",
         minHeight: "108px",
-        padding: "12px 14px"
+        padding: "12px 14px",
       }}
     >
       {/* Background gradient orb */}
@@ -169,7 +214,10 @@ function StatCard({
               border: `1px solid ${changePositive ? "rgba(16,185,129,0.2)" : "rgba(244,63,94,0.2)"}`,
             }}
           >
-            <ArrowUpRight size={10} style={{ transform: changePositive ? "" : "rotate(90deg)" }} />
+            <ArrowUpRight
+              size={10}
+              style={{ transform: changePositive ? "" : "rotate(90deg)" }}
+            />
             {change}
           </div>
         )}
@@ -251,9 +299,7 @@ const QUICK_ACTIONS = [
   },
 ];
 
-// Replaced with real data from API
-
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ dataKey: string; value: number; color: string }>; label?: string }) => {
   if (active && payload && payload.length) {
     return (
       <div
@@ -268,12 +314,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <p className="font-bold mb-2 text-xs uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
           {label}
         </p>
-        {payload.map((p: any) => (
+        {payload.map((p) => (
           <div key={p.dataKey} className="flex items-center gap-2">
-            <div
-              className="w-2 h-2 rounded-full"
-              style={{ background: p.color }}
-            />
+            <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
             <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
               {p.dataKey === "revenue" ? formatCurrency(p.value) : `${p.value} invoices`}
             </p>
@@ -285,7 +328,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const BarTooltip = ({ active, payload, label }: any) => {
+const BarTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) => {
   if (active && payload && payload.length) {
     return (
       <div
@@ -306,12 +349,10 @@ const BarTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-// Helper to calculate time ago
 function timeAgo(dateString: string) {
   const date = new Date(dateString);
   const now = new Date();
   const seconds = Math.round((now.getTime() - date.getTime()) / 1000);
-  
   if (seconds < 60) return "Just now";
   const minutes = Math.round(seconds / 60);
   if (minutes < 60) return `${minutes}m ago`;
@@ -325,25 +366,29 @@ function timeAgo(dateString: string) {
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(false);
+  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
   const [now, setNow] = useState(new Date());
+  const autoRefreshRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const hour = now.getHours();
-  const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
-  const greetingEmoji = hour < 12 ? "☀️" : hour < 17 ? "🌤️" : "🌙";
-
-  useEffect(() => {
-    fetch("/api/dashboard")
-      .then((r) => r.json())
-      .then((d) => {
-        setData(d);
-        setLoading(false);
-      })
-      .catch(() => {
+  const fetchData = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    try {
+      const res = await fetch("/api/dashboard");
+      if (!res.ok) throw new Error("API error");
+      const d = await res.json();
+      setData(d);
+      setError(false);
+      setLastRefreshed(new Date());
+    } catch {
+      setError(true);
+      if (!data) {
         setData({
           todayIncome: 0,
           todayTransactions: 0,
@@ -356,26 +401,40 @@ export default function DashboardPage() {
           recentActivities: [],
           chartData: [],
           partialInvoicesCount: 0,
+          topServices: [],
+          percentChanges: {
+            income: { value: "—", positive: true },
+            customers: { value: "—", positive: true },
+            monthlyRevenue: { value: "—", positive: true },
+            weeklyIncome: { value: "—", positive: true },
+          },
         });
-        setLoading(false);
-      });
+      }
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div
-          className="w-16 h-16 rounded-2xl flex items-center justify-center animate-pulse-glow bg-white p-2"
-          style={{ border: "2px solid #4f6ef7" }}
-        >
-          <img src="/logo.png" alt="Loading" className="w-full h-full object-contain animate-spin" />
-        </div>
-        <p className="text-sm font-medium" style={{ color: "var(--text-muted)" }}>
-          Loading dashboard...
-        </p>
-      </div>
-    );
-  }
+  // Auto-refresh every 60 seconds
+  useEffect(() => {
+    autoRefreshRef.current = setInterval(() => {
+      fetchData(true);
+    }, 60000);
+    return () => {
+      if (autoRefreshRef.current) clearInterval(autoRefreshRef.current);
+    };
+  }, [fetchData]);
+
+  const hour = now.getHours();
+  const greeting = hour < 12 ? "Good Morning" : hour < 17 ? "Good Afternoon" : "Good Evening";
+  const greetingEmoji = hour < 12 ? "☀️" : hour < 17 ? "🌤️" : "🌙";
+
+  if (loading) return <DashboardSkeleton />;
 
   const stats: StatCardProps[] = [
     {
@@ -386,8 +445,8 @@ export default function DashboardPage() {
       icon: IndianRupee,
       gradient: "linear-gradient(135deg, #4f6ef7 0%, #3451d1 100%)",
       accentColor: "#4f6ef7",
-      change: "+12%",
-      changePositive: true,
+      change: data?.percentChanges?.income?.value,
+      changePositive: data?.percentChanges?.income?.positive,
       delay: 0,
       href: "/billing",
     },
@@ -398,8 +457,8 @@ export default function DashboardPage() {
       icon: Users,
       gradient: "linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)",
       accentColor: "#a78bfa",
-      change: "+5%",
-      changePositive: true,
+      change: data?.percentChanges?.customers?.value,
+      changePositive: data?.percentChanges?.customers?.positive,
       delay: 60,
       href: "/customers",
     },
@@ -420,8 +479,6 @@ export default function DashboardPage() {
       icon: CheckCircle,
       gradient: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
       accentColor: "#10b981",
-      change: "+3",
-      changePositive: true,
       delay: 180,
       href: "/services",
     },
@@ -433,8 +490,8 @@ export default function DashboardPage() {
       icon: TrendingUp,
       gradient: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)",
       accentColor: "#06b6d4",
-      change: "+18%",
-      changePositive: true,
+      change: data?.percentChanges?.monthlyRevenue?.value,
+      changePositive: data?.percentChanges?.monthlyRevenue?.positive,
       delay: 240,
       href: "/reports",
     },
@@ -451,6 +508,8 @@ export default function DashboardPage() {
   ];
 
   const chartColors = ["#4f6ef7", "#a78bfa", "#4f6ef7", "#7b93ff", "#4f6ef7", "#a78bfa", "#4f6ef7"];
+  const chartData = data?.chartData?.length ? data.chartData : MOCK_CHART;
+  const isChartEmpty = !data?.chartData?.length || data.chartData.every((d) => d.revenue === 0 && d.invoices === 0);
 
   return (
     <div className="page-shell page-shell-dashboard">
@@ -458,7 +517,7 @@ export default function DashboardPage() {
       <div
         className="relative overflow-hidden rounded-xl p-4 sm:p-5 animate-fade-in flex flex-col gap-3.5"
         style={{
-          background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)", // Rich indigo gradient
+          background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)",
           border: "1px solid rgba(255,255,255,0.1)",
           boxShadow: "0 12px 24px -6px rgba(49, 46, 129, 0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
         }}
@@ -476,20 +535,26 @@ export default function DashboardPage() {
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <div
-                className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest text-white shadow-xs"
+                className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest text-white"
                 style={{
                   background: "linear-gradient(90deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)",
                   border: "1px solid rgba(255,255,255,0.15)",
-                  backdropFilter: "blur(10px)"
+                  backdropFilter: "blur(10px)",
                 }}
               >
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Live Dashboard
               </div>
+              {/* Last refresh indicator */}
+              <div
+                className="flex items-center gap-1 text-[10px] font-medium"
+                style={{ color: "rgba(255,255,255,0.45)" }}
+              >
+                <RefreshCw size={9} className={refreshing ? "animate-spin" : ""} />
+                {refreshing ? "Refreshing..." : `Updated ${timeAgo(lastRefreshed.toISOString())}`}
+              </div>
             </div>
-            <h1
-              className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight"
-            >
+            <h1 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">
               {greeting}, Ruhan! {greetingEmoji}
             </h1>
             <p
@@ -501,19 +566,37 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          <Link
-            href="/services"
-            className="hidden sm:flex btn-primary shrink-0 py-2 px-3 text-xs transition-transform hover:scale-105"
-            style={{
-              background: "#ffffff",
-              color: "#312e81",
-              border: "none",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-            }}
-          >
-            <Plus size={14} />
-            New Service
-          </Link>
+          <div className="hidden sm:flex items-center gap-2 shrink-0">
+            {/* Manual refresh button */}
+            <button
+              onClick={() => fetchData(true)}
+              disabled={refreshing}
+              className="flex items-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all hover:scale-105 disabled:opacity-60"
+              style={{
+                background: "rgba(255,255,255,0.1)",
+                color: "rgba(255,255,255,0.85)",
+                border: "1px solid rgba(255,255,255,0.2)",
+              }}
+              title="Refresh dashboard"
+            >
+              <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
+              Refresh
+            </button>
+
+            <Link
+              href="/services"
+              className="btn-primary shrink-0 py-2 px-3 text-xs transition-transform hover:scale-105"
+              style={{
+                background: "#ffffff",
+                color: "#312e81",
+                border: "none",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+              }}
+            >
+              <Plus size={14} />
+              New Service
+            </Link>
+          </div>
         </div>
 
         {/* Stats preview strip */}
@@ -527,7 +610,7 @@ export default function DashboardPage() {
             { label: "New Today", value: data?.todayCustomers || 0, icon: "👥" },
           ].map((item) => (
             <div key={item.label} className="flex items-center gap-2">
-              <span className="text-base filter drop-shadow-xs">{item.icon}</span>
+              <span className="text-base filter drop-shadow-sm">{item.icon}</span>
               <div className="flex items-center gap-1.5 text-white font-semibold">
                 <span className="opacity-75 text-xs font-medium">{item.label}:</span>
                 <span className="text-sm font-bold tracking-tight">{item.value}</span>
@@ -536,6 +619,33 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
+
+      {/* Error Banner */}
+      {error && (
+        <div
+          className="flex items-center gap-3 p-3.5 rounded-xl animate-slide-up"
+          style={{
+            background: "rgba(244,63,94,0.08)",
+            border: "1px solid rgba(244,63,94,0.2)",
+          }}
+        >
+          <AlertCircle size={16} className="shrink-0" style={{ color: "#f43f5e" }} />
+          <p className="text-sm font-medium" style={{ color: "#f43f5e" }}>
+            Data load karne mein problem aayi. Showing last available data.
+          </p>
+          <button
+            onClick={() => fetchData(true)}
+            className="ml-auto text-xs font-bold px-3 py-1.5 rounded-lg transition-all"
+            style={{
+              background: "rgba(244,63,94,0.15)",
+              color: "#f43f5e",
+              border: "1px solid rgba(244,63,94,0.25)",
+            }}
+          >
+            Try Again
+          </button>
+        </div>
+      )}
 
       {/* ===== KPI STAT CARDS ===== */}
       <div className="metric-grid">
@@ -554,14 +664,14 @@ export default function DashboardPage() {
           {QUICK_ACTIONS.map((action, i) => {
             const Icon = action.icon;
             return (
-                <Link
-                  key={action.href}
-                  href={action.href}
-                  className="action-card group flex flex-col items-center justify-center gap-3 text-center animate-slide-up"
-                  style={{
-                    animationDelay: `${i * 60}ms`,
-                    animationFillMode: "both"
-                  }}
+              <Link
+                key={action.href}
+                href={action.href}
+                className="action-card group flex flex-col items-center justify-center gap-3 text-center animate-slide-up"
+                style={{
+                  animationDelay: `${i * 60}ms`,
+                  animationFillMode: "both",
+                }}
                 onMouseEnter={(e) => {
                   const el = e.currentTarget as HTMLAnchorElement;
                   el.style.boxShadow = `var(--shadow-md), 0 0 0 1px ${action.accentColor}30`;
@@ -586,16 +696,10 @@ export default function DashboardPage() {
                   <Icon size={22} className="text-white relative z-10" />
                 </div>
                 <div>
-                  <span
-                    className="text-sm font-bold block"
-                    style={{ color: "var(--text-primary)" }}
-                  >
+                  <span className="text-sm font-bold block" style={{ color: "var(--text-primary)" }}>
                     {action.label}
                   </span>
-                  <span
-                    className="text-xs"
-                    style={{ color: "var(--text-muted)" }}
-                  >
+                  <span className="text-xs" style={{ color: "var(--text-muted)" }}>
                     {action.desc}
                   </span>
                 </div>
@@ -603,7 +707,7 @@ export default function DashboardPage() {
             );
           })}
         </div>
-        
+
         <BulkRemindersWidget />
       </section>
 
@@ -618,58 +722,77 @@ export default function DashboardPage() {
                 Last 7 days performance
               </p>
             </div>
-            <div
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
-              style={{
-                background: "rgba(16,185,129,0.1)",
-                color: "#10b981",
-                border: "1px solid rgba(16,185,129,0.2)",
-              }}
-            >
-              <TrendingUp size={12} />
-              +18.2% this week
-            </div>
-          </div>
-          <div className="flex-1">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={(data?.chartData?.length ? data.chartData : MOCK_CHART).map(d => ({...d, displayDate: formatChartDate(d.date)}))}>
-              <defs>
-                <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#4f6ef7" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="#4f6ef7" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-secondary)" vertical={false} />
-              <XAxis
-                dataKey="displayDate"
-                tick={{ fontSize: 11.5, fill: "var(--text-muted)", fontFamily: "inherit" }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fontSize: 11, fill: "var(--text-muted)", fontFamily: "inherit" }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
-              />
-              <Tooltip content={<CustomTooltip />} cursor={{ stroke: "rgba(79,110,247,0.15)", strokeWidth: 2 }} />
-              <Area
-                type="monotone"
-                dataKey="revenue"
-                stroke="#4f6ef7"
-                strokeWidth={2.5}
-                fill="url(#revenueGrad)"
-                dot={false}
-                activeDot={{
-                  r: 5,
-                  fill: "#4f6ef7",
-                  stroke: "var(--bg-card)",
-                  strokeWidth: 2,
+            {data?.percentChanges?.weeklyIncome && (
+              <div
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
+                style={{
+                  background: data.percentChanges.weeklyIncome.positive
+                    ? "rgba(16,185,129,0.1)"
+                    : "rgba(244,63,94,0.1)",
+                  color: data.percentChanges.weeklyIncome.positive ? "#10b981" : "#f43f5e",
+                  border: `1px solid ${data.percentChanges.weeklyIncome.positive ? "rgba(16,185,129,0.2)" : "rgba(244,63,94,0.2)"}`,
                 }}
-              />
-              </AreaChart>
-            </ResponsiveContainer>
+              >
+                <TrendingUp size={12} />
+                {data.percentChanges.weeklyIncome.value} vs last week
+              </div>
+            )}
           </div>
+
+          {isChartEmpty ? (
+            <div className="flex-1 flex flex-col items-center justify-center opacity-50 gap-3">
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                style={{ background: "rgba(79,110,247,0.1)", border: "1px dashed rgba(79,110,247,0.3)" }}
+              >
+                <TrendingUp size={24} style={{ color: "var(--brand-primary)" }} />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>
+                  No revenue data yet
+                </p>
+                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+                  Transactions hone pe chart yahan dikhega
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData.map((d) => ({ ...d, displayDate: formatChartDate(d.date) }))}>
+                  <defs>
+                    <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#4f6ef7" stopOpacity={0.25} />
+                      <stop offset="95%" stopColor="#4f6ef7" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-secondary)" vertical={false} />
+                  <XAxis
+                    dataKey="displayDate"
+                    tick={{ fontSize: 11.5, fill: "var(--text-muted)", fontFamily: "inherit" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: "var(--text-muted)", fontFamily: "inherit" }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
+                  />
+                  <Tooltip content={<CustomTooltip />} cursor={{ stroke: "rgba(79,110,247,0.15)", strokeWidth: 2 }} />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#4f6ef7"
+                    strokeWidth={2.5}
+                    fill="url(#revenueGrad)"
+                    dot={false}
+                    activeDot={{ r: 5, fill: "#4f6ef7", stroke: "var(--bg-card)", strokeWidth: 2 }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
 
         {/* Recent Activity Feed */}
@@ -687,17 +810,25 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-3 flex-1 overflow-y-auto pr-1">
-            {(!data?.recentActivities || data.recentActivities.length === 0) ? (
-              <div className="flex flex-col items-center justify-center h-full opacity-50 py-10">
-                <Activity size={24} className="mb-2" />
-                <p className="text-xs">No recent activity</p>
+            {!data?.recentActivities || data.recentActivities.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full opacity-50 py-10 gap-3">
+                <div
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center"
+                  style={{ background: "rgba(79,110,247,0.1)", border: "1px dashed rgba(79,110,247,0.3)" }}
+                >
+                  <Activity size={22} style={{ color: "var(--brand-primary)" }} />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>No recent activity</p>
+                  <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Koi action hone pe yahan dikhega</p>
+                </div>
               </div>
             ) : (
-              data.recentActivities.map((item: any, i: number) => {
+              data.recentActivities.map((item: RecentActivity, i: number) => {
                 let color = "#4f6ef7";
                 let ItemIcon = Activity;
                 let href = "#";
-                
+
                 if (item.entity === "CUSTOMER") {
                   color = "#10b981";
                   ItemIcon = UserPlus;
@@ -711,7 +842,7 @@ export default function DashboardPage() {
                   ItemIcon = IndianRupee;
                   href = item.entityId ? `/billing/${item.entityId}` : "/billing";
                 }
-                
+
                 return (
                   <Link
                     href={href}
@@ -772,6 +903,12 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* ===== GOAL TRACKER + TOP SERVICES ROW ===== */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <GoalTrackerWidget currentIncome={data?.todayIncome || 0} />
+        <TopServicesWidget services={data?.topServices || []} />
+      </div>
+
       {/* ===== INVOICE BAR CHART + RECENT SERVICES TABLE ===== */}
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(320px,1fr)_minmax(0,2fr)] gap-5 items-stretch">
         {/* Bar chart */}
@@ -780,36 +917,53 @@ export default function DashboardPage() {
           <p className="text-xs mb-5" style={{ color: "var(--text-muted)" }}>
             Last 7 days
           </p>
-          <div className="flex-1">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={(data?.chartData?.length ? data.chartData : MOCK_CHART).map(d => ({...d, displayDate: formatChartDate(d.date)}))} barSize={32}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border-secondary)" vertical={false} />
-              <XAxis
-                dataKey="displayDate"
-                tick={{ fontSize: 11, fill: "var(--text-muted)", fontFamily: "inherit" }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis
-                tick={{ fontSize: 10, fill: "var(--text-muted)", fontFamily: "inherit" }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip content={<BarTooltip />} cursor={{ fill: "rgba(79,110,247,0.06)", radius: 8 }} />
-              <Bar dataKey="invoices" radius={[6, 6, 0, 0]}>
-                {(data?.chartData?.length ? data.chartData : MOCK_CHART).map((_, index, arr) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={index === arr.length - 1 ? "#4f6ef7" : "rgba(79,110,247,0.25)"}
+          {isChartEmpty ? (
+            <div className="flex-1 flex flex-col items-center justify-center opacity-50 gap-3">
+              <div
+                className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                style={{ background: "rgba(79,110,247,0.1)", border: "1px dashed rgba(79,110,247,0.3)" }}
+              >
+                <BarChart2 size={24} style={{ color: "var(--brand-primary)" }} />
+              </div>
+              <p className="text-sm font-medium text-center" style={{ color: "var(--text-secondary)" }}>
+                No invoice data yet
+              </p>
+            </div>
+          ) : (
+            <div className="flex-1">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={chartData.map((d) => ({ ...d, displayDate: formatChartDate(d.date) }))}
+                  barSize={32}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-secondary)" vertical={false} />
+                  <XAxis
+                    dataKey="displayDate"
+                    tick={{ fontSize: 11, fill: "var(--text-muted)", fontFamily: "inherit" }}
+                    axisLine={false}
+                    tickLine={false}
                   />
-                ))}
-              </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+                  <YAxis
+                    tick={{ fontSize: 10, fill: "var(--text-muted)", fontFamily: "inherit" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip content={<BarTooltip />} cursor={{ fill: "rgba(79,110,247,0.06)", radius: 8 }} />
+                  <Bar dataKey="invoices" radius={[6, 6, 0, 0]}>
+                    {chartData.map((_, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={index === chartData.length - 1 ? "#4f6ef7" : "rgba(79,110,247,0.25)"}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
 
-        {/* Recent Services Table */}
+        {/* Recent Services Table — Rows clickable */}
         <div className="glass-card overflow-hidden flex flex-col">
           <div className="flex items-center justify-between p-5 pb-0">
             <div>
@@ -840,63 +994,67 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {(!data?.recentServices || data.recentServices.length === 0) ? (
+                {!data?.recentServices || data.recentServices.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="text-center py-10 opacity-50 text-sm">
-                      No recent services found
-                    </td>
-                  </tr>
-                ) : data.recentServices.map((service: any, i: number) => (
-                  <tr key={service.id} className="animate-slide-up" style={{ animationDelay: `${i * 50}ms`, animationFillMode: "both" }}>
-                    <td>
-                      <div className="flex items-center gap-2.5">
-                        <div
-                          className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[10px] font-bold shrink-0"
-                          style={{
-                            background: `hsl(${(service.customer?.name?.charCodeAt(0) || 65) * 5 % 360}, 65%, 50%)`,
-                          }}
-                        >
-                          {service.customer?.name?.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-[13px]" style={{ color: "var(--text-primary)" }}>
-                            {service.customer?.name}
-                          </div>
-                          <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-                            {service.customer?.mobile}
-                          </div>
-                        </div>
+                    <td colSpan={5}>
+                      <div className="flex flex-col items-center justify-center py-10 opacity-50 gap-3">
+                        <Briefcase size={24} style={{ color: "var(--text-muted)" }} />
+                        <p className="text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
+                          No recent services found
+                        </p>
                       </div>
                     </td>
-                    <td>
-                      <span
-                        className="text-[13px] font-medium"
-                        style={{ color: "var(--text-secondary)" }}
-                      >
-                        {service.serviceType}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`badge ${SERVICE_STATUS_COLORS[service.status]}`}>
-                        {service.status}
-                      </span>
-                    </td>
-                    <td
-                      className="text-[12.5px]"
-                      style={{ color: "var(--text-muted)" }}
-                    >
-                      {format(new Date(service.createdAt), "dd MMM")}
-                    </td>
-                    <td>
-                      <span
-                        className="font-bold text-[13px]"
-                        style={{ color: "var(--text-primary)" }}
-                      >
-                        {formatCurrency(service.fees)}
-                      </span>
-                    </td>
                   </tr>
-                ))}
+                ) : (
+                  data.recentServices.map((service: RecentService, i: number) => (
+                    <tr
+                      key={service.id}
+                      className="animate-slide-up cursor-pointer"
+                      style={{ animationDelay: `${i * 50}ms`, animationFillMode: "both" }}
+                      onClick={() => window.location.href = `/services/${service.id}`}
+                      title="Click to view service details"
+                    >
+                      <td>
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[10px] font-bold shrink-0"
+                            style={{
+                              background: `hsl(${(service.customer?.name?.charCodeAt(0) || 65) * 5 % 360}, 65%, 50%)`,
+                            }}
+                          >
+                            {service.customer?.name?.charAt(0)}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-[13px]" style={{ color: "var(--text-primary)" }}>
+                              {service.customer?.name}
+                            </div>
+                            <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                              {service.customer?.mobile}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="text-[13px] font-medium" style={{ color: "var(--text-secondary)" }}>
+                          {service.serviceType}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`badge ${SERVICE_STATUS_COLORS[service.status as keyof typeof SERVICE_STATUS_COLORS]}`}>
+                          {service.status}
+                        </span>
+                      </td>
+                      <td className="text-[12.5px]" style={{ color: "var(--text-muted)" }}>
+                        {format(new Date(service.createdAt), "dd MMM")}
+                      </td>
+                      <td>
+                        <span className="font-bold text-[13px]" style={{ color: "var(--text-primary)" }}>
+                          {formatCurrency(service.fees)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

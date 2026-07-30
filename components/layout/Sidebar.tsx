@@ -129,13 +129,17 @@ export default function Sidebar({ collapsed, onToggle, className }: SidebarProps
         {!collapsed && (
           <div className="min-w-0 flex-1">
             <div
-              className="font-extrabold text-[15px] leading-tight truncate text-slate-800"
+              className="font-extrabold text-[15px] leading-tight truncate"
+              style={{ color: "rgba(255,255,255,0.88)" }}
             >
               Almin General Store
             </div>
             <div className="flex items-center gap-1 mt-0.5">
-              <Sparkles size={10} className="text-blue-500" />
-              <span className="text-[11px] font-medium leading-tight truncate text-slate-500">
+              <Sparkles size={10} style={{ color: "#7b93ff" }} />
+              <span
+                className="text-[11px] font-medium leading-tight truncate"
+                style={{ color: "rgba(255,255,255,0.45)" }}
+              >
                 Services & Books
               </span>
             </div>
