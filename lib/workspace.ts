@@ -139,14 +139,7 @@ export const WORKSPACE_MODULES: WorkspaceModule[] = [
     section: "Tools",
     keywords: ["manual", "id", "aadhaar", "pan", "generate", "pdf"],
   },
-  {
-    id: "file-drop",
-    label: "Wi-Fi File Drop",
-    href: "/file-drop",
-    icon: "Smartphone",
-    section: "Tools",
-    keywords: ["wifi", "file", "drop", "transfer", "mobile", "upload"],
-  },
+
   {
     id: "online-work",
     label: "Online Work",
