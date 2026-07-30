@@ -7,6 +7,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { formatCurrency, formatDate, SERVICE_STATUS_COLORS, PAYMENT_STATUS_COLORS } from "@/lib/utils";
 import PageHeader from "@/components/layout/PageHeader";
 import ServiceDetailsDialog from "@/components/services/ServiceDetailsDialog";
+import InvoiceDetailsDialog from "@/components/billing/InvoiceDetailsDialog";
 
 export default function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -23,6 +24,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     name: "", mobile: "", email: "", address: "", aadhaarNumber: "", panNumber: "" 
   });
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
 
   const fetchCustomer = () => {
@@ -487,7 +489,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                   <div
                     key={inv.id}
                     className="glass-card p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors"
-                    onClick={() => router.push(`/billing/${inv.id}`)}
+                    onClick={() => setSelectedInvoiceId(inv.id)}
                   >
                     <div>
                       <div className="font-mono font-bold text-sm" style={{ color: "var(--brand-primary)" }}>
@@ -689,6 +691,14 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           onClose={() => { setIsServiceModalOpen(false); setSelectedServiceId(null); }}
           serviceId={selectedServiceId}
           onSuccess={() => fetchCustomer()}
+        />
+      )}
+
+      {selectedInvoiceId && (
+        <InvoiceDetailsDialog
+          isOpen={!!selectedInvoiceId}
+          onClose={() => setSelectedInvoiceId(null)}
+          invoiceId={selectedInvoiceId}
         />
       )}
     </div>
