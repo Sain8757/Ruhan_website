@@ -81,6 +81,18 @@ function BillingContent() {
     });
   };
 
+  const handleDeleteInvoice = async (invoiceId: string) => {
+    if (!confirm("Are you sure you want to delete this invoice?")) return;
+    try {
+      const res = await fetch(`/api/invoices/${invoiceId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error("Failed to delete invoice");
+      toast.success("Invoice deleted successfully");
+      fetchInvoices();
+    } catch {
+      toast.error("Failed to delete invoice");
+    }
+  };
+
   const handleExportCSV = () => {
     if (!invoices || invoices.length === 0) {
       toast.error("No invoices available to export");
@@ -335,6 +347,28 @@ function BillingContent() {
                           title="Edit Invoice"
                         >
                           Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteInvoice(inv.id);
+                          }}
+                          style={{
+                            backgroundColor: "#d4d0c8",
+                            borderTop: "2px solid #ffffff",
+                            borderLeft: "2px solid #ffffff",
+                            borderRight: "2px solid #404040",
+                            borderBottom: "2px solid #404040",
+                            padding: "2px 6px",
+                            fontWeight: "bold",
+                            fontSize: "11px",
+                            color: "#000000",
+                            cursor: "pointer",
+                          }}
+                          title="Delete Invoice"
+                        >
+                          Delete
                         </button>
                       </div>
                     </td>
