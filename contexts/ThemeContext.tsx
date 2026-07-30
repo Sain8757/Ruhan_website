@@ -23,7 +23,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Only run if not already set, or just use the initial state logic correctly
     const saved = localStorage.getItem("ra-theme") as Theme;
     if (saved && saved !== theme) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       setTheme(saved);
       document.documentElement.classList.toggle("dark", saved === "dark");
     } else if (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches && theme !== "dark") {

@@ -52,6 +52,13 @@ interface Props {
   onSuccess?: () => void;
 }
 
+const SHead = ({ icon, label, color="black" }: { icon: React.ReactNode; label: string; color?: string }) => (
+  <div style={{ display:"flex",alignItems:"center",gap:"5px",marginBottom:"6px",paddingBottom:"3px",borderBottom:"1px solid #c0c0c0" }}>
+    <span style={{ color }}>{icon}</span>
+    <span style={{ fontWeight:"bold",fontSize:"11px",color,letterSpacing:"0.3px" }}>{label}</span>
+  </div>
+);
+
 export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuccess }: Props) {
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -424,12 +431,6 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
   const Inp = (extra?: React.CSSProperties): React.CSSProperties => ({ ...F,...inset,background:"white",padding:"3px 5px",outline:"none",width:"100%",...extra });
   const Sel = (extra?: React.CSSProperties): React.CSSProperties => ({ ...F,...inset,background:"white",padding:"3px 4px",outline:"none",width:"100%",...extra });
 
-  const SHead = ({ icon, label, color="black" }: { icon: React.ReactNode; label: string; color?: string }) => (
-    <div style={{ display:"flex",alignItems:"center",gap:"5px",marginBottom:"6px",paddingBottom:"3px",borderBottom:"1px solid #c0c0c0" }}>
-      <span style={{ color }}>{icon}</span>
-      <span style={{ fontWeight:"bold",fontSize:"11px",color,letterSpacing:"0.3px" }}>{label}</span>
-    </div>
-  );
 
   const TABS: { key: Tab; label: string; icon: string }[] = [
     { key:"general",   label:"General",   icon:"⚙" },
