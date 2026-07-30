@@ -71,7 +71,7 @@ export default function RationCardNewApplyForm() {
       const container = engineRef.current;
       if (!container) throw new Error("Preview container not found");
       
-      const html2canvas = (await import('html2canvas')).default;
+      const html2canvas = (await import("html2canvas-pro")).default;
       const { jsPDF } = await import('jspdf');
 
       // Create an off-screen container to render at full 100% scale without scroll issues

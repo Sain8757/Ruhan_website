@@ -96,7 +96,7 @@ export default function RationCardKaApplyForm() {
       if (!container) throw new Error("Preview container not found");
       
       // Load dynamically so they don't break SSR
-      const html2canvas = (await import('html2canvas')).default;
+      const html2canvas = (await import("html2canvas-pro")).default;
       const { jsPDF } = await import('jspdf');
 
       // Create an off-screen container to render at full 100% scale without scroll issues

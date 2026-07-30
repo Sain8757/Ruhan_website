@@ -56,7 +56,7 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleDownloadKioskQR = async () => {
-    const html2canvas = (await import("html2canvas")).default;
+    const html2canvas = (await import("html2canvas-pro")).default;
     const jsPDF = (await import("jspdf")).default;
     const el = document.getElementById("kiosk-standee-preview");
     if (!el) return;

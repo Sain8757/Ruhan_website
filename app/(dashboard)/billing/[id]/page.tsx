@@ -104,7 +104,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
       const element = invoiceCardRef.current;
       if (!element) throw new Error("Invoice container element not found");
 
-      const html2canvas = (await import("html2canvas")).default;
+      const html2canvas = (await import("html2canvas-pro")).default;
       const { jsPDF } = await import("jspdf");
 
       // Temporarily enforce fixed 794px canvas width for standard A4 ratio during capture
@@ -171,7 +171,7 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
       const element = invoiceCardRef.current;
       if (!element) throw new Error("Invoice element not found");
 
-      const html2canvas = (await import("html2canvas")).default;
+      const html2canvas = (await import("html2canvas-pro")).default;
       const { jsPDF } = await import("jspdf");
 
       const canvas = await html2canvas(element, { scale: 2, useCORS: true });

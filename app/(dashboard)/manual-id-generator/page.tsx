@@ -451,7 +451,7 @@ function readImageFile(file: File): Promise<string> {
 }
 
 async function downloadCardAsPDF(elementId: string, fileName: string, isAadhaar: boolean = false) {
-  const html2canvas = (await import("html2canvas")).default;
+  const html2canvas = (await import("html2canvas-pro")).default;
   const el = document.getElementById(elementId);
   if (!el) return;
   const canvas = await html2canvas(el, { scale: 3, useCORS: true, backgroundColor: "#fff" });
