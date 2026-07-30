@@ -379,6 +379,29 @@ export default function ServiceDetailPage({ params }: { params: Promise<{ id: st
                     <span>{service.assignedTo?.name || "Admin"}</span>
                   </div>
                 </fieldset>
+
+                {service.serviceDocUrls && service.serviceDocUrls.length > 0 && (
+                  <fieldset className="border-t border-l border-gray-500 border-b border-r border-white p-2">
+                    <legend className="px-1 text-[#0000aa] font-bold -ml-1 flex items-center gap-1"><FileText size={10} /> Uploaded Documents</legend>
+                    <div className="flex flex-col gap-2 mt-1">
+                      {service.serviceDocUrls.map((url: string, idx: number) => (
+                        <div key={idx} className="flex justify-between items-center bg-white border-t-black border-l-black border-b-white border-r-white border-[2px] p-1">
+                          <span className="text-[10px] font-bold truncate max-w-[120px]" title={url.split('/').pop()}>
+                            Document {idx + 1}
+                          </span>
+                          <div className="flex gap-1">
+                            <a href={url} target="_blank" rel="noopener noreferrer" className="bg-[#c0c0c0] text-black font-bold px-2 py-0.5 border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white text-[10px] no-underline">
+                              View
+                            </a>
+                            <a href={url.replace('/upload/', '/upload/fl_attachment/')} target="_blank" rel="noopener noreferrer" download className="bg-[#c0c0c0] text-black font-bold px-2 py-0.5 border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white text-[10px] no-underline">
+                              Save
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </fieldset>
+                )}
               </div>
 
               {/* Right Column */}
