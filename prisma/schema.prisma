@@ -340,3 +340,12 @@ model OnlineServiceLink {
   @@index([categoryId])
   @@index([order])
 }
+
+model FileDrop {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  size      Int
+  type      String   @default("unknown")
+  createdAt DateTime @default(now())
+}

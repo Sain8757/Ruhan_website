@@ -36,6 +36,7 @@ import {
   Users,
   WalletCards,
   X,
+  Smartphone,
 } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 import type { GlobalSearchResult, SearchResultType } from "@/lib/search";
@@ -93,6 +94,7 @@ const iconMap = {
   QrCode,
   FileImage,
   MessageCircle,
+  Smartphone,
 } satisfies Record<WorkspaceIcon, React.ComponentType<{ size?: number; className?: string }>>;
 
 const recordIconMap = {
