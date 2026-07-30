@@ -48,6 +48,39 @@ export default function FileDropDashboard() {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
+  const getDownloadUrl = (url: string) => {
+    // Force cloudinary to download as attachment
+    if (url.includes('cloudinary.com') && url.includes('/upload/')) {
+      return url.replace('/upload/', '/upload/fl_attachment/');
+    }
+    return url;
+  };
+
+  const downloadQR = () => {
+    const svg = document.getElementById("drop-qr-code");
+    if (!svg) return;
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      if(ctx) {
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+        const pngFile = canvas.toDataURL("image/png");
+        const downloadLink = document.createElement("a");
+        downloadLink.download = "Drop_QR_Code.png";
+        downloadLink.href = `${pngFile}`;
+        downloadLink.click();
+      }
+    };
+    img.src = "data:image/svg+xml;base64," + btoa(svgData);
+  };
+
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row gap-6">
@@ -65,11 +98,19 @@ export default function FileDropDashboard() {
             
             <div className="bg-white p-4 rounded-xl border-4 border-blue-500 shadow-md">
               <QRCodeSVG 
+                id="drop-qr-code"
                 value={dropUrl} 
                 size={180} 
                 level="H"
               />
             </div>
+            
+            <button 
+              onClick={downloadQR}
+              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors w-full"
+            >
+              <Download size={16} /> Download QR Code
+            </button>
             
             <div className="mt-4 text-xs font-mono bg-gray-100 px-3 py-2 rounded-lg text-gray-600 break-all w-full">
               {dropUrl}
@@ -111,37 +152,55 @@ export default function FileDropDashboard() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {files.map((file) => (
-                    <div key={file.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-start gap-3">
-                        <div className="bg-blue-50 p-3 rounded-lg text-blue-600 shrink-0">
-                          {file.type.startsWith('image/') ? <ImageIcon size={24} /> : <FileIcon size={24} />}
-                        </div>
-                        <div className="overflow-hidden w-full">
+                    <div key={file.id} className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col">
+                      
+                      {/* Live Preview Area */}
+                      <div className="h-32 bg-gray-100 flex items-center justify-center border-b border-gray-100 relative">
+                        {file.type.startsWith('image/') ? (
+                          <img src={file.url} alt={file.filename} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center text-red-500">
+                            <FileIcon size={40} />
+                            <span className="text-xs font-bold mt-2">PDF DOCUMENT</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-4 flex-1 flex flex-col justify-between">
+                        <div>
                           <p className="font-semibold text-gray-800 truncate" title={file.filename}>
                             {file.filename}
                           </p>
-                          <div className="flex items-center gap-3 text-xs text-gray-500 mt-1">
+                          <div className="flex items-center justify-between text-xs text-gray-500 mt-1">
                             <span>{(file.size / 1024 / 1024).toFixed(2)} MB</span>
                             <span className="flex items-center gap-1"><Clock size={12} /> {formatTime(file.createdAt)}</span>
                           </div>
-                          
-                          <div className="flex gap-2 mt-4">
-                            <a 
-                              href={file.url} 
-                              download={file.filename}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-md text-xs font-semibold flex items-center justify-center gap-1 transition-colors"
-                            >
-                              <Download size={14} /> Download
-                            </a>
-                            <button 
-                              onClick={() => handlePrint(file.url)}
-                              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded-md text-xs font-semibold flex items-center justify-center gap-1 transition-colors"
-                            >
-                              <Printer size={14} /> Print
-                            </button>
-                          </div>
+                        </div>
+                        
+                        <div className="flex gap-2 mt-4">
+                          <a 
+                            href={file.url} 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-md text-xs font-semibold flex items-center justify-center gap-1 transition-colors"
+                            title="View File"
+                          >
+                            <ExternalLink size={14} /> View
+                          </a>
+                          <a 
+                            href={getDownloadUrl(file.url)}
+                            download={file.filename}
+                            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-md text-xs font-semibold flex items-center justify-center gap-1 transition-colors"
+                            title="Force Download"
+                          >
+                            <Download size={14} /> Save
+                          </a>
+                          <button 
+                            onClick={() => handlePrint(file.url)}
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded-md text-xs font-semibold flex items-center justify-center gap-1 transition-colors"
+                          >
+                            <Printer size={14} /> Print
+                          </button>
                         </div>
                       </div>
                     </div>
