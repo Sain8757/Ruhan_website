@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Users, MessageCircle, Play, Pause, AlertCircle, Loader2 } from "lucide-react";
+import { Users, MessageCircle, Play, Pause, AlertCircle, Loader2, Bot, Megaphone } from "lucide-react";
 import PageHeader from "@/components/layout/PageHeader";
 import { useToast } from "@/contexts/ToastContext";
+import WhatsAppBotSimulator from "@/components/marketing/WhatsAppBotSimulator";
 
 export default function MarketingPage() {
+  const [activeTab, setActiveTab] = useState<"campaign" | "chatbot">("chatbot");
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("Namaste [Name],\n\nSpecial offer at RA Seva Point today! Get 10% off on all services.\n\nRegards,\nRA Seva Point");
@@ -87,11 +89,42 @@ export default function MarketingPage() {
   return (
     <div className="page-shell">
       <PageHeader
-        title="WhatsApp Marketing"
-        subtitle="Bulk messaging campaign to your customers"
+        title="WhatsApp Marketing & AI Support"
+        subtitle="Bulk messaging campaigns and AI-powered WhatsApp Customer Support"
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+      {/* Tab Switcher */}
+      <div className="flex gap-2 border-b border-slate-200 mt-4 pb-2">
+        <button
+          onClick={() => setActiveTab("chatbot")}
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-t-lg transition-colors border-t border-x ${
+            activeTab === "chatbot"
+              ? "bg-white text-emerald-800 border-slate-300 shadow-sm -mb-[9px]"
+              : "bg-slate-100 text-slate-600 border-transparent hover:bg-slate-200"
+          }`}
+        >
+          <Bot size={16} className="text-emerald-600" />
+          AI Customer Support Bot
+        </button>
+        <button
+          onClick={() => setActiveTab("campaign")}
+          className={`flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-t-lg transition-colors border-t border-x ${
+            activeTab === "campaign"
+              ? "bg-white text-blue-900 border-slate-300 shadow-sm -mb-[9px]"
+              : "bg-slate-100 text-slate-600 border-transparent hover:bg-slate-200"
+          }`}
+        >
+          <Megaphone size={16} className="text-blue-600" />
+          Bulk Campaign
+        </button>
+      </div>
+
+      {activeTab === "chatbot" ? (
+        <div className="mt-4">
+          <WhatsAppBotSimulator customers={customers} />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
         
         {/* Campaign Settings */}
         <div className="legacy-fieldset" style={{ background: '#fff' }}>
@@ -189,8 +222,8 @@ export default function MarketingPage() {
             </div>
           </div>
         </div>
-
       </div>
-    </div>
+    )}
+  </div>
   );
 }
