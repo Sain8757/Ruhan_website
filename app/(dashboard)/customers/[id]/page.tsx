@@ -6,6 +6,7 @@ import { User, Phone, Mail, MapPin, Loader2, ChevronRight, FileText, Plus, Trash
 import { useToast } from "@/contexts/ToastContext";
 import { formatCurrency, formatDate, SERVICE_STATUS_COLORS, PAYMENT_STATUS_COLORS } from "@/lib/utils";
 import PageHeader from "@/components/layout/PageHeader";
+import ServiceDetailsDialog from "@/components/services/ServiceDetailsDialog";
 
 export default function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -21,8 +22,10 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
   const [editForm, setEditForm] = useState({ 
     name: "", mobile: "", email: "", address: "", aadhaarNumber: "", panNumber: "" 
   });
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
 
-  useEffect(() => {
+  const fetchCustomer = () => {
     fetch(`/api/customers/${resolvedParams.id}`)
       .then((res) => {
         if (!res.ok) throw new Error("Customer profile not found");
@@ -42,9 +45,13 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
       })
       .catch((err) => {
         toast.error(err.message);
-        router.push("/customers");
+        setLoading(false);
       });
-  }, [resolvedParams.id, router, toast]);
+  };
+
+  useEffect(() => {
+    fetchCustomer();
+  }, [resolvedParams.id]);
 
   const refreshCustomer = async () => {
     const res = await fetch(`/api/customers/${resolvedParams.id}`);
@@ -436,7 +443,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                   <div
                     key={s.id}
                     className="glass-card p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-colors"
-                    onClick={() => router.push(`/services/${s.id}`)}
+                    onClick={() => { setSelectedServiceId(s.id); setIsServiceModalOpen(true); }}
                   >
                     <div>
                       <div className="font-bold text-sm" style={{ color: "var(--text-primary)" }}>
@@ -674,6 +681,15 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             </form>
           </div>
         </div>
+      )}
+
+      {isServiceModalOpen && selectedServiceId && (
+        <ServiceDetailsDialog
+          isOpen={isServiceModalOpen}
+          onClose={() => { setIsServiceModalOpen(false); setSelectedServiceId(null); }}
+          serviceId={selectedServiceId}
+          onSuccess={() => fetchCustomer()}
+        />
       )}
     </div>
   );
