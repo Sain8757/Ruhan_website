@@ -104,9 +104,15 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
 
       const html2canvas = (await import("html2canvas-pro")).default;
       const { jsPDF } = await import("jspdf");
+      const isThermal = template === "thermal";
 
+      // Temporarily enforce fixed canvas width for capture
       const origWidth = element.style.width;
-      element.style.width = "794px";
+      if (!isThermal) {
+        element.style.width = "794px";
+      } else {
+        element.style.width = "300px";
+      }
 
       const canvas = await html2canvas(element, {
         scale: 2,
@@ -118,14 +124,19 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
       element.style.width = origWidth;
 
       const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
+      const pdf = new jsPDF("p", "mm", isThermal ? [80, (canvas.height * 80) / canvas.width] : "a4");
 
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const margin = 8;
-      const printWidth = pdfWidth - (margin * 2);
-      const printHeight = (canvas.height * printWidth) / canvas.width;
-
-      pdf.addImage(imgData, "PNG", margin, margin, printWidth, printHeight);
+      if (isThermal) {
+        // For thermal, use exact width without margins
+        pdf.addImage(imgData, "PNG", 0, 0, 80, (canvas.height * 80) / canvas.width);
+      } else {
+        // For A4, use margins
+        const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
+        const margin = 8;
+        const printWidth = pdfWidth - (margin * 2); // 194mm
+        const printHeight = (canvas.height * printWidth) / canvas.width;
+        pdf.addImage(imgData, "PNG", margin, margin, printWidth, printHeight);
+      }
       
       const fileName = `${invoice.customer.name.replace(/[^a-zA-Z0-9 ]/g, "")}_Invoice_${invoice.invoiceNumber}.pdf`;
       pdf.save(fileName);
@@ -540,8 +551,8 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
             <div className="flex justify-between items-start gap-4 flex-wrap pb-6 border-b-2 border-slate-200">
               <div>
                 <div className="flex items-center gap-4 mb-3">
-                  <div className="w-14 h-14 rounded-xl flex items-center justify-center bg-white border border-slate-200 shadow-sm">
-                    <img src="/logo.png" alt="RA" className="w-full h-full object-contain p-1" />
+                  <div className="rounded-xl flex items-center justify-center bg-white border border-slate-200 shadow-sm overflow-hidden" style={{ width: '56px', height: '56px', flexShrink: 0 }}>
+                    <img src="/logo.png" alt="RA" className="object-contain p-1" style={{ width: '100%', height: '100%' }} />
                   </div>
                   <div>
                     <h2 className="font-extrabold text-2xl tracking-tight text-slate-900">{shopName}</h2>
