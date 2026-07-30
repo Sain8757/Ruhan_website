@@ -225,19 +225,19 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
                   onClick={() => setTemplate("classic")}
                   className={`px-3 py-1 transition-colors ${template === "classic" ? "bg-[#0000aa] text-white" : "text-black hover:bg-slate-200"}`}
                 >
-                  Classic
+                  Classic Vintage
                 </button>
                 <button
                   onClick={() => setTemplate("modern")}
                   className={`px-3 py-1 transition-colors ${template === "modern" ? "bg-[#0000aa] text-white" : "text-black hover:bg-slate-200"}`}
                 >
-                  Modern
+                  Modern Executive
                 </button>
                 <button
                   onClick={() => setTemplate("thermal")}
                   className={`px-3 py-1 transition-colors ${template === "thermal" ? "bg-[#0000aa] text-white" : "text-black hover:bg-slate-200"}`}
                 >
-                  Thermal
+                  Thermal POS (80mm)
                 </button>
               </div>
 
