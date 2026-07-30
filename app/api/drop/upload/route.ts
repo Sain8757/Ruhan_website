@@ -33,7 +33,8 @@ export async function POST(req: Request) {
           folder: `ruhan/file-drops`,
           public_id: filenameWithoutExt + "_" + Date.now(),
           unique_filename: true,
-          overwrite: false
+          overwrite: false,
+          resource_type: "auto"
         },
         (error, result) => {
           if (error) reject(error);
