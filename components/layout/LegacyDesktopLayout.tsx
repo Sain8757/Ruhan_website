@@ -6,7 +6,8 @@ import {
   X, LayoutDashboard, Users, Briefcase, Receipt, Camera,
   ScanLine, Layers, WalletCards, BookOpen, Package,
   MessageSquare, BarChart3, Settings, QrCode, FileImage,
-  Search, Bell, MessageCircle, Mail, Sparkles, LogOut, AlertTriangle, Clock
+  Search, Bell, MessageCircle, Mail, Sparkles, LogOut, AlertTriangle, Clock,
+  Download, Printer, Copy
 } from "lucide-react";
 import { WorkspaceProvider, useWorkspace } from "@/components/workspace/WorkspaceProvider";
 import Providers from "@/components/Providers";
@@ -49,6 +50,49 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setKioskUrl(window.location.origin + "/kiosk");
   }, []);
+
+  const handleDownloadKioskQR = async () => {
+    const html2canvas = (await import("html2canvas")).default;
+    const jsPDF = (await import("jspdf")).default;
+    const el = document.getElementById("kiosk-standee-preview");
+    if (!el) return;
+    // Hide the actual buttons if they were inside, but they are outside in our design
+    const canvas = await html2canvas(el, { scale: 3, useCORS: true, backgroundColor: "#fff" });
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    
+    // Center it nicely on A4
+    const a4W = 210;
+    const w = 150; // Standee width in mm on paper
+    const h = (canvas.height * w) / canvas.width;
+    pdf.addImage(imgData, "JPEG", (a4W - w) / 2, 20, w, h);
+    pdf.save("Shop_Kiosk_Standee.pdf");
+  };
+
+  const handlePrintKioskQR = () => {
+    const el = document.getElementById("kiosk-standee-preview");
+    if (!el) return;
+    const printWindow = window.open('', '', 'width=800,height=900');
+    if (!printWindow) return;
+    printWindow.document.write('<html><head><title>Print Kiosk QR</title>');
+    printWindow.document.write('<style>body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }</style>');
+    printWindow.document.write('</head><body>');
+    // Scale up the print out
+    printWindow.document.write(`<div style="transform: scale(2); transform-origin: center;">${el.outerHTML}</div>`);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  };
+
+  const handleCopyKioskLink = () => {
+    navigator.clipboard.writeText(kioskUrl);
+    alert("Kiosk Link Copied to Clipboard!\n\n" + kioskUrl);
+  };
+
   const [notifications, setNotifications] = useState<{
     pendingServices: any[];
     lowStockItems: any[];
@@ -472,10 +516,74 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
                   X
                 </button>
               </div>
-              <div style={{ padding: "20px", display: "flex", flexDirection: "column", alignItems: "center", background: "#fff", margin: "2px" }}>
-                <p style={{ marginBottom: "16px", textAlign: "center", fontSize: "14px", fontWeight: "bold" }}>Scan to Join Queue</p>
-                <QRCodeSVG value={kioskUrl} size={250} />
-                <p style={{ marginTop: "16px", textAlign: "center", fontSize: "11px", color: "#666" }}>Customers can scan this to self-book services from their phone.</p>
+              <div style={{ padding: "10px", background: "#fff", margin: "2px" }}>
+                
+                {/* Printable Standee Area */}
+                <div id="kiosk-standee-preview" style={{ 
+                  padding: "25px 20px", display: "flex", flexDirection: "column", alignItems: "center", 
+                  background: "#fff", border: "3px solid #000080", borderRadius: "16px", 
+                  width: "300px", margin: "0 auto", position: "relative", overflow: "hidden" 
+                }}>
+                  
+                  <div style={{ position: "absolute", top: "-50px", right: "-50px", width: "100px", height: "100px", background: "rgba(16, 132, 208, 0.1)", borderRadius: "50%" }}></div>
+                  <div style={{ position: "absolute", bottom: "-40px", left: "-40px", width: "80px", height: "80px", background: "rgba(0, 0, 128, 0.05)", borderRadius: "50%" }}></div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "15px", zIndex: 1 }}>
+                    <div style={{ background: "#000080", color: "#fff", padding: "8px", borderRadius: "50%", boxShadow: "0 4px 10px rgba(0,0,128,0.3)" }}>
+                        <ScanLine size={24} />
+                    </div>
+                    <h2 style={{ margin: 0, color: "#000080", fontSize: "20px", fontWeight: "900", letterSpacing: "0.5px" }}>RA Seva Point</h2>
+                  </div>
+                  
+                  <div style={{ background: "linear-gradient(135deg, #f0f8ff, #e6f2ff)", padding: "10px 15px", borderRadius: "8px", marginBottom: "20px", width: "100%", textAlign: "center", border: "1px dashed #1084d0", zIndex: 1 }}>
+                      <p style={{ margin: 0, fontSize: "15px", fontWeight: "bold", color: "#000080" }}>SELF-SERVICE KIOSK</p>
+                      <p style={{ margin: "4px 0 0 0", fontSize: "11px", color: "#444", fontWeight: "600" }}>Scan code below to book services</p>
+                  </div>
+
+                  <div style={{ background: "#fff", padding: "15px", borderRadius: "16px", boxShadow: "0 8px 24px rgba(0,0,0,0.12)", zIndex: 1 }}>
+                      <QRCodeSVG 
+                          value={kioskUrl} 
+                          size={180} 
+                          level="H" 
+                          imageSettings={{
+                              src: "/logo.png",
+                              x: undefined,
+                              y: undefined,
+                              height: 35,
+                              width: 35,
+                              excavate: true,
+                          }}
+                      />
+                  </div>
+
+                  <div style={{ marginTop: "20px", textAlign: "center", color: "#555", zIndex: 1 }}>
+                      <p style={{ margin: 0, fontSize: "14px", fontWeight: "bold", color: "#000080" }}>No waiting in line!</p>
+                      <div style={{ display: "flex", gap: "12px", justifyContent: "center", marginTop: "8px" }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                          <span style={{ fontSize: "16px" }}>📷</span><span style={{ fontSize: "9px", fontWeight: "bold" }}>OPEN<br/>CAMERA</span>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                          <span style={{ fontSize: "16px" }}>🔍</span><span style={{ fontSize: "9px", fontWeight: "bold" }}>SCAN<br/>CODE</span>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
+                          <span style={{ fontSize: "16px" }}>🚀</span><span style={{ fontSize: "9px", fontWeight: "bold" }}>BOOK<br/>FAST</span>
+                        </div>
+                      </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: "flex", gap: "8px", padding: "8px", background: "#d4d0c8", borderTop: "2px solid #404040" }}>
+                 <button onClick={handleDownloadKioskQR} style={{ flex: 1, padding: "6px", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", background: "#e0ded8", borderTop: "2px solid #fff", borderLeft: "2px solid #fff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", cursor: "pointer", fontWeight: "bold", fontSize: "11px" }}>
+                    <Download size={14} /> Download PDF
+                 </button>
+                 <button onClick={handlePrintKioskQR} style={{ flex: 1, padding: "6px", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", background: "#e0ded8", borderTop: "2px solid #fff", borderLeft: "2px solid #fff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", cursor: "pointer", fontWeight: "bold", fontSize: "11px" }}>
+                    <Printer size={14} /> Print
+                 </button>
+                 <button onClick={handleCopyKioskLink} style={{ flex: 1, padding: "6px", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", background: "#e0ded8", borderTop: "2px solid #fff", borderLeft: "2px solid #fff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", cursor: "pointer", fontWeight: "bold", fontSize: "11px" }}>
+                    <Copy size={14} /> Copy Link
+                 </button>
               </div>
             </div>
           </div>
