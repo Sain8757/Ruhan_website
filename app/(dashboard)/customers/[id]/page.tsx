@@ -8,6 +8,7 @@ import { formatCurrency, formatDate, SERVICE_STATUS_COLORS, PAYMENT_STATUS_COLOR
 import PageHeader from "@/components/layout/PageHeader";
 import ServiceDetailsDialog from "@/components/services/ServiceDetailsDialog";
 import InvoiceDetailsDialog from "@/components/billing/InvoiceDetailsDialog";
+import LegacyDialog from "@/components/layout/LegacyDialog";
 
 export default function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -637,52 +638,46 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
       </div>
 
       {showEditModal && (
-        <div className="modal-overlay">
-          <div className="modal-content" style={{ maxWidth: 500 }}>
-            <div className="modal-header">
-              <h2 className="section-title mb-0">Edit Customer</h2>
-              <button onClick={() => setShowEditModal(false)} className="btn-ghost p-1">
-                <X size={18} />
-              </button>
-            </div>
-            <form onSubmit={handleUpdate} className="modal-body space-y-4">
-              <div>
-                <label className="label">Full Name</label>
-                <input required className="input-field" value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} />
+        <LegacyDialog isOpen={showEditModal} onClose={() => setShowEditModal(false)} title="Edit Customer" width="500px">
+          <form onSubmit={handleUpdate} className="space-y-4">
+            <div className="bg-[#c0c0c0] p-4">
+              <div className="mb-4">
+                <label className="block text-xs font-bold mb-1 text-black">Full Name</label>
+                <input required className="w-full bg-white border-[2px] border-b-white border-r-white border-t-[#808080] border-l-[#808080] px-2 py-1 text-black font-bold text-xs focus:outline-none ring-1 ring-black shadow-[1px_1px_0px_#fff_inset]" value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="label">Mobile Number</label>
-                  <input required className="input-field" value={editForm.mobile} onChange={e => setEditForm({ ...editForm, mobile: e.target.value })} />
+                  <label className="block text-xs font-bold mb-1 text-black">Mobile Number</label>
+                  <input required className="w-full bg-white border-[2px] border-b-white border-r-white border-t-[#808080] border-l-[#808080] px-2 py-1 text-black font-bold text-xs focus:outline-none ring-1 ring-black shadow-[1px_1px_0px_#fff_inset]" value={editForm.mobile} onChange={e => setEditForm({ ...editForm, mobile: e.target.value })} />
                 </div>
                 <div>
-                  <label className="label">Email Address (Optional)</label>
-                  <input type="email" className="input-field" value={editForm.email} onChange={e => setEditForm({ ...editForm, email: e.target.value })} />
+                  <label className="block text-xs font-bold mb-1 text-black">Email Address (Optional)</label>
+                  <input type="email" className="w-full bg-white border-[2px] border-b-white border-r-white border-t-[#808080] border-l-[#808080] px-2 py-1 text-black font-bold text-xs focus:outline-none ring-1 ring-black shadow-[1px_1px_0px_#fff_inset]" value={editForm.email} onChange={e => setEditForm({ ...editForm, email: e.target.value })} />
                 </div>
               </div>
-              <div>
-                <label className="label">Address (Optional)</label>
-                <input className="input-field" value={editForm.address} onChange={e => setEditForm({ ...editForm, address: e.target.value })} />
+              <div className="mb-4">
+                <label className="block text-xs font-bold mb-1 text-black">Address (Optional)</label>
+                <input className="w-full bg-white border-[2px] border-b-white border-r-white border-t-[#808080] border-l-[#808080] px-2 py-1 text-black font-bold text-xs focus:outline-none ring-1 ring-black shadow-[1px_1px_0px_#fff_inset]" value={editForm.address} onChange={e => setEditForm({ ...editForm, address: e.target.value })} />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="label">Aadhaar (Optional)</label>
-                  <input className="input-field" value={editForm.aadhaarNumber} onChange={e => setEditForm({ ...editForm, aadhaarNumber: e.target.value })} />
+                  <label className="block text-xs font-bold mb-1 text-black">Aadhaar (Optional)</label>
+                  <input className="w-full bg-white border-[2px] border-b-white border-r-white border-t-[#808080] border-l-[#808080] px-2 py-1 text-black font-bold text-xs focus:outline-none ring-1 ring-black shadow-[1px_1px_0px_#fff_inset]" value={editForm.aadhaarNumber} onChange={e => setEditForm({ ...editForm, aadhaarNumber: e.target.value })} />
                 </div>
                 <div>
-                  <label className="label">PAN (Optional)</label>
-                  <input className="input-field" value={editForm.panNumber} onChange={e => setEditForm({ ...editForm, panNumber: e.target.value })} />
+                  <label className="block text-xs font-bold mb-1 text-black">PAN (Optional)</label>
+                  <input className="w-full bg-white border-[2px] border-b-white border-r-white border-t-[#808080] border-l-[#808080] px-2 py-1 text-black font-bold text-xs focus:outline-none ring-1 ring-black shadow-[1px_1px_0px_#fff_inset]" value={editForm.panNumber} onChange={e => setEditForm({ ...editForm, panNumber: e.target.value })} />
                 </div>
               </div>
-              <div className="modal-footer">
-                <button type="button" onClick={() => setShowEditModal(false)} className="btn-secondary" disabled={saving}>Cancel</button>
-                <button type="submit" className="btn-primary" disabled={saving}>
-                  {saving ? <Loader2 size={16} className="animate-spin" /> : "Save Changes"}
+              <div className="flex gap-2 justify-end mt-4 pt-2">
+                <button type="button" onClick={() => setShowEditModal(false)} className="bg-[#c0c0c0] px-6 py-1.5 text-xs font-bold text-black border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white" disabled={saving}>Cancel</button>
+                <button type="submit" className="bg-[#c0c0c0] px-6 py-1.5 text-xs font-bold text-black border-t-white border-l-white border-b-black border-r-black border-[3px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white ring-1 ring-black ring-inset shadow-[1px_1px_0px_#fff_inset] flex items-center justify-center min-w-[100px]" disabled={saving}>
+                  {saving ? <Loader2 size={12} className="animate-spin" /> : "Save Changes"}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
+            </div>
+          </form>
+        </LegacyDialog>
       )}
 
       {isServiceModalOpen && selectedServiceId && (
