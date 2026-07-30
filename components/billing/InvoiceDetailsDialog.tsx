@@ -217,76 +217,80 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
       ) : (
         <div className="w-full mx-auto p-4 flex flex-col h-full bg-[#c0c0c0]">
           {/* Top Action Header — hidden on print */}
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-4 no-print border-b border-gray-400 pb-2">
+          <div className="flex flex-wrap items-center justify-between gap-4 p-4 mb-4 rounded-xl border border-slate-200 bg-white shadow-sm no-print">
             {/* Template Switcher & Actions */}
             <div className="flex flex-wrap items-center gap-2">
-              <div className="flex border rounded-lg overflow-hidden bg-white text-[10px] font-bold shadow-[inset_1px_1px_2px_rgba(0,0,0,0.1)] border-gray-400">
+              <div className="flex border rounded-lg overflow-hidden bg-white text-xs font-bold shadow-sm" style={{ borderColor: 'var(--border-primary)' }}>
                 <button
                   onClick={() => setTemplate("classic")}
-                  className={`px-3 py-1 transition-colors ${template === "classic" ? "bg-[#0000aa] text-white" : "text-black hover:bg-slate-200"}`}
+                  className={`px-3 py-1.5 transition-colors ${template === "classic" ? "bg-blue-600 text-white" : "text-slate-700 hover:bg-slate-100"}`}
                 >
                   Classic Vintage
                 </button>
                 <button
                   onClick={() => setTemplate("modern")}
-                  className={`px-3 py-1 transition-colors ${template === "modern" ? "bg-[#0000aa] text-white" : "text-black hover:bg-slate-200"}`}
+                  className={`px-3 py-1.5 transition-colors ${template === "modern" ? "bg-blue-600 text-white" : "text-slate-700 hover:bg-slate-100"}`}
                 >
                   Modern Executive
                 </button>
                 <button
                   onClick={() => setTemplate("thermal")}
-                  className={`px-3 py-1 transition-colors ${template === "thermal" ? "bg-[#0000aa] text-white" : "text-black hover:bg-slate-200"}`}
+                  className={`px-3 py-1.5 transition-colors ${template === "thermal" ? "bg-blue-600 text-white" : "text-slate-700 hover:bg-slate-100"}`}
                 >
                   Thermal POS (80mm)
                 </button>
               </div>
 
-              <div className={`flex items-center gap-1.5 px-3 py-1 bg-white border border-gray-400 shadow-[inset_1px_1px_2px_rgba(0,0,0,0.1)] text-xs font-bold ${paymentStyle.className}`}>
+              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold ${paymentStyle.className}`}>
                 {paymentStyle.icon}
                 {paymentStyle.label}
               </div>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {invoice.paymentStatus !== "PAID" && (
                 <button
                   onClick={handleSettleInvoice}
-                  className="bg-[#c0c0c0] px-3 py-1 flex items-center gap-1.5 text-xs font-bold border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white no-print"
+                  className="btn-secondary px-3 py-1.5 flex items-center gap-1.5 text-xs font-bold no-print"
+                  style={{ color: "#059669", backgroundColor: "rgba(5, 150, 105, 0.1)", borderColor: "rgba(5, 150, 105, 0.2)" }}
                 >
-                  <IndianRupee size={12} />
+                  <IndianRupee size={14} />
                   Settle
                 </button>
               )}
 
               <button
                 onClick={() => setIsEditOpen(true)}
-                className="bg-[#c0c0c0] px-3 py-1 flex items-center gap-1.5 text-xs font-bold border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white no-print"
+                className="btn-secondary px-3 py-1.5 flex items-center gap-1.5 text-xs font-bold no-print"
+                title="Edit Invoice Details"
               >
-                <Edit3 size={12} />
+                <Edit3 size={14} />
                 Edit
               </button>
 
               <button
                 onClick={handleDownloadPdf}
                 disabled={isGeneratingPdf}
-                className="bg-[#c0c0c0] px-3 py-1 flex items-center gap-1.5 text-xs font-bold border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white"
+                className="btn-secondary px-3 py-1.5 flex items-center gap-1.5 text-xs font-bold"
+                title="Download PDF File"
               >
-                {isGeneratingPdf ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+                {isGeneratingPdf ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
                 Save PDF
               </button>
 
               <button
                 onClick={handleWhatsApp}
                 disabled={isGeneratingPdf}
-                className="bg-[#c0c0c0] px-3 py-1 flex items-center gap-1.5 text-xs font-bold border-t-white border-l-white border-b-black border-r-black border-[2px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white"
+                className="btn-secondary px-3 py-1.5 flex items-center gap-1.5 text-xs font-bold"
+                style={{ color: "#16a34a", backgroundColor: "rgba(22, 163, 74, 0.1)", borderColor: "rgba(22, 163, 74, 0.2)" }}
               >
-                {isGeneratingPdf ? <Loader2 size={12} className="animate-spin" /> : <MessageCircle size={12} />}
+                {isGeneratingPdf ? <Loader2 size={14} className="animate-spin" /> : <MessageCircle size={14} />}
                 WhatsApp
               </button>
 
-              <button onClick={handlePrint} className="bg-[#c0c0c0] px-3 py-1 flex items-center gap-1.5 text-xs font-bold border-t-white border-l-white border-b-black border-r-black border-[3px] active:border-t-black active:border-l-black active:border-b-white active:border-r-white border-black ring-1 ring-black ring-inset shadow-[1px_1px_0px_#fff_inset]">
-                <Printer size={12} />
-                Print
+              <button onClick={handlePrint} className="btn-primary px-4 py-1.5 flex items-center gap-1.5 text-xs font-bold">
+                <Printer size={14} />
+                Print Invoice
               </button>
             </div>
           </div>
