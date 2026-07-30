@@ -131,6 +131,14 @@ export const WORKSPACE_MODULES: WorkspaceModule[] = [
     keywords: ["crop", "id", "aadhaar", "pan", "documents"],
   },
   {
+    id: "manual-id-generator",
+    label: "Manual ID Generator",
+    href: "/manual-id-generator",
+    icon: "FilePlus2",
+    section: "Tools",
+    keywords: ["manual", "id", "aadhaar", "pan", "generate", "pdf"],
+  },
+  {
     id: "online-work",
     label: "Online Work",
     href: "/online-work",
