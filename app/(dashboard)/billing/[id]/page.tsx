@@ -712,66 +712,70 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
           /* ========================================================================= */
           <div
             ref={invoiceCardRef}
-            className="invoice-printable-card text-black font-mono shadow-md border border-slate-300 print:shadow-none print:border-none print:m-0"
+            className="invoice-printable-card text-black shadow-md border border-slate-300 print:shadow-none print:border-none print:m-0"
             style={{
               width: "300px",
               background: "#ffffff",
               padding: "16px 12px",
               boxSizing: "border-box",
               color: "#000000",
-              fontFamily: "'Courier New', Courier, monospace",
-              fontSize: "11px",
+              fontFamily: "Arial, Helvetica, sans-serif",
+              fontSize: "12px",
               lineHeight: "1.3",
             }}
           >
             {/* Store Header */}
-            <div className="text-center pb-2 border-b border-black mb-2">
-              <h2 className="text-base font-bold uppercase tracking-wider">{shopName}</h2>
-              <p className="text-[10px]">{shopTagline}</p>
-              <p className="text-[10px]">Ph: {shopPhone}</p>
-              <p className="text-[9px] text-slate-700">{shopAddress}</p>
+            <div className="text-center pb-2">
+              <h2 className="font-black uppercase tracking-wider" style={{ fontSize: "22px", lineHeight: "1.2" }}>{shopName}</h2>
+              <p className="mt-1">{shopTagline}</p>
+              <p>Ph: {shopPhone}</p>
+              <p className="text-slate-700">{shopAddress}</p>
             </div>
 
+            <hr style={{ borderColor: "#000", borderWidth: "1px", margin: "4px 0" }} />
+
             {/* Bill Meta */}
-            <div className="border-b border-black pb-2 mb-2 text-[10px] space-y-0.5">
-              <div className="flex justify-between font-bold">
+            <div className="pb-2 space-y-0.5">
+              <div className="flex justify-between font-bold" style={{ fontSize: "13px" }}>
                 <span>INV #{invoice.invoiceNumber}</span>
                 <span>{formatDate(invoice.createdAt)}</span>
               </div>
-              <div>Customer: <strong>{invoice.customer.name}</strong></div>
-              <div>Mobile: {invoice.customer.mobile}</div>
-              <div>Mode: {PAYMENT_MODE_LABELS[invoice.paymentMode] || invoice.paymentMode}</div>
+              <div style={{ fontSize: "13px" }}>Customer: <span className="font-bold">{invoice.customer.name}</span></div>
+              <div style={{ fontSize: "13px" }}>Mobile: {invoice.customer.mobile}</div>
+              <div style={{ fontSize: "13px" }}>Mode: {PAYMENT_MODE_LABELS[invoice.paymentMode] || invoice.paymentMode}</div>
             </div>
 
             {/* Items Table */}
-            <table className="w-full text-[10px] text-left border-b border-black pb-2 mb-2">
+            <table style={{ width: "100%", borderCollapse: "collapse", border: "1.5px solid #000", marginBottom: "8px" }}>
               <thead>
-                <tr className="border-b border-black">
-                  <th className="py-1">Item</th>
-                  <th className="py-1 text-center">Qty</th>
-                  <th className="py-1 text-right">Amt</th>
+                <tr style={{ background: "#e5e7eb", borderBottom: "1.5px solid #000" }}>
+                  <th style={{ padding: "4px", borderRight: "1px solid #000", textAlign: "left", fontWeight: "normal" }}>Item</th>
+                  <th style={{ padding: "4px", borderRight: "1px solid #000", textAlign: "center", fontWeight: "normal" }}>Qty</th>
+                  <th style={{ padding: "4px", textAlign: "right", fontWeight: "normal" }}>Amt</th>
                 </tr>
               </thead>
               <tbody>
-                {invoice.items.map((item: any) => (
-                  <tr key={item.id}>
-                    <td className="py-1 pr-1 truncate max-w-[120px]">{item.name}</td>
-                    <td className="py-1 text-center">{item.quantity}</td>
-                    <td className="py-1 text-right font-bold">{item.total.toFixed(2)}</td>
+                {invoice.items.map((item: any, idx: number) => (
+                  <tr key={item.id || idx} style={{ borderBottom: "1px solid #000" }}>
+                    <td style={{ padding: "4px", borderRight: "1px solid #000", textTransform: "uppercase" }}>{item.name}</td>
+                    <td style={{ padding: "4px", borderRight: "1px solid #000", textAlign: "center" }}>{item.quantity}</td>
+                    <td style={{ padding: "4px", textAlign: "right", fontWeight: "bold" }}>{item.total.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
             {/* Totals */}
-            <div className="space-y-0.5 text-[10px] text-right border-b border-black pb-2 mb-2">
+            <div className="space-y-0.5 text-right pb-2" style={{ fontSize: "13px" }}>
               <div className="flex justify-between"><span>Subtotal:</span><span>₹{invoice.subtotal.toFixed(2)}</span></div>
               {invoice.discount > 0 && <div className="flex justify-between"><span>Discount:</span><span>-₹{invoice.discount.toFixed(2)}</span></div>}
               {invoice.gst > 0 && <div className="flex justify-between"><span>GST:</span><span>₹{((invoice.subtotal * invoice.gst) / 100).toFixed(2)}</span></div>}
-              <div className="flex justify-between font-bold text-xs border-t border-black pt-1 my-0.5">
+              
+              <div className="flex justify-between font-bold" style={{ fontSize: "16px", borderTop: "1.5px solid #000", borderBottom: "1px solid #000", margin: "4px 0", padding: "2px 0" }}>
                 <span>TOTAL:</span>
                 <span>₹{invoice.total.toFixed(2)}</span>
               </div>
+              
               <div className="flex justify-between"><span>Paid:</span><span>₹{(invoice.amountPaid || 0).toFixed(2)}</span></div>
               {invoice.total - (invoice.amountPaid || 0) > 0 && (
                 <div className="flex justify-between font-bold text-red-700">
@@ -783,15 +787,17 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
 
             {/* QR Code */}
             {upiLink && (
-              <div className="text-center py-2 border-b border-black mb-2 flex flex-col items-center">
-                <QRCodeSVG value={upiLink} size={80} />
-                <span className="text-[9px] mt-1 font-bold">Scan & Pay via UPI</span>
+              <div className="text-center py-2 flex flex-col items-center">
+                <QRCodeSVG value={upiLink} size={120} />
+                <span className="mt-1 font-bold" style={{ fontSize: "13px" }}>Scan & Pay via UPI</span>
               </div>
             )}
 
+            <hr style={{ borderColor: "#000", borderWidth: "1px", margin: "4px 0" }} />
+
             {/* Footer */}
-            <div className="text-center text-[9px]">
-              <p className="font-bold">Thank You! Visit Again.</p>
+            <div className="text-center mt-2" style={{ fontSize: "11px" }}>
+              <p className="font-bold" style={{ fontSize: "13px" }}>Thank You! Visit Again.</p>
               <p>*** Computer Generated Receipt ***</p>
             </div>
           </div>
