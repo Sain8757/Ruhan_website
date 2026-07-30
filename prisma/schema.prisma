@@ -342,10 +342,12 @@ model OnlineServiceLink {
 }
 
 model FileDrop {
-  id        String   @id @default(cuid())
-  filename  String
-  url       String
-  size      Int
-  type      String   @default("unknown")
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  filename     String
+  url          String
+  size         Int
+  type         String   @default("unknown")
+  customerName String?
+  direction    String   @default("MOBILE_TO_PC") // "MOBILE_TO_PC" or "PC_TO_MOBILE"
+  createdAt    DateTime @default(now())
 }

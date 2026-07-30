@@ -12,6 +12,8 @@ export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File;
+    const customerName = formData.get('customerName') as string || null;
+    const direction = formData.get('direction') as string || "MOBILE_TO_PC";
 
     if (!file) {
       return NextResponse.json({ error: 'Missing file' }, { status: 400 });
@@ -52,7 +54,9 @@ export async function POST(req: Request) {
         filename: file.name,
         url: publicUrl,
         size: file.size,
-        type: file.type || "unknown"
+        type: file.type || "unknown",
+        customerName: customerName,
+        direction: direction
       }
     });
 
