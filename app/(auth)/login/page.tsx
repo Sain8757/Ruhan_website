@@ -145,9 +145,12 @@ export default function LoginPage() {
                 </button>
               </div>
               <div style={{ textAlign: "right", marginTop: "4px" }}>
-                <a href="/reset-password" style={{ color: "blue", textDecoration: "underline", cursor: "pointer", fontSize: "11px" }}>
+                <span 
+                  onClick={() => router.push('/reset-password')} 
+                  style={{ color: "blue", textDecoration: "underline", cursor: "pointer", fontSize: "11px" }}
+                >
                   Reset Password
-                </a>
+                </span>
               </div>
 
             </form>
