@@ -12,6 +12,7 @@ import {
 import { WorkspaceProvider, useWorkspace } from "@/components/workspace/WorkspaceProvider";
 import Providers from "@/components/Providers";
 import { WORKSPACE_MODULES } from "@/lib/workspace";
+import { WifiFileDropModal } from "@/components/kiosk/WifiFileDropModal";
 import { signOut } from "next-auth/react";
 import { DownloadProvider } from "@/contexts/DownloadContext";
 import AIAssistant from "@/components/ai/AIAssistant";
@@ -46,6 +47,8 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAI, setShowAI] = useState(false);
   const [showKioskQR, setShowKioskQR] = useState(false);
+  const [showWifiDrop, setShowWifiDrop] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const [kioskUrl, setKioskUrl] = useState("");
   useEffect(() => {
@@ -285,6 +288,16 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
               >
                 <QrCode size={16} color="#000" />
               </button>
+
+              {/* Wi-Fi File Drop Button */}
+              <button
+                className="legacy-toolbar-btn"
+                title="Wi-Fi File Drop"
+                onClick={() => setShowWifiDrop(true)}
+                style={{ background: "#d4d0c8", padding: "2px 4px", cursor: "pointer", marginLeft: "2px" }}
+              >
+                <Smartphone size={16} color="#1084d0" />
+              </button>
             </div>
           </div>
 
@@ -451,7 +464,10 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        {/* AI Assistant Modal */}
+        {/* Wi-Fi File Drop Modal */}
+        {showWifiDrop && <WifiFileDropModal onClose={() => setShowWifiDrop(false)} />}
+
+        {/* AI Assistant Modal (Same Windows 95 Style) */}    
         <AIAssistant isOpen={showAI} onClose={() => setShowAI(false)} />
 
         {/* Kiosk QR Modal */}
