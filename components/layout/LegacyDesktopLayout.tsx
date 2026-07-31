@@ -7,7 +7,7 @@ import {
   ScanLine, Layers, WalletCards, BookOpen, Package,
   MessageSquare, BarChart3, Settings, QrCode, FileImage,
   Search, Bell, MessageCircle, Mail, Sparkles, LogOut, AlertTriangle, Clock,
-  Download, Printer, Copy, Smartphone
+  Download, Printer, Copy, Smartphone, Languages, Volume2, VolumeX
 } from "lucide-react";
 import { WorkspaceProvider, useWorkspace } from "@/components/workspace/WorkspaceProvider";
 import Providers from "@/components/Providers";
@@ -17,6 +17,7 @@ import { signOut } from "next-auth/react";
 import { DownloadProvider } from "@/contexts/DownloadContext";
 import AIAssistant from "@/components/ai/AIAssistant";
 import { QRCodeSVG } from "qrcode.react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const iconMap: Record<string, React.ComponentType<{ size?: number; color?: string; className?: string }>> = {
   LayoutDashboard,
@@ -42,6 +43,7 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { openSearch } = useWorkspace();
+  const { language, toggleLanguage, soundEnabled, toggleSound, t } = useLanguage();
 
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -298,6 +300,48 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
               >
                 <Smartphone size={16} color="#1084d0" />
               </button>
+
+              {/* Language Switcher Badge Button */}
+              <button
+                className="legacy-toolbar-btn flex items-center gap-1"
+                onClick={toggleLanguage}
+                title="Switch Language (English / हिंदी)"
+                style={{
+                  background: language === "hi" ? "#1d4ed8" : "#d4d0c8",
+                  color: language === "hi" ? "#ffffff" : "#000000",
+                  padding: "1px 6px",
+                  fontSize: "11px",
+                  fontWeight: "bold",
+                  borderRadius: "3px",
+                  borderTop: "2px solid #fff",
+                  borderLeft: "2px solid #fff",
+                  borderRight: "2px solid #404040",
+                  borderBottom: "2px solid #404040",
+                  cursor: "pointer",
+                  marginLeft: "4px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "3px",
+                }}
+              >
+                <Languages size={13} color={language === "hi" ? "#ffffff" : "#1d4ed8"} />
+                <span>{language === "en" ? "EN" : "हिंदी"}</span>
+              </button>
+
+              {/* Sound Feedback Toggle */}
+              <button
+                className="legacy-toolbar-btn"
+                onClick={toggleSound}
+                title={soundEnabled ? t("soundOn") : t("soundOff")}
+                style={{
+                  background: "#d4d0c8",
+                  padding: "2px 4px",
+                  cursor: "pointer",
+                  marginLeft: "2px",
+                }}
+              >
+                {soundEnabled ? <Volume2 size={16} color="#10b981" /> : <VolumeX size={16} color="#ef4444" />}
+              </button>
             </div>
           </div>
 
@@ -307,10 +351,10 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
               className="legacy-btn-sys"
               style={{ width: "auto", padding: "0 8px", display: "flex", gap: "4px", cursor: "pointer" }}
               onClick={() => setShowLogoutConfirm(true)}
-              title="Logout"
+              title={t("logout")}
             >
               <LogOut size={12} />
-              <span>Logout</span>
+              <span>{t("logout")}</span>
             </button>
           </div>
         </div>
@@ -324,7 +368,7 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
                 <React.Fragment key={module.id}>
                   <button className="legacy-toolbar-btn" onClick={() => router.push(module.href)}>
                     <IconComponent size={16} color={idx % 2 === 0 ? "#008080" : "#000080"} />
-                    {module.label}
+                    {t(module.id) !== module.id ? t(module.id) : module.label}
                   </button>
                   {(idx === 3 || idx === 6 || idx === 10) && (
                     <div style={{ width: "2px", borderLeft: "1px solid #808080", borderRight: "1px solid #fff", margin: "0 4px", height: "24px", alignSelf: "center" }}></div>
