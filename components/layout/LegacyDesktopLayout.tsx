@@ -303,29 +303,26 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
 
               {/* Language Switcher Badge Button */}
               <button
-                className="legacy-toolbar-btn flex items-center gap-1"
+                className="legacy-toolbar-btn"
                 onClick={toggleLanguage}
                 title="Switch Language (English / हिंदी)"
                 style={{
                   background: language === "hi" ? "#1d4ed8" : "#d4d0c8",
                   color: language === "hi" ? "#ffffff" : "#000000",
-                  padding: "1px 6px",
-                  fontSize: "11px",
+                  padding: "0 4px",
+                  height: "22px",
+                  fontSize: "10px",
                   fontWeight: "bold",
-                  borderRadius: "3px",
-                  borderTop: "2px solid #fff",
-                  borderLeft: "2px solid #fff",
-                  borderRight: "2px solid #404040",
-                  borderBottom: "2px solid #404040",
                   cursor: "pointer",
-                  marginLeft: "4px",
                   display: "flex",
                   alignItems: "center",
-                  gap: "3px",
+                  justifyContent: "center",
+                  gap: "2px",
+                  boxSizing: "border-box",
                 }}
               >
-                <Languages size={13} color={language === "hi" ? "#ffffff" : "#1d4ed8"} />
-                <span>{language === "en" ? "EN" : "हिंदी"}</span>
+                <Languages size={12} color={language === "hi" ? "#ffffff" : "#1d4ed8"} />
+                <span>{language === "en" ? "EN" : "HI"}</span>
               </button>
 
               {/* Sound Feedback Toggle */}
@@ -335,12 +332,17 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
                 title={soundEnabled ? t("soundOn") : t("soundOff")}
                 style={{
                   background: "#d4d0c8",
-                  padding: "2px 4px",
+                  padding: "0 4px",
+                  height: "22px",
+                  width: "22px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   cursor: "pointer",
-                  marginLeft: "2px",
+                  boxSizing: "border-box",
                 }}
               >
-                {soundEnabled ? <Volume2 size={16} color="#10b981" /> : <VolumeX size={16} color="#ef4444" />}
+                {soundEnabled ? <Volume2 size={13} color="#10b981" /> : <VolumeX size={13} color="#ef4444" />}
               </button>
             </div>
           </div>
