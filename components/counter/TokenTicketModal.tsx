@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Ticket, Printer, X, Check, User, Phone, Briefcase } from "lucide-react";
+import { Ticket, Printer, X, Check, User, Phone, Briefcase, Volume2 } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
+import { announceTokenInHindi } from "@/lib/voiceAnnouncement";
 
 export interface TokenData {
   tokenNumber: number;
@@ -204,19 +205,27 @@ export default function TokenTicketModal({ isOpen, onClose, initialTokenNumber =
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => setIssuedToken(null)}
-                  className="flex-1 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer"
+                  onClick={() => announceTokenInHindi(issuedToken.tokenNumber)}
+                  className="flex-1 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer shadow-sm transition-all"
+                  title="Announce token number in Hindi voice"
                 >
-                  <Ticket size={14} /> Issue Next Token
+                  <Volume2 size={16} /> Announce Token
                 </button>
 
                 <button
                   onClick={handlePrint}
-                  className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
+                  className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer shadow-md transition-all"
                 >
                   <Printer size={16} /> Print Token Slip
+                </button>
+
+                <button
+                  onClick={() => setIssuedToken(null)}
+                  className="w-full py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Ticket size={14} /> Issue Next Token
                 </button>
               </div>
             </div>

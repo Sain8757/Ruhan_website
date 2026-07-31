@@ -25,6 +25,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { useDownload } from "@/contexts/DownloadContext";
 import TokenTicketModal from "@/components/counter/TokenTicketModal";
 import KeyboardShortcutsModal from "@/components/layout/KeyboardShortcutsModal";
+import GovtPortalsLauncher from "@/components/counter/GovtPortalsLauncher";
 
 type PrintJob = {
   id: string;
@@ -308,6 +309,11 @@ export default function CounterDeskPage() {
           <span className="label">Daily Net</span>
           <p className="text-2xl font-bold">{formatCurrency(netTotal)}</p>
         </div>
+      </div>
+
+      {/* CSC & Govt Portals Quick Launcher */}
+      <div className="mt-4">
+        <GovtPortalsLauncher />
       </div>
 
       <div className="content-grid content-grid-wide">
