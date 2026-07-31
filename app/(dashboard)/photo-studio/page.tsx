@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Camera, Download, RotateCw, Trash2, Sliders, Layout, Printer, Move, Plus, Minus, Eraser } from "lucide-react";
+import { Camera, Download, RotateCw, Trash2, Sliders, Layout, Printer, Move, Plus, Minus, Eraser, UserCheck } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 import { useDownload } from "@/contexts/DownloadContext";
 import jsPDF from "jspdf";
 import PageHeader from "@/components/layout/PageHeader";
 import AdvancedRetouchModal from "@/components/photo-studio/AdvancedRetouchModal";
+import FormalDressOverlayModal from "@/components/photo-studio/FormalDressOverlayModal";
 import type { Config } from "@imgly/background-removal";
 
 const FILTERS = [
@@ -177,6 +178,7 @@ export default function PhotoStudioPage() {
   const [flipH, setFlipH] = useState(false);
   const [flipV, setFlipV] = useState(false);
   const [activeFilter, setActiveFilter] = useState('none');
+  const [isDressModalOpen, setIsDressModalOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -732,6 +734,21 @@ export default function PhotoStudioPage() {
                       <Eraser size={16} />
                       Advanced Retouch (Heal/Erase)
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!originalImage) {
+                          toast.error("Please upload a photo first");
+                          return;
+                        }
+                        setIsDressModalOpen(true);
+                      }}
+                      className="w-full py-2.5 px-3 bg-gradient-to-r from-blue-700 to-indigo-800 hover:from-blue-800 hover:to-indigo-900 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={!originalImage}
+                    >
+                      <UserCheck size={16} />
+                      <span>👔 Formal Suit / Shirt Inserter</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1050,6 +1067,23 @@ export default function PhotoStudioPage() {
               }
             })();
             setIsEraserMode(false);
+          }}
+        />
+      )}
+
+      {isDressModalOpen && originalImage && (
+        <FormalDressOverlayModal
+          isOpen={isDressModalOpen}
+          onClose={() => setIsDressModalOpen(false)}
+          imageSrc={originalImage}
+          onApply={async (composedDataUrl) => {
+            setOriginalImage(composedDataUrl);
+            try {
+              originalImageRef.current = await loadImage(composedDataUrl);
+              drawCanvas();
+            } catch (err) {
+              console.error("Failed to load composed dress image", err);
+            }
           }}
         />
       )}
