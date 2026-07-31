@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import {
   Copy,
   Download,
@@ -15,12 +15,16 @@ import {
   Trash2,
   Upload,
   WalletCards,
+  Ticket,
+  Keyboard,
 } from "lucide-react";
 import PageHeader from "@/components/layout/PageHeader";
 import { SERVICE_CATALOG, type ServiceCatalogItem } from "@/lib/serviceCatalog";
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/contexts/ToastContext";
 import { useDownload } from "@/contexts/DownloadContext";
+import TokenTicketModal from "@/components/counter/TokenTicketModal";
+import KeyboardShortcutsModal from "@/components/layout/KeyboardShortcutsModal";
 
 type PrintJob = {
   id: string;
@@ -89,6 +93,33 @@ export default function CounterDeskPage() {
   const [credentials, setCredentials] = useStoredState<Credential[]>("ra-counter-credentials", []);
   const [credentialForm, setCredentialForm] = useState({ portal: "", username: "", password: "", note: "" });
   const [showPasswords, setShowPasswords] = useState(false);
+  const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isTyping = target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT";
+
+      if (e.key === "F2") {
+        e.preventDefault();
+        setIsTokenModalOpen(true);
+      } else if (e.key === "F4" && !isTyping) {
+        e.preventDefault();
+        const searchInput = document.getElementById("counter-search-input");
+        if (searchInput) searchInput.focus();
+      } else if (e.key === "F8") {
+        e.preventDefault();
+        setActiveTab("cash");
+      } else if (e.key === "F1" || (e.key === "?" && !isTyping)) {
+        e.preventDefault();
+        setIsShortcutsOpen(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const filteredServices = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -229,7 +260,29 @@ export default function CounterDeskPage() {
         title="Counter Desk"
         subtitle="Rate list, document checklist, WhatsApp templates, print queue and daily cash closing"
         actions={
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              className="btn-primary px-3 py-2 flex items-center gap-1.5 text-xs font-extrabold cursor-pointer"
+              onClick={() => setIsTokenModalOpen(true)}
+              title="Issue Counter Token Ticket (F2)"
+            >
+              <Ticket size={16} />
+              <span>Issue Token Ticket</span>
+              <span className="text-[10px] bg-white/25 px-1.5 py-0.5 rounded font-mono">F2</span>
+            </button>
+
+            <button
+              type="button"
+              className="btn-secondary px-3 py-2 flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+              onClick={() => setIsShortcutsOpen(true)}
+              title="View Keyboard Shortcuts (F1 / ?)"
+            >
+              <Keyboard size={16} />
+              <span>Hotkeys</span>
+              <span className="text-[10px] bg-slate-200 px-1.5 py-0.5 rounded font-mono">F1</span>
+            </button>
+
             <button type="button" className="btn-secondary" onClick={() => importInputRef.current?.click()}>
               <Upload size={16} />
               Import Data
@@ -493,6 +546,10 @@ export default function CounterDeskPage() {
           Sensitive data yahan browser ke local storage me save hota hai. Shared computer par password save na karein.
         </p>
       </section>
+
+      {/* Modals */}
+      <TokenTicketModal isOpen={isTokenModalOpen} onClose={() => setIsTokenModalOpen(false)} />
+      <KeyboardShortcutsModal isOpen={isShortcutsOpen} onClose={() => setIsShortcutsOpen(false)} />
     </div>
   );
 }
