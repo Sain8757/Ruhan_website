@@ -24,9 +24,11 @@ import {
   WalletCards,
   QrCode,
   FileImage,
+  type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WORKSPACE_MODULES, type WorkspaceIcon } from "@/lib/workspace";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Icon colors for premium look
 const iconColors: Partial<Record<WorkspaceIcon, string>> = {
@@ -47,7 +49,7 @@ const iconColors: Partial<Record<WorkspaceIcon, string>> = {
   FileImage: "#ec4899",
 };
 
-const iconMap: Partial<Record<WorkspaceIcon, React.ComponentType<{ size?: number; className?: string }>>> = {
+const iconMap: Partial<Record<WorkspaceIcon, React.ElementType>> = {
   LayoutDashboard,
   Users,
   Briefcase,
@@ -82,6 +84,7 @@ interface SidebarProps {
 
 export default function Sidebar({ collapsed, onToggle, className }: SidebarProps) {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -193,17 +196,17 @@ export default function Sidebar({ collapsed, onToggle, className }: SidebarProps
               )}
 
               {items.map((item) => {
-                const Icon = iconMap[item.icon];
+                const Icon = iconMap[item.icon] as any;
                 const active = isActive(item.href);
                 const iconColor = iconColors[item.icon] || "#7b93ff";
-                if (!Icon) return null;
+                const itemLabel = t(item.id) !== item.id ? t(item.id) : item.label;
 
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     className={cn("sidebar-item group", active && "active")}
-                    title={collapsed ? item.label : undefined}
+                    title={collapsed ? itemLabel : undefined}
                     style={collapsed ? { justifyContent: "center", padding: "10px 0" } : {}}
                   >
                     {/* Icon with colored background on active */}
@@ -229,7 +232,7 @@ export default function Sidebar({ collapsed, onToggle, className }: SidebarProps
                     </div>
 
                     {!collapsed && (
-                      <span className="truncate flex-1">{item.label}</span>
+                      <span className="truncate flex-1">{itemLabel}</span>
                     )}
 
                     {active && !collapsed && (
@@ -271,12 +274,12 @@ export default function Sidebar({ collapsed, onToggle, className }: SidebarProps
             el.style.background = "";
             el.style.color = "rgba(244,63,94,0.6)";
           }}
-          title={collapsed ? "Sign out" : undefined}
+          title={collapsed ? t("logout") : undefined}
         >
           <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "rgba(244,63,94,0.08)" }}>
             <LogOut size={15} className="shrink-0" />
           </div>
-          {!collapsed && <span>Sign Out</span>}
+          {!collapsed && <span>{t("logout")}</span>}
         </button>
 
         {!collapsed && (

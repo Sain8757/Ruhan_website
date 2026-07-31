@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, Menu, Bell, AlertTriangle, Clock, MessageCircle, Mail, FolderOpen, Sparkles, LogOut, X, Key, Moon, Sun } from "lucide-react";
+import { Search, Menu, Bell, AlertTriangle, Clock, MessageCircle, Mail, FolderOpen, Sparkles, LogOut, X, Key, Moon, Sun, Volume2, VolumeX, Languages } from "lucide-react";
 import { useWorkspace } from "@/components/workspace/WorkspaceProvider";
 import AIAssistant from "@/components/ai/AIAssistant";
 import { signOut } from "next-auth/react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface HeaderProps {
   onMenuToggle: () => void;
@@ -13,6 +14,7 @@ interface HeaderProps {
 
 export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
   const { openSearch } = useWorkspace();
+  const { language, toggleLanguage, soundEnabled, toggleSound, t } = useLanguage();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAI, setShowAI] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -107,8 +109,8 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
         >
           <input
             type="text"
-            placeholder="Search..."
-            style={{ flex: 1, paddingLeft: "6px", fontSize: "13px", border: "none", outline: "none", background: "transparent" }}
+            placeholder={t("searchPlaceholder")}
+            style={{ flex: 1, paddingLeft: "6px", fontSize: "12px", border: "none", outline: "none", background: "transparent" }}
             onFocus={openSearch}
           />
           <button
@@ -124,11 +126,42 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
         <div className="flex items-center gap-1 sm:gap-2">
           <input type="file" ref={fileInputRef} className="hidden" />
 
+          {/* Language Switcher Badge */}
+          <button
+            className="legacy-button flex items-center gap-1 font-semibold text-xs transition-all"
+            style={{
+              padding: "3px 8px",
+              background: language === "hi" ? "linear-gradient(135deg, #3b82f6, #1d4ed8)" : "var(--bg-secondary)",
+              color: language === "hi" ? "#ffffff" : "var(--text-primary)",
+              border: "1px solid var(--border-primary)",
+              borderRadius: "4px",
+              boxShadow: language === "hi" ? "0 2px 6px rgba(59,130,246,0.4)" : "none",
+            }}
+            onClick={toggleLanguage}
+            title="Switch Language (English / हिंदी)"
+          >
+            <Languages size={14} className={language === "hi" ? "text-white" : "text-blue-500"} />
+            <span>{language === "en" ? "EN" : "हिंदी"}</span>
+          </button>
+
+          {/* Sound Feedback Toggle */}
+          <button
+            className="legacy-button flex items-center justify-center transition-all"
+            style={{
+              padding: "4px 8px",
+              color: soundEnabled ? "#10b981" : "#ef4444",
+            }}
+            onClick={toggleSound}
+            title={soundEnabled ? t("soundOn") : t("soundOff")}
+          >
+            {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+          </button>
+
           <button
             className="legacy-button"
             style={{ padding: "4px 8px", color: "#000" }}
             onClick={openFileExplorer}
-            title="Open File Explorer"
+            title={t("fileExplorer")}
           >
             <FolderOpen size={16} />
           </button>
@@ -142,7 +175,7 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
               position: "relative",
             }}
             onClick={toggleDarkMode}
-            title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            title={isDark ? t("lightMode") : t("darkMode")}
           >
             <span
               style={{

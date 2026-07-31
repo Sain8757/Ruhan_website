@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { CheckCircle, XCircle, Info, X } from "lucide-react";
+import { soundFx } from "@/lib/soundEffects";
 
 type ToastType = "success" | "error" | "info";
 
@@ -35,6 +36,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const addToast = useCallback((message: string, type: ToastType = "info") => {
     const id = Math.random().toString(36).slice(2);
     setToasts((prev) => [...prev, { id, message, type }]);
+
+    // Trigger audio cues
+    if (type === "success") {
+      soundFx.playSuccess();
+    } else if (type === "error") {
+      soundFx.playError();
+    } else {
+      soundFx.playClick();
+    }
+
     setTimeout(() => removeToast(id), 4000);
   }, [removeToast]);
 
