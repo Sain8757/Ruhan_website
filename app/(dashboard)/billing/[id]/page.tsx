@@ -12,6 +12,7 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { QRCodeSVG } from "qrcode.react";
 import SettleModal, { SettleInvoiceData } from "../SettleModal";
 import EditBillDialog from "@/components/billing/EditBillDialog";
+import { openWhatsAppReceipt } from "@/lib/whatsappReceipt";
 
 const PAYMENT_STATUS_STYLES: Record<string, { className: string; icon: React.ReactNode; label: string }> = {
   PAID: {
@@ -281,13 +282,28 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
           </button>
 
           <button
-            onClick={handleWhatsApp}
-            disabled={isGeneratingPdf}
-            className="btn-secondary px-3 py-1.5 flex items-center gap-1.5 text-xs font-bold"
-            style={{ color: "#16a34a", backgroundColor: "rgba(22, 163, 74, 0.1)", borderColor: "rgba(22, 163, 74, 0.2)" }}
+            onClick={() => {
+              openWhatsAppReceipt({
+                invoiceNumber: invoice.invoiceNumber,
+                customerName: invoice.customer.name,
+                customerMobile: invoice.customer.mobile,
+                createdAt: invoice.createdAt,
+                total: invoice.total,
+                amountPaid: invoice.amountPaid,
+                paymentMode: invoice.paymentMode,
+                paymentStatus: invoice.paymentStatus,
+                items: invoice.items,
+                shopName: settings?.shopName,
+                shopPhone: settings?.shopPhone,
+              });
+              toast.success("Opening WhatsApp receipt...");
+            }}
+            className="px-3 py-1.5 flex items-center gap-1.5 text-xs font-extrabold text-white rounded-lg transition-transform active:scale-95 cursor-pointer shadow-sm"
+            style={{ backgroundColor: "#25D366" }}
+            title="Send Instant WhatsApp Receipt"
           >
-            {isGeneratingPdf ? <Loader2 size={14} className="animate-spin" /> : <MessageCircle size={14} />}
-            WhatsApp
+            <MessageCircle size={14} />
+            Send WhatsApp Receipt
           </button>
 
           <button onClick={handlePrint} className="btn-primary px-4 py-1.5 flex items-center gap-1.5 text-xs font-bold">

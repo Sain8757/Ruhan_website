@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import Link from "next/link";
-import { Plus, Search, FileText, Loader2, Printer, IndianRupee, Edit3, Download } from "lucide-react";
+import { Plus, Search, FileText, Loader2, Printer, IndianRupee, Edit3, Download, MessageCircle } from "lucide-react";
 import { formatCurrency, formatDate, PAYMENT_STATUS_COLORS } from "@/lib/utils";
 import { useToast } from "@/contexts/ToastContext";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -10,6 +10,7 @@ import PageHeader from "@/components/layout/PageHeader";
 import SettleModal, { SettleInvoiceData } from "./SettleModal";
 import NewBillDialog from "@/components/billing/NewBillDialog";
 import EditBillDialog from "@/components/billing/EditBillDialog";
+import { openWhatsAppReceipt } from "@/lib/whatsappReceipt";
 
 interface Invoice {
   id: string;
@@ -306,6 +307,41 @@ function BillingContent() {
                         >
                           View
                         </Link>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            openWhatsAppReceipt({
+                              invoiceNumber: inv.invoiceNumber,
+                              customerName: inv.customer.name,
+                              customerMobile: inv.customer.mobile,
+                              createdAt: inv.createdAt,
+                              total: inv.total,
+                              amountPaid: inv.amountPaid,
+                              paymentMode: inv.paymentMode,
+                              paymentStatus: inv.paymentStatus,
+                              items: inv.items,
+                            });
+                            toast.success("Opening WhatsApp receipt...");
+                          }}
+                          style={{
+                            backgroundColor: "#25D366",
+                            color: "#ffffff",
+                            borderTop: "2px solid #86efac",
+                            borderLeft: "2px solid #86efac",
+                            borderRight: "2px solid #14532d",
+                            borderBottom: "2px solid #14532d",
+                            padding: "2px 6px",
+                            fontWeight: "bold",
+                            fontSize: "11px",
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "2px",
+                          }}
+                          title="Send WhatsApp Receipt"
+                        >
+                          <MessageCircle size={11} /> WA
+                        </button>
                         {inv.paymentStatus !== "PAID" && (
                           <button
                             type="button"
