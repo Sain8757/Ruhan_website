@@ -34,6 +34,21 @@ function formatSize(n: number) {
 
 function uid() { return `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`; }
 
+function parseHexColor(colorStr: string): { r: number; g: number; b: number } {
+  let hex = (colorStr || "#000000").replace("#", "").trim();
+  if (hex === "auto" || !hex) hex = "000000";
+  if (hex.length === 3) {
+    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+  }
+  if (hex.length < 6) hex = "000000";
+
+  const r = (parseInt(hex.slice(0, 2), 16) || 0) / 255;
+  const g = (parseInt(hex.slice(2, 4), 16) || 0) / 255;
+  const b = (parseInt(hex.slice(4, 6), 16) || 0) / 255;
+
+  return { r, g, b };
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface RedactRect {
@@ -73,10 +88,14 @@ const PATTERNS: { label: string; icon: string; regex: RegExp }[] = [
 
 const FILL_COLORS = [
   { label: "⬛ Black", value: "#000000" },
-  { label: "🟦 Navy", value: "#1e3a5f" },
-  { label: "🟥 Red", value: "#991b1b" },
   { label: "⬜ White", value: "#ffffff" },
-  { label: "▪ Gray", value: "#374151" },
+  { label: "🟨 Yellow", value: "#fef08a" },
+  { label: "🟥 Red", value: "#dc2626" },
+  { label: "🟦 Blue", value: "#2563eb" },
+  { label: "🟩 Green", value: "#16a34a" },
+  { label: "🟪 Purple", value: "#9333ea" },
+  { label: "🟧 Orange", value: "#ea580c" },
+  { label: "▪ Gray", value: "#4b5563" },
   { label: "🎯 Auto BG", value: "auto" },
 ];
 
@@ -452,11 +471,8 @@ export default function RedactPdfTool() {
         // Convert canvas y (top-down) to PDF y (bottom-up)
         const pdfY = height - r.y / pdfScale - pdfH;
 
-        // Parse fill color
-        const hex = r.fillColor.replace("#", "");
-        const fr = parseInt(hex.slice(0, 2), 16) / 255;
-        const fg = parseInt(hex.slice(2, 4), 16) / 255;
-        const fb = parseInt(hex.slice(4, 6), 16) / 255;
+        // Parse fill color safely
+        const fillRgb = parseHexColor(r.fillColor);
 
         // Draw fill rectangle
         page.drawRectangle({
@@ -464,16 +480,13 @@ export default function RedactPdfTool() {
           y: Math.max(0, pdfY),
           width: pdfW,
           height: pdfH,
-          color: rgb(fr, fg, fb),
+          color: rgb(fillRgb.r, fillRgb.g, fillRgb.b),
           borderWidth: 0,
         });
 
         // Draw overlay text (centered in box)
         if (r.overlayText) {
-          const ohex = r.overlayColor.replace("#", "");
-          const or2 = parseInt(ohex.slice(0, 2), 16) / 255;
-          const og = parseInt(ohex.slice(2, 4), 16) / 255;
-          const ob = parseInt(ohex.slice(4, 6), 16) / 255;
+          const textRgb = parseHexColor(r.overlayColor || "#ffffff");
           const fontSize = Math.min(10, Math.max(5, pdfH * 0.55));
           const textWidth = font.widthOfTextAtSize(r.overlayText, fontSize);
           const textX = pdfX + (pdfW - textWidth) / 2;
@@ -484,7 +497,7 @@ export default function RedactPdfTool() {
               y: textY,
               size: fontSize,
               font,
-              color: rgb(or2, og, ob),
+              color: rgb(textRgb.r, textRgb.g, textRgb.b),
             });
           }
         }
