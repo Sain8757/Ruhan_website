@@ -21,6 +21,7 @@ import ReorderPagesTool from "./components/ReorderPagesTool";
 import AddSignatureTool from "./components/AddSignatureTool";
 import RedactPdfTool from "./components/RedactPdfTool";
 import EditPdfTool from "./components/EditPdfTool";
+import WordToPdfTool from "./components/WordToPdfTool";
 
 export default function ToolPage() {
   const params = useParams();
@@ -49,13 +50,7 @@ export default function ToolPage() {
       case "add-signature": return <AddSignatureTool />;
       case "redact": return <RedactPdfTool />;
       case "edit": return <EditPdfTool />;
-      case "word-to-pdf":
-        return (
-          <div className="text-center py-20 animate-fade-in">
-            <h3 className="text-2xl font-bold mb-4" style={{ color: "var(--text-primary)" }}>Word to PDF Component Coming Soon</h3>
-            <p style={{ color: "var(--text-muted)" }}>This feature is currently under development.</p>
-          </div>
-        );
+      case "word-to-pdf": return <WordToPdfTool />;
       default:
         return <div>Tool not found</div>;
     }
