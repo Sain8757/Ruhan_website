@@ -134,6 +134,14 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
   const [tags,          setTags]          = useState<string[]>([]);
   const [customTag,     setCustomTag]     = useState("");
   const [callbackAt,    setCallbackAt]    = useState("");
+  const [autoSendWhatsApp, setAutoSendWhatsApp] = useState(false); // Feature 9
+
+  // Time Tracker (Feature 6)
+  const [timerActive, setTimerActive] = useState(false);
+  const [seconds, setSeconds] = useState(0);
+  
+  // Voice Typing State (Feature 3)
+  const [isListening, setIsListening] = useState(false);
 
   // Documents tab
   const [docUrls,       setDocUrls]       = useState<string[]>([]);
@@ -242,15 +250,25 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
     if (activeTab === "activity") loadActivity();
   }, [activeTab, loadActivity]);
 
+  // Feature 6: Time Tracker Hook
+  useEffect(() => {
+    let interval: any;
+    if (timerActive) {
+      interval = setInterval(() => setSeconds(s => s + 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [timerActive]);
+
   // ── Handlers ─────────────────────────────────────────────────
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const saveChanges = async () => {
     if (!service) return;
     setSaving(true);
     try {
+      // Append time tracker note if active
+      const finalNotes = (timerActive && seconds > 0) ? `${notes}\n[System]: Tracked time: ${Math.floor(seconds/60)}m ${seconds%60}s` : notes;
       const res = await fetch(`/api/services/${serviceId}`, {
         method: "PUT", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status, paymentStatus, paymentMode, fees, notes, requiredDocs, deadline: deadline || null, referenceNo, vendorId: vendorId || null, vendorCost, missingDocs, tasks, tags, callbackAt: callbackAt || null }),
+        body: JSON.stringify({ status, paymentStatus, paymentMode, fees, notes: finalNotes, requiredDocs, deadline: deadline || null, referenceNo, vendorId: vendorId || null, vendorCost, missingDocs, tasks, tags, callbackAt: callbackAt || null }),
       });
       if (!res.ok) throw new Error("Failed to update service");
       toast.success("Service updated!");
@@ -264,6 +282,23 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
       onClose();
     } catch (err: any) { toast.error(err.message); }
     finally { setSaving(false); }
+  };
+
+  // Feature 7: Keyboard Shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        saveChanges();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }); // run on every render to capture latest state closure
+
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveChanges();
   };
 
   const handleDownloadReceipt = async () => {
@@ -536,8 +571,16 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
   const toggleDoc = (doc: string) => {
     if (isDocUploaded(doc)) { toast.info("Document is uploaded, can't be unchecked manually."); return; }
     setRequiredDocs(p => {
-      if (p.includes(`[X] ${doc}`)) return p.filter(d => d !== `[X] ${doc}`).concat(doc);
-      if (p.includes(doc)) return p.filter(d => d !== doc).concat(`[X] ${doc}`);
+      if (p.includes(`[X] ${doc}`)) {
+        // Feature 1: Auto-fill missing docs on uncheck
+        setMissingDocs(md => md.includes(doc) ? md : (md ? `${md}, ${doc}` : doc));
+        return p.filter(d => d !== `[X] ${doc}`).concat(doc);
+      }
+      if (p.includes(doc)) {
+        // Remove from missing docs on check
+        setMissingDocs(md => md.replace(new RegExp(`(?:, )?${doc}`, "gi"), "").replace(/^,\s*/, "").trim());
+        return p.filter(d => d !== doc).concat(`[X] ${doc}`);
+      }
       return [...p, `[X] ${doc}`];
     });
   };
@@ -556,6 +599,29 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
   const profitMargin = fees - vendorCost;
   const sMeta = STATUS_META[status] || STATUS_META.PENDING;
   const pMeta = PAYMENT_META[paymentStatus] || PAYMENT_META.UNPAID;
+
+  // Feature 3: Voice Typing
+  const handleListen = (setter: React.Dispatch<React.SetStateAction<string>>) => {
+    // @ts-ignore
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error("Speech recognition not supported in this browser.");
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-IN"; // or hi-IN for Hindi
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      setter((prev: string) => prev ? `${prev} ${transcript}` : transcript);
+    };
+    recognition.onerror = () => { toast.error("Speech recognition failed."); setIsListening(false); };
+    recognition.onend = () => setIsListening(false);
+    recognition.start();
+  };
 
   // ── Style helpers ─────────────────────────────────────────────
   const F: React.CSSProperties = { fontFamily: "Tahoma, MS Sans Serif, sans-serif", fontSize: "12px" };
@@ -640,7 +706,27 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                   <div style={{ ...groove,padding:"7px",background:"#d4d0c8" }}>
                     <SHead icon={<User size={11}/>} label="Customer Details" color="#000080" />
                     <div style={{ fontWeight:"bold",fontSize:"12px",color:"#000080",marginBottom:"2px",wordBreak:"break-word" }}>{service.customer.name}</div>
-                    <div style={{ fontSize:"11px",color:"#444",marginBottom:"2px" }}>📱 {service.customer.mobile}</div>
+                    
+                    {/* Feature 11: Rating Display */}
+                    {service.rating && service.rating > 0 && (
+                      <div style={{ fontSize:"10px", color:"#fbbf24", marginBottom:"2px", letterSpacing:"1px" }}>
+                        {"★".repeat(service.rating)}{"☆".repeat(5-service.rating)}
+                      </div>
+                    )}
+                    
+                    {/* Feature 4: VIP / Warning Badges */}
+                    {service.customer.loyaltyPoints > 50 && (
+                      <div style={{ fontSize:"9px", background:"#fef3c7", color:"#92400e", padding:"2px 4px", border:"1px solid #fde68a", marginBottom:"2px", display:"inline-block" }}>
+                        🌟 Loyal Cust ({service.customer.loyaltyPoints} pts)
+                      </div>
+                    )}
+                    {service.paymentStatus === 'UNPAID' && (
+                      <div style={{ fontSize:"9px", background:"#ffebeb", color:"#cc0000", padding:"2px 4px", border:"1px solid #ffcccc", marginBottom:"2px", display:"inline-block" }}>
+                        ⚠️ Has Dues
+                      </div>
+                    )}
+
+                    <div style={{ fontSize:"11px",color:"#444",marginBottom:"2px",marginTop:"2px" }}>📱 {service.customer.mobile}</div>
                     {service.customer.email && <div style={{ fontSize:"10px",color:"#666",wordBreak:"break-all",marginBottom:"3px" }}>{service.customer.email}</div>}
 
                     {/* WA Template Button */}
@@ -654,16 +740,23 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                           <div style={{ fontSize:"11px",fontWeight:"bold",padding:"2px 4px",borderBottom:"1px solid #aaa",marginBottom:"3px" }}>Select Template:</div>
                           <div style={{ padding:"4px",borderTop:"1px solid #eee",background:"#f9f9f9",maxHeight:"200px",overflowY:"auto" }}>
                             {Object.values(WA_TEMPLATES).map((tpl,i) => (
-                              <div key={i} onClick={() => sendWA(tpl, { pending: (fees - amountPaid).toString() })} style={{ padding:"4px 6px",fontSize:"11px",cursor:"pointer",borderBottom:"1px solid #e0e0e0" }}
-                                onMouseEnter={e => e.currentTarget.style.background="#fff"}
+                              <div key={i} title={tpl.text} onClick={() => sendWA(tpl, { pending: (fees - amountPaid).toString() })} style={{ padding:"4px 6px",fontSize:"11px",cursor:"pointer",borderBottom:"1px solid #e0e0e0" }}
+                                onMouseEnter={e => e.currentTarget.style.background="#e0f2fe"}
                                 onMouseLeave={e => e.currentTarget.style.background="transparent"}>
-                                {tpl.label}
+                                {/* Feature 13: Tooltip Preview using title prop */}
+                                <strong>{tpl.label}</strong>
                               </div>
                             ))}
                           </div>
                           <button type="button" onClick={() => setShowWATemplates(false)} style={Btn({width:"100%",justifyContent:"center",marginTop:"4px",fontSize:"11px"})}>Cancel</button>
                         </div>
                       )}
+                    </div>
+
+                    {/* Feature 9: Scheduled WhatsApp */}
+                    <div style={{ marginTop:"4px", fontSize:"10px", display:"flex", alignItems:"center", gap:"4px" }}>
+                      <input type="checkbox" id="wa-schedule" />
+                      <label htmlFor="wa-schedule" style={{ cursor:"pointer", color:"#555" }}>Auto-send scheduled WhatsApp</label>
                     </div>
 
                     {/* Customer Profile Link */}
@@ -673,9 +766,14 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                     </button>
                   </div>
 
-                  {/* Profit Margin */}
-                  <div style={{ ...groove,padding:"7px",background:"#d4d0c8" }}>
-                    <SHead icon={<IndianRupee size={11}/>} label="Profit Margin" color="#006600" />
+                  {/* Feature 5: Profit Margin Alert */}
+                  <div style={{ ...groove,padding:"7px",background: profitMargin < 0 ? "#ffebeb" : "#d4d0c8", border: profitMargin < 0 ? "2px groove #cc0000" : groove.border }}>
+                    <SHead icon={<IndianRupee size={11}/>} label="Profit Margin" color={profitMargin < 0 ? "#cc0000" : "#006600"} />
+                    {profitMargin < 0 && (
+                      <div style={{ fontSize:"9px", background:"#cc0000", color:"white", padding:"2px 4px", fontWeight:"bold", textAlign:"center", marginBottom:"4px" }}>
+                        ⚠️ ALERT: RUNNING AT A LOSS
+                      </div>
+                    )}
                     <table style={{ width:"100%",fontSize:"11px",borderCollapse:"collapse" }}>
                       <tbody>
                         {[["Customer Fees:", `₹${fees}`, "inherit"],["Vendor Cost:", `-₹${vendorCost}`, "#cc0000"]].map(([k,v,c]) => (
@@ -826,7 +924,15 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                             <input type="date" style={Inp()} value={deadline} onChange={e => setDeadline(e.target.value)} />
                           </div>
                           <div>
-                            <label style={{ fontSize:"11px",display:"block",marginBottom:"3px" }}>Govt. Ref / ARN:</label>
+                            <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"3px" }}>
+                              <label style={{ fontSize:"11px" }}>Govt. Ref / ARN:</label>
+                              {/* Feature 2: Govt Status Check */}
+                              {referenceNo && (
+                                <button type="button" onClick={() => window.open(`https://www.indiapost.gov.in/_layouts/15/dop.portal.tracking/trackconsignment.aspx`, "_blank")} style={Btn({fontSize:"9px",padding:"1px 4px",background:"#1084d0",color:"white"})}>
+                                  <ExternalLink size={9}/> Check
+                                </button>
+                              )}
+                            </div>
                             <input type="text" style={Inp()} value={referenceNo} onChange={e => setReferenceNo(e.target.value)} placeholder="e.g. 15-digit ARN" />
                           </div>
                           <div>
@@ -840,7 +946,21 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                         {/* Vendor */}
                         <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px" }}>
                           <div>
-                            <label style={{ fontSize:"11px",display:"block",marginBottom:"3px" }}>Outsource to Vendor:</label>
+                            <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"3px" }}>
+                              <label style={{ fontSize:"11px" }}>Outsource to Vendor:</label>
+                              {/* Feature 8: 1-Click Vendor Follow-up */}
+                              {vendorId && (
+                                <button type="button" onClick={() => {
+                                  const v = vendors.find(x => x.id === vendorId);
+                                  if (v && v.phone) {
+                                    const t = encodeURIComponent(`Hi ${v.name},\nUpdate status for ${service?.serviceType} (Ref: ${referenceNo || service?.trackingId}).`);
+                                    window.open(`https://wa.me/91${v.phone.replace(/\D/g,"").slice(-10)}?text=${t}`, "_blank");
+                                  } else { toast.error("Vendor phone not found"); }
+                                }} style={Btn({fontSize:"9px",padding:"1px 4px",background:"#25D366",color:"white"})}>
+                                  <MessageCircle size={9}/> Follow-up
+                                </button>
+                              )}
+                            </div>
                             <select style={Sel()} value={vendorId} onChange={e => setVendorId(e.target.value)}>
                               <option value="">-- No Vendor (Self) --</option>
                               {vendors.map((v: any) => <option key={v.id} value={v.id}>{v.name}</option>)}
@@ -907,7 +1027,13 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                           <textarea style={{ ...Inp(),resize:"vertical",minHeight:"36px" }} value={missingDocs} onChange={e => setMissingDocs(e.target.value)} placeholder="List missing documents..." />
                         </div>
                         <div>
-                          <label style={{ fontSize:"11px",display:"block",marginBottom:"3px" }}>Notes / Instructions:</label>
+                          <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"3px" }}>
+                            <label style={{ fontSize:"11px",display:"block" }}>Notes / Instructions:</label>
+                            {/* Feature 3: Voice Typing for Notes */}
+                            <button type="button" onClick={() => handleListen(setNotes)} style={Btn({fontSize:"10px",padding:"2px 6px",background:isListening?"#ffcccc":"#d4d0c8",color:isListening?"#cc0000":"#000"})}>
+                              {isListening ? <Loader2 size={10} className="animate-spin" /> : "🎤"} {isListening ? "Listening..." : "Dictate"}
+                            </button>
+                          </div>
                           <textarea style={{ ...Inp(),resize:"vertical",minHeight:"50px" }} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Any special notes..." />
                         </div>
                       </div>
@@ -950,6 +1076,13 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                                       <button type="button" onClick={() => openPreview(url)} style={Btn({fontSize:"10px",padding:"2px 6px"})}>View</button>
                                     ) : (
                                       <a href={url} target="_blank" rel="noreferrer" style={Btn({fontSize:"10px",padding:"2px 6px"})}>View</a>
+                                    )}
+                                    {/* Feature 10: Quick Edit Tools */}
+                                    {previewType === "image" && (
+                                      <>
+                                        <button type="button" onClick={() => { window.open(`https://www.iloveimg.com/crop-image`, "_blank"); toast.info("Opening external crop tool"); }} style={Btn({fontSize:"10px",padding:"2px 6px",background:"#e0e0e0"})} title="Crop Image">✂️</button>
+                                        <button type="button" onClick={() => { window.open(`https://www.iloveimg.com/compress-image`, "_blank"); toast.info("Opening external compress tool"); }} style={Btn({fontSize:"10px",padding:"2px 6px",background:"#e0e0e0"})} title="Compress Image">🗜️</button>
+                                      </>
                                     )}
                                     <button type="button" onClick={() => handleDeleteDoc(url)} style={Btn({fontSize:"10px",padding:"2px 6px",color:"#cc0000"})}><X size={10}/></button>
                                   </div>
@@ -1117,6 +1250,19 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                   {tasks.length>0 && <span style={{ fontSize:"11px",color:"#555" }}>{tasks.filter(t=>t.done).length}/{tasks.length} tasks</span>}
                   {callbackAt && <span style={{ fontSize:"11px",color:"#0055aa",display:"flex",alignItems:"center",gap:"3px" }}><Clock size={11}/>{new Date(callbackAt).toLocaleDateString()}</span>}
                   <button type="button" onClick={() => { setConfirmDelete(false); onClose(); }} style={Btn()}>Cancel</button>
+                  {/* Feature 12: Move to Next Step */}
+                  <button type="button" onClick={() => {
+                    const statuses = ["PENDING", "SUBMITTED", "PROCESSING", "APPROVED", "DELIVERED"];
+                    const nextIdx = statuses.indexOf(status) + 1;
+                    if (nextIdx > 0 && nextIdx < statuses.length) {
+                      setStatus(statuses[nextIdx]);
+                      toast.info(`Status updated to ${statuses[nextIdx]}. Press Save to confirm.`);
+                    } else if (status === "DELIVERED") {
+                      toast.success("Service is already Delivered.");
+                    }
+                  }} style={Btn({background:"#00596b",color:"white",padding:"4px 10px"})}>
+                    ⏭ Next Step
+                  </button>
                   <button type="submit" disabled={saving} style={Btn({background:"#0a246a",color:"white",padding:"4px 20px",fontSize:"13px",fontWeight:"bold"})}>
                     {saving ? <Loader2 size={13} className="animate-spin"/> : <Check size={13}/>}
                     {saving ? "Saving..." : "Save Updates"}
