@@ -79,6 +79,8 @@ const detectPreviewType = (url: string, blob: Blob, bytes: Uint8Array): PreviewT
   return "unsupported";
 };
 
+const getPreviewFetchUrl = (url: string) => `/api/document-preview?url=${encodeURIComponent(url)}`;
+
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -342,7 +344,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
 
   const renderPdfPreview = async (buffer: ArrayBuffer) => {
     const pdfjs = await import("pdfjs-dist");
-    pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+    pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
     const pdf = await pdfjs.getDocument({ data: new Uint8Array(buffer) }).promise;
     const pages: string[] = [];
 
@@ -378,7 +380,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
     setPreviewLoading(true);
 
     try {
-      const res = await fetch(url);
+      const res = await fetch(getPreviewFetchUrl(url));
       if (!res.ok) throw new Error("Failed to load");
       const blob = await res.blob();
       const buffer = await blob.arrayBuffer();
@@ -403,8 +405,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
       toast.error("Preview is not available for this file type. Please use Download or Open in New Tab.");
     } catch (e) {
       console.error(e);
-      const type = getPreviewType(url);
-      setPreviewType(type);
+      setPreviewType("unsupported");
       setPreviewImg(url);
       toast.error("Preview failed. Please use Download or Open in New Tab.");
     } finally {
