@@ -9,6 +9,7 @@ import { findCatalogItem } from "@/lib/serviceCatalog";
 import { 
   User, Phone, Mail, MapPin, Edit, Trash2, MessageCircle, FileText, PlusCircle, ExternalLink, Loader2, Check 
 } from "lucide-react";
+import NewBillDialog from "@/components/billing/NewBillDialog";
 
 interface CustomerActionsDialogProps {
   isOpen: boolean;
@@ -56,6 +57,7 @@ export default function CustomerActionsDialog({
   const [customService, setCustomService] = useState("");
   const [docInput, setDocInput] = useState("");
   const [isCreatingService, setIsCreatingService] = useState(false);
+  const [isNewBillOpen, setIsNewBillOpen] = useState(false);
 
   // Fetch Customer details when modal opens
   useEffect(() => {
@@ -340,7 +342,7 @@ export default function CustomerActionsDialog({
 
                   {/* Generate Invoice */}
                   <button 
-                    onClick={() => { onClose(); router.push(`/billing?customerId=${customer.id}`); }}
+                    onClick={() => setIsNewBillOpen(true)}
                     style={{ 
                       display: "flex", alignItems: "center", gap: "8px", padding: "10px", background: "#f1f5f9", cursor: "pointer",
                       borderTop: "2px solid #ffffff", borderLeft: "2px solid #ffffff", borderRight: "2px solid #808080", borderBottom: "2px solid #808080",
@@ -544,6 +546,17 @@ export default function CustomerActionsDialog({
           </div>
         </div>
       </div>
+
+      <NewBillDialog 
+        isOpen={isNewBillOpen} 
+        onClose={() => setIsNewBillOpen(false)} 
+        defaultCustomer={customer} 
+        zIndex={10005}
+        onSuccess={() => {
+          setIsNewBillOpen(false);
+          toast.success("Invoice created! You can now print the bill.");
+        }}
+      />
     </>
   );
 }

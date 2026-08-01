@@ -145,17 +145,32 @@ interface NewBillDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  defaultCustomer?: any;
+  zIndex?: number;
 }
 
-export default function NewBillDialog({ isOpen, onClose, onSuccess }: NewBillDialogProps) {
+export default function NewBillDialog({ isOpen, onClose, onSuccess, defaultCustomer, zIndex = 10000 }: NewBillDialogProps) {
   const router = useRouter();
   const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [customerSearch, setCustomerSearch] = useState("");
   const [customers, setCustomers] = useState<any[]>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(defaultCustomer || null);
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
   
+  useEffect(() => {
+    if (isOpen && defaultCustomer) {
+      setSelectedCustomer(defaultCustomer);
+    } else if (!isOpen) {
+      // Reset form when closed
+      setSelectedCustomer(null);
+      setItems([{ name: "", quantity: 1, price: 0 }]);
+      setDiscount(0);
+      setGst(0);
+      setPointsRedeemed(0);
+    }
+  }, [isOpen, defaultCustomer]);
+
   const [items, setItems] = useState<InvoiceItemInput[]>([{ name: "", quantity: 1, price: 0 }]);
   const [discount, setDiscount] = useState(0);
   const [pointsRedeemed, setPointsRedeemed] = useState(0);
@@ -219,7 +234,7 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess }: NewBillDia
 
   return (
     <>
-      <LegacyDialog isOpen={isOpen} onClose={onClose} title="New Invoice / Bill" width="600px">
+      <LegacyDialog isOpen={isOpen} onClose={onClose} title="New Invoice / Bill" width="600px" zIndex={zIndex}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           
           {/* Customer Fieldset */}
