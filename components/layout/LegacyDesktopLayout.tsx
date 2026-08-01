@@ -12,6 +12,7 @@ import {
 import { WorkspaceProvider, useWorkspace } from "@/components/workspace/WorkspaceProvider";
 import Providers from "@/components/Providers";
 import { WORKSPACE_MODULES } from "@/lib/workspace";
+import { PDF_TOOLS } from "@/lib/pdf-tools-config";
 import { WifiFileDropModal } from "@/components/kiosk/WifiFileDropModal";
 import { signOut } from "next-auth/react";
 import { DownloadProvider } from "@/contexts/DownloadContext";
@@ -50,6 +51,8 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
   const [showAI, setShowAI] = useState(false);
   const [showKioskQR, setShowKioskQR] = useState(false);
   const [showWifiDrop, setShowWifiDrop] = useState(false);
+  const [showPdfToolsMenu, setShowPdfToolsMenu] = useState(false);
+  const [pdfToolsMenuPosition, setPdfToolsMenuPosition] = useState({ top: 0, left: 0 });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const [kioskUrl, setKioskUrl] = useState("");
@@ -136,6 +139,21 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
 
   const openMail = () => {
     window.open("https://mail.google.com/", "_blank");
+  };
+
+  const pdfToolCategories = PDF_TOOLS.reduce((groups, tool) => {
+    if (!groups[tool.category]) groups[tool.category] = [];
+    groups[tool.category].push(tool);
+    return groups;
+  }, {} as Record<string, typeof PDF_TOOLS>);
+
+  const positionPdfToolsMenu = (target: HTMLElement) => {
+    const rect = target.getBoundingClientRect();
+    const menuWidth = 680;
+    setPdfToolsMenuPosition({
+      top: rect.bottom + 2,
+      left: Math.max(6, Math.min(rect.left, window.innerWidth - menuWidth - 8)),
+    });
   };
 
   return (
@@ -362,16 +380,139 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Toolbar - Dynamic Modules */}
-        <div className="legacy-toolbar" style={{ overflowX: "auto", whiteSpace: "nowrap", display: "flex", alignItems: "center", width: "100%" }}>
+        <div
+          className="legacy-toolbar"
+          style={{ overflowX: "auto", whiteSpace: "nowrap", display: "flex", alignItems: "center", width: "100%", position: "relative", zIndex: 2000 }}
+        >
           <div style={{ display: "flex", alignItems: "center" }}>
             {WORKSPACE_MODULES.map((module, idx) => {
               const IconComponent = iconMap[module.icon as string] || ScanLine;
+              const isPdfTools = module.id === "pdf-tools";
               return (
                 <React.Fragment key={module.id}>
-                  <button className="legacy-toolbar-btn" onClick={() => router.push(module.href)}>
-                    <IconComponent size={16} color={idx % 2 === 0 ? "#008080" : "#000080"} />
-                    {t(module.id) !== module.id ? t(module.id) : module.label}
-                  </button>
+                  <div style={{ position: "relative", display: "inline-flex" }}>
+                    <button
+                      className="legacy-toolbar-btn"
+                      onMouseEnter={(event) => {
+                        if (isPdfTools) {
+                          positionPdfToolsMenu(event.currentTarget);
+                          setShowPdfToolsMenu(true);
+                        } else {
+                          setShowPdfToolsMenu(false);
+                        }
+                      }}
+                      onFocus={(event) => {
+                        if (isPdfTools) {
+                          positionPdfToolsMenu(event.currentTarget);
+                          setShowPdfToolsMenu(true);
+                        }
+                      }}
+                      onClick={(event) => {
+                        if (isPdfTools) {
+                          positionPdfToolsMenu(event.currentTarget);
+                          setShowPdfToolsMenu((open) => !open);
+                          return;
+                        }
+                        setShowPdfToolsMenu(false);
+                        router.push(module.href);
+                      }}
+                    >
+                      <IconComponent size={16} color={idx % 2 === 0 ? "#008080" : "#000080"} />
+                      {t(module.id) !== module.id ? t(module.id) : module.label}
+                      {isPdfTools && <span style={{ fontSize: "9px", marginLeft: "2px" }}>▼</span>}
+                    </button>
+
+                    {isPdfTools && showPdfToolsMenu && (
+                      <div
+                        style={{
+                          position: "fixed",
+                          top: `${pdfToolsMenuPosition.top}px`,
+                          left: `${pdfToolsMenuPosition.left}px`,
+                          zIndex: 10000,
+                          minWidth: "520px",
+                          maxWidth: "680px",
+                          background: "#d4d0c8",
+                          borderTop: "2px solid #fff",
+                          borderLeft: "2px solid #fff",
+                          borderRight: "2px solid #404040",
+                          borderBottom: "2px solid #404040",
+                          boxShadow: "3px 3px 0 rgba(0,0,0,0.35)",
+                          padding: "6px",
+                          whiteSpace: "normal",
+                        }}
+                        onMouseEnter={() => setShowPdfToolsMenu(true)}
+                        onMouseLeave={() => setShowPdfToolsMenu(false)}
+                      >
+                        <div style={{ background: "linear-gradient(90deg,#000080,#1084d0)", color: "white", fontWeight: "bold", fontSize: "12px", padding: "4px 6px", marginBottom: "6px" }}>
+                          PDF Tools
+                        </div>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(145px, 1fr))", gap: "6px" }}>
+                          {Object.entries(pdfToolCategories).map(([category, tools]) => (
+                            <div key={category} style={{ minWidth: 0 }}>
+                              <div style={{ color: "#000080", fontSize: "11px", fontWeight: "bold", marginBottom: "4px", borderBottom: "1px solid #808080" }}>
+                                {category}
+                              </div>
+                              {tools.map((tool) => {
+                                const ToolIcon = tool.icon;
+                                return (
+                                  <button
+                                    key={tool.id}
+                                    type="button"
+                                    onClick={() => {
+                                      setShowPdfToolsMenu(false);
+                                      router.push(`/pdf-tools/${tool.id}`);
+                                    }}
+                                    style={{
+                                      width: "100%",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "6px",
+                                      textAlign: "left",
+                                      padding: "5px",
+                                      marginBottom: "3px",
+                                      background: "#d4d0c8",
+                                      color: "#000",
+                                      borderTop: "1px solid #fff",
+                                      borderLeft: "1px solid #fff",
+                                      borderRight: "1px solid #404040",
+                                      borderBottom: "1px solid #404040",
+                                      cursor: "pointer",
+                                      fontSize: "11px",
+                                    }}
+                                    title={tool.description}
+                                  >
+                                    <ToolIcon size={14} color="#000080" style={{ flexShrink: 0 }} />
+                                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{tool.title}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowPdfToolsMenu(false);
+                            router.push("/pdf-tools");
+                          }}
+                          style={{
+                            marginTop: "6px",
+                            width: "100%",
+                            padding: "5px",
+                            background: "#d4d0c8",
+                            borderTop: "1px solid #fff",
+                            borderLeft: "1px solid #fff",
+                            borderRight: "1px solid #404040",
+                            borderBottom: "1px solid #404040",
+                            fontWeight: "bold",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Open PDF Toolkit Suite
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   {(idx === 3 || idx === 6 || idx === 10) && (
                     <div style={{ width: "2px", borderLeft: "1px solid #808080", borderRight: "1px solid #fff", margin: "0 4px", height: "24px", alignSelf: "center" }}></div>
                   )}
