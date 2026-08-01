@@ -15,42 +15,47 @@ export interface FormalDressPreset {
 const buildSvgDataUrl = (svgString: string) =>
   `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString.trim())}`;
 
-// Ultra-realistic vector formal attire presets with natural neck curves & realistic shading
+// Hyper-realistic vector formal attire presets with natural sloped shoulders, curved collars, lapel cuts, shading, and buttons
 export const DRESS_PRESETS: FormalDressPreset[] = [
   {
     id: "female_black_blazer",
     name: "👩 Female Black Executive Blazer",
     category: "female",
-    prompt: "Female professional ID photo wearing a black executive blazer suit with a high-neck white formal top",
+    prompt: "Female professional ID photo wearing a black executive blazer suit with a white top",
     svgDataUrl: buildSvgDataUrl(`
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400">
         <defs>
           <linearGradient id="fbbBlazer" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#2d3748"/>
-            <stop offset="50%" stop-color="#1a202c"/>
-            <stop offset="100%" stop-color="#0f172a"/>
+            <stop offset="0%" stop-color="#1f2937"/>
+            <stop offset="30%" stop-color="#111827"/>
+            <stop offset="100%" stop-color="#030712"/>
+          </linearGradient>
+          <linearGradient id="fbbLapel" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#374151"/>
+            <stop offset="50%" stop-color="#1f2937"/>
+            <stop offset="100%" stop-color="#111827"/>
           </linearGradient>
           <linearGradient id="fbbInner" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stop-color="#ffffff"/>
-            <stop offset="100%" stop-color="#f4f4f5"/>
+            <stop offset="100%" stop-color="#f3f4f6"/>
           </linearGradient>
-          <filter id="fbbShd">
-            <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.3"/>
+          <filter id="fbbShd" x="-10%" y="-10%" width="120%" height="120%">
+            <feDropShadow dx="0" dy="6" stdDeviation="4" flood-color="#000000" flood-opacity="0.35"/>
           </filter>
         </defs>
-        <!-- Inner White V-Neck Top -->
-        <path d="M 180 80 Q 250 160 320 80 L 295 240 L 205 240 Z" fill="url(#fbbInner)"/>
-        <path d="M 205 110 L 250 145 L 295 110" stroke="#e4e4e7" stroke-width="2" fill="none"/>
+        <!-- White Inner V-Neck Top -->
+        <path d="M 190 70 L 250 160 L 310 70 L 290 220 L 210 220 Z" fill="url(#fbbInner)"/>
+        <path d="M 215 100 L 250 135 L 285 100" stroke="#d1d5db" stroke-width="1.5" fill="none"/>
         
-        <!-- Shoulders & Body (Natural Curved Body Shape) -->
-        <path d="M 20 400 C 65 270 120 160 185 85 L 250 170 L 315 85 C 380 160 435 270 480 400 Z" fill="url(#fbbBlazer)" filter="url(#fbbShd)"/>
+        <!-- Shoulders & Body (Sloped shoulders) -->
+        <path d="M 25 400 C 50 310 90 210 185 85 L 250 160 L 315 85 C 410 210 450 310 475 400 Z" fill="url(#fbbBlazer)" filter="url(#fbbShd)"/>
         
-        <!-- Elegant Lapels -->
-        <path d="M 185 85 L 230 230 L 250 190 L 195 130 Z" fill="#4a5568"/>
-        <path d="M 315 85 L 270 230 L 250 190 L 305 130 Z" fill="#4a5568"/>
+        <!-- Left & Right Curved Lapels -->
+        <path d="M 185 85 L 235 220 L 205 240 L 160 160 Z" fill="url(#fbbLapel)"/>
+        <path d="M 315 85 L 265 220 L 295 240 L 340 160 Z" fill="url(#fbbLapel)"/>
         
         <!-- Button -->
-        <circle cx="250" cy="265" r="5" fill="#a1a1aa" stroke="#52525b" stroke-width="1.5"/>
+        <circle cx="250" cy="245" r="5.5" fill="#9ca3af" stroke="#4b5563" stroke-width="1"/>
       </svg>
     `),
   },
@@ -63,7 +68,7 @@ export const DRESS_PRESETS: FormalDressPreset[] = [
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400">
         <defs>
           <linearGradient id="mbsSuit" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#1e293b"/>
+            <stop offset="0%" stop-color="#1f2937"/>
             <stop offset="100%" stop-color="#0f172a"/>
           </linearGradient>
           <linearGradient id="mbsTie" x1="0" y1="0" x2="0" y2="1">
@@ -71,17 +76,22 @@ export const DRESS_PRESETS: FormalDressPreset[] = [
             <stop offset="100%" stop-color="#1e40af"/>
           </linearGradient>
           <filter id="mbsShd">
-            <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.3"/>
+            <feDropShadow dx="0" dy="5" stdDeviation="4" flood-opacity="0.3"/>
           </filter>
         </defs>
+        <!-- Shirt -->
         <path d="M 180 90 L 250 185 L 320 90 Z" fill="#ffffff"/>
+        <!-- Collar folds -->
         <path d="M 175 80 Q 215 130 250 145 L 210 75 Z" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
         <path d="M 325 80 Q 285 130 250 145 L 290 75 Z" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
-        <polygon points="238,130 262,130 258,155 242,155" fill="url(#mbsTie)" filter="url(#mbsShd)"/>
+        <!-- Tie -->
+        <polygon points="238,130 262,130 258,155 242,155" fill="url(#mbsTie)"/>
         <path d="M 242 155 L 258 155 L 265 340 L 250 380 L 235 340 Z" fill="url(#mbsTie)" filter="url(#mbsShd)"/>
-        <path d="M 20 400 C 60 270 120 160 185 85 L 250 170 L 315 85 C 380 160 440 270 480 400 Z" fill="url(#mbsSuit)" filter="url(#mbsShd)"/>
-        <path d="M 185 85 L 225 240 L 250 200 L 195 140 Z" fill="#334155"/>
-        <path d="M 315 85 L 275 240 L 250 200 L 305 140 Z" fill="#334155"/>
+        <!-- Jacket shoulders (Sloped) -->
+        <path d="M 25 400 C 60 280 110 170 185 85 L 250 170 L 315 85 C 390 170 440 280 475 400 Z" fill="url(#mbsSuit)" filter="url(#mbsShd)"/>
+        <!-- Lapels -->
+        <path d="M 185 85 L 225 240 L 250 200 L 195 140 Z" fill="#374151"/>
+        <path d="M 315 85 L 275 240 L 250 200 L 305 140 Z" fill="#374151"/>
         <circle cx="250" cy="275" r="5" fill="#64748b" stroke="#334155" stroke-width="1.5"/>
       </svg>
     `),
@@ -103,17 +113,21 @@ export const DRESS_PRESETS: FormalDressPreset[] = [
             <stop offset="100%" stop-color="#991b1b"/>
           </linearGradient>
           <filter id="mnsShd">
-            <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.3"/>
+            <feDropShadow dx="0" dy="5" stdDeviation="4" flood-opacity="0.3"/>
           </filter>
         </defs>
+        <!-- Shirt -->
         <path d="M 180 85 L 250 180 L 320 85 Z" fill="#ffffff"/>
         <path d="M 175 75 Q 215 125 250 140 L 210 70 Z" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
         <path d="M 325 75 Q 285 125 250 140 L 290 70 Z" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
-        <polygon points="238,125 262,125 258,150 242,150" fill="url(#mnsTie)" filter="url(#mnsShd)"/>
+        <!-- Tie -->
+        <polygon points="238,125 262,125 258,150 242,150" fill="url(#mnsTie)"/>
         <path d="M 242 150 L 258 150 L 265 335 L 250 375 L 235 335 Z" fill="url(#mnsTie)" filter="url(#mnsShd)"/>
-        <path d="M 20 400 C 60 265 120 155 185 80 L 250 165 L 315 80 C 380 155 440 265 480 400 Z" fill="url(#mnsSuit)" filter="url(#mnsShd)"/>
-        <path d="M 185 80 L 225 235 L 250 195 L 195 135 Z" fill="#2563eb"/>
-        <path d="M 315 80 L 275 235 L 250 195 L 305 135 Z" fill="#2563eb"/>
+        <!-- Jacket shoulders (Sloped) -->
+        <path d="M 25 400 C 60 270 110 160 185 80 L 250 165 L 315 80 C 390 160 440 270 475 400 Z" fill="url(#mnsSuit)" filter="url(#mnsShd)"/>
+        <!-- Lapels -->
+        <path d="M 185 80 L 225 235 L 250 195 L 195 135 Z" fill="#1e40af"/>
+        <path d="M 315 80 L 275 235 L 250 195 L 305 135 Z" fill="#1e40af"/>
         <circle cx="250" cy="270" r="5" fill="#93c5fd" stroke="#1d4ed8" stroke-width="1.5"/>
       </svg>
     `),
@@ -131,13 +145,16 @@ export const DRESS_PRESETS: FormalDressPreset[] = [
             <stop offset="100%" stop-color="#f1f5f9"/>
           </linearGradient>
           <filter id="mwsShd">
-            <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-opacity="0.2"/>
+            <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.25"/>
           </filter>
         </defs>
-        <path d="M 30 400 C 70 270 125 160 190 75 L 250 115 L 310 75 C 375 160 430 270 470 400 Z" fill="url(#mwsShirt)" stroke="#cbd5e1" stroke-width="2" filter="url(#mwsShd)"/>
-        <path d="M 190 75 Q 225 130 250 120 L 215 65 Z" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
-        <path d="M 310 75 Q 275 130 250 120 L 285 65 Z" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
-        <path d="M 242 120 L 258 120 L 258 400 L 242 400 Z" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+        <!-- Shirt shoulders (Sloped) -->
+        <path d="M 25 400 C 60 275 115 165 190 75 L 250 115 L 310 75 C 385 165 440 275 475 400 Z" fill="url(#mwsShirt)" stroke="#cbd5e1" stroke-width="1.5" filter="url(#mwsShd)"/>
+        <!-- Collar -->
+        <path d="M 190 75 Q 225 130 250 120 L 215 65 Z" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+        <path d="M 310 75 Q 275 130 250 120 L 285 65 Z" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+        <!-- Placket & Buttons -->
+        <path d="M 243 120 L 257 120 L 257 400 L 243 400 Z" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
         <circle cx="250" cy="160" r="4.5" fill="#475569"/>
         <circle cx="250" cy="220" r="4.5" fill="#475569"/>
         <circle cx="250" cy="280" r="4.5" fill="#475569"/>
@@ -158,15 +175,17 @@ export const DRESS_PRESETS: FormalDressPreset[] = [
             <stop offset="100%" stop-color="#f8fafc"/>
           </linearGradient>
           <filter id="fwsShd">
-            <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-opacity="0.2"/>
+            <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.2"/>
           </filter>
         </defs>
-        <path d="M 35 400 C 75 270 125 160 190 80 L 250 120 L 310 80 C 375 160 425 270 465 400 Z" fill="url(#fwsShirt)" stroke="#cbd5e1" stroke-width="2" filter="url(#fwsShd)"/>
-        <path d="M 190 80 Q 225 125 250 115 L 215 70 Z" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
-        <path d="M 310 80 Q 275 125 250 115 L 285 70 Z" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
-        <circle cx="250" cy="170" r="4" fill="#64748b"/>
-        <circle cx="250" cy="230" r="4" fill="#64748b"/>
-        <circle cx="250" cy="290" r="4" fill="#64748b"/>
+        <!-- Shirt shoulders (Sloped) -->
+        <path d="M 30 400 C 65 275 120 165 190 80 L 250 120 L 310 80 C 380 165 435 275 470 400 Z" fill="url(#fwsShirt)" stroke="#cbd5e1" stroke-width="1.5" filter="url(#fwsShd)"/>
+        <!-- Collar -->
+        <path d="M 190 80 Q 225 125 250 115 L 215 70 Z" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+        <path d="M 310 80 Q 275 125 250 115 L 285 70 Z" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+        <circle cx="250" cy="170" r="4.5" fill="#64748b"/>
+        <circle cx="250" cy="230" r="4.5" fill="#64748b"/>
+        <circle cx="250" cy="290" r="4.5" fill="#64748b"/>
       </svg>
     `),
   },
@@ -186,16 +205,18 @@ export default function FormalDressOverlayModal({
   onApply,
 }: FormalDressOverlayModalProps) {
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState<"ai_prompt" | "manual_overlay">("ai_prompt");
+  
+  // Default to Premium Overlay tab to guarantee perfect, instant look, but keep AI Prompt available
+  const [activeTab, setActiveTab] = useState<"manual_overlay" | "ai_prompt">("manual_overlay");
   const [selectedPreset, setSelectedPreset] = useState<FormalDressPreset>(DRESS_PRESETS[0]);
   const [customPrompt, setCustomPrompt] = useState<string>(DRESS_PRESETS[0].prompt);
   
-  // Manual Overlay Controls
-  const [scale, setScale] = useState(100);
-  const [offsetY, setOffsetY] = useState(10);
+  // Precision Controls (Default fitted to natural neck/shoulders height)
+  const [scale, setScale] = useState(105);
+  const [offsetY, setOffsetY] = useState(12);
   const [offsetX, setOffsetX] = useState(0);
 
-  // Gemini AI Generation state
+  // AI State
   const [isAiGenerating, setIsAiGenerating] = useState(false);
   const [aiGeneratedImage, setAiGeneratedImage] = useState<string | null>(null);
   const [showOriginal, setShowOriginal] = useState(false);
@@ -222,35 +243,32 @@ export default function FormalDressOverlayModal({
 
     ctx.clearRect(0, 0, width, height);
 
-    // If user holds "View Original" button
+    // 1. Show original comparison
     if (showOriginal) {
       ctx.drawImage(photoImgRef.current, 0, 0, width, height);
       return;
     }
 
-    // Priority 1: If AI image generated via Cloudinary / Gemini AI
-    if (aiGeneratedImage && aiImgRef.current) {
-      ctx.drawImage(aiImgRef.current, 0, 0, width, height);
-      return;
-    }
-
-    // Priority 2: Base User Photo
+    // 2. Draw base photo
     ctx.drawImage(photoImgRef.current, 0, 0, width, height);
 
-    // Render suit overlay ONLY if user explicitly switched to manual overlay tab
-    if (activeTab === "manual_overlay" && suitImgRef.current) {
+    // 3. Draw AI generated result or precision transparent overlay
+    if (aiGeneratedImage && aiImgRef.current) {
+      ctx.drawImage(aiImgRef.current, 0, 0, width, height);
+    } else if (suitImgRef.current) {
       const baseSuitW = width * 1.15;
       const baseSuitH = baseSuitW * 0.8;
       const suitW = baseSuitW * (scale / 100);
       const suitH = baseSuitH * (scale / 100);
 
+      // defaultPosY places the neck directly under the chin level (approx 44%)
       const defaultPosY = height * 0.44;
       const posX = (width - suitW) / 2 + (offsetX * width) / 100;
       const posY = defaultPosY + (offsetY * height) / 100;
 
       ctx.drawImage(suitImgRef.current, posX, posY, suitW, suitH);
     }
-  }, [activeTab, aiGeneratedImage, offsetX, offsetY, scale, showOriginal]);
+  }, [aiGeneratedImage, offsetX, offsetY, scale, showOriginal]);
 
   const loadPresetSuit = useCallback((preset: FormalDressPreset) => {
     const sImg = new Image();
@@ -277,24 +295,26 @@ export default function FormalDressOverlayModal({
     if (photoImgRef.current) {
       renderComposition();
     }
-  }, [renderComposition]);
+  }, [activeTab, renderComposition]);
 
   // Handle Preset Click
   const handleSelectPreset = (preset: FormalDressPreset) => {
     setSelectedPreset(preset);
     setCustomPrompt(preset.prompt);
+    setAiGeneratedImage(null);
+    aiImgRef.current = null;
     loadPresetSuit(preset);
   };
 
-  // Call AI Dress-Up API (Cloudinary Generative AI / Gemini)
+  // AI Generative Replacement
   const handleGenerateGeminiAi = async () => {
     if (!customPrompt.trim()) {
-      toast.error("Please enter or select a prompt for AI dress up");
+      toast.error("Please select a prompt or type your own");
       return;
     }
 
     setIsAiGenerating(true);
-    toast.info("✨ AI is transforming clothes with Generative Replace...");
+    toast.info("✨ AI is analyzing portrait and replacing clothes...");
 
     try {
       const res = await fetch("/api/ai/dress-up", {
@@ -317,15 +337,17 @@ export default function FormalDressOverlayModal({
         img.onload = () => {
           aiImgRef.current = img;
           renderComposition();
-          toast.success("✨ AI successfully replaced clothing with formal attire!");
+          toast.success("✨ AI successfully replaced clothing!");
         };
       } else {
-        toast.error(data.message || "AI image replacement failed. Switched to manual mode.");
+        toast.error("AI replacement failed. Using precision overlay fit.");
+        setAiGeneratedImage(null);
         setActiveTab("manual_overlay");
       }
     } catch (err) {
-      console.error("AI dress up error:", err);
-      toast.error("AI processing error. Switched to manual overlay mode.");
+      console.error(err);
+      toast.error("AI service error. Using precision overlay.");
+      setAiGeneratedImage(null);
       setActiveTab("manual_overlay");
     } finally {
       setIsAiGenerating(false);
@@ -334,7 +356,7 @@ export default function FormalDressOverlayModal({
 
   // Pointer drag to position suit on canvas
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (activeTab !== "manual_overlay" || aiGeneratedImage) return;
+    if (aiGeneratedImage) return;
     isDraggingRef.current = true;
     dragStartRef.current = {
       x: e.clientX,
@@ -346,7 +368,7 @@ export default function FormalDressOverlayModal({
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!isDraggingRef.current || !photoImgRef.current || activeTab !== "manual_overlay" || aiGeneratedImage) return;
+    if (!isDraggingRef.current || !photoImgRef.current || aiGeneratedImage) return;
     const deltaX = e.clientX - dragStartRef.current.x;
     const deltaY = e.clientY - dragStartRef.current.y;
 
@@ -387,26 +409,20 @@ export default function FormalDressOverlayModal({
             <div className="flex items-center gap-2">
               <Sparkles size={16} className="text-yellow-400 animate-pulse" />
               <p className="text-xs font-black text-slate-200 uppercase tracking-wider">
-                {aiGeneratedImage
-                  ? "✨ AI Generative Suit Result"
-                  : activeTab === "ai_prompt"
-                  ? "Photo Preview (Click button below to apply AI)"
-                  : "Manual Overlay Mode"}
+                {aiGeneratedImage ? "✨ AI Generated Result" : "Precision Fit Preview (Drag suit to position)"}
               </p>
             </div>
 
-            {(aiGeneratedImage || activeTab === "manual_overlay") && (
-              <button
-                onMouseDown={() => setShowOriginal(true)}
-                onMouseUp={() => setShowOriginal(false)}
-                onMouseLeave={() => setShowOriginal(false)}
-                onTouchStart={() => setShowOriginal(true)}
-                onTouchEnd={() => setShowOriginal(false)}
-                className="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full font-bold flex items-center gap-1 transition cursor-pointer select-none"
-              >
-                <Eye size={12} /> View Original
-              </button>
-            )}
+            <button
+              onMouseDown={() => setShowOriginal(true)}
+              onMouseUp={() => setShowOriginal(false)}
+              onMouseLeave={() => setShowOriginal(false)}
+              onTouchStart={() => setShowOriginal(true)}
+              onTouchEnd={() => setShowOriginal(false)}
+              className="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1 rounded-full font-bold flex items-center gap-1 transition cursor-pointer select-none"
+            >
+              <Eye size={12} /> Press to View Original
+            </button>
           </div>
 
           <div className="relative border-4 border-white/20 rounded-2xl overflow-hidden shadow-2xl bg-black max-h-[52vh] flex items-center justify-center">
@@ -425,16 +441,16 @@ export default function FormalDressOverlayModal({
               onPointerUp={handlePointerUp}
               onPointerCancel={handlePointerUp}
               className={`max-h-[50vh] w-auto object-contain ${
-                activeTab === "manual_overlay" && !aiGeneratedImage ? "cursor-grab active:cursor-grabbing" : "cursor-default"
+                aiGeneratedImage ? "cursor-default" : "cursor-grab active:cursor-grabbing"
               } touch-none`}
-              title={activeTab === "manual_overlay" ? "Click and drag to move suit" : "Photo preview"}
+              title="Drag suit directly on photo to align shoulders"
             />
           </div>
 
-          {activeTab === "ai_prompt" && !aiGeneratedImage && (
-            <div className="mt-3 bg-blue-950/80 border border-blue-800/80 text-blue-200 text-xs px-4 py-2 rounded-xl text-center font-medium max-w-md">
-              💡 Select a prompt below & click <span className="font-black text-white">"✨ Gemini Automatic Pehnao"</span> to replace clothes with AI.
-            </div>
+          {!aiGeneratedImage && (
+            <p className="text-[11px] text-slate-400 mt-3 font-semibold flex items-center gap-1">
+              <Move size={12} className="text-blue-400" /> Drag directly on photo to position suit over shoulders
+            </p>
           )}
 
           {aiGeneratedImage && (
@@ -447,6 +463,7 @@ export default function FormalDressOverlayModal({
                   setAiGeneratedImage(null);
                   aiImgRef.current = null;
                   renderComposition();
+                  toast.info("Reset to original image");
                 }}
                 className="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full font-semibold transition cursor-pointer flex items-center gap-1"
               >
@@ -471,6 +488,18 @@ export default function FormalDressOverlayModal({
           {/* Navigation Mode Tabs */}
           <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-200/70 rounded-xl">
             <button
+              onClick={() => setActiveTab("manual_overlay")}
+              className={`py-2 px-3 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                activeTab === "manual_overlay"
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-slate-700 hover:bg-slate-300/50"
+              }`}
+            >
+              <Sliders size={14} />
+              <span>📐 Premium Overlay</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab("ai_prompt")}
               className={`py-2 px-3 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                 activeTab === "ai_prompt"
@@ -481,123 +510,54 @@ export default function FormalDressOverlayModal({
               <Wand2 size={14} />
               <span>✨ Gemini AI Prompt</span>
             </button>
-
-            <button
-              onClick={() => setActiveTab("manual_overlay")}
-              className={`py-2 px-3 rounded-lg text-xs font-black transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                activeTab === "manual_overlay"
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-slate-700 hover:bg-slate-300/50"
-              }`}
-            >
-              <Sliders size={14} />
-              <span>📐 Manual Overlay</span>
-            </button>
           </div>
 
-          {/* TAB 1: Gemini AI Prompt Mode */}
-          {activeTab === "ai_prompt" && (
-            <div className="space-y-4 animate-fade-in">
-              {/* Ready Prompts Chips */}
-              <div>
-                <label className="text-xs font-black text-slate-800 flex items-center gap-1 mb-2">
-                  <Sparkles size={13} className="text-amber-500" />
-                  <span>Select Ready Prompt:</span>
-                </label>
-                
-                <div className="grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto pr-1">
-                  {DRESS_PRESETS.map((preset) => (
-                    <button
-                      key={preset.id}
-                      onClick={() => handleSelectPreset(preset)}
-                      className={`p-2.5 rounded-xl border text-left text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
-                        selectedPreset.id === preset.id
-                          ? "bg-blue-50 border-blue-500 text-blue-900 shadow-xs"
-                          : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
-                      }`}
-                    >
-                      <span className="truncate">{preset.name}</span>
-                      {selectedPreset.id === preset.id && <Check size={14} className="text-blue-600 shrink-0" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
+          {/* Tab Selection Info Banner */}
+          <div className="bg-slate-100 border border-slate-200 p-3 rounded-xl">
+            <p className="text-[11px] text-slate-600 font-bold leading-normal">
+              {activeTab === "manual_overlay"
+                ? "💡 Drag & drop the realistic suit directly on the photo, then adjust the size with sliders to fit perfectly."
+                : "✨ Write or select a prompt, then click 'Gemini Automatic Pehnao' to replace clothes using AI."}
+            </p>
+          </div>
 
-              {/* Custom Prompt Input */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-black text-slate-800">
-                    ✍️ AI Dress Prompt:
-                  </label>
-                  <span className="text-[10px] text-blue-600 font-bold">Generative Replace Active</span>
-                </div>
-
-                <textarea
-                  value={customPrompt}
-                  onChange={(e) => setCustomPrompt(e.target.value)}
-                  placeholder="e.g. Female professional black executive blazer with white inner top..."
-                  className="w-full p-3 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none h-20 shadow-inner"
-                />
-              </div>
-
-              {/* Gemini AI Action Button */}
-              <button
-                onClick={handleGenerateGeminiAi}
-                disabled={isAiGenerating}
-                className="w-full py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50"
-              >
-                {isAiGenerating ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    <span>AI Kapde Badalke Pehna Raha Hai...</span>
-                  </>
-                ) : (
-                  <>
-                    <Wand2 size={16} />
-                    <span>✨ Gemini Automatic Pehnao</span>
-                  </>
-                )}
-              </button>
+          {/* Preset Selector */}
+          <div className="space-y-2">
+            <label className="text-xs font-black text-slate-700 block">👔 Select Outfit Preset:</label>
+            <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+              {DRESS_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  onClick={() => handleSelectPreset(preset)}
+                  className={`w-full p-2.5 rounded-xl border text-left text-xs font-bold transition-all flex items-center justify-between cursor-pointer ${
+                    selectedPreset.id === preset.id
+                      ? "bg-blue-50 border-blue-500 text-blue-900 shadow-xs"
+                      : "bg-white text-slate-700 border-slate-200 hover:bg-slate-100"
+                  }`}
+                >
+                  <span className="truncate">{preset.name}</span>
+                  {selectedPreset.id === preset.id && <Check size={14} className="text-blue-600 shrink-0" />}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
 
-          {/* TAB 2: Manual Overlay Mode */}
+          {/* TAB 1: Premium Overlay Controls */}
           {activeTab === "manual_overlay" && (
             <div className="space-y-4 animate-fade-in">
-              {/* Preset Selector */}
-              <div className="space-y-2">
-                <label className="text-xs font-black text-slate-700 block">👔 Select Outfit Preset:</label>
-                <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1">
-                  {DRESS_PRESETS.map((preset) => (
-                    <button
-                      key={preset.id}
-                      onClick={() => handleSelectPreset(preset)}
-                      className={`w-full p-2 rounded-xl border text-left text-xs font-extrabold flex items-center justify-between transition-all cursor-pointer ${
-                        selectedPreset.id === preset.id
-                          ? "bg-blue-600 text-white border-blue-600 shadow-md"
-                          : "bg-white text-slate-800 border-slate-200 hover:bg-slate-100"
-                      }`}
-                    >
-                      <span>{preset.name}</span>
-                      {selectedPreset.id === preset.id && <Check size={14} />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Position Sliders */}
               <div className="p-4 bg-white border border-slate-200 rounded-xl space-y-3.5 shadow-xs">
                 <div className="flex items-center justify-between text-xs font-extrabold text-slate-800">
-                  <span>🎚️ Precision Adjustments</span>
+                  <span>🎚️ Precision Fit Controls</span>
                   <button
                     onClick={() => {
-                      setScale(100);
-                      setOffsetY(10);
+                      setScale(105);
+                      setOffsetY(12);
                       setOffsetX(0);
                     }}
                     className="text-[10px] text-blue-600 hover:underline flex items-center gap-1 cursor-pointer font-bold"
                   >
-                    <RotateCcw size={10} /> Reset
+                    <RotateCcw size={10} /> Reset Fit
                   </button>
                 </div>
 
@@ -646,6 +606,47 @@ export default function FormalDressOverlayModal({
                   />
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* TAB 2: Gemini AI Prompt Mode */}
+          {activeTab === "ai_prompt" && (
+            <div className="space-y-4 animate-fade-in">
+              {/* Custom Prompt Input */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-black text-slate-800">
+                    ✍️ AI Dress Prompt:
+                  </label>
+                  <span className="text-[10px] text-blue-600 font-bold">Generative Replace</span>
+                </div>
+
+                <textarea
+                  value={customPrompt}
+                  onChange={(e) => setCustomPrompt(e.target.value)}
+                  placeholder="e.g. Female professional black blazer with white shirt..."
+                  className="w-full p-3 bg-white border border-slate-300 rounded-xl text-xs font-medium text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none h-20 shadow-inner"
+                />
+              </div>
+
+              {/* Gemini AI Action Button */}
+              <button
+                onClick={handleGenerateGeminiAi}
+                disabled={isAiGenerating}
+                className="w-full py-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white rounded-xl text-xs font-black flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isAiGenerating ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    <span>AI replacing clothes...</span>
+                  </>
+                ) : (
+                  <>
+                    <Wand2 size={16} />
+                    <span>✨ Gemini Automatic Pehnao</span>
+                  </>
+                )}
+              </button>
             </div>
           )}
 
