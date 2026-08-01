@@ -573,24 +573,24 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
           <div
             ref={invoiceCardRef}
             className="invoice-print-card p-8 bg-white border text-slate-900 shadow-md"
-            style={{ width: "100%", maxWidth: "794px", background: "#ffffff", border: "1px solid #d8e0ec", borderRadius: "20px", overflow: "hidden", boxShadow: "0 24px 70px rgba(15,23,42,0.14)" }}
+            style={{ width: "100%", maxWidth: "794px", padding: "32px", boxSizing: "border-box", background: "#ffffff", border: "1px solid #d8e0ec", borderRadius: "16px", overflow: "hidden", boxShadow: "0 24px 70px rgba(15,23,42,0.14)", fontFamily: "Arial, Helvetica, sans-serif", color: "#0f172a" }}
           >
             {/* Header */}
-            <div className="flex justify-between items-start gap-5 flex-wrap" style={{ margin: "-32px -32px 0", padding: "30px 34px 28px", background: "linear-gradient(135deg,#07111f 0%,#123c80 58%,#1784d9 100%)", color: "#ffffff" }}>
+            <div className="flex justify-between items-start gap-5 flex-wrap" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "22px", margin: "-32px -32px 0", padding: "24px 30px 22px", background: "linear-gradient(135deg,#07111f 0%,#123c80 58%,#1784d9 100%)", color: "#ffffff" }}>
               <div style={{ maxWidth: "470px" }}>
-                <div className="flex items-center gap-4 mb-3">
+                <div className="flex items-center gap-4 mb-3" style={{ display: "flex", alignItems: "center", gap: "14px", marginBottom: "12px" }}>
                   <div className="flex items-center justify-center bg-white border border-slate-200 shadow-sm overflow-hidden" style={{ width: "64px", height: "64px", flexShrink: 0, borderRadius: "16px", padding: "6px" }}>
                     <img src="/logo.png" alt="RA" className="object-contain p-1" style={{ width: '100%', height: '100%' }} />
                   </div>
                   <div>
-                    <h2 className="font-extrabold" style={{ color: "#ffffff", fontSize: "26px", lineHeight: "1.08", letterSpacing: "0" }}>{shopName}</h2>
-                    <p className="font-bold uppercase mt-1" style={{ color: "#d7e8ff", fontSize: "10px", letterSpacing: "1.8px" }}>{shopTagline}</p>
+                    <h2 className="font-extrabold" style={{ color: "#ffffff", fontSize: "25px", lineHeight: "1.08", letterSpacing: "0", margin: 0 }}>{shopName}</h2>
+                    <p className="font-bold uppercase mt-1" style={{ color: "#d7e8ff", fontSize: "10px", letterSpacing: "1.6px", margin: "4px 0 0" }}>{shopTagline}</p>
                   </div>
                 </div>
                 <div className="space-y-1 text-xs" style={{ color: "#eef6ff", lineHeight: "1.45" }}>
-                  {shopAddress && <p className="flex items-center gap-1.5"><MapPin size={12} /> {shopAddress}</p>}
-                  {shopPhone && <p className="flex items-center gap-1.5"><Phone size={12} /> {shopPhone}</p>}
-                  {shopEmail && <p className="flex items-center gap-1.5"><Mail size={12} /> {shopEmail}</p>}
+                  {shopAddress && <p className="flex items-center gap-1.5" style={{ display: "flex", alignItems: "center", gap: "6px", margin: "0 0 3px" }}><MapPin size={12} /> {shopAddress}</p>}
+                  {shopPhone && <p className="flex items-center gap-1.5" style={{ display: "flex", alignItems: "center", gap: "6px", margin: "0 0 3px" }}><Phone size={12} /> {shopPhone}</p>}
+                  {shopEmail && <p className="flex items-center gap-1.5" style={{ display: "flex", alignItems: "center", gap: "6px", margin: 0 }}><Mail size={12} /> {shopEmail}</p>}
                 </div>
               </div>
 
@@ -607,12 +607,12 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
             </div>
 
             {/* Billed To */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 py-6 border-b border-slate-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 py-6 border-b border-slate-200" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", padding: "18px 0", borderBottom: "1px solid #e2e8f0" }}>
               <div style={{ border: "1px solid #e3e8f0", borderRadius: "16px", padding: "16px", background: "#f8fafc" }}>
                 <div className="font-bold uppercase mb-2" style={{ color: "#64748b", fontSize: "10px", letterSpacing: "1.3px" }}>Billed To</div>
                 <div className="font-black text-base" style={{ color: "#0f172a" }}>{invoice.customer.name}</div>
-                <div className="flex items-center gap-1 text-xs mt-2" style={{ color: "#475569" }}><Phone size={11} /> {invoice.customer.mobile}</div>
-                {invoice.customer.address && <div className="flex items-center gap-1 text-xs mt-1" style={{ color: "#475569" }}><MapPin size={11} /> {invoice.customer.address}</div>}
+                <div className="flex items-center gap-1 text-xs mt-2" style={{ display: "flex", alignItems: "center", gap: "5px", color: "#475569", marginTop: "7px" }}><Phone size={11} /> {invoice.customer.mobile}</div>
+                {invoice.customer.address && <div className="flex items-center gap-1 text-xs mt-1" style={{ display: "flex", alignItems: "center", gap: "5px", color: "#475569", marginTop: "4px" }}><MapPin size={11} /> {invoice.customer.address}</div>}
               </div>
               <div className="sm:text-right text-xs space-y-1" style={{ border: "1px solid #dbeafe", borderRadius: "16px", padding: "16px", background: "#eff6ff" }}>
                 <div className="font-bold uppercase mb-2" style={{ color: "#2563eb", fontSize: "10px", letterSpacing: "1.3px" }}>Payment Summary</div>
@@ -620,7 +620,7 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
                 <div><span style={{ color: "#64748b" }}>Status: </span><span className="font-black uppercase" style={{ color: invoice.paymentStatus === "PAID" ? "#047857" : "#b45309" }}>{invoice.paymentStatus}</span></div>
                 <div><span style={{ color: "#64748b" }}>UPI ID: </span><span className="font-mono font-bold" style={{ color: "#1d4ed8" }}>{upiId}</span></div>
                 
-                <div className="flex gap-2 justify-end mt-2">
+                <div className="flex gap-2 justify-end mt-2" style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "8px" }}>
                   {invoice.paymentStatus !== "PAID" && (
                     <button
                       onClick={handleSettleInvoice}
@@ -670,7 +670,7 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
             )}
 
             {/* Items Table */}
-            <div className="my-6">
+            <div className="my-6" style={{ margin: "16px 0" }}>
               <table className="w-full text-left text-sm border-collapse" style={{ border: "1px solid #e2e8f0", borderRadius: "14px", overflow: "hidden" }}>
                 <thead>
                   <tr style={{ background: "#0f172a", color: "#ffffff" }}>
@@ -694,8 +694,8 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
             </div>
 
             {/* Totals & QR */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 items-end">
-              <div className="flex gap-4 items-center p-4" style={{ border: "1px dashed #60a5fa", borderRadius: "16px", background: "#f0f7ff" }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 items-end" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", alignItems: "stretch", paddingTop: "4px" }}>
+              <div className="flex gap-4 items-center p-4" style={{ display: "flex", alignItems: "center", gap: "14px", padding: "14px", border: "1px dashed #60a5fa", borderRadius: "16px", background: "#f0f7ff" }}>
                 <QRCodeSVG value={upiLink} size={84} />
                 <div>
                   <div className="text-xs font-black" style={{ color: "#0f172a" }}>Scan to Pay (UPI)</div>
@@ -704,33 +704,33 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
                 </div>
               </div>
 
-              <div className="space-y-2 text-sm p-4" style={{ color: "#475569", border: "1px solid #d8e0ec", borderRadius: "18px", background: "#f8fafc" }}>
-                <div className="flex justify-between"><span>Subtotal:</span><span>₹{invoice.subtotal.toLocaleString("en-IN")}</span></div>
-                {invoice.discount > 0 && <div className="flex justify-between text-red-500"><span>Discount:</span><span>- ₹{invoice.discount.toLocaleString("en-IN")}</span></div>}
-                {invoice.gst > 0 && <div className="flex justify-between"><span>GST ({invoice.gst}%):</span><span>₹{Math.round((invoice.subtotal * invoice.gst) / 100).toLocaleString("en-IN")}</span></div>}
-                <div className="flex justify-between font-black text-lg pt-3 mt-2" style={{ color: "#0f172a", borderTop: "2px solid #cbd5e1" }}>
+              <div className="space-y-2 text-sm p-4" style={{ color: "#475569", border: "1px solid #d8e0ec", borderRadius: "18px", background: "#f8fafc", padding: "13px 15px" }}>
+                <div className="flex justify-between" style={{ display: "flex", justifyContent: "space-between" }}><span>Subtotal:</span><span>₹{invoice.subtotal.toLocaleString("en-IN")}</span></div>
+                {invoice.discount > 0 && <div className="flex justify-between text-red-500" style={{ display: "flex", justifyContent: "space-between" }}><span>Discount:</span><span>- ₹{invoice.discount.toLocaleString("en-IN")}</span></div>}
+                {invoice.gst > 0 && <div className="flex justify-between" style={{ display: "flex", justifyContent: "space-between" }}><span>GST ({invoice.gst}%):</span><span>₹{Math.round((invoice.subtotal * invoice.gst) / 100).toLocaleString("en-IN")}</span></div>}
+                <div className="flex justify-between font-black text-lg pt-3 mt-2" style={{ display: "flex", justifyContent: "space-between", color: "#0f172a", borderTop: "2px solid #cbd5e1", paddingTop: "8px", marginTop: "6px" }}>
                   <span>Grand Total:</span>
                   <span style={{ color: "#1d4ed8" }}>₹{invoice.total.toLocaleString("en-IN")}</span>
                 </div>
-                <div className="flex justify-between font-semibold mt-1"><span>Amount Paid:</span><span className="text-emerald-600">₹{(invoice.amountPaid || 0).toLocaleString("en-IN")}</span></div>
-                <div className="flex justify-between font-bold text-red-500 mt-1"><span>Balance Due:</span><span>₹{Math.max(0, invoice.total - (invoice.amountPaid || 0)).toLocaleString("en-IN")}</span></div>
+                <div className="flex justify-between font-semibold mt-1" style={{ display: "flex", justifyContent: "space-between" }}><span>Amount Paid:</span><span className="text-emerald-600">₹{(invoice.amountPaid || 0).toLocaleString("en-IN")}</span></div>
+                <div className="flex justify-between font-bold text-red-500 mt-1" style={{ display: "flex", justifyContent: "space-between" }}><span>Balance Due:</span><span>₹{Math.max(0, invoice.total - (invoice.amountPaid || 0)).toLocaleString("en-IN")}</span></div>
               </div>
             </div>
 
             {/* Separate Terms Section */}
-            <div className="mt-6 p-4 rounded-xl border border-slate-200 bg-slate-50 text-[11px] space-y-2">
-              <div className="font-bold uppercase tracking-wider text-slate-600">Terms & Conditions</div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="mt-6 p-4 rounded-xl border border-slate-200 bg-slate-50 text-[11px] space-y-2" style={{ marginTop: "14px", padding: "12px 14px", border: "1px solid #e2e8f0", borderRadius: "14px", background: "#f8fafc", fontSize: "10px", lineHeight: "1.35" }}>
+              <div className="font-bold uppercase tracking-wider text-slate-600" style={{ fontWeight: 800, color: "#475569", letterSpacing: "1px", marginBottom: "5px" }}>Terms & Conditions</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
                 <div>
                   <strong className="text-slate-800">1. Digital & Cyber Services:</strong>
-                  <ul className="list-disc pl-4 text-slate-600 space-y-0.5 mt-0.5">
+                  <ul className="list-disc pl-4 text-slate-600 space-y-0.5 mt-0.5" style={{ margin: "4px 0 0 14px", padding: 0, color: "#475569" }}>
                     <li>Govt application processing depends on department portals.</li>
                     <li>Govt fees & portal charges are non-refundable after submission.</li>
                   </ul>
                 </div>
                 <div>
                   <strong className="text-slate-800">2. Goods & Products:</strong>
-                  <ul className="list-disc pl-4 text-slate-600 space-y-0.5 mt-0.5">
+                  <ul className="list-disc pl-4 text-slate-600 space-y-0.5 mt-0.5" style={{ margin: "4px 0 0 14px", padding: 0, color: "#475569" }}>
                     <li>7 days replacement for manufacturing defect with original bill.</li>
                     <li>Warranty claims handled by respective brand service center.</li>
                   </ul>
@@ -739,9 +739,9 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
             </div>
 
             {/* Footer */}
-            <div className="text-center pt-6 mt-6 border-t border-slate-200 text-[10px] text-slate-400">
-              <p className="font-semibold">Thank you for choosing {shopName}!</p>
-              <p className="mt-0.5">Please retain this invoice for your records. This is a computer-generated invoice.</p>
+            <div className="text-center pt-6 mt-6 border-t border-slate-200 text-[10px] text-slate-400" style={{ textAlign: "center", paddingTop: "10px", marginTop: "12px", borderTop: "1px solid #e2e8f0", fontSize: "10px", color: "#64748b" }}>
+              <p className="font-semibold" style={{ margin: 0, fontWeight: 700 }}>Thank you for choosing {shopName}!</p>
+              <p className="mt-0.5" style={{ margin: "3px 0 0" }}>Please retain this invoice for your records. This is a computer-generated invoice.</p>
             </div>
           </div>
         ) : (
