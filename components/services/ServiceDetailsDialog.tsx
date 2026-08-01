@@ -114,6 +114,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
   const [paymentStatus, setPaymentStatus] = useState("UNPAID");
   const [paymentMode,   setPaymentMode]   = useState("PENDING");
   const [fees,          setFees]          = useState(0);
+  const [amountPaid,    setAmountPaid]    = useState(0);
   const [notes,         setNotes]         = useState("");
   const [requiredDocs,  setRequiredDocs]  = useState<string[]>([]);
   const [masterDocs,    setMasterDocs]    = useState<string[]>([]);
@@ -171,6 +172,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
         setPaymentStatus(data.paymentStatus);
         setPaymentMode(data.paymentMode);
         setFees(data.fees || 0);
+        setAmountPaid(data.amountPaid || 0);
         setNotes(data.notes || "");
         setRequiredDocs(data.requiredDocs || []);
         setDeadline(data.deadline ? new Date(data.deadline).toISOString().split("T")[0] : "");
@@ -491,7 +493,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Payment failed");
       setPaymentStatus(data.paymentStatus);
-      setFees(parseFloat(payAmount));
+      setAmountPaid(data.service.amountPaid);
       toast.success(`₹${payAmount} collected via ${payMode}! Status: ${data.paymentStatus}`);
       if (onSuccess) onSuccess();
     } catch (err: any) { toast.error(err.message); }
@@ -990,12 +992,14 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                         {/* Current Status */}
                         <div style={{ ...groove,padding:"10px",background:"#d4d0c8" }}>
                           <SHead icon={<CreditCard size={11}/>} label="Current Payment Status" color="#006600" />
-                          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"8px",textAlign:"center" }}>
+                          <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit, minmax(80px, 1fr))",gap:"8px",textAlign:"center" }}>
                             {[
                               { label:"Total Fees", value:`₹${fees}`, color:"#000080" },
+                              { label:"Paid", value:`₹${amountPaid}`, color:"#006600", show: paymentStatus !== "UNPAID" && fees > 0 },
+                              { label:"Pending", value:`₹${Math.max(0, fees - amountPaid)}`, color:"#cc0000", show: paymentStatus === "PARTIAL" || paymentStatus === "UNPAID" },
                               { label:"Status", value:paymentStatus, color:pMeta.color },
                               { label:"Mode", value:paymentMode, color:"#555" },
-                            ].map(({ label,value,color }) => (
+                            ].filter(item => item.show !== false).map(({ label,value,color }) => (
                               <div key={label} style={{ background:"white",...inset,padding:"10px" }}>
                                 <div style={{ fontSize:"18px",fontWeight:"bold",color }}>{value}</div>
                                 <div style={{ fontSize:"10px",color:"#888",marginTop:"2px" }}>{label}</div>

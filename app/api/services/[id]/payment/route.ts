@@ -14,12 +14,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const service = await prisma.service.findUnique({ where: { id }, include: { customer: true } });
   if (!service) return NextResponse.json({ error: 'Service not found' }, { status: 404 });
 
-  const newPaymentStatus = parseFloat(amount) >= service.fees ? 'PAID' : 'PARTIAL';
+  const newAmountPaid = (service.amountPaid || 0) + parseFloat(amount);
+  const newPaymentStatus = newAmountPaid >= service.fees ? 'PAID' : 'PARTIAL';
 
   const updated = await prisma.service.update({
     where: { id },
     data: {
-      fees: parseFloat(amount),
+      amountPaid: newAmountPaid,
       paymentStatus: newPaymentStatus as any,
       paymentMode: paymentMode as any,
     }
