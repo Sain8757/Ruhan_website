@@ -140,7 +140,7 @@ html {
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  font-family: 'Tahoma', 'MS Sans Serif', 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
   transition: background var(--transition-normal), color var(--transition-normal);
@@ -150,35 +150,37 @@ body {
   min-width: 320px;
 }
 
-/* Premium ambient background */
+/* No ambient gradient — Win95 style */
 body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 50% at 10% 0%, rgba(79, 110, 247, 0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(167, 139, 250, 0.05) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(79, 110, 247, 0.02) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 0;
+  display: none;
 }
 
-.dark body::before {
-  background:
-    radial-gradient(ellipse 80% 50% at 10% 0%, rgba(79, 110, 247, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 90% 100%, rgba(167, 139, 250, 0.07) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(79, 110, 247, 0.04) 0%, transparent 70%);
+/* ===== WIN95 SCROLLBAR ===== */
+::-webkit-scrollbar { width: 17px; height: 17px; }
+::-webkit-scrollbar-track {
+  background: #d4d0c8;
+  border-left: 1px solid #808080;
 }
-
-/* ===== PREMIUM SCROLLBAR ===== */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(79, 110, 247, 0.2);
-  border-radius: 99px;
+  background: #d4d0c8;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  border-radius: 0;
 }
-::-webkit-scrollbar-thumb:hover { background: var(--brand-primary); }
-.dark ::-webkit-scrollbar-thumb { background: rgba(79, 110, 247, 0.25); }
+::-webkit-scrollbar-thumb:hover { background: #c8c4bc; }
+::-webkit-scrollbar-button {
+  background: #d4d0c8;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  display: block;
+  height: 17px;
+  width: 17px;
+}
+::-webkit-scrollbar-corner { background: #d4d0c8; }
 
 /* ===== GLASSMORPHISM & UTILITY CLASSES ===== */
 @layer utilities {

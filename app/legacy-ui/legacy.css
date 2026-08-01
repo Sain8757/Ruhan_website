@@ -1,31 +1,38 @@
+/* =========================================================
+   LEGACY.CSS — Windows 95 / 98 Classic UI System
+   All content inside .legacy-tab-content gets this treatment
+   ========================================================= */
+
+/* ---- Desktop Background ---- */
 .legacy-desktop {
-  background-color: #3a6ea5; /* Classic desktop background */
+  background-color: #008080; /* Classic Win95 teal desktop */
+  background-image: none;
   min-height: 100vh;
   width: 100vw;
-  font-family: 'Tahoma', 'MS Sans Serif', sans-serif !important;
+  font-family: 'Tahoma', 'MS Sans Serif', Arial, sans-serif !important;
   font-size: 12px;
   color: #000;
   overflow: hidden;
   position: relative;
 }
 
-/* Ensure inputs, buttons, and selects use Tahoma */
+/* Force Tahoma on ALL elements inside desktop */
+.legacy-desktop *,
 .legacy-desktop input,
 .legacy-desktop button,
 .legacy-desktop select,
-.legacy-desktop textarea,
-.legacy-desktop .legacy-tab-content * {
-  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+.legacy-desktop textarea {
+  font-family: 'Tahoma', 'MS Sans Serif', Arial, sans-serif !important;
 }
 
-/* Classic Windows 98/2000 style Window */
+/* ---- Window Frame ---- */
 .legacy-window {
   background-color: #d4d0c8;
-  border-top: 1px solid #fff;
-  border-left: 1px solid #fff;
-  border-right: 1px solid #404040;
-  border-bottom: 1px solid #404040;
-  box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px #808080, 1px 1px 2px rgba(0,0,0,0.2);
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #404040;
+  border-bottom: 2px solid #404040;
+  box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px #808080, 2px 2px 6px rgba(0,0,0,0.4);
   display: flex;
   flex-direction: column;
   position: absolute;
@@ -34,28 +41,31 @@
 @media (max-width: 768px) {
   .legacy-window {
     width: 100% !important;
-    height: calc(100% - 30px) !important; /* adjust for taskbar */
+    height: calc(100% - 30px) !important;
     top: 0 !important;
     left: 0 !important;
   }
 }
 
-/* Specific styling to match the screenshot which seems more like Windows 7 Classic theme or XP */
+/* ---- Title Bar ---- */
 .legacy-window-titlebar {
-  background: linear-gradient(to right, #0a246a 0%, #a6caf0 100%);
+  background: linear-gradient(90deg, #000080 0%, #1084d0 100%);
   color: white;
   font-weight: bold;
+  font-size: 12px;
   padding: 3px 2px 3px 3px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .legacy-window-titlebar .title-text {
   display: flex;
   align-items: center;
   gap: 4px;
+  font-size: 12px;
 }
 
 .legacy-window-controls {
@@ -63,6 +73,7 @@
   gap: 2px;
 }
 
+/* ---- Sys Buttons (min/max/close) ---- */
 .legacy-btn-sys {
   background-color: #d4d0c8;
   border-top: 1px solid #fff;
@@ -126,108 +137,109 @@
   padding-left: 1px !important;
 }
 
-.legacy-content {
-  padding: 8px;
-}
-
-/* Classic Button */
+/* ---- Classic Button ---- */
 .legacy-button {
   background-color: #d4d0c8;
-  border-top: 1px solid #fff;
-  border-left: 1px solid #fff;
-  border-right: 1px solid #404040;
-  border-bottom: 1px solid #404040;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #404040;
+  border-bottom: 2px solid #404040;
   box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px #808080;
   padding: 3px 12px;
-  font-family: inherit;
-  font-size: inherit;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+  font-size: 12px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   cursor: default;
   color: black;
-}
-.legacy-button:active {
-  border-top: 1px solid #404040;
-  border-left: 1px solid #404040;
-  border-right: 1px solid #fff;
-  border-bottom: 1px solid #fff;
-  box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf;
-  padding: 4px 11px 2px 13px; /* shift text down-right */
+  border-radius: 0 !important;
+  text-decoration: none;
 }
 
-/* Inputs */
+.legacy-button:hover {
+  background-color: #d4d0c8;
+}
+
+.legacy-button:active {
+  border-top: 2px solid #404040;
+  border-left: 2px solid #404040;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf;
+  padding: 4px 11px 2px 13px;
+}
+
+.legacy-button:disabled,
+.legacy-button[disabled] {
+  color: #808080;
+  text-shadow: 1px 1px 0 #fff;
+}
+
+/* ---- Classic Input ---- */
 .legacy-input {
   background: white;
-  border-top: 1px solid #404040;
-  border-left: 1px solid #404040;
-  border-right: 1px solid #fff;
-  border-bottom: 1px solid #fff;
-  box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf;
+  border-top: 2px solid #808080;
+  border-left: 2px solid #808080;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  box-shadow: inset 1px 1px #404040;
   padding: 2px 4px;
-  font-family: inherit;
-  font-size: inherit;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+  font-size: 12px;
   color: black;
   outline: none;
+  border-radius: 0 !important;
 }
+
+.legacy-input:focus {
+  outline: 1px dotted #000;
+  outline-offset: -2px;
+}
+
 .legacy-input:disabled {
   background: #d4d0c8;
   color: #808080;
 }
 
-/* Select */
+/* ---- Classic Select ---- */
 .legacy-select {
   background: white;
-  border-top: 1px solid #404040;
-  border-left: 1px solid #404040;
-  border-right: 1px solid #fff;
-  border-bottom: 1px solid #fff;
-  box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf;
+  border-top: 2px solid #808080;
+  border-left: 2px solid #808080;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  box-shadow: inset 1px 1px #404040;
   padding: 1px 2px;
-  font-family: inherit;
-  font-size: inherit;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+  font-size: 12px;
   color: black;
+  border-radius: 0 !important;
 }
 
-/* Fieldset */
+/* ---- Fieldset ---- */
 .legacy-fieldset {
-  border: 1px solid #d4d0c8; 
-  border-top: 1px solid #fff;
-  border-left: 1px solid #fff;
-  border-right: 1px solid #808080;
-  border-bottom: 1px solid #808080;
-  border-radius: 0;
-  padding: 6px;
-  margin: 0;
-  box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf;
+  border-top: 1px solid #808080;
+  border-left: 1px solid #808080;
+  border-right: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+  padding: 8px 8px 12px 8px;
+  margin-bottom: 12px;
   position: relative;
-  background: transparent;
-}
-.legacy-fieldset > legend {
-  color: #0000bd;
-  padding: 0 4px;
-  margin-left: 6px;
+  border-radius: 0 !important;
 }
 
-.legacy-group-box {
-  border: 1px solid #dfdfdf;
-  border-right-color: white;
-  border-bottom-color: white;
-  box-shadow: -1px -1px #808080, 1px 1px #fff;
-  padding: 8px;
-  position: relative;
-  margin-top: 6px;
-}
-.legacy-group-box-title {
+.legacy-legend {
+  color: #000080;
+  padding: 0 4px;
   position: absolute;
-  top: -7px;
-  left: 6px;
+  top: -8px;
+  left: 8px;
   background: #d4d0c8;
-  padding: 0 4px;
-  color: #0000bd;
+  font-size: 12px;
 }
 
-/* Toolbars */
+/* ---- Toolbar ---- */
 .legacy-toolbar {
   display: flex;
   gap: 2px;
@@ -235,7 +247,9 @@
   background-color: #d4d0c8;
   border-bottom: 1px solid #808080;
   box-shadow: 0 1px 0 #fff;
+  border-radius: 0 !important;
 }
+
 .legacy-toolbar-btn {
   display: flex;
   flex-direction: column;
@@ -246,19 +260,17 @@
   background: transparent;
   font-size: 10px;
   gap: 2px;
+  border-radius: 0 !important;
 }
+
 .legacy-toolbar-btn:hover {
   border-top: 1px solid #fff;
   border-left: 1px solid #fff;
   border-right: 1px solid #808080;
   border-bottom: 1px solid #808080;
 }
-.legacy-toolbar-btn img {
-  width: 16px;
-  height: 16px;
-}
 
-/* Tabs */
+/* ---- Tabs ---- */
 .legacy-tabs-container {
   display: flex;
   margin-bottom: -1px;
@@ -266,6 +278,7 @@
   z-index: 2;
   position: relative;
 }
+
 .legacy-tab {
   background: #d4d0c8;
   border-top: 1px solid #fff;
@@ -277,204 +290,299 @@
   border-top-left-radius: 2px;
   border-top-right-radius: 2px;
   box-shadow: inset -1px 0 #808080;
-}
-.legacy-tab.active {
-  background: #fff;
-  border-bottom: 1px solid #fff; /* cover the container border */
-  padding-top: 5px;
-  margin-top: -2px;
-}
-.legacy-tab-content {
-  background: #fff;
-  border-top: 1px solid #fff;
-  border-left: 1px solid #fff;
-  border-right: 1px solid #808080;
-  border-bottom: 1px solid #808080;
-  box-shadow: -1px -1px 0 #dfdfdf, 1px 1px 0 #404040;
-  padding: 8px;
-  min-height: 200px;
+  font-size: 12px;
 }
 
-/* Data Grid */
+.legacy-tab.active {
+  background: #d4d0c8;
+  border-bottom: 1px solid #d4d0c8;
+  padding-top: 5px;
+  margin-top: -2px;
+  z-index: 3;
+}
+
+.legacy-tab-content {
+  background: #d4d0c8;
+  border-top: 2px solid #fff;
+  border-left: 2px solid #fff;
+  border-right: 2px solid #808080;
+  border-bottom: 2px solid #808080;
+  padding: 8px;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ---- Data Grid ---- */
 .legacy-grid {
   width: 100%;
   border-collapse: collapse;
   background: white;
-  border: 1px solid #808080;
+  border: 2px solid #808080;
+  border-radius: 0 !important;
 }
+
 .legacy-grid th {
   background: #d4d0c8;
   border-top: 1px solid #fff;
   border-left: 1px solid #fff;
   border-right: 1px solid #808080;
   border-bottom: 1px solid #808080;
-  padding: 2px 4px;
-  font-weight: normal;
+  padding: 2px 6px;
+  font-weight: bold;
   text-align: left;
+  font-size: 12px;
 }
+
 .legacy-grid td {
-  border: 1px solid #dfdfdf;
-  padding: 2px 4px;
+  border: 1px solid #c0c0c0;
+  padding: 2px 6px;
+  font-size: 12px;
 }
+
 .legacy-grid tr:nth-child(even) td {
-  background: #f8f8f8;
+  background: #f4f4f4;
 }
+
+.legacy-grid tr:hover td {
+  background: #0a246a;
+  color: white;
+}
+
 .legacy-grid tr.selected td {
   background: #0a246a;
   color: white;
 }
 
-/* Checkbox */
+/* ---- Misc legacy components ---- */
 .legacy-checkbox {
   margin: 0 4px 0 0;
   vertical-align: middle;
 }
 
-/* Small input variant */
 .legacy-input.small {
   width: 60px;
   text-align: right;
 }
 
-/* Fieldset and Legend */
-.legacy-fieldset {
-  border-top: 1px solid #808080;
-  border-left: 1px solid #808080;
-  border-right: 1px solid #fff;
-  border-bottom: 1px solid #fff;
-  padding: 8px 8px 12px 8px;
-  margin-bottom: 12px;
+.legacy-group-box {
+  border: 1px solid #dfdfdf;
+  border-right-color: white;
+  border-bottom-color: white;
+  box-shadow: -1px -1px #808080, 1px 1px #fff;
+  padding: 8px;
   position: relative;
+  margin-top: 6px;
+  border-radius: 0 !important;
 }
-.legacy-legend {
-  color: #000080;
-  padding: 0 4px;
+
+.legacy-group-box-title {
   position: absolute;
-  top: -8px;
-  left: 8px;
+  top: -7px;
+  left: 6px;
   background: #d4d0c8;
+  padding: 0 4px;
+  color: #000080;
+  font-size: 12px;
 }
 
-/* =========================================
-   GLOBAL OVERRIDES FOR INNER PAGE CONTENTS
-   ========================================= */
+/* =========================================================
+   GLOBAL OVERRIDES — Make ALL content inside .legacy-tab-content
+   look 100% Windows 95. These rules override modern CSS.
+   ========================================================= */
 
-/* Strip all modern rounding and animations */
-.legacy-tab-content * {
+/* Strip modern rounding, animation, blur from EVERYTHING */
+.legacy-tab-content *,
+.legacy-tab-content *::before,
+.legacy-tab-content *::after {
   border-radius: 0 !important;
   transition: none !important;
+  animation-duration: 0s !important;
   animation-name: none !important;
   backdrop-filter: none !important;
-}
-
-/* Force gray background on modern cards and sections */
-.legacy-tab-content .bg-white,
-.legacy-tab-content .bg-card,
-.legacy-tab-content .stat-card,
-.legacy-tab-content section,
-.legacy-tab-content .glass-panel,
-.legacy-tab-content .glass-card,
-.legacy-tab-content .toolbar,
-.legacy-tab-content .page-shell {
-  background: #d4d0c8 !important;
-  border-top: 2px solid #fff !important;
-  border-left: 2px solid #fff !important;
-  border-right: 2px solid #808080 !important;
-  border-bottom: 2px solid #808080 !important;
+  -webkit-backdrop-filter: none !important;
   box-shadow: none !important;
-  color: black !important;
+  text-shadow: none !important;
+  background-image: none !important;
+  background-clip: border-box !important;
+  -webkit-text-fill-color: currentColor !important;
+  letter-spacing: 0 !important;
+  transform: none !important;
 }
 
-/* Modern inputs and textareas to classic inset 3D */
-.legacy-tab-content input,
-.legacy-tab-content select,
-.legacy-tab-content textarea {
-  background: #fff !important;
-  border-top: 2px solid #808080 !important;
-  border-left: 2px solid #808080 !important;
-  border-right: 2px solid #fff !important;
-  border-bottom: 2px solid #fff !important;
-  box-shadow: none !important;
-  color: black !important;
-  padding: 2px 4px !important;
-  outline: none !important;
-}
-
-/* Modern buttons to classic outset 3D */
-.legacy-tab-content button {
+/* Root background color for content area */
+.legacy-tab-content {
   background: #d4d0c8 !important;
-  border-top: 2px solid #fff !important;
-  border-left: 2px solid #fff !important;
+  color: #000 !important;
+}
+
+/* ---- Buttons (ALL named classes) ---- */
+.legacy-tab-content button,
+.legacy-tab-content .btn-primary,
+.legacy-tab-content .btn-secondary,
+.legacy-tab-content .btn-danger,
+.legacy-tab-content .btn-ghost,
+.legacy-tab-content a.btn-primary,
+.legacy-tab-content a.btn-secondary,
+.legacy-tab-content [class*="btn-"] {
+  background: #d4d0c8 !important;
+  background-color: #d4d0c8 !important;
+  border-top: 2px solid #ffffff !important;
+  border-left: 2px solid #ffffff !important;
   border-right: 2px solid #404040 !important;
   border-bottom: 2px solid #404040 !important;
   box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px #808080 !important;
-  color: black !important;
-  padding: 4px 12px !important;
+  color: #000000 !important;
+  padding: 3px 10px !important;
+  font-size: 12px !important;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif !important;
   cursor: default !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  min-height: auto !important;
+  height: auto !important;
+  line-height: 1.4 !important;
+  opacity: 1 !important;
+  border-radius: 0 !important;
+  font-weight: normal !important;
 }
 
-.legacy-tab-content button:active {
+.legacy-tab-content button:hover,
+.legacy-tab-content .btn-primary:hover,
+.legacy-tab-content .btn-secondary:hover,
+.legacy-tab-content .btn-danger:hover,
+.legacy-tab-content .btn-ghost:hover {
+  background: #d4d0c8 !important;
+  background-color: #d4d0c8 !important;
+  border-top: 2px solid #ffffff !important;
+  border-left: 2px solid #ffffff !important;
+  border-right: 2px solid #404040 !important;
+  border-bottom: 2px solid #404040 !important;
+  transform: none !important;
+  box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px #808080 !important;
+}
+
+.legacy-tab-content button:active,
+.legacy-tab-content .btn-primary:active,
+.legacy-tab-content .btn-secondary:active,
+.legacy-tab-content .btn-danger:active {
   border-top: 2px solid #404040 !important;
   border-left: 2px solid #404040 !important;
-  border-right: 2px solid #fff !important;
-  border-bottom: 2px solid #fff !important;
-  padding: 5px 11px 3px 13px !important; /* shift content down/right */
-  box-shadow: none !important;
+  border-right: 2px solid #ffffff !important;
+  border-bottom: 2px solid #ffffff !important;
+  box-shadow: inset 1px 1px #808080, inset -1px -1px #dfdfdf !important;
+  padding: 4px 9px 2px 11px !important;
 }
 
-/* Remove gradient texts and weird modern font colors */
-.legacy-tab-content h1,
-.legacy-tab-content h2,
-.legacy-tab-content h3,
-.legacy-tab-content h4,
-.legacy-tab-content p,
-.legacy-tab-content span,
-.legacy-tab-content div {
-  background-clip: border-box !important;
-  -webkit-text-fill-color: currentcolor !important;
+.legacy-tab-content button:disabled,
+.legacy-tab-content button[disabled],
+.legacy-tab-content .btn-primary:disabled,
+.legacy-tab-content .btn-secondary:disabled {
+  color: #808080 !important;
+  text-shadow: 1px 1px 0 #ffffff !important;
+  opacity: 1 !important;
+  cursor: not-allowed !important;
 }
 
-/* Data tables */
-.legacy-tab-content table {
-  border-collapse: collapse !important;
-  background: #fff !important;
-  border: 2px solid #808080 !important;
+/* ---- Inputs, Selects, Textareas ---- */
+.legacy-tab-content input,
+.legacy-tab-content select,
+.legacy-tab-content textarea,
+.legacy-tab-content .input-field {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border-top: 2px solid #808080 !important;
+  border-left: 2px solid #808080 !important;
+  border-right: 2px solid #ffffff !important;
+  border-bottom: 2px solid #ffffff !important;
+  box-shadow: inset 1px 1px #404040 !important;
+  color: #000000 !important;
+  padding: 2px 4px !important;
+  outline: none !important;
+  font-size: 12px !important;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif !important;
+  min-height: auto !important;
+  line-height: 1.4 !important;
+  border-radius: 0 !important;
 }
 
-.legacy-tab-content th {
+.legacy-tab-content input:focus,
+.legacy-tab-content select:focus,
+.legacy-tab-content textarea:focus,
+.legacy-tab-content .input-field:focus {
+  outline: 1px dotted #000 !important;
+  outline-offset: -2px !important;
+  border-top: 2px solid #808080 !important;
+  border-left: 2px solid #808080 !important;
+}
+
+.legacy-tab-content input:disabled,
+.legacy-tab-content select:disabled,
+.legacy-tab-content textarea:disabled,
+.legacy-tab-content .input-field:disabled {
   background: #d4d0c8 !important;
-  border-top: 1px solid #fff !important;
-  border-left: 1px solid #fff !important;
-  border-right: 1px solid #808080 !important;
-  border-bottom: 1px solid #808080 !important;
-  color: black !important;
-  font-weight: normal !important;
-  padding: 2px 4px !important;
+  background-color: #d4d0c8 !important;
+  color: #808080 !important;
 }
 
-.legacy-tab-content td {
-  border: 1px solid #c0c0c0 !important;
-  color: black !important;
-  padding: 2px 4px !important;
+/* ---- Cards — All variants ---- */
+.legacy-tab-content .stat-card,
+.legacy-tab-content .card-base,
+.legacy-tab-content .metric-card,
+.legacy-tab-content .action-card,
+.legacy-tab-content .form-card,
+.legacy-tab-content .tool-card,
+.legacy-tab-content .data-card,
+.legacy-tab-content .glass-card,
+.legacy-tab-content .glass,
+.legacy-tab-content .glass-panel,
+.legacy-tab-content .skeleton-card,
+.legacy-tab-content [class*="card"] {
+  background: #d4d0c8 !important;
+  background-color: #d4d0c8 !important;
+  border-top: 2px solid #ffffff !important;
+  border-left: 2px solid #ffffff !important;
+  border-right: 2px solid #808080 !important;
+  border-bottom: 2px solid #808080 !important;
+  color: #000 !important;
+  padding: 8px !important;
 }
 
-/* Badges / Tags */
-.legacy-tab-content .badge,
-.legacy-tab-content [class*="bg-"][class*="text-"] {
-  background: transparent !important;
-  border: 1px solid black !important;
-  color: black !important;
+.legacy-tab-content .stat-card:hover,
+.legacy-tab-content .action-card:hover,
+.legacy-tab-content .data-card:hover,
+.legacy-tab-content .glass-card:hover,
+.legacy-tab-content [class*="card"]:hover {
+  transform: none !important;
 }
-.legacy-tab-content * { font-family: 'Tahoma', 'MS Sans Serif', sans-serif !important; }
 
-/* Windows 95 Search Field and Button */
+/* ---- Toolbar / Search ---- */
+.legacy-tab-content .toolbar {
+  background: #d4d0c8 !important;
+  background-color: #d4d0c8 !important;
+  border-top: 2px solid #ffffff !important;
+  border-left: 2px solid #ffffff !important;
+  border-right: 2px solid #808080 !important;
+  border-bottom: 2px solid #808080 !important;
+  padding: 4px !important;
+  gap: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  backdrop-filter: none !important;
+}
+
 .legacy-tab-content .search-field {
+  position: relative !important;
+  flex: 1 !important;
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
 }
 
-.legacy-tab-content .search-field svg {
+/* SVG inside search-field: make it a button */
+.legacy-tab-content .search-field > svg {
   position: static !important;
   transform: none !important;
   order: 2 !important;
@@ -483,27 +591,487 @@
   border-left: 2px solid #fff !important;
   border-right: 2px solid #404040 !important;
   border-bottom: 2px solid #404040 !important;
-  box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px #808080 !important;
-  padding: 2px 8px !important;
+  padding: 2px 6px !important;
   margin-left: 4px !important;
   color: black !important;
   width: 16px !important;
   height: 16px !important;
   box-sizing: content-box !important;
   cursor: pointer !important;
-}
-
-.legacy-tab-content .search-field svg:active {
-  border-top: 2px solid #404040 !important;
-  border-left: 2px solid #404040 !important;
-  border-right: 2px solid #fff !important;
-  border-bottom: 2px solid #fff !important;
-  box-shadow: none !important;
-  padding: 3px 7px 1px 9px !important;
+  pointer-events: auto !important;
 }
 
 .legacy-tab-content .search-field .input-field {
-  padding-left: 4px !important;
   order: 1 !important;
   flex: 1 !important;
+  padding-left: 4px !important;
+}
+
+/* ---- Page header / title ---- */
+.legacy-tab-content .page-header {
+  background: #d4d0c8 !important;
+  border-top: 2px solid #ffffff !important;
+  border-left: 2px solid #ffffff !important;
+  border-right: 2px solid #808080 !important;
+  border-bottom: 2px solid #808080 !important;
+  padding: 6px 8px !important;
+  margin-bottom: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+}
+
+.legacy-tab-content .page-title {
+  font-size: 13px !important;
+  font-weight: bold !important;
+  color: #000080 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.3 !important;
+  background: none !important;
+}
+
+.legacy-tab-content h1.page-title {
+  font-size: 13px !important;
+}
+
+.legacy-tab-content .page-subtitle {
+  font-size: 11px !important;
+  color: #444 !important;
+  margin-top: 1px !important;
+}
+
+.legacy-tab-content .page-actions {
+  display: flex !important;
+  gap: 4px !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+}
+
+/* ---- Badges ---- */
+.legacy-tab-content .badge,
+.legacy-tab-content [class*="badge-"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 1px solid #000 !important;
+  color: #000 !important;
+  padding: 1px 6px !important;
+  font-size: 11px !important;
+  font-weight: normal !important;
+  border-radius: 0 !important;
+  display: inline-block !important;
+}
+
+.legacy-tab-content .badge-paid,
+.legacy-tab-content .badge-approved,
+.legacy-tab-content .badge-delivered {
+  border-color: #008000 !important;
+  color: #006400 !important;
+}
+
+.legacy-tab-content .badge-unpaid,
+.legacy-tab-content .badge-cancelled {
+  border-color: #cc0000 !important;
+  color: #cc0000 !important;
+}
+
+.legacy-tab-content .badge-pending,
+.legacy-tab-content .badge-partial {
+  border-color: #808000 !important;
+  color: #806000 !important;
+}
+
+.legacy-tab-content .badge-submitted,
+.legacy-tab-content .badge-processing {
+  border-color: #000080 !important;
+  color: #000080 !important;
+}
+
+/* ---- Empty State ---- */
+.legacy-tab-content .empty-state {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 2px solid #808080 !important;
+  color: #444 !important;
+  padding: 24px !important;
+  text-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+.legacy-tab-content .empty-state-icon {
+  opacity: 0.5 !important;
+  color: #808080 !important;
+}
+
+.legacy-tab-content .empty-state-title {
+  font-size: 13px !important;
+  font-weight: bold !important;
+  color: #000 !important;
+}
+
+.legacy-tab-content .empty-state-desc {
+  font-size: 11px !important;
+  color: #666 !important;
+}
+
+/* ---- Data Tables ---- */
+.legacy-tab-content .table-wrapper {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 2px solid #808080 !important;
+  overflow-x: auto !important;
+  border-radius: 0 !important;
+}
+
+.legacy-tab-content table,
+.legacy-tab-content .data-table {
+  border-collapse: collapse !important;
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: none !important;
+  width: 100% !important;
+  font-size: 12px !important;
+}
+
+.legacy-tab-content th,
+.legacy-tab-content .data-table th {
+  background: #d4d0c8 !important;
+  background-color: #d4d0c8 !important;
+  border-top: 1px solid #ffffff !important;
+  border-left: 1px solid #ffffff !important;
+  border-right: 1px solid #808080 !important;
+  border-bottom: 2px solid #808080 !important;
+  color: #000 !important;
+  font-weight: bold !important;
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+.legacy-tab-content td,
+.legacy-tab-content .data-table td {
+  border: 1px solid #c0c0c0 !important;
+  color: #000 !important;
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+  vertical-align: middle !important;
+}
+
+.legacy-tab-content tbody tr:nth-child(even) td {
+  background: #f8f8f8 !important;
+  background-color: #f8f8f8 !important;
+}
+
+.legacy-tab-content tbody tr:hover td {
+  background: #0a246a !important;
+  background-color: #0a246a !important;
+  color: #ffffff !important;
+}
+
+/* ---- Segmented Control → Win95 Tab-button style ---- */
+.legacy-tab-content .segmented-control {
+  background: #d4d0c8 !important;
+  background-color: #d4d0c8 !important;
+  border: 1px solid #808080 !important;
+  padding: 2px !important;
+  gap: 2px !important;
+  display: flex !important;
+}
+
+.legacy-tab-content .segmented-item {
+  background: #d4d0c8 !important;
+  background-color: #d4d0c8 !important;
+  color: #000 !important;
+  border-top: 1px solid #fff !important;
+  border-left: 1px solid #fff !important;
+  border-right: 1px solid #808080 !important;
+  border-bottom: 1px solid #808080 !important;
+  padding: 2px 10px !important;
+  font-size: 12px !important;
+  font-weight: normal !important;
+  min-height: auto !important;
+  cursor: default !important;
+}
+
+.legacy-tab-content .segmented-item.active {
+  background: #d4d0c8 !important;
+  background-color: #d4d0c8 !important;
+  color: #000080 !important;
+  font-weight: bold !important;
+  border-top: 2px solid #808080 !important;
+  border-left: 2px solid #808080 !important;
+  border-right: 1px solid #fff !important;
+  border-bottom: 1px solid #fff !important;
+}
+
+/* ---- Icon Badge ---- */
+.legacy-tab-content .icon-badge {
+  background: #d4d0c8 !important;
+  background-color: #d4d0c8 !important;
+  color: #000 !important;
+  border-top: 1px solid #fff !important;
+  border-left: 1px solid #fff !important;
+  border-right: 1px solid #808080 !important;
+  border-bottom: 1px solid #808080 !important;
+  border-radius: 0 !important;
+  width: 28px !important;
+  height: 28px !important;
+}
+
+/* ---- Kanban ---- */
+.legacy-tab-content .kanban-column {
+  background: #d4d0c8 !important;
+  background-color: #d4d0c8 !important;
+  border: 1px solid #808080 !important;
+  padding: 8px !important;
+}
+
+.legacy-tab-content .kanban-card {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 1px solid #808080 !important;
+  padding: 4px 8px !important;
+  cursor: default !important;
+}
+
+.legacy-tab-content .kanban-card:hover {
+  background: #f0f0f0 !important;
+  transform: none !important;
+}
+
+/* ---- Upload Zone ---- */
+.legacy-tab-content .upload-zone {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 2px dashed #808080 !important;
+  padding: 24px !important;
+  min-height: 160px !important;
+}
+
+.legacy-tab-content .upload-icon,
+.legacy-tab-content .tool-empty-icon {
+  background: #d4d0c8 !important;
+  background-color: #d4d0c8 !important;
+  border: 1px solid #808080 !important;
+  color: #000 !important;
+  width: 40px !important;
+  height: 40px !important;
+}
+
+/* ---- Form styles ---- */
+.legacy-tab-content .form-card,
+.legacy-tab-content .control-section {
+  background: #d4d0c8 !important;
+  background-color: #d4d0c8 !important;
+  border-top: 2px solid #ffffff !important;
+  border-left: 2px solid #ffffff !important;
+  border-right: 2px solid #808080 !important;
+  border-bottom: 2px solid #808080 !important;
+  padding: 8px !important;
+}
+
+.legacy-tab-content label,
+.legacy-tab-content .label {
+  font-size: 12px !important;
+  font-weight: normal !important;
+  color: #000 !important;
+  margin-bottom: 2px !important;
+  letter-spacing: 0 !important;
+}
+
+/* ---- Inline color spans/icons ---- */
+.legacy-tab-content h1,
+.legacy-tab-content h2,
+.legacy-tab-content h3,
+.legacy-tab-content h4,
+.legacy-tab-content h5,
+.legacy-tab-content h6 {
+  color: #000000 !important;
+  font-size: 13px !important;
+  font-weight: bold !important;
+  background: none !important;
+  background-clip: border-box !important;
+  -webkit-text-fill-color: #000000 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.4 !important;
+}
+
+.legacy-tab-content p,
+.legacy-tab-content span:not([class*="text-green"]):not([class*="text-red"]):not([class*="text-blue"]):not([class*="text-yellow"]):not([class*="text-orange"]) {
+  color: inherit !important;
+  -webkit-text-fill-color: inherit !important;
+  background-clip: border-box !important;
+}
+
+/* ---- Scrollbar (Win95-style) ---- */
+.legacy-tab-content::-webkit-scrollbar {
+  width: 17px !important;
+  height: 17px !important;
+}
+
+.legacy-tab-content::-webkit-scrollbar-track {
+  background: #d4d0c8 !important;
+  border-left: 1px solid #808080 !important;
+}
+
+.legacy-tab-content::-webkit-scrollbar-thumb {
+  background: #d4d0c8 !important;
+  border-top: 1px solid #fff !important;
+  border-left: 1px solid #fff !important;
+  border-right: 1px solid #404040 !important;
+  border-bottom: 1px solid #404040 !important;
+  border-radius: 0 !important;
+}
+
+.legacy-tab-content::-webkit-scrollbar-button {
+  background: #d4d0c8 !important;
+  border-top: 1px solid #fff !important;
+  border-left: 1px solid #fff !important;
+  border-right: 1px solid #404040 !important;
+  border-bottom: 1px solid #404040 !important;
+  display: block !important;
+  height: 17px !important;
+  width: 17px !important;
+}
+
+/* ---- Tailwind utility override — remove modern radius/shadow ---- */
+.legacy-tab-content [class*="rounded"],
+.legacy-tab-content [class*="shadow"],
+.legacy-tab-content [class*="blur"],
+.legacy-tab-content [class*="ring"],
+.legacy-tab-content [class*="gradient"] {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+/* ---- Loader/Spinner — keep functional but desaturate ---- */
+.legacy-tab-content .animate-spin {
+  animation: spin 1s linear infinite !important;
+  animation-name: spin !important;
+  animation-duration: 1s !important;
+  color: #000080 !important;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ---- Section dividers ---- */
+.legacy-tab-content hr {
+  border: none !important;
+  border-top: 1px solid #808080 !important;
+  border-bottom: 1px solid #fff !important;
+  margin: 6px 0 !important;
+}
+
+/* ---- links ---- */
+.legacy-tab-content a {
+  color: #0000cc !important;
+  text-decoration: underline !important;
+}
+
+.legacy-tab-content a:hover {
+  color: #0000ff !important;
+}
+
+/* ---- Pagination ---- */
+.legacy-tab-content [class*="pagination"],
+.legacy-tab-content .flex.items-center.justify-center.gap-2 {
+  gap: 4px !important;
+}
+
+/* =========================================================
+   WINDOWS 95 TOAST — global (not inside legacy-tab-content)
+   ========================================================= */
+.win95-toast-container {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+  font-size: 12px;
+}
+
+.win95-toast {
+  background: #d4d0c8;
+  border-top: 2px solid #ffffff;
+  border-left: 2px solid #ffffff;
+  border-right: 2px solid #404040;
+  border-bottom: 2px solid #404040;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: stretch;
+  min-width: 280px;
+  max-width: 380px;
+}
+
+.win95-toast-titlebar {
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 11px;
+  color: #fff;
+}
+
+.win95-toast-success .win95-toast-titlebar {
+  background: linear-gradient(90deg, #006400 0%, #228B22 100%);
+}
+
+.win95-toast-error .win95-toast-titlebar {
+  background: linear-gradient(90deg, #8B0000 0%, #cc2200 100%);
+}
+
+.win95-toast-info .win95-toast-titlebar {
+  background: linear-gradient(90deg, #000080 0%, #1084d0 100%);
+}
+
+.win95-toast-body {
+  padding: 6px 10px;
+  color: #000;
+  font-size: 12px;
+  line-height: 1.4;
+  flex: 1;
+  background: #d4d0c8;
+}
+
+.win95-toast-close {
+  background: #d4d0c8;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #404040;
+  border-bottom: 1px solid #404040;
+  color: #000;
+  font-size: 10px;
+  font-weight: bold;
+  width: 16px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  flex-shrink: 0;
+  font-family: 'Tahoma', 'MS Sans Serif', sans-serif;
+}
+
+.win95-toast-close:hover {
+  background: #c0bdb5;
+}
+
+.win95-toast-close:active {
+  border-top: 1px solid #404040;
+  border-left: 1px solid #404040;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #fff;
 }

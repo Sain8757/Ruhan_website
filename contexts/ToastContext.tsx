@@ -1,7 +1,6 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback } from "react";
-import { CheckCircle, XCircle, Info, X } from "lucide-react";
 import { soundFx } from "@/lib/soundEffects";
 
 type ToastType = "success" | "error" | "info";
@@ -26,6 +25,36 @@ const ToastContext = createContext<ToastContextType>({
   info: () => {},
 });
 
+const TOAST_TITLES: Record<ToastType, string> = {
+  success: "✓ Success",
+  error: "✕ Error",
+  info: "ℹ Information",
+};
+
+function Win95Toast({ toast, onClose }: { toast: Toast; onClose: () => void }) {
+  return (
+    <div className={`win95-toast win95-toast-${toast.type}`}>
+      <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+        {/* Title bar */}
+        <div className="win95-toast-titlebar">
+          <span>{TOAST_TITLES[toast.type]}</span>
+          <button
+            onClick={onClose}
+            className="win95-toast-close"
+            title="Close"
+          >
+            ✕
+          </button>
+        </div>
+        {/* Body */}
+        <div className="win95-toast-body">
+          {toast.message}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
@@ -46,7 +75,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       soundFx.playClick();
     }
 
-    setTimeout(() => removeToast(id), 4000);
+    setTimeout(() => removeToast(id), 5000);
   }, [removeToast]);
 
   const value = React.useMemo(() => ({
@@ -56,27 +85,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     info: (message: string) => addToast(message, "info"),
   }), [addToast]);
 
-  const icons = {
-    success: <CheckCircle size={18} className="text-green-500 shrink-0" />,
-    error: <XCircle size={18} className="text-red-500 shrink-0" />,
-    info: <Info size={18} className="text-blue-500 shrink-0" />,
-  };
-
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="toast-container">
+      <div className="win95-toast-container">
         {toasts.map((t) => (
-          <div key={t.id} className={`toast toast-${t.type}`}>
-            {icons[t.type]}
-            <span style={{ color: "var(--text-primary)" }}>{t.message}</span>
-            <button
-              onClick={() => removeToast(t.id)}
-              className="ml-auto btn-ghost p-1"
-            >
-              <X size={14} />
-            </button>
-          </div>
+          <Win95Toast key={t.id} toast={t} onClose={() => removeToast(t.id)} />
         ))}
       </div>
     </ToastContext.Provider>
