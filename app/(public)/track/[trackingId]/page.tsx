@@ -1,14 +1,7 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
-import { CheckCircle2, Clock, Truck, FileText, AlertCircle, Calendar } from "lucide-react";
-
-const statusSteps = [
-  { id: "PENDING", label: "Received", icon: FileText },
-  { id: "PROCESSING", label: "Processing", icon: Clock },
-  { id: "SUBMITTED", label: "Submitted", icon: Truck },
-  { id: "APPROVED", label: "Approved", icon: CheckCircle2 },
-  { id: "DELIVERED", label: "Delivered", icon: CheckCircle2 },
-];
+import { Search, Clock, CreditCard, MessageSquare, AlertTriangle } from "lucide-react";
+import { format } from "date-fns";
 
 export default async function TrackServicePage({ params }: { params: Promise<{ trackingId: string }> }) {
   const { trackingId } = await params;
@@ -24,151 +17,117 @@ export default async function TrackServicePage({ params }: { params: Promise<{ t
     return notFound();
   }
 
-  // Determine current step index
-  let currentStepIndex = statusSteps.findIndex(s => s.id === service.status);
-  if (currentStepIndex === -1 && service.status === "CANCELLED") {
-    currentStepIndex = -1; // Cancelled state
-  }
+  // Win95 Styles
+  const inset: React.CSSProperties = {
+    borderTop: '2px solid #808080',
+    borderLeft: '2px solid #808080',
+    borderRight: '2px solid #ffffff',
+    borderBottom: '2px solid #ffffff',
+    background: '#ffffff',
+  };
+  
+  const raised: React.CSSProperties = {
+    borderTop: '2px solid #ffffff',
+    borderLeft: '2px solid #ffffff',
+    borderRight: '2px solid #404040',
+    borderBottom: '2px solid #404040',
+  };
+
+  const formatCurrency = (amt: number) => `₹${amt.toFixed(2)}`;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-50 via-blue-50/30 to-indigo-50 p-4 md:p-8 flex justify-center items-start pt-10 font-sans">
-      <div className="max-w-xl w-full bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 overflow-hidden transition-all">
+    <div className="min-h-screen flex flex-col items-center p-4 pt-10 pb-20"
+      style={{ backgroundColor: '#008080', backgroundImage: "repeating-linear-gradient(45deg, rgba(0,0,0,0.04) 0, rgba(0,0,0,0.04) 1px, transparent 0, transparent 50%)", backgroundSize: '10px 10px' }}>
+      
+      <div style={{ ...raised, background: '#d4d0c8', width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column' }}>
         
-        {/* Header */}
-        <div className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 p-8 text-white text-center overflow-hidden">
-          {/* Decorative background circles */}
-          <div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-x-10 -translate-y-10"></div>
-          <div className="absolute bottom-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl translate-x-10 translate-y-10"></div>
-          
-          <h1 className="relative z-10 text-3xl font-extrabold tracking-tight mb-2 drop-shadow-md">Service Tracking</h1>
-          <div className="relative z-10 inline-flex items-center gap-2 bg-black/20 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-            <p className="text-white/90 font-mono text-sm tracking-widest">ID: {service.trackingId}</p>
+        {/* Title Bar */}
+        <div style={{ background: 'linear-gradient(90deg, #000080, #1084d0)', color: 'white', padding: '4px 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'Tahoma', fontSize: '13px', fontWeight: 'bold' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Search size={14} />
+            RA Seva Point Tracker
           </div>
         </div>
 
-        <div className="p-6 md:p-10">
-          {/* Customer & Service Info */}
-          <div className="bg-gradient-to-br from-slate-50 to-white rounded-xl p-5 mb-10 border border-slate-100 shadow-sm">
-            <div className="flex justify-between items-start mb-4 border-b border-slate-100 pb-4">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Service Requested</p>
-                <h2 className="text-xl font-bold text-slate-800">{service.serviceType}</h2>
+        <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            
+            {/* Header Info */}
+            <div style={{ background: 'white', ...inset, padding: '10px', textAlign: 'center' }}>
+              <div style={{ fontFamily: 'Tahoma', fontSize: '11px', color: '#666', textTransform: 'uppercase' }}>Hello, {service.customer.name}</div>
+              <div style={{ fontFamily: 'Tahoma', fontSize: '18px', fontWeight: 'bold', color: '#000080', margin: '4px 0', lineHeight: '1.2' }}>{service.serviceType}</div>
+              <div style={{ fontFamily: 'Tahoma', fontSize: '12px', color: '#444', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px' }}>
+                <Clock size={12} /> {format(new Date(service.createdAt), "dd MMM yyyy")}
               </div>
-              <div className="text-right">
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Date</p>
-                <p className="text-sm font-semibold text-slate-700">{new Date(service.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+              <div style={{ fontFamily: 'Tahoma', fontSize: '11px', color: '#888', marginTop: '4px' }}>Tracking ID: {service.trackingId}</div>
+            </div>
+
+            {/* Status and Payment Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              
+              {/* Application Status */}
+              <div style={{ background: '#e8f0ff', border: '1px solid #aac', padding: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                <div style={{ fontFamily: 'Tahoma', fontSize: '11px', color: '#555' }}>App Status</div>
+                <div style={{ fontFamily: 'Tahoma', fontSize: '14px', fontWeight: 'bold', color: '#000080', marginTop: '2px' }}>{service.status}</div>
+              </div>
+
+              {/* Payment Status */}
+              <div style={{ background: service.paymentStatus === 'PAID' ? '#d4edda' : '#fff8e8', border: service.paymentStatus === 'PAID' ? '1px solid #c3e6cb' : '1px solid #cc9', padding: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                <div style={{ fontFamily: 'Tahoma', fontSize: '11px', color: '#555', display: 'flex', alignItems: 'center', gap: '4px' }}><CreditCard size={12} /> Payment</div>
+                
+                <div style={{ fontFamily: 'Tahoma', fontSize: '13px', fontWeight: 'bold', color: service.paymentStatus === 'PAID' ? '#155724' : '#885500', marginTop: '2px' }}>
+                  {service.paymentStatus}
+                </div>
+                
+                <div style={{ fontFamily: 'Tahoma', fontSize: '10px', color: '#333', marginTop: '2px' }}>
+                  {service.paymentStatus === 'UNPAID' ? `Due: ${formatCurrency(service.fees)}` : 
+                   service.paymentStatus === 'PARTIAL' ? `Partial Paid (Total: ${formatCurrency(service.fees)})` : 
+                   `Paid: ${formatCurrency(service.fees)}`}
+                </div>
               </div>
             </div>
-            
-            <div className="flex items-center gap-3 text-slate-700">
-              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
-                {service.customer.name.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <p className="text-sm font-semibold">{service.customer.name}</p>
-                <p className="text-xs text-slate-500">Applicant</p>
-              </div>
-            </div>
-            
-            {service.deadline && (
-              <div className="mt-4 flex items-center justify-center text-sm font-bold text-orange-700 bg-orange-50 border border-orange-100 px-4 py-2.5 rounded-lg shadow-inner">
-                <Calendar className="w-4 h-4 mr-2 text-orange-500" />
-                Expected Completion: {new Date(service.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-              </div>
+
+            {/* Admin Comments (Notes) */}
+            {service.notes && (
+              <fieldset style={{ border: '2px groove #c0c0c0', padding: '8px', background: '#f5f5f5' }}>
+                <legend style={{ fontFamily: 'Tahoma', fontSize: '11px', padding: '0 4px', color: '#333', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <MessageSquare size={12} /> Remarks
+                </legend>
+                <div style={{ fontFamily: 'Tahoma', fontSize: '12px', color: '#000', whiteSpace: 'pre-wrap', lineHeight: '1.4' }}>
+                  {service.notes}
+                </div>
+              </fieldset>
             )}
-          </div>
 
-          {/* Timeline */}
-          {service.status === "CANCELLED" ? (
-            <div className="text-center p-8 bg-gradient-to-b from-red-50 to-white rounded-2xl text-red-600 border border-red-100 shadow-sm">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <AlertCircle className="w-8 h-8 text-red-500" />
-              </div>
-              <h3 className="font-extrabold text-xl mb-1">Service Cancelled</h3>
-              <p className="text-sm text-red-400 mt-2">This service request has been cancelled. Please contact the store for more information.</p>
-            </div>
-          ) : (
-            <div className="relative pl-2">
-              {/* Vertical line background */}
-              <div className="absolute left-[27px] top-6 bottom-8 w-1 bg-slate-100 rounded-full"></div>
-              
-              {/* Animated Progress Line */}
-              <div 
-                className="absolute left-[27px] top-6 w-1 bg-gradient-to-b from-blue-500 via-indigo-500 to-violet-500 rounded-full transition-all duration-1000 ease-out"
-                style={{ height: currentStepIndex > 0 ? `calc(${(currentStepIndex / (statusSteps.length - 1)) * 100}% - 24px)` : '0%' }}
-              ></div>
-              
-              <div className="space-y-10 relative">
-                {statusSteps.map((step, index) => {
-                  const Icon = step.icon;
-                  const isCompleted = index <= currentStepIndex;
-                  const isCurrent = index === currentStepIndex;
-                  
-                  return (
-                    <div key={step.id} className={`flex items-start transition-all duration-500 ${isCompleted ? 'opacity-100' : 'opacity-40 grayscale'}`}>
-                      <div className="relative">
-                        {isCurrent && (
-                          <div className="absolute inset-0 bg-blue-400 rounded-full animate-ping opacity-20 scale-150"></div>
-                        )}
-                        <div 
-                          className={`relative z-10 flex items-center justify-center w-14 h-14 rounded-full shadow-md flex-shrink-0 transition-all duration-300 ${
-                            isCompleted 
-                              ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white' 
-                              : 'bg-white text-slate-300 border-2 border-slate-200'
-                          } ${isCurrent ? 'ring-4 ring-blue-100 ring-offset-2 scale-110' : ''}`}
-                        >
-                          <Icon className={`w-6 h-6 ${isCompleted && !isCurrent ? 'opacity-90' : ''}`} />
-                        </div>
-                      </div>
-                      
-                      <div className={`ml-6 pt-3 flex-1 transition-all duration-300 ${isCurrent ? '-translate-y-1' : ''}`}>
-                        <h4 className={`text-lg font-bold tracking-tight ${isCurrent ? 'text-blue-700' : isCompleted ? 'text-slate-800' : 'text-slate-400'}`}>
-                          {step.label}
-                        </h4>
-                        
-                        {/* Custom descriptions based on step and status */}
-                        {isCurrent && step.id === "PENDING" && (
-                          <p className="text-sm text-slate-500 mt-1.5 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
-                            Your request has been successfully received by our team and is currently in queue.
-                          </p>
-                        )}
-                        {isCurrent && step.id === "PROCESSING" && (
-                          <p className="text-sm text-slate-500 mt-1.5 leading-relaxed bg-blue-50/50 p-3 rounded-lg border border-blue-100/50">
-                            Our team is actively processing your documents and preparing the application.
-                          </p>
-                        )}
-                        {isCurrent && step.id === "SUBMITTED" && (
-                          <p className="text-sm text-slate-500 mt-1.5 leading-relaxed bg-indigo-50/50 p-3 rounded-lg border border-indigo-100/50">
-                            Your application has been submitted to the respective authority.
-                          </p>
-                        )}
-                        
-                        {/* Missing Docs Alert */}
-                        {isCurrent && service.missingDocs && (
-                          <div className="mt-4 bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-xl p-4 flex items-start shadow-sm">
-                            <div className="bg-white p-1.5 rounded-full shadow-sm mr-3">
-                              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                            </div>
-                            <div className="text-sm text-red-800">
-                              <span className="font-bold block text-red-900 mb-1">Action Required</span>
-                              {service.missingDocs}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+            {/* ACTION REQUIRED: Missing Documents */}
+            {service.missingDocs && (
+              <fieldset style={{ border: '2px groove #c0c0c0', padding: '8px', background: '#ffebeb' }}>
+                <legend style={{ fontFamily: 'Tahoma', fontSize: '11px', padding: '0 4px', color: '#cc0000', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <AlertTriangle size={12} /> Action Required
+                </legend>
+                
+                <div style={{ fontSize: '12px', color: '#880000', marginBottom: '10px', fontFamily: 'Tahoma', background: 'white', padding: '6px', border: '1px solid #ffcccc' }}>
+                  <strong>Required Document:</strong><br/>
+                  {service.missingDocs}
+                </div>
+                
+                <p style={{ fontFamily: 'Tahoma', fontSize: '11px', color: '#444', textAlign: 'center' }}>
+                  Please go to the manual tracker (status portal) to upload your missing documents, or send them via WhatsApp.
+                </p>
+              </fieldset>
+            )}
+            
+            <p style={{ fontFamily: 'Tahoma', fontSize: '11px', color: '#666', textAlign: 'center', marginTop: '10px' }}>
+              Want to upload documents? Go to <strong>/status</strong>
+            </p>
 
-          {/* Footer */}
-          <div className="mt-12 pt-6 border-t border-slate-100 text-center flex flex-col items-center justify-center gap-2">
-            <p className="text-sm text-slate-500 font-medium">Powered by RA Seva Point</p>
-            <p className="text-xs text-slate-400">If you have any questions, please contact our support.</p>
           </div>
+        </div>
+
+        {/* Status Bar */}
+        <div style={{ borderTop: '2px solid #808080', background: '#d4d0c8', padding: '2px 6px', fontSize: '11px', fontFamily: 'Tahoma', color: '#444' }}>
+          Universal Tracker Portal v1.0
         </div>
       </div>
     </div>
