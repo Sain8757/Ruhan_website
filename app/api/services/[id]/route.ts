@@ -97,6 +97,20 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
           }
         });
       }
+
+      // Add Loyalty Points to Customer
+      // 10% of fees as points (e.g., ₹100 spent = 10 points)
+      const pointsToAward = Math.floor(service.fees / 10);
+      if (pointsToAward > 0) {
+        await prisma.customer.update({
+          where: { id: service.customerId },
+          data: {
+            loyaltyPoints: {
+              increment: pointsToAward
+            }
+          }
+        });
+      }
     }
 
     return NextResponse.json(service);

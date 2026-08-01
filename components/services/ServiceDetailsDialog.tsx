@@ -708,12 +708,18 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                           ["Fee:", formatCurrency(service.fees)],
                           ["Mode:", service.paymentMode],
                           ["Assignee:", service.assignedTo?.name||"Admin"],
-                          ...(service.vendorId ? [["Vendor:", vendors.find(v => v.id === service.vendorId)?.name || "Assigned 🏢"]] : [])
+                          ...(service.vendorId ? [["Vendor:", vendors.find(v => v.id === service.vendorId)?.name || "Assigned 🏢"]] : []),
+                          ...(service.rating ? [["Rating:", `${service.rating} ⭐`]] : [])
                         ].map(([k,v]) => (
                           <tr key={k}><td style={{ color:"#555",padding:"1px 0" }}>{k}</td><td style={{ textAlign:"right",fontWeight:"bold" }}>{v}</td></tr>
                         ))}
                       </tbody>
                     </table>
+                    {service.feedback && (
+                      <div style={{ marginTop:"4px", fontSize:"10px", color:"#333", background:"#fff", padding:"4px", border:"1px inset #ccc", fontStyle:"italic" }}>
+                        "{service.feedback}"
+                      </div>
+                    )}
                   </div>
 
                   {/* Related Services */}

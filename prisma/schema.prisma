@@ -110,6 +110,9 @@ model Service {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
+  rating         Int?
+  feedback       String?
+
   @@index([trackingId])
   @@index([serviceType])
   @@index([status])
