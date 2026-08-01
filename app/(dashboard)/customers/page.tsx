@@ -16,6 +16,7 @@ import { useToast } from "@/contexts/ToastContext";
 import { useRouter } from "next/navigation";
 import PageHeader from "@/components/layout/PageHeader";
 import AddCustomerDialog from "@/components/customers/AddCustomerDialog";
+import CustomerActionsDialog from "@/components/customers/CustomerActionsDialog";
 
 interface Customer {
   id: string;
@@ -226,6 +227,8 @@ export default function CustomersPage() {
   const toast = useToast();
 
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [isActionsOpen, setIsActionsOpen] = useState(false);
 
   const fetchCustomers = useCallback(async () => {
     setLoading(true);
@@ -274,6 +277,18 @@ export default function CustomersPage() {
         }}
       />
 
+      <CustomerActionsDialog
+        isOpen={isActionsOpen}
+        onClose={() => {
+          setIsActionsOpen(false);
+          setSelectedCustomerId(null);
+        }}
+        customerId={selectedCustomerId}
+        onSuccess={() => {
+          fetchCustomers();
+        }}
+      />
+
       {/* Search */}
       <div className="toolbar">
         <div className="search-field">
@@ -312,7 +327,13 @@ export default function CustomersPage() {
         </div>
       ) : (
         <>
-          <CustomerResults customers={customers} onOpen={(id) => router.push(`/customers/${id}`)} />
+          <CustomerResults 
+            customers={customers} 
+            onOpen={(id) => {
+              setSelectedCustomerId(id);
+              setIsActionsOpen(true);
+            }} 
+          />
 
           {/* Pagination */}
           {total > 20 && (
