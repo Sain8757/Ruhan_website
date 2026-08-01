@@ -188,14 +188,15 @@ export function WifiFileDropModal({ onClose }: { onClose: () => void }) {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      fontFamily: "Tahoma, 'Segoe UI', sans-serif"
+      fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif",
+      fontSize: "12px",
     }}>
-      <div className="legacy-window" style={{ width: "1000px", maxWidth: "95vw", height: "85vh", display: "flex", flexDirection: "column" }}>
+      <div style={{ width: "1000px", maxWidth: "95vw", height: "85vh", display: "flex", flexDirection: "column", background: "#d4d0c8", borderTop: "2px solid #ffffff", borderLeft: "2px solid #ffffff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", outline: "1px solid #808080" }}>
         
         {/* Window Titlebar */}
-        <div className="legacy-window-titlebar" style={{ display: "flex", justifyContent: "space-between", padding: "3px 4px", background: "#000080", color: "#fff", cursor: "default" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", padding: "3px 4px", background: "linear-gradient(90deg, #000080, #1084d0)", color: "#fff", cursor: "default", userSelect: "none" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <Smartphone size={14} />
+            <Smartphone size={14} color="#ffffff" />
             <span style={{ fontSize: "12px", fontWeight: "bold" }}>Wi-Fi File Drop - Live Monitor</span>
           </div>
           <button
@@ -222,32 +223,29 @@ export function WifiFileDropModal({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Window Content */}
-        <div style={{ padding: "10px", background: "#d4d0c8", display: "flex", gap: "10px", flex: 1, minHeight: 0 }}>
+        <div style={{ padding: "8px", background: "#d4d0c8", display: "flex", gap: "8px", flex: 1, minHeight: 0 }}>
           
           {/* Left Panel: QR Codes */}
           <div style={{
             width: "300px",
-            background: "#fff",
-            borderTop: "1px solid #808080",
-            borderLeft: "1px solid #808080",
-            borderBottom: "1px solid #fff",
-            borderRight: "1px solid #fff",
+            background: "#ffffff",
+            borderTop: "2px solid #808080",
+            borderLeft: "2px solid #808080",
+            borderRight: "2px solid #ffffff",
+            borderBottom: "2px solid #ffffff",
             display: "flex",
             flexDirection: "column",
             overflowY: "auto",
-            padding: "15px"
+            padding: "8px"
           }}>
             {/* Receive Area */}
-            <div style={{ textAlign: "center", marginBottom: "30px", borderBottom: "1px solid #eee", paddingBottom: "20px" }}>
-              <div style={{ background: "#e6f2ff", padding: "10px", borderRadius: "50%", display: "inline-block", marginBottom: "10px" }}>
-                <Smartphone size={24} color="#1084d0" />
-              </div>
-              <h2 style={{ fontSize: "16px", fontWeight: "bold", color: "#333", margin: "0 0 5px 0" }}>Receive from Phone</h2>
-              <p style={{ fontSize: "11px", color: "#666", marginBottom: "15px", lineHeight: "1.4" }}>
+            <div style={{ textAlign: "center", marginBottom: "15px", borderBottom: "1px solid #808080", paddingBottom: "10px" }}>
+              <h2 style={{ fontSize: "14px", fontWeight: "bold", color: "#000", margin: "0 0 5px 0" }}>Receive from Phone</h2>
+              <p style={{ fontSize: "11px", color: "#000", marginBottom: "10px" }}>
                 Customer scans to send photos/docs
               </p>
               
-              <div style={{ padding: "10px", background: "#fff", border: "2px solid #1084d0", borderRadius: "10px", marginBottom: "10px", display: "inline-block" }}>
+              <div style={{ padding: "8px", background: "#ffffff", borderTop: "1px solid #808080", borderLeft: "1px solid #808080", borderRight: "1px solid #ffffff", borderBottom: "1px solid #ffffff", display: "inline-block", marginBottom: "10px" }}>
                 <QRCodeSVG 
                   id="drop-qr-code"
                   value={dropUrl} 
@@ -258,7 +256,7 @@ export function WifiFileDropModal({ onClose }: { onClose: () => void }) {
               
               <button 
                 onClick={() => downloadQR("drop-qr-code", "Receive_File_QR.png")}
-                style={{ width: "100%", background: "#1084d0", color: "#fff", border: "none", padding: "6px 0", borderRadius: "4px", fontSize: "12px", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", cursor: "pointer" }}
+                style={{ width: "100%", background: "#d4d0c8", color: "#000", borderTop: "2px solid #ffffff", borderLeft: "2px solid #ffffff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", padding: "4px 0", fontSize: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", cursor: "pointer", outline: "none" }}
               >
                 <Download size={12} /> Download QR
               </button>
@@ -266,17 +264,14 @@ export function WifiFileDropModal({ onClose }: { onClose: () => void }) {
 
             {/* Send Area (Two-Way) */}
             <div style={{ textAlign: "center" }}>
-              <div style={{ background: "#f0fdf4", padding: "10px", borderRadius: "50%", display: "inline-block", marginBottom: "10px" }}>
-                <Send size={24} color="#16a34a" />
-              </div>
-              <h2 style={{ fontSize: "16px", fontWeight: "bold", color: "#333", margin: "0 0 5px 0" }}>Send to Phone</h2>
-              <p style={{ fontSize: "11px", color: "#666", marginBottom: "15px", lineHeight: "1.4" }}>
+              <h2 style={{ fontSize: "14px", fontWeight: "bold", color: "#000", margin: "0 0 5px 0" }}>Send to Phone</h2>
+              <p style={{ fontSize: "11px", color: "#000", marginBottom: "10px" }}>
                 Select a file from PC to give to customer
               </p>
 
               {pcToMobileUrl ? (
                 <div>
-                  <div style={{ padding: "10px", background: "#fff", border: "2px solid #16a34a", borderRadius: "10px", marginBottom: "10px", display: "inline-block" }}>
+                  <div style={{ padding: "8px", background: "#ffffff", borderTop: "1px solid #808080", borderLeft: "1px solid #808080", borderRight: "1px solid #ffffff", borderBottom: "1px solid #ffffff", display: "inline-block", marginBottom: "10px" }}>
                     <QRCodeSVG 
                       id="send-qr-code"
                       value={pcToMobileUrl} 
@@ -284,17 +279,17 @@ export function WifiFileDropModal({ onClose }: { onClose: () => void }) {
                       level="H"
                     />
                   </div>
-                  <p style={{ fontSize: "11px", fontWeight: "bold", color: "#16a34a", margin: "0 0 10px 0" }}>Ask customer to scan to download!</p>
+                  <p style={{ fontSize: "11px", fontWeight: "bold", color: "#000080", margin: "0 0 10px 0" }}>Ask customer to scan to download!</p>
                   <div style={{ display: "flex", gap: "5px" }}>
                     <button 
                       onClick={() => setPcToMobileUrl("")}
-                      style={{ flex: 1, background: "#f3f4f6", color: "#333", border: "none", padding: "6px 0", borderRadius: "4px", fontSize: "11px", fontWeight: "bold", cursor: "pointer" }}
+                      style={{ flex: 1, background: "#d4d0c8", color: "#000", borderTop: "2px solid #ffffff", borderLeft: "2px solid #ffffff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", padding: "4px 0", fontSize: "11px", cursor: "pointer", outline: "none" }}
                     >
                       Clear
                     </button>
                     <button 
                       onClick={() => downloadQR("send-qr-code", "Send_File_QR.png")}
-                      style={{ flex: 1, background: "#16a34a", color: "#fff", border: "none", padding: "6px 0", borderRadius: "4px", fontSize: "11px", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer" }}
+                      style={{ flex: 1, background: "#d4d0c8", color: "#000", borderTop: "2px solid #ffffff", borderLeft: "2px solid #ffffff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", padding: "4px 0", fontSize: "11px", display: "flex", alignItems: "center", justifyContent: "center", gap: "4px", cursor: "pointer", outline: "none" }}
                     >
                       <Download size={12} /> Save
                     </button>
@@ -313,12 +308,12 @@ export function WifiFileDropModal({ onClose }: { onClose: () => void }) {
                     htmlFor="pc-to-mobile-upload"
                     style={{
                       display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
-                      background: "#16a34a", color: "white", padding: "10px", borderRadius: "8px",
-                      fontSize: "13px", fontWeight: "bold", cursor: "pointer", transition: "opacity 0.2s",
-                      opacity: isUploadingToMobile ? 0.7 : 1
+                      background: "#d4d0c8", color: "#000", padding: "6px",
+                      borderTop: "2px solid #ffffff", borderLeft: "2px solid #ffffff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040",
+                      fontSize: "12px", cursor: "pointer", outline: "none"
                     }}
                   >
-                    {isUploadingToMobile ? <Loader2 size={16} className="animate-spin" /> : <UploadCloud size={16} />}
+                    {isUploadingToMobile ? <Loader2 size={12} className="animate-spin" /> : <UploadCloud size={12} />}
                     {isUploadingToMobile ? "Uploading..." : "Upload File to Send"}
                   </label>
                 </div>
@@ -331,136 +326,133 @@ export function WifiFileDropModal({ onClose }: { onClose: () => void }) {
             flex: 1,
             display: "flex",
             flexDirection: "column",
-            background: "#fff",
-            borderTop: "1px solid #808080",
-            borderLeft: "1px solid #808080",
-            borderBottom: "1px solid #fff",
-            borderRight: "1px solid #fff",
+            background: "#ffffff",
+            borderTop: "2px solid #808080",
+            borderLeft: "2px solid #808080",
+            borderRight: "2px solid #ffffff",
+            borderBottom: "2px solid #ffffff",
             minHeight: 0
           }}>
             {/* Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 15px", borderBottom: "1px solid #eee", background: "#f9f9f9" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "bold", color: "#333", fontSize: "14px" }}>
-                <span style={{ position: "relative", display: "flex", width: "10px", height: "10px" }}>
-                  <span style={{ animation: "ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite", position: "absolute", width: "100%", height: "100%", borderRadius: "50%", background: "#4ade80", opacity: 0.75 }}></span>
-                  <span style={{ position: "relative", width: "10px", height: "10px", borderRadius: "50%", background: "#22c55e" }}></span>
-                </span>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 8px", background: "#d4d0c8", borderBottom: "1px solid #808080" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", fontWeight: "bold", color: "#000", fontSize: "12px" }}>
                 Live Incoming Files
               </div>
-              <div style={{ display: "flex", gap: "10px" }}>
+              <div style={{ display: "flex", gap: "6px" }}>
                 {files.length > 0 && (
                   <button 
                     onClick={clearAllFiles}
-                    style={{ background: "#fef2f2", color: "#ef4444", border: "1px solid #fca5a5", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
+                    style={{ background: "#d4d0c8", color: "#000", borderTop: "2px solid #ffffff", borderLeft: "2px solid #ffffff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", padding: "2px 6px", fontSize: "11px", display: "flex", alignItems: "center", gap: "4px", cursor: "pointer", outline: "none" }}
                   >
-                    <Trash2 size={12} /> Clear All
+                    <Trash2 size={12} color="red" /> Clear All
                   </button>
                 )}
                 <button 
                   onClick={fetchFiles}
-                  style={{ background: "#e5e7eb", color: "#374151", border: "1px solid #d1d5db", padding: "4px 8px", borderRadius: "4px", fontSize: "11px", fontWeight: "bold", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}
+                  style={{ background: "#d4d0c8", color: "#000", borderTop: "2px solid #ffffff", borderLeft: "2px solid #ffffff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", padding: "2px 6px", fontSize: "11px", display: "flex", alignItems: "center", gap: "4px", cursor: "pointer", outline: "none" }}
                   title="Refresh"
                 >
-                  <RefreshCw size={12} className={isLoading ? "animate-spin" : ""} /> Refresh
+                  <RefreshCw size={12} className={isLoading ? "animate-spin" : ""} color="#000080" /> Refresh
                 </button>
               </div>
             </div>
             
             {/* List */}
-            <div style={{ flex: 1, overflowY: "auto", padding: "20px", background: "#f3f4f6" }}>
+            <div style={{ flex: 1, overflowY: "auto", padding: "8px", background: "#ffffff" }}>
               {isLoading && files.length === 0 ? (
                 <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%" }}>
-                  <Loader2 className="animate-spin" size={24} color="#1084d0" />
+                  <Loader2 className="animate-spin" size={24} color="#000080" />
                 </div>
               ) : files.length === 0 ? (
-                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100%", color: "#aaa" }}>
-                  <FileIcon size={40} style={{ opacity: 0.3, marginBottom: "10px" }} />
-                  <p style={{ margin: 0, fontSize: "14px", fontWeight: "bold" }}>No incoming files yet.</p>
-                  <p style={{ fontSize: "12px", marginTop: "5px" }}>Ask a customer to scan the "Receive" QR code.</p>
+                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100%", color: "#808080" }}>
+                  <FileIcon size={32} style={{ opacity: 0.5, marginBottom: "8px" }} />
+                  <p style={{ margin: 0, fontSize: "12px" }}>No incoming files yet.</p>
+                  <p style={{ fontSize: "11px", marginTop: "4px" }}>Ask a customer to scan the "Receive" QR code.</p>
                 </div>
               ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: "25px" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                   {Object.entries(groupedFiles).map(([key, groupData]: [string, any]) => (
-                    <div key={key} style={{ background: "#fff", borderRadius: "10px", border: "1px solid #e5e7eb", overflow: "hidden", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>
-                      <div style={{ background: "#1084d0", color: "#fff", padding: "10px 15px", display: "flex", alignItems: "center", justifyContent: "space-between", fontWeight: "bold", fontSize: "14px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          <FolderOpen size={16} />
-                          {groupData.customerName} <span style={{ fontSize: "11px", background: "rgba(255,255,255,0.2)", padding: "2px 6px", borderRadius: "10px", marginLeft: "5px" }}>{groupData.mobileNumber}</span>
-                          <span style={{ fontSize: "11px", background: "rgba(255,255,255,0.2)", padding: "2px 6px", borderRadius: "10px", marginLeft: "5px" }}>{groupData.files.length} files</span>
+                    <div key={key} style={{ background: "#d4d0c8", borderTop: "2px solid #ffffff", borderLeft: "2px solid #ffffff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", outline: "1px solid #808080", overflow: "hidden" }}>
+                      <div style={{ background: "linear-gradient(90deg, #000080, #1084d0)", color: "#fff", padding: "4px 8px", display: "flex", alignItems: "center", justifyContent: "space-between", fontWeight: "bold", fontSize: "12px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <FolderOpen size={14} color="#ffffff" />
+                          {groupData.customerName} <span style={{ fontSize: "11px", background: "transparent", color: "#c0d8f0", marginLeft: "5px" }}>({groupData.mobileNumber})</span>
+                          <span style={{ fontSize: "11px", color: "#ffffff", marginLeft: "10px" }}>- {groupData.files.length} files</span>
                         </div>
                         <button 
                           onClick={() => setMoveToCrmData({ customer: groupData.customerName, mobile: groupData.mobileNumber, files: groupData.files })}
-                          style={{ background: "#16a34a", color: "white", border: "none", padding: "5px 10px", borderRadius: "6px", fontSize: "12px", fontWeight: "bold", display: "flex", alignItems: "center", gap: "4px", cursor: "pointer" }}
+                          style={{ background: "#d4d0c8", color: "#000", borderTop: "1px solid #ffffff", borderLeft: "1px solid #ffffff", borderRight: "1px solid #404040", borderBottom: "1px solid #404040", padding: "2px 6px", fontSize: "11px", display: "flex", alignItems: "center", gap: "4px", cursor: "pointer", outline: "none" }}
                         >
-                          <Send size={12} /> Move to Services
+                          <Send size={10} color="#000080" /> Move to Services
                         </button>
                       </div>
                       
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "15px", padding: "15px" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: "8px", padding: "8px", background: "#ffffff", borderTop: "1px solid #808080" }}>
                         {groupData.files.map((file: any) => (
                           <div key={file.id} style={{
-                            background: "#f9fafb",
-                            border: "1px solid #e5e7eb",
-                            borderRadius: "8px",
-                            overflow: "hidden",
+                            background: "#d4d0c8",
+                            borderTop: "1px solid #ffffff",
+                            borderLeft: "1px solid #ffffff",
+                            borderRight: "1px solid #808080",
+                            borderBottom: "1px solid #808080",
                             display: "flex",
-                            flexDirection: "column"
+                            flexDirection: "column",
+                            padding: "4px"
                           }}>
                             {/* Preview Area */}
-                            <div className="group relative" style={{ height: "120px", background: "#eee", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <div style={{ height: "100px", background: "#ffffff", borderTop: "1px solid #808080", borderLeft: "1px solid #808080", borderRight: "1px solid #ffffff", borderBottom: "1px solid #ffffff", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
                               {file.type.startsWith('image/') ? (
                                 <img src={file.url} alt={file.filename} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                               ) : (
-                                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "#ef4444" }}>
-                                  <FileIcon size={32} />
-                                  <span style={{ fontSize: "10px", fontWeight: "bold", marginTop: "8px" }}>PDF</span>
+                                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", color: "#000080" }}>
+                                  <FileIcon size={24} />
+                                  <span style={{ fontSize: "10px", marginTop: "4px" }}>PDF Document</span>
                                 </div>
                               )}
                               
                               <button
                                 onClick={() => deleteFile(file.id)}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity"
                                 style={{
-                                  position: "absolute", top: "5px", right: "5px",
-                                  background: "rgba(255,255,255,0.9)", color: "#ef4444",
-                                  border: "none", borderRadius: "50%", padding: "5px",
-                                  cursor: "pointer", boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+                                  position: "absolute", top: "2px", right: "2px",
+                                  background: "#d4d0c8", color: "#000",
+                                  borderTop: "1px solid #ffffff", borderLeft: "1px solid #ffffff", borderRight: "1px solid #404040", borderBottom: "1px solid #404040",
+                                  padding: "2px", cursor: "pointer", outline: "none"
                                 }}
                                 title="Delete file"
                               >
-                                <Trash2 size={14} />
+                                <Trash2 size={12} color="red" />
                               </button>
                             </div>
 
                             {/* Details */}
-                            <div style={{ padding: "10px", display: "flex", flexDirection: "column", flex: 1 }}>
-                              <p style={{ margin: "0 0 5px 0", fontSize: "11px", fontWeight: "bold", color: "#374151", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={file.filename}>
+                            <div style={{ padding: "4px 0 0 0", display: "flex", flexDirection: "column", flex: 1 }}>
+                              <p style={{ margin: "0 0 4px 0", fontSize: "11px", color: "#000", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} title={file.filename}>
                                 {file.filename}
                               </p>
-                              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9px", color: "#6b7280", marginBottom: "10px" }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "#404040", marginBottom: "6px" }}>
                                 <span>{(file.size / 1024 / 1024).toFixed(2)} MB</span>
                                 <span style={{ display: "flex", alignItems: "center", gap: "2px" }}><Clock size={9} /> {formatTime(file.createdAt)}</span>
                               </div>
                               
-                              <div style={{ display: "flex", gap: "4px", marginTop: "auto" }}>
+                              <div style={{ display: "flex", gap: "2px", marginTop: "auto" }}>
                                 <button 
                                   onClick={() => setPreviewFile({url: file.url, type: file.type, name: file.filename})}
-                                  style={{ flex: 1, background: "#e5e7eb", color: "#374151", border: "none", padding: "4px 0", borderRadius: "4px", fontSize: "10px", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", gap: "2px", cursor: "pointer" }}
+                                  style={{ flex: 1, background: "#d4d0c8", color: "#000", borderTop: "1px solid #ffffff", borderLeft: "1px solid #ffffff", borderRight: "1px solid #404040", borderBottom: "1px solid #404040", padding: "2px 0", fontSize: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "2px", cursor: "pointer", outline: "none" }}
                                 >
-                                  <ExternalLink size={10} /> View
+                                  <ExternalLink size={10} color="#000080" /> View
                                 </button>
                                 <a 
                                   href={getDownloadUrl(file.url)}
                                   download={file.filename}
-                                  style={{ flex: 1, background: "#e5e7eb", color: "#374151", padding: "4px 0", borderRadius: "4px", fontSize: "10px", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", gap: "2px", textDecoration: "none" }}
+                                  style={{ flex: 1, background: "#d4d0c8", color: "#000", borderTop: "1px solid #ffffff", borderLeft: "1px solid #ffffff", borderRight: "1px solid #404040", borderBottom: "1px solid #404040", padding: "2px 0", fontSize: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "2px", textDecoration: "none", outline: "none" }}
                                 >
-                                  <Download size={10} /> Save
+                                  <Download size={10} color="#000080" /> Save
                                 </a>
                                 <button 
                                   onClick={() => handlePrint(file.url)}
-                                  style={{ flex: 1, background: "#1084d0", color: "#fff", border: "none", padding: "4px 0", borderRadius: "4px", fontSize: "10px", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", gap: "2px", cursor: "pointer" }}
+                                  style={{ flex: 1, background: "#d4d0c8", color: "#000", borderTop: "1px solid #ffffff", borderLeft: "1px solid #ffffff", borderRight: "1px solid #404040", borderBottom: "1px solid #404040", padding: "2px 0", fontSize: "10px", display: "flex", alignItems: "center", justifyContent: "center", gap: "2px", cursor: "pointer", outline: "none" }}
                                 >
-                                  <Printer size={10} /> Print
+                                  <Printer size={10} color="#000080" /> Print
                                 </button>
                               </div>
                             </div>
@@ -476,22 +468,26 @@ export function WifiFileDropModal({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
+      {/* Preview File Dialog */}
       {previewFile && (
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-          background: "rgba(0,0,0,0.85)", zIndex: 10000,
-          display: "flex", flexDirection: "column", padding: "20px"
+          background: "rgba(0,0,0,0.5)", zIndex: 10000,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif"
         }}>
-          <div style={{ display: "flex", justifyContent: "space-between", color: "white", marginBottom: "15px", alignItems: "center" }}>
-            <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "bold" }}>{previewFile.name}</h3>
-            <button onClick={() => setPreviewFile(null)} style={{ background: "none", border: "none", color: "white", cursor: "pointer", fontSize: "24px", fontWeight: "bold", lineHeight: "1" }}>&times;</button>
-          </div>
-          <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", overflow: "hidden", background: "#222", borderRadius: "8px" }}>
-            {previewFile.type.startsWith('image/') ? (
-              <img src={previewFile.url} alt={previewFile.name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
-            ) : (
-              <iframe src={previewFile.url} style={{ width: "100%", height: "100%", border: "none", background: "white" }} title={previewFile.name} />
-            )}
+          <div style={{ background: "#d4d0c8", width: "80%", maxWidth: "800px", height: "85vh", display: "flex", flexDirection: "column", borderTop: "2px solid #ffffff", borderLeft: "2px solid #ffffff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", outline: "1px solid #808080" }}>
+            <div style={{ background: "linear-gradient(90deg, #000080, #1084d0)", color: "white", padding: "3px 4px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "12px", fontWeight: "bold" }}>{previewFile.name}</span>
+              <button onClick={() => setPreviewFile(null)} style={{ background: "#d4d0c8", color: "#000", borderTop: "1px solid #ffffff", borderLeft: "1px solid #ffffff", borderRight: "1px solid #404040", borderBottom: "1px solid #404040", width: "16px", height: "14px", fontSize: "10px", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", outline: "none" }}>X</button>
+            </div>
+            <div style={{ flex: 1, padding: "8px", display: "flex", justifyContent: "center", alignItems: "center", background: "#ffffff", borderTop: "2px solid #808080", borderLeft: "2px solid #808080", borderRight: "2px solid #ffffff", borderBottom: "2px solid #ffffff", margin: "8px" }}>
+              {previewFile.type.startsWith('image/') ? (
+                <img src={previewFile.url} alt={previewFile.name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+              ) : (
+                <iframe src={previewFile.url} style={{ width: "100%", height: "100%", border: "none", background: "white" }} title={previewFile.name} />
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -500,57 +496,59 @@ export function WifiFileDropModal({ onClose }: { onClose: () => void }) {
       {moveToCrmData && (
         <div style={{
           position: "fixed", top: 0, left: 0, right: 0, bottom: 0,
-          background: "rgba(0,0,0,0.6)", zIndex: 20000,
-          display: "flex", justifyContent: "center", alignItems: "center"
+          background: "rgba(0,0,0,0.5)", zIndex: 20000,
+          display: "flex", justifyContent: "center", alignItems: "center",
+          fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif"
         }}>
-          <div style={{ background: "white", padding: "25px", borderRadius: "12px", width: "400px", maxWidth: "90%", boxShadow: "0 10px 25px rgba(0,0,0,0.2)" }}>
-            <h3 style={{ marginTop: 0, marginBottom: "20px", display: "flex", alignItems: "center", gap: "10px", color: "#1084d0", fontSize: "20px" }}>
-              <Send size={20} /> Move to Services
-            </h3>
+          <div style={{ background: "#d4d0c8", borderTop: "2px solid #ffffff", borderLeft: "2px solid #ffffff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", outline: "1px solid #808080", width: "350px", display: "flex", flexDirection: "column" }}>
+            <div style={{ background: "linear-gradient(90deg, #000080, #1084d0)", color: "white", padding: "3px 4px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "12px", fontWeight: "bold" }}>Move to Services</span>
+              <button onClick={() => setMoveToCrmData(null)} style={{ background: "#d4d0c8", color: "#000", borderTop: "1px solid #ffffff", borderLeft: "1px solid #ffffff", borderRight: "1px solid #404040", borderBottom: "1px solid #404040", width: "16px", height: "14px", fontSize: "10px", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", outline: "none" }}>X</button>
+            </div>
             
-            <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", fontSize: "13px", fontWeight: "bold", color: "#666", marginBottom: "5px" }}>Customer</label>
-              <div style={{ background: "#f3f4f6", padding: "12px", borderRadius: "8px", fontSize: "15px", fontWeight: "bold", color: "#111" }}>
-                {moveToCrmData.customer} <span style={{ color: "#666", fontWeight: "normal" }}>({moveToCrmData.mobile})</span>
+            <div style={{ padding: "12px", display: "flex", flexDirection: "column", gap: "10px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <span style={{ fontSize: "11px" }}>Customer:</span>
+                <span style={{ fontSize: "12px", background: "#ffffff", borderTop: "1px solid #808080", borderLeft: "1px solid #808080", borderRight: "1px solid #ffffff", borderBottom: "1px solid #ffffff", padding: "4px" }}>
+                  {moveToCrmData.customer} ({moveToCrmData.mobile})
+                </span>
               </div>
-            </div>
 
-            <div style={{ marginBottom: "15px" }}>
-              <label style={{ display: "block", fontSize: "13px", fontWeight: "bold", color: "#666", marginBottom: "5px" }}>Service Type</label>
-              <input 
-                type="text" 
-                value={crmServiceType}
-                onChange={(e) => setCrmServiceType(e.target.value)}
-                placeholder="e.g. Online Form, File Print..."
-                style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ccc", fontSize: "15px", boxSizing: "border-box", outline: "none" }}
-              />
-            </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <span style={{ fontSize: "11px" }}>Service Type:</span>
+                <input 
+                  type="text" 
+                  value={crmServiceType}
+                  onChange={(e) => setCrmServiceType(e.target.value)}
+                  style={{ width: "100%", padding: "4px", background: "#ffffff", borderTop: "2px solid #808080", borderLeft: "2px solid #808080", borderRight: "2px solid #ffffff", borderBottom: "2px solid #ffffff", fontSize: "12px", boxSizing: "border-box", outline: "none", fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif" }}
+                />
+              </div>
 
-            <div style={{ marginBottom: "25px" }}>
-              <label style={{ display: "block", fontSize: "13px", fontWeight: "bold", color: "#666", marginBottom: "5px" }}>Fees (₹)</label>
-              <input 
-                type="number" 
-                value={crmFees}
-                onChange={(e) => setCrmFees(e.target.value)}
-                placeholder="e.g. 100"
-                style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #ccc", fontSize: "15px", boxSizing: "border-box", outline: "none" }}
-              />
-            </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <span style={{ fontSize: "11px" }}>Fees (₹):</span>
+                <input 
+                  type="number" 
+                  value={crmFees}
+                  onChange={(e) => setCrmFees(e.target.value)}
+                  style={{ width: "100%", padding: "4px", background: "#ffffff", borderTop: "2px solid #808080", borderLeft: "2px solid #808080", borderRight: "2px solid #ffffff", borderBottom: "2px solid #ffffff", fontSize: "12px", boxSizing: "border-box", outline: "none", fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif" }}
+                />
+              </div>
 
-            <div style={{ display: "flex", gap: "12px" }}>
-              <button 
-                onClick={() => setMoveToCrmData(null)}
-                style={{ flex: 1, padding: "12px", background: "#f3f4f6", color: "#444", border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: "bold", cursor: "pointer", transition: "background 0.2s" }}
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={handleMoveToCrm}
-                disabled={isMovingToCrm}
-                style={{ flex: 1, padding: "12px", background: "#1084d0", color: "white", border: "none", borderRadius: "8px", fontSize: "15px", fontWeight: "bold", cursor: isMovingToCrm ? "not-allowed" : "pointer", opacity: isMovingToCrm ? 0.7 : 1, transition: "background 0.2s" }}
-              >
-                {isMovingToCrm ? "Moving..." : "Confirm & Move"}
-              </button>
+              <div style={{ display: "flex", gap: "6px", marginTop: "8px", justifyContent: "flex-end" }}>
+                <button 
+                  onClick={handleMoveToCrm}
+                  disabled={isMovingToCrm}
+                  style={{ background: "#d4d0c8", color: "#000", borderTop: "2px solid #ffffff", borderLeft: "2px solid #ffffff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", padding: "4px 12px", fontSize: "12px", cursor: isMovingToCrm ? "not-allowed" : "pointer", outline: "none" }}
+                >
+                  {isMovingToCrm ? "Moving..." : "OK"}
+                </button>
+                <button 
+                  onClick={() => setMoveToCrmData(null)}
+                  style={{ background: "#d4d0c8", color: "#000", borderTop: "2px solid #ffffff", borderLeft: "2px solid #ffffff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", padding: "4px 12px", fontSize: "12px", cursor: "pointer", outline: "none" }}
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>

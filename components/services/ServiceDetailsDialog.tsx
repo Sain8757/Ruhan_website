@@ -1018,17 +1018,21 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
               {previewLoading ? (
                 <div style={{ color:"white", display:"flex", flexDirection:"column", alignItems:"center", gap:"10px" }}>
                   <Loader2 className="animate-spin" size={32} />
-                  <span>Loading Image...</span>
+                  <span>Loading Document...</span>
                 </div>
               ) : (
-                <img 
-                  src={previewImg || undefined} 
-                  alt="Preview" 
-                  style={{ maxWidth:"100%", maxHeight:"100%", objectFit:"contain" }} 
-                  onError={(e) => { 
-                    toast.error('Failed to load preview. Please use Download or View in New Tab.'); 
-                  }} 
-                />
+                (previewImg?.toLowerCase().includes('.pdf') || originalUrl?.toLowerCase().includes('.pdf')) ? (
+                  <iframe src={previewImg || undefined} style={{ width: "100%", height: "100%", minHeight: "500px", border: "none", background: "white" }} title="PDF Preview" />
+                ) : (
+                  <img 
+                    src={previewImg || undefined} 
+                    alt="Preview" 
+                    style={{ maxWidth:"100%", maxHeight:"100%", objectFit:"contain" }} 
+                    onError={(e) => { 
+                      toast.error('Failed to load preview. Please use Download or View in New Tab.'); 
+                    }} 
+                  />
+                )
               )}
             </div>
             

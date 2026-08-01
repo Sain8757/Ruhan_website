@@ -69,58 +69,39 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col h-[600px] max-h-[90vh] border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-200">
+    <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif", fontSize: "12px" }}>
+      <div style={{ width: "520px", maxWidth: "95vw", height: "480px", maxHeight: "90vh", display: "flex", flexDirection: "column", background: "#d4d0c8", borderTop: "2px solid #ffffff", borderLeft: "2px solid #ffffff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", outline: "1px solid #808080" }}>
         {/* Header */}
-        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800/50 dark:to-indigo-900/20">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md">
-              <Sparkles size={20} />
-            </div>
-            <div>
-              <h2 className="font-semibold text-slate-800 dark:text-slate-200">RA Seva AI</h2>
-              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Powered by Gemini</p>
-            </div>
+        <div style={{ background: "linear-gradient(90deg, #000080, #1084d0)", padding: "4px 8px", display: "flex", justifyContent: "space-between", alignItems: "center", color: "white" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <Sparkles size={14} color="white" />
+            <span style={{ fontWeight: "bold", fontSize: "12px" }}>RA Seva AI</span>
+            <span style={{ fontSize: "10px", color: "#c0d8f0", marginLeft: "8px" }}>Powered by Gemini</span>
           </div>
           <button 
             onClick={onClose}
-            className="p-2 hover:bg-slate-200/50 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-500"
+            style={{ background: "#d4d0c8", borderTop: "1px solid #ffffff", borderLeft: "1px solid #ffffff", borderRight: "1px solid #404040", borderBottom: "1px solid #404040", width: "16px", height: "14px", fontSize: "11px", fontWeight: "bold", display: "flex", alignItems: "center", justifyContent: "center", color: "#000000" }}
           >
-            <X size={20} />
+            X
           </button>
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50 dark:bg-slate-900/50">
+        <div style={{ flex: 1, overflowY: "auto", padding: "8px", background: "#ffffff", borderTop: "2px solid #808080", borderLeft: "2px solid #808080", borderRight: "2px solid #ffffff", borderBottom: "2px solid #ffffff", margin: "8px", display: "flex", flexDirection: "column", gap: "6px" }}>
           {messages.map((msg, idx) => (
-            <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div className={`flex gap-3 max-w-[85%] ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
-                <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center ${
-                  msg.role === "user" ? "bg-slate-800 text-white" : "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-                }`}>
-                  {msg.role === "user" ? <User size={16} /> : <Bot size={16} />}
-                </div>
-                <div className={`px-4 py-3 rounded-2xl whitespace-pre-wrap text-sm ${
-                  msg.role === "user" 
-                    ? "bg-slate-800 text-white rounded-tr-sm dark:bg-slate-700" 
-                    : "bg-white border border-slate-100 text-slate-700 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 rounded-tl-sm shadow-sm"
-                }`}>
+            <div key={idx} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
+              <div style={{ display: "flex", gap: "8px", maxWidth: "80%", flexDirection: msg.role === "user" ? "row-reverse" : "row" }}>
+                <div style={{ padding: "4px 8px", fontSize: "12px", background: msg.role === "user" ? "#000080" : "#d4d0c8", color: msg.role === "user" ? "#ffffff" : "#000000", WebkitTextFillColor: msg.role === "user" ? "#ffffff" : "#000000", borderTop: msg.role === "user" ? "none" : "1px solid #ffffff", borderLeft: msg.role === "user" ? "none" : "1px solid #ffffff", borderRight: msg.role === "user" ? "none" : "1px solid #808080", borderBottom: msg.role === "user" ? "none" : "1px solid #808080", wordBreak: "break-word" }}>
                   {msg.content}
                 </div>
               </div>
             </div>
           ))}
           {isLoading && (
-            <div className="flex justify-start">
-              <div className="flex gap-3 max-w-[85%]">
-                <div className="w-8 h-8 shrink-0 rounded-full flex items-center justify-center bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
-                  <Bot size={16} />
-                </div>
-                <div className="px-5 py-4 rounded-2xl bg-white border border-slate-100 dark:bg-slate-800 dark:border-slate-700 rounded-tl-sm shadow-sm flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+            <div style={{ display: "flex", justifyContent: "flex-start" }}>
+              <div style={{ display: "flex", gap: "8px", maxWidth: "80%" }}>
+                <div style={{ padding: "4px 8px", fontSize: "12px", background: "#d4d0c8", color: "#000000", WebkitTextFillColor: "#000000", borderTop: "1px solid #ffffff", borderLeft: "1px solid #ffffff", borderRight: "1px solid #808080", borderBottom: "1px solid #808080" }}>
+                  <Loader2 size={12} className="animate-spin" />
                 </div>
               </div>
             </div>
@@ -129,22 +110,23 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
         </div>
 
         {/* Input Area */}
-        <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
-          <form onSubmit={handleSubmit} className="relative flex items-center">
+        <div style={{ padding: "6px", background: "#d4d0c8", borderTop: "1px solid #808080", display: "flex", gap: "4px" }}>
+          <form onSubmit={handleSubmit} style={{ display: "flex", width: "100%", gap: "4px" }}>
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Puchiye apna sawaal ya idea..."
-              className="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-full py-3.5 pl-6 pr-14 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
+              style={{ flex: 1, borderTop: "2px solid #808080", borderLeft: "2px solid #808080", borderRight: "2px solid #ffffff", borderBottom: "2px solid #ffffff", background: "#ffffff", padding: "3px 6px", fontSize: "12px", fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif", outline: "none", color: "#000000", WebkitTextFillColor: "#000000" }}
               disabled={isLoading}
             />
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="absolute right-2 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors disabled:opacity-50 disabled:hover:bg-blue-600"
+              style={{ background: "#d4d0c8", borderTop: "2px solid #ffffff", borderLeft: "2px solid #ffffff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", padding: "3px 12px", fontSize: "12px", display: "flex", alignItems: "center", gap: "4px", color: "#000000" }}
             >
-              {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} className="ml-0.5" />}
+              {isLoading ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} />}
+              Send
             </button>
           </form>
         </div>

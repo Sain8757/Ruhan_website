@@ -300,20 +300,55 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         <div
           className="modal-overlay"
           onMouseDown={(event) => event.target === event.currentTarget && closePalette()}
-          style={{ alignItems: "flex-start", paddingTop: "72px" }}
+          style={{ alignItems: "flex-start", paddingTop: "72px", background: "rgba(0,0,0,0.5)" }}
         >
           <div
-            className="modal-content overflow-hidden"
-            style={{ maxWidth: "680px", borderRadius: "18px" }}
+            style={{
+              background: "#d4d0c8",
+              borderTop: "2px solid #ffffff",
+              borderLeft: "2px solid #ffffff",
+              borderRight: "2px solid #404040",
+              borderBottom: "2px solid #404040",
+              outline: "1px solid #808080",
+              maxWidth: "620px",
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+            }}
           >
+            {/* Win95 Title Bar */}
             <div
-              className="flex items-center gap-3 border-b px-4 py-3"
-              style={{ borderColor: "var(--border-primary)" }}
+              style={{
+                background: "linear-gradient(90deg, #000080, #1084d0)",
+                color: "#fff",
+                fontWeight: "bold",
+                fontSize: "12px",
+                padding: "3px 8px",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                userSelect: "none",
+                fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif"
+              }}
+            >
+              <Search size={12} color="#ffffff" />
+              <span>{mode === "command" ? "Command Palette" : "Quick Search"}</span>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "4px 6px",
+                background: "#d4d0c8",
+                borderBottom: "1px solid #808080",
+              }}
             >
               {mode === "command" ? (
-                <Command size={18} style={{ color: "var(--text-muted)" }} />
+                <Command size={18} style={{ color: "#000000" }} />
               ) : (
-                <Search size={18} style={{ color: "var(--text-muted)" }} />
+                <Search size={18} style={{ color: "#000000" }} />
               )}
               <input
                 ref={inputRef}
@@ -342,18 +377,65 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
                     ? "Run command or open module"
                     : "Search customer, mobile, Aadhaar, PAN, invoice, service, book, product"
                 }
-                className="min-w-0 flex-1 bg-transparent text-sm outline-none sm:text-base"
-                style={{ color: "var(--text-primary)" }}
+                style={{
+                  flex: 1,
+                  background: "#ffffff",
+                  borderTop: "2px solid #808080",
+                  borderLeft: "2px solid #808080",
+                  borderRight: "2px solid #ffffff",
+                  borderBottom: "2px solid #ffffff",
+                  padding: "2px 6px",
+                  fontSize: "12px",
+                  fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif",
+                  color: "#000",
+                  WebkitTextFillColor: "#000",
+                  outline: "none",
+                }}
               />
-              {loading && <Loader2 size={16} className="animate-spin" style={{ color: "var(--text-muted)" }} />}
-              <button className="btn-ghost p-2" onClick={closePalette} title="Close">
-                <X size={16} />
+              {loading && <Loader2 size={16} className="animate-spin" style={{ color: "#000000" }} />}
+              <button
+                onClick={closePalette}
+                title="Close"
+                style={{
+                  background: "#d4d0c8",
+                  borderTop: "2px solid #fff",
+                  borderLeft: "2px solid #fff",
+                  borderRight: "2px solid #404040",
+                  borderBottom: "2px solid #404040",
+                  padding: "1px 6px",
+                  cursor: "default",
+                  display: "flex",
+                  alignItems: "center",
+                  color: "#000000",
+                }}
+              >
+                <X size={14} />
               </button>
             </div>
 
-            <div className="max-h-[58vh] overflow-y-auto p-2">
+            <div
+              style={{
+                maxHeight: "55vh",
+                overflowY: "auto",
+                background: "#ffffff",
+                borderTop: "2px solid #808080",
+                borderLeft: "2px solid #808080",
+                borderRight: "2px solid #ffffff",
+                borderBottom: "2px solid #ffffff",
+                margin: "4px 6px 6px 6px",
+              }}
+            >
               {items.length === 0 ? (
-                <div className="px-4 py-10 text-center text-sm" style={{ color: "var(--text-muted)" }}>
+                <div
+                  style={{
+                    padding: "16px",
+                    textAlign: "center",
+                    fontSize: "12px",
+                    color: "#808080",
+                    WebkitTextFillColor: "#808080",
+                    fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif"
+                  }}
+                >
                   No results found
                 </div>
               ) : (
@@ -364,55 +446,106 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
                   return (
                     <button
                       key={`${item.source}-${item.id}`}
-                      className={cn(
-                        "flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-all",
-                        active && "shadow-sm"
-                      )}
                       style={{
-                        background: active ? "var(--bg-tertiary)" : "transparent",
-                        color: "var(--text-primary)",
+                        display: "flex",
+                        width: "100%",
+                        alignItems: "center",
+                        gap: "8px",
+                        padding: "4px 6px",
+                        textAlign: "left",
+                        cursor: "default",
+                        background: active ? "#000080" : "transparent",
+                        color: active ? "#ffffff" : "#000000",
+                        WebkitTextFillColor: active ? "#ffffff" : "#000000",
+                        borderBottom: "1px solid #c0c0c0",
+                        fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif",
+                        fontSize: "12px",
                       }}
                       onMouseEnter={() => setActiveIndex(index)}
                       onClick={() => executeItem(item)}
                     >
                       <span
-                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm text-white"
                         style={{
-                          background: item.source === "record" 
-                            ? "linear-gradient(135deg, #3b82f6, #1d4ed8)" // Blue for records
-                            : item.subtitle === "Core" ? "linear-gradient(135deg, #6366f1, #4338ca)" // Indigo
-                            : item.subtitle === "Tools" ? "linear-gradient(135deg, #10b981, #047857)" // Emerald
-                            : item.subtitle === "Inventory" ? "linear-gradient(135deg, #f59e0b, #b45309)" // Amber
-                            : item.subtitle === "Business" ? "linear-gradient(135deg, #8b5cf6, #6d28d9)" // Violet
-                            : item.subtitle === "Action" ? "linear-gradient(135deg, #ef4444, #b91c1c)" // Red
-                            : "linear-gradient(135deg, #64748b, #334155)", // Slate for automation/other
+                          width: "20px",
+                          height: "20px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          background: "#d4d0c8",
+                          flexShrink: 0,
+                          borderTop: "1px solid #fff",
+                          borderLeft: "1px solid #fff",
+                          borderRight: "1px solid #808080",
+                          borderBottom: "1px solid #808080",
+                          color: active ? "#ffffff" : "#000080",
                         }}
                       >
-                        <Icon size={17} />
+                        <Icon size={14} />
                       </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-semibold">{item.title}</span>
-                        <span className="block truncate text-xs" style={{ color: "var(--text-muted)" }}>
+                      <span style={{ minWidth: 0, flex: 1 }}>
+                        <span
+                          style={{
+                            display: "block",
+                            fontSize: "12px",
+                            fontWeight: "bold",
+                            color: active ? "#ffffff" : "#000000",
+                            WebkitTextFillColor: active ? "#ffffff" : "#000000",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.title}
+                        </span>
+                        <span
+                          style={{
+                            display: "block",
+                            fontSize: "11px",
+                            color: active ? "#c0d0f0" : "#444",
+                            WebkitTextFillColor: active ? "#c0d0f0" : "#444",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
                           {item.subtitle}
                         </span>
                       </span>
                       {item.badge && (
-                        <span className="badge whitespace-nowrap" style={{ background: "var(--bg-secondary)" }}>
+                        <span
+                          style={{
+                            background: "#d4d0c8",
+                            color: active ? "#ffffff" : "#000000",
+                            borderTop: "1px solid #808080",
+                            borderLeft: "1px solid #808080",
+                            borderRight: "1px solid #ffffff",
+                            borderBottom: "1px solid #ffffff",
+                            padding: "1px 4px",
+                            fontSize: "10px",
+                            fontFamily: "Tahoma",
+                          }}
+                        >
                           {item.badge}
                         </span>
                       )}
                       {item.shortcut && (
                         <kbd
-                          className="hidden rounded-md px-2 py-1 text-[11px] font-semibold sm:inline-flex"
                           style={{
-                            background: "var(--bg-secondary)",
-                            color: "var(--text-muted)",
+                            background: "#d4d0c8",
+                            color: active ? "#ffffff" : "#000000",
+                            borderTop: "1px solid #ffffff",
+                            borderLeft: "1px solid #ffffff",
+                            borderRight: "1px solid #808080",
+                            borderBottom: "1px solid #808080",
+                            padding: "1px 5px",
+                            fontSize: "10px",
+                            fontFamily: "Tahoma",
                           }}
                         >
                           {shortcutLabel(item.shortcut)}
                         </kbd>
                       )}
-                      <ChevronRight size={15} style={{ color: "var(--text-muted)" }} />
+                      <ChevronRight size={15} style={{ color: active ? "#ffffff" : "#808080" }} />
                     </button>
                   );
                 })
