@@ -44,6 +44,30 @@ const WA_TEMPLATES = [
 ];
 
 type Tab = "general" | "documents" | "comments" | "activity" | "payment";
+type PreviewType = "image" | "pdf" | "unsupported";
+
+const getFileNameFromUrl = (url: string, fallback = "document") => {
+  try {
+    const pathname = new URL(url).pathname;
+    return decodeURIComponent(pathname.split("/").pop() || fallback);
+  } catch {
+    return decodeURIComponent(url.split("/").pop() || fallback);
+  }
+};
+
+const getExtension = (nameOrUrl: string) => {
+  const clean = nameOrUrl.split("?")[0].split("#")[0];
+  const match = clean.match(/\.([a-z0-9]{2,5})$/i);
+  return match?.[1]?.toLowerCase() || "";
+};
+
+const getPreviewType = (url: string, contentType?: string): PreviewType => {
+  const type = (contentType || "").toLowerCase();
+  const ext = getExtension(getFileNameFromUrl(url, url));
+  if (type.startsWith("image/") || ["jpg", "jpeg", "png", "gif", "webp", "bmp"].includes(ext)) return "image";
+  if (type.includes("pdf") || ext === "pdf") return "pdf";
+  return "unsupported";
+};
 
 interface Props {
   isOpen: boolean;
@@ -116,6 +140,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
 
   // Document Viewer Modal
   const [previewImg, setPreviewImg] = useState<string | null>(null);
+  const [previewType, setPreviewType] = useState<PreviewType>("unsupported");
   const [previewLoading, setPreviewLoading] = useState(false);
   const [originalUrl, setOriginalUrl] = useState<string | null>(null);
 
@@ -173,6 +198,11 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
   }, [isOpen, serviceId]);
 
   useEffect(() => { loadService(); }, [loadService]);
+  useEffect(() => {
+    return () => {
+      if (previewImg?.startsWith("blob:")) URL.revokeObjectURL(previewImg);
+    };
+  }, [previewImg]);
   useEffect(() => {
     fetch("/api/vendors").then(r => r.json()).then(d => setVendors(d.vendors || [])).catch(() => {});
   }, []);
@@ -276,8 +306,15 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
       const link = document.createElement('a');
       link.href = blobUrl;
       
-      let filename = decodeURIComponent(url.split('/').pop() || 'document');
-      if (!filename.match(/\.[a-zA-Z]{3,4}$/)) filename += '.jpg';
+      let filename = getFileNameFromUrl(url);
+      if (!getExtension(filename)) {
+        const extFromType = blob.type.includes("pdf")
+          ? "pdf"
+          : blob.type.startsWith("image/")
+            ? blob.type.split("/")[1]?.replace("jpeg", "jpg")
+            : "";
+        if (extFromType) filename += `.${extFromType}`;
+      }
       
       link.download = filename;
       document.body.appendChild(link);
@@ -293,22 +330,32 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
 
   const openPreview = async (url: string) => {
     setOriginalUrl(url);
-    if (url.includes('res.cloudinary.com') && !url.match(/\.[a-zA-Z]{3,4}$/)) {
-      setPreviewLoading(true);
-      setPreviewImg(null); // Clear previous
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("Failed to load");
-        const blob = await res.blob();
-        setPreviewImg(URL.createObjectURL(blob));
-      } catch (e) {
-        console.error(e);
-        setPreviewImg(url); // fallback
-      } finally {
-        setPreviewLoading(false);
+    setPreviewImg(null);
+    setPreviewType(getPreviewType(url));
+    setPreviewLoading(true);
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to load");
+      const blob = await res.blob();
+      const type = getPreviewType(url, blob.type);
+      setPreviewType(type);
+      if (type === "unsupported") {
+        setPreviewImg(url);
+        toast.error("Preview is not available for this file type. Please use Download or Open in New Tab.");
+        return;
       }
-    } else {
+      setPreviewImg(URL.createObjectURL(blob));
+    } catch (e) {
+      console.error(e);
+      const type = getPreviewType(url);
+      setPreviewType(type);
       setPreviewImg(url);
+      if (type === "unsupported") {
+        toast.error("Preview is not available. Please use Download or Open in New Tab.");
+      }
+    } finally {
+      setPreviewLoading(false);
     }
   };
 
@@ -788,16 +835,15 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                             ? <div style={{ fontSize:"11px",color:"#999",fontStyle:"italic",textAlign:"center",padding:"20px" }}>No documents uploaded yet.</div>
                             : docUrls.map((url,i) => {
                                 // Extract the original filename from the url (e.g. from cloudniary)
-                                const decodedUrl = decodeURIComponent(url);
-                                let name = decodedUrl.split("/").pop() || `Document ${i+1}`;
-                                if (!name.match(/\.[a-zA-Z]{3,4}$/)) name += '.jpg'; // Display with extension
-                                const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(name) || url.includes('res.cloudinary.com');
+                                const name = getFileNameFromUrl(url, `Document ${i+1}`);
+                                const previewType = getPreviewType(url);
+                                const canPreview = previewType === "image" || previewType === "pdf" || url.includes("res.cloudinary.com");
                                 return (
                                   <div key={i} style={{ display:"flex",alignItems:"center",gap:"8px",padding:"5px",borderBottom:"1px solid #ccc" }}>
-                                    <span style={{ fontSize:"18px" }}>{isImage ? "🖼" : "📄"}</span>
+                                    <span style={{ fontSize:"18px" }}>{previewType === "image" ? "🖼" : "📄"}</span>
                                     <span style={{ flex:1,fontSize:"11px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap" }}>{name}</span>
                                     <button type="button" onClick={() => handleDownload(url)} style={Btn({fontSize:"10px",padding:"2px 6px"})}><Download size={10}/> D/L</button>
-                                    {isImage ? (
+                                    {canPreview ? (
                                       <button type="button" onClick={() => openPreview(url)} style={Btn({fontSize:"10px",padding:"2px 6px"})}>View</button>
                                     ) : (
                                       <a href={url} target="_blank" rel="noreferrer" style={Btn({fontSize:"10px",padding:"2px 6px"})}>View</a>
@@ -1011,7 +1057,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
           <div style={{ background:"#d4d0c8", ...raised, display:"flex", flexDirection:"column", width:"80%", maxWidth:"700px", maxHeight:"85vh", boxShadow:"0 10px 30px rgba(0,0,0,0.8)" }}>
             <div style={{ background:"linear-gradient(90deg,#000080,#1084d0)", color:"white", padding:"6px 10px", fontWeight:"bold", fontSize:"13px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
               <span>Document Viewer</span>
-              <button onClick={() => { setPreviewImg(null); setPreviewLoading(false); }} style={{ background:"#d4d0c8", color:"black", border:"none", padding:"1px 6px", cursor:"pointer", ...raised, fontWeight:"bold" }}>✕</button>
+              <button onClick={() => { setPreviewImg(null); setPreviewType("unsupported"); setPreviewLoading(false); }} style={{ background:"#d4d0c8", color:"black", border:"none", padding:"1px 6px", cursor:"pointer", ...raised, fontWeight:"bold" }}>✕</button>
             </div>
             
             <div style={{ flex:1, background:"#000", display:"flex", alignItems:"center", justifyContent:"center", padding:"10px", overflow:"hidden", minHeight:"300px" }}>
@@ -1021,23 +1067,31 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                   <span>Loading Document...</span>
                 </div>
               ) : (
-                (previewImg?.toLowerCase().includes('.pdf') || originalUrl?.toLowerCase().includes('.pdf')) ? (
+                previewType === "pdf" ? (
                   <iframe src={previewImg || undefined} style={{ width: "100%", height: "100%", minHeight: "500px", border: "none", background: "white" }} title="PDF Preview" />
-                ) : (
+                ) : previewType === "image" ? (
                   <img 
                     src={previewImg || undefined} 
                     alt="Preview" 
                     style={{ maxWidth:"100%", maxHeight:"100%", objectFit:"contain" }} 
-                    onError={(e) => { 
+                    onError={() => { 
                       toast.error('Failed to load preview. Please use Download or View in New Tab.'); 
                     }} 
                   />
+                ) : (
+                  <div style={{ color:"white", textAlign:"center", maxWidth:"420px", lineHeight:1.5 }}>
+                    <FileText size={40} style={{ margin:"0 auto 10px", opacity:0.8 }} />
+                    <div style={{ fontWeight:"bold", marginBottom:"6px" }}>Preview not available</div>
+                    <div style={{ fontSize:"12px", color:"#d0d0d0" }}>
+                      This file type cannot be shown inside the document viewer. Use Download or Open in New Tab.
+                    </div>
+                  </div>
                 )
               )}
             </div>
             
             <div style={{ padding:"10px", display:"flex", justifyContent:"center", flexWrap: "wrap", gap:"10px", background:"#111" }}>
-              <button onClick={() => { setPreviewImg(null); setPreviewLoading(false); }} style={{ ...Btn(), padding:"6px 20px" }}>
+              <button onClick={() => { setPreviewImg(null); setPreviewType("unsupported"); setPreviewLoading(false); }} style={{ ...Btn(), padding:"6px 20px" }}>
                 Close
               </button>
               <button onClick={() => sendReuploadWA(originalUrl || '')} style={{ ...Btn(), padding:"6px 16px", background:"#25D366", color:"white", border:"2px solid #1da851" }}>

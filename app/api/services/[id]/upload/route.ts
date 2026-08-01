@@ -42,7 +42,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           folder: `ruhan/services/${service.id}`,
           public_id: filenameWithoutExt,
           unique_filename: false,
-          overwrite: true
+          overwrite: true,
+          resource_type: "auto"
         },
         (error, result) => {
           if (error) reject(error);
