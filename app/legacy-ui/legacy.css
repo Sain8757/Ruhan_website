@@ -428,9 +428,14 @@
 .legacy-tab-content h3,
 .legacy-tab-content h4,
 .legacy-tab-content h5,
-.legacy-tab-content h6 {
-  color: #000000;
-  -webkit-text-fill-color: #000000;
+.legacy-tab-content h6,
+.legacy-tab-content button,
+.legacy-tab-content a,
+.legacy-tab-content input,
+.legacy-tab-content select,
+.legacy-tab-content textarea {
+  color: inherit;
+  -webkit-text-fill-color: currentcolor;
 }
 
 /* ---- Buttons (ALL named classes) ---- */
@@ -442,14 +447,14 @@
 .legacy-tab-content a.btn-primary,
 .legacy-tab-content a.btn-secondary,
 .legacy-tab-content [class*="btn-"] {
-  background: #d4d0c8 !important;
-  background-color: #d4d0c8 !important;
+  background: #d4d0c8;
+  background-color: #d4d0c8;
   border-top: 2px solid #ffffff !important;
   border-left: 2px solid #ffffff !important;
   border-right: 2px solid #404040 !important;
   border-bottom: 2px solid #404040 !important;
   box-shadow: inset 1px 1px #dfdfdf, inset -1px -1px #808080 !important;
-  color: #000000 !important;
+  color: #000000;
   padding: 3px 10px !important;
   font-size: 12px !important;
   font-family: 'Tahoma', 'MS Sans Serif', sans-serif !important;
@@ -471,8 +476,8 @@
 .legacy-tab-content .btn-secondary:hover,
 .legacy-tab-content .btn-danger:hover,
 .legacy-tab-content .btn-ghost:hover {
-  background: #d4d0c8 !important;
-  background-color: #d4d0c8 !important;
+  background: #d4d0c8;
+  background-color: #d4d0c8;
   border-top: 2px solid #ffffff !important;
   border-left: 2px solid #ffffff !important;
   border-right: 2px solid #404040 !important;
@@ -508,14 +513,14 @@
 .legacy-tab-content select,
 .legacy-tab-content textarea,
 .legacy-tab-content .input-field {
-  background: #ffffff !important;
-  background-color: #ffffff !important;
+  background: #ffffff;
+  background-color: #ffffff;
   border-top: 2px solid #808080 !important;
   border-left: 2px solid #808080 !important;
   border-right: 2px solid #ffffff !important;
   border-bottom: 2px solid #ffffff !important;
   box-shadow: inset 1px 1px #404040 !important;
-  color: #000000 !important;
+  color: #000000;
   padding: 2px 4px !important;
   outline: none !important;
   font-size: 12px !important;
@@ -908,20 +913,20 @@
 .legacy-tab-content h4,
 .legacy-tab-content h5,
 .legacy-tab-content h6 {
-  color: #000000 !important;
+  color: #000000;
   font-size: 13px !important;
   font-weight: bold !important;
   background: none !important;
   background-clip: border-box !important;
-  -webkit-text-fill-color: #000000 !important;
+  -webkit-text-fill-color: currentcolor;
   letter-spacing: 0 !important;
   line-height: 1.4 !important;
 }
 
 .legacy-tab-content p,
 .legacy-tab-content span:not([class*="text-green"]):not([class*="text-red"]):not([class*="text-blue"]):not([class*="text-yellow"]):not([class*="text-orange"]) {
-  color: inherit !important;
-  -webkit-text-fill-color: inherit !important;
+  color: inherit;
+  -webkit-text-fill-color: currentcolor;
   background-clip: border-box !important;
 }
 
