@@ -44,7 +44,7 @@ const WA_TEMPLATES = [
 ];
 
 type Tab = "general" | "documents" | "comments" | "activity" | "payment";
-type PreviewType = "image" | "pdf" | "unsupported";
+type PreviewType = "image" | "document" | "unsupported";
 
 const getFileNameFromUrl = (url: string, fallback = "document") => {
   try {
@@ -65,9 +65,18 @@ const getPreviewType = (url: string, contentType?: string): PreviewType => {
   const type = (contentType || "").toLowerCase();
   const ext = getExtension(getFileNameFromUrl(url, url));
   if (type.startsWith("image/") || ["jpg", "jpeg", "png", "gif", "webp", "bmp"].includes(ext)) return "image";
-  if (type.includes("pdf") || ext === "pdf") return "pdf";
+  if (
+    type.includes("pdf") ||
+    type.includes("word") ||
+    type.includes("msword") ||
+    type.includes("officedocument") ||
+    ["pdf", "doc", "docx"].includes(ext)
+  ) return "document";
   return "unsupported";
 };
+
+const getDocumentViewerUrl = (url: string) =>
+  `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(url)}`;
 
 interface Props {
   isOpen: boolean;
@@ -341,11 +350,16 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
       const type = getPreviewType(url, blob.type);
       setPreviewType(type);
       if (type === "unsupported") {
+        if (url.includes("res.cloudinary.com")) {
+          setPreviewType("document");
+          setPreviewImg(url);
+          return;
+        }
         setPreviewImg(url);
         toast.error("Preview is not available for this file type. Please use Download or Open in New Tab.");
         return;
       }
-      setPreviewImg(URL.createObjectURL(blob));
+      setPreviewImg(type === "image" ? URL.createObjectURL(blob) : url);
     } catch (e) {
       console.error(e);
       const type = getPreviewType(url);
@@ -837,7 +851,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                                 // Extract the original filename from the url (e.g. from cloudniary)
                                 const name = getFileNameFromUrl(url, `Document ${i+1}`);
                                 const previewType = getPreviewType(url);
-                                const canPreview = previewType === "image" || previewType === "pdf" || url.includes("res.cloudinary.com");
+                                const canPreview = previewType === "image" || previewType === "document" || url.includes("res.cloudinary.com");
                                 return (
                                   <div key={i} style={{ display:"flex",alignItems:"center",gap:"8px",padding:"5px",borderBottom:"1px solid #ccc" }}>
                                     <span style={{ fontSize:"18px" }}>{previewType === "image" ? "🖼" : "📄"}</span>
@@ -1067,8 +1081,12 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                   <span>Loading Document...</span>
                 </div>
               ) : (
-                previewType === "pdf" ? (
-                  <iframe src={previewImg || undefined} style={{ width: "100%", height: "100%", minHeight: "500px", border: "none", background: "white" }} title="PDF Preview" />
+                previewType === "document" ? (
+                  <iframe
+                    src={previewImg ? getDocumentViewerUrl(previewImg) : undefined}
+                    style={{ width: "100%", height: "100%", minHeight: "500px", border: "none", background: "white" }}
+                    title="Document Preview"
+                  />
                 ) : previewType === "image" ? (
                   <img 
                     src={previewImg || undefined} 
