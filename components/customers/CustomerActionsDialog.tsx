@@ -59,6 +59,19 @@ export default function CustomerActionsDialog({
   const [docInput, setDocInput] = useState("");
   const [isCreatingService, setIsCreatingService] = useState(false);
   const [isNewBillOpen, setIsNewBillOpen] = useState(false);
+  
+  const [dbServices, setDbServices] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch('/api/kiosk/services')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setDbServices(data);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   // Fetch Customer details when modal opens
   useEffect(() => {
@@ -143,34 +156,31 @@ export default function CustomerActionsDialog({
   };
 
   // Auto fill service preset values
-  const applyServicePreset = async (serviceType: string) => {
-    const preset = findCatalogItem(serviceType);
-    let masterFee = preset ? String(preset.fee) : "";
-    let masterDocs = preset ? preset.documents : [];
-
-    try {
-      const res = await fetch(`/api/inventory?q=${encodeURIComponent(serviceType)}&type=service`);
-      if (res.ok) {
-        const data = await res.json();
-        const master = data.find((item: any) => item.name === serviceType);
-        if (master) {
-          masterFee = String(master.sellingPrice);
-          masterDocs = master.requiredDocs || [];
-        }
+  const applyServicePreset = (serviceName: string) => {
+    if (serviceName === "Other") {
+      setServiceForm({ ...serviceForm, serviceType: "Other", fees: "", notes: "", requiredDocs: [] });
+      setCustomService("");
+      return;
+    }
+    const preset = dbServices.find((s) => s.name === serviceName);
+    if (preset) {
+      let msg = "";
+      if (preset.requiredDocs && preset.requiredDocs.length > 0) {
+         msg = `Namaste ${customer?.name || 'Customer'},\n${serviceName} ke liye kripya yeh documents provide karein: ${preset.requiredDocs.join(', ')}.`;
+      } else {
+         msg = `Namaste ${customer?.name || 'Customer'},\n${serviceName} request received.`;
       }
-    } catch {}
-
-    setServiceForm((current) => ({
-      ...current,
-      serviceType,
-      fees: masterFee || current.fees,
-      requiredDocs: masterDocs.length > 0 ? masterDocs : current.requiredDocs,
-      notes: preset
-        ? `${preset.message.replace(/{name}/g, customer?.name || "")}\nEstimated time: ${preset.estimate}${
-            preset.portal ? `\nPortal: ${preset.portal}` : ""
-          }`
-        : current.notes,
-    }));
+      
+      setServiceForm({
+        ...serviceForm,
+        serviceType: serviceName,
+        fees: preset.sellingPrice?.toString() || "0",
+        notes: msg,
+        requiredDocs: preset.requiredDocs || []
+      });
+    } else {
+      setServiceForm({ ...serviceForm, serviceType: serviceName, fees: "", notes: "", requiredDocs: [] });
+    }
   };
 
   // Handle service creation submit
@@ -480,7 +490,8 @@ export default function CustomerActionsDialog({
                           required
                         >
                           <option value="">-- Select Service --</option>
-                          {SERVICE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                          {dbServices.map(s => <option key={s.id} value={s.name}>{s.name}</option>)}
+                          <option value="Other">Other (Custom)</option>
                         </select>
                       </div>
 
