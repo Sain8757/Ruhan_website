@@ -177,11 +177,11 @@ export default function OnlineWorkPage() {
             }}
           >
             <div>
-              <div style={{ display: "flex", alignItems: "center", gap: "4px", fontWeight: "bold", marginBottom: "2px" }}>
-                <Sparkles size={13} />
+              <div style={{ display: "flex", alignItems: "center", gap: "4px", fontWeight: "bold", marginBottom: "2px", color: "#000000", WebkitTextFillColor: "#000000" }}>
+                <Sparkles size={13} color="#000080" />
                 Select Portal Category
               </div>
-              <div style={{ color: "#404040", fontSize: "11px" }}>
+              <div style={{ color: "#404040", WebkitTextFillColor: "#404040", fontSize: "11px" }}>
                 Click any category to view official portal links and direct access
               </div>
             </div>
@@ -267,7 +267,8 @@ export default function OnlineWorkPage() {
                   <div
                     style={{
                       fontWeight: "bold",
-                      color: "#000",
+                      color: "#000000",
+                      WebkitTextFillColor: "#000000",
                       marginBottom: "2px",
                       whiteSpace: "nowrap" as const,
                       overflow: "hidden",
@@ -280,6 +281,7 @@ export default function OnlineWorkPage() {
                     style={{
                       fontSize: "11px",
                       color: "#404040",
+                      WebkitTextFillColor: "#404040",
                       overflow: "hidden",
                       display: "-webkit-box",
                       WebkitLineClamp: 2,
@@ -300,10 +302,11 @@ export default function OnlineWorkPage() {
                     alignItems: "center",
                     fontSize: "10px",
                     color: "#404040",
+                    WebkitTextFillColor: "#404040",
                   }}
                 >
-                  <span>Click for Direct Links</span>
-                  <span style={{ fontWeight: "bold" }}>→</span>
+                  <span style={{ color: "#404040", WebkitTextFillColor: "#404040" }}>Click for Direct Links</span>
+                  <span style={{ fontWeight: "bold", color: "#000080", WebkitTextFillColor: "#000080" }}>→</span>
                 </div>
               </div>
             ))}
@@ -429,13 +432,14 @@ export default function OnlineWorkPage() {
                     }}
                   >
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: "bold", color: "#000", marginBottom: "1px" }}>
+                      <div style={{ fontWeight: "bold", color: "#000000", WebkitTextFillColor: "#000000", marginBottom: "1px" }}>
                         {link.title}
                       </div>
                       <div
                         style={{
                           fontSize: "10px",
                           color: "#808080",
+                          WebkitTextFillColor: "#808080",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           whiteSpace: "nowrap" as const,

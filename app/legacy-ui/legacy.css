@@ -405,7 +405,6 @@
   text-shadow: none !important;
   background-image: none !important;
   background-clip: border-box !important;
-  -webkit-text-fill-color: currentColor !important;
   letter-spacing: 0 !important;
   transform: none !important;
 }
@@ -414,6 +413,24 @@
 .legacy-tab-content {
   background: #d4d0c8 !important;
   color: #000 !important;
+}
+
+/* Force visible black text on all children by default */
+.legacy-tab-content p,
+.legacy-tab-content span,
+.legacy-tab-content div,
+.legacy-tab-content li,
+.legacy-tab-content td,
+.legacy-tab-content th,
+.legacy-tab-content label,
+.legacy-tab-content h1,
+.legacy-tab-content h2,
+.legacy-tab-content h3,
+.legacy-tab-content h4,
+.legacy-tab-content h5,
+.legacy-tab-content h6 {
+  color: #000000;
+  -webkit-text-fill-color: #000000;
 }
 
 /* ---- Buttons (ALL named classes) ---- */
