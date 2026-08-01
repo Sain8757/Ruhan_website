@@ -99,9 +99,10 @@ export default function CustomerActionsDialog({
           serviceType: "",
           fees: "",
           paymentStatus: "UNPAID",
-          paymentMode: "CASH",
+          paymentMode: "PENDING",
+          amountPaid: "",
           notes: "",
-          requiredDocs: [],
+          requiredDocs: []
         });
         setCustomService("");
         setDocInput("");
