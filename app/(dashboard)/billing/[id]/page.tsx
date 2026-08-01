@@ -581,50 +581,52 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
           <div
             ref={invoiceCardRef}
             className="invoice-print-card p-8 bg-white border text-slate-900 shadow-md"
-            style={{ width: "100%", maxWidth: "794px", background: "#ffffff", borderColor: "#d7dde8", borderRadius: "18px", overflow: "hidden", boxShadow: "0 18px 45px rgba(15,23,42,0.12)" }}
+            style={{ width: "100%", maxWidth: "794px", background: "#ffffff", border: "1px solid #d8e0ec", borderRadius: "20px", overflow: "hidden", boxShadow: "0 24px 70px rgba(15,23,42,0.14)" }}
           >
             {/* Header */}
-            <div className="flex justify-between items-start gap-4 flex-wrap pb-6 border-b-2 border-slate-200" style={{ margin: "-32px -32px 0", padding: "28px 32px 24px", background: "linear-gradient(135deg,#0f172a 0%,#1d4ed8 100%)", color: "#ffffff" }}>
-              <div>
+            <div className="flex justify-between items-start gap-5 flex-wrap" style={{ margin: "-32px -32px 0", padding: "30px 34px 28px", background: "linear-gradient(135deg,#07111f 0%,#123c80 58%,#1784d9 100%)", color: "#ffffff" }}>
+              <div style={{ maxWidth: "470px" }}>
                 <div className="flex items-center gap-4 mb-3">
-                  <div className="rounded-xl flex items-center justify-center bg-white border border-slate-200 shadow-sm overflow-hidden" style={{ width: '56px', height: '56px', flexShrink: 0 }}>
+                  <div className="flex items-center justify-center bg-white border border-slate-200 shadow-sm overflow-hidden" style={{ width: "64px", height: "64px", flexShrink: 0, borderRadius: "16px", padding: "6px" }}>
                     <img src="/logo.png" alt="RA" className="object-contain p-1" style={{ width: '100%', height: '100%' }} />
                   </div>
                   <div>
-                    <h2 className="font-extrabold text-2xl tracking-tight" style={{ color: "#ffffff" }}>{shopName}</h2>
-                    <p className="text-[11px] font-bold uppercase tracking-widest mt-0.5" style={{ color: "#bfdbfe" }}>{shopTagline}</p>
+                    <h2 className="font-extrabold" style={{ color: "#ffffff", fontSize: "26px", lineHeight: "1.08", letterSpacing: "0" }}>{shopName}</h2>
+                    <p className="font-bold uppercase mt-1" style={{ color: "#d7e8ff", fontSize: "10px", letterSpacing: "1.8px" }}>{shopTagline}</p>
                   </div>
                 </div>
-                <div className="space-y-1 text-xs" style={{ color: "#dbeafe" }}>
+                <div className="space-y-1 text-xs" style={{ color: "#eef6ff", lineHeight: "1.45" }}>
                   {shopAddress && <p className="flex items-center gap-1.5"><MapPin size={12} /> {shopAddress}</p>}
                   {shopPhone && <p className="flex items-center gap-1.5"><Phone size={12} /> {shopPhone}</p>}
                   {shopEmail && <p className="flex items-center gap-1.5"><Mail size={12} /> {shopEmail}</p>}
                 </div>
               </div>
 
-              <div className="text-right">
-                <div className={`inline-block px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider mb-2 ${invoice.type === 'QUOTATION' ? 'bg-orange-50 text-orange-600' : 'bg-white text-blue-700'}`}>
+              <div className="text-right" style={{ minWidth: "215px" }}>
+                <div className={`inline-block px-3 py-1 text-xs font-bold uppercase tracking-wider mb-3 ${invoice.type === 'QUOTATION' ? 'bg-orange-50 text-orange-600' : 'bg-white text-blue-700'}`} style={{ borderRadius: "999px" }}>
                   {invoice.type === 'QUOTATION' ? 'Quotation / Proforma' : 'Tax Invoice'}
                 </div>
-                <div className="font-mono font-bold text-lg" style={{ color: "#ffffff" }}>#{invoice.invoiceNumber}</div>
-                <div className="text-xs mt-1" style={{ color: "#dbeafe" }}>Date: {formatDate(invoice.createdAt)}</div>
-                <div className="text-xs mt-0.5" style={{ color: "#dbeafe" }}>Operator: {invoice.createdBy?.name || "—"}</div>
+                <div className="font-black uppercase" style={{ color: "#ffffff", fontSize: "34px", lineHeight: "1", letterSpacing: "1px" }}>INVOICE</div>
+                <div className="font-mono font-bold mt-2" style={{ color: "#ffffff", fontSize: "16px" }}>#{invoice.invoiceNumber}</div>
+                <div style={{ height: "1px", background: "rgba(255,255,255,0.34)", margin: "12px 0" }} />
+                <div className="text-xs" style={{ color: "#eaf3ff" }}>Date: <strong>{formatDate(invoice.createdAt)}</strong></div>
+                <div className="text-xs mt-1" style={{ color: "#eaf3ff" }}>Operator: <strong>{invoice.createdBy?.name || "—"}</strong></div>
               </div>
             </div>
 
             {/* Billed To */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 py-6 border-b border-slate-200">
-              <div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Billed To</div>
-                <div className="font-bold text-base text-slate-900">{invoice.customer.name}</div>
-                <div className="flex items-center gap-1 text-xs text-slate-600 mt-1"><Phone size={11} /> {invoice.customer.mobile}</div>
-                {invoice.customer.address && <div className="flex items-center gap-1 text-xs text-slate-600 mt-0.5"><MapPin size={11} /> {invoice.customer.address}</div>}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 py-6 border-b border-slate-200">
+              <div style={{ border: "1px solid #e3e8f0", borderRadius: "16px", padding: "16px", background: "#f8fafc" }}>
+                <div className="font-bold uppercase mb-2" style={{ color: "#64748b", fontSize: "10px", letterSpacing: "1.3px" }}>Billed To</div>
+                <div className="font-black text-base" style={{ color: "#0f172a" }}>{invoice.customer.name}</div>
+                <div className="flex items-center gap-1 text-xs mt-2" style={{ color: "#475569" }}><Phone size={11} /> {invoice.customer.mobile}</div>
+                {invoice.customer.address && <div className="flex items-center gap-1 text-xs mt-1" style={{ color: "#475569" }}><MapPin size={11} /> {invoice.customer.address}</div>}
               </div>
-              <div className="sm:text-right text-xs space-y-1">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Payment Details</div>
-                <div><span className="text-slate-500">Mode: </span><span className="font-semibold text-slate-900">{PAYMENT_MODE_LABELS[invoice.paymentMode] || invoice.paymentMode}</span></div>
-                <div><span className="text-slate-500">Status: </span><span className="font-semibold text-blue-600">{invoice.paymentStatus}</span></div>
-                <div><span className="text-slate-500">UPI ID: </span><span className="font-mono font-semibold text-blue-600">{upiId}</span></div>
+              <div className="sm:text-right text-xs space-y-1" style={{ border: "1px solid #dbeafe", borderRadius: "16px", padding: "16px", background: "#eff6ff" }}>
+                <div className="font-bold uppercase mb-2" style={{ color: "#2563eb", fontSize: "10px", letterSpacing: "1.3px" }}>Payment Summary</div>
+                <div><span style={{ color: "#64748b" }}>Mode: </span><span className="font-bold" style={{ color: "#0f172a" }}>{PAYMENT_MODE_LABELS[invoice.paymentMode] || invoice.paymentMode}</span></div>
+                <div><span style={{ color: "#64748b" }}>Status: </span><span className="font-black uppercase" style={{ color: invoice.paymentStatus === "PAID" ? "#047857" : "#b45309" }}>{invoice.paymentStatus}</span></div>
+                <div><span style={{ color: "#64748b" }}>UPI ID: </span><span className="font-mono font-bold" style={{ color: "#1d4ed8" }}>{upiId}</span></div>
                 
                 <div className="flex gap-2 justify-end mt-2">
                   {invoice.paymentStatus !== "PAID" && (
@@ -677,22 +679,22 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
 
             {/* Items Table */}
             <div className="my-6">
-              <table className="w-full text-left text-sm border-collapse">
+              <table className="w-full text-left text-sm border-collapse" style={{ border: "1px solid #e2e8f0", borderRadius: "14px", overflow: "hidden" }}>
                 <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="pb-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 w-[45%]">Description</th>
-                    <th className="pb-3 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400 w-16">Qty</th>
-                    <th className="pb-3 text-right text-[10px] font-bold uppercase tracking-wider text-slate-400 w-28">Unit Price</th>
-                    <th className="pb-3 text-right text-[10px] font-bold uppercase tracking-wider text-slate-400 w-28">Amount</th>
+                  <tr style={{ background: "#0f172a", color: "#ffffff" }}>
+                    <th className="text-[10px] font-bold uppercase tracking-wider w-[45%]" style={{ padding: "11px 12px" }}>Description</th>
+                    <th className="text-center text-[10px] font-bold uppercase tracking-wider w-16" style={{ padding: "11px 12px" }}>Qty</th>
+                    <th className="text-right text-[10px] font-bold uppercase tracking-wider w-28" style={{ padding: "11px 12px" }}>Unit Price</th>
+                    <th className="text-right text-[10px] font-bold uppercase tracking-wider w-28" style={{ padding: "11px 12px" }}>Amount</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {invoice.items.map((item: any) => (
-                    <tr key={item.id} className="border-b border-dashed border-slate-200">
-                      <td className="py-3 font-medium text-slate-900">{item.name}</td>
-                      <td className="py-3 text-center text-slate-600">{item.quantity}</td>
-                      <td className="py-3 text-right text-slate-600">₹{item.price.toLocaleString("en-IN")}</td>
-                      <td className="py-3 text-right font-semibold text-slate-900">₹{item.total.toLocaleString("en-IN")}</td>
+                  {invoice.items.map((item: any, idx: number) => (
+                    <tr key={item.id} style={{ background: idx % 2 === 0 ? "#ffffff" : "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
+                      <td className="font-semibold" style={{ padding: "13px 12px", color: "#0f172a" }}>{item.name}</td>
+                      <td className="text-center" style={{ padding: "13px 12px", color: "#475569" }}>{item.quantity}</td>
+                      <td className="text-right" style={{ padding: "13px 12px", color: "#475569" }}>₹{item.price.toLocaleString("en-IN")}</td>
+                      <td className="text-right font-bold" style={{ padding: "13px 12px", color: "#0f172a" }}>₹{item.total.toLocaleString("en-IN")}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -701,22 +703,22 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
 
             {/* Totals & QR */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 items-end">
-              <div className="flex gap-4 items-center p-4 rounded-xl border border-dashed border-blue-200 bg-blue-50/50">
-                <QRCodeSVG value={upiLink} size={76} />
+              <div className="flex gap-4 items-center p-4" style={{ border: "1px dashed #60a5fa", borderRadius: "16px", background: "#f0f7ff" }}>
+                <QRCodeSVG value={upiLink} size={84} />
                 <div>
-                  <div className="text-xs font-bold text-slate-900">Scan to Pay (UPI)</div>
-                  <p className="text-[10px] text-slate-500">GPay, PhonePe, Paytm se scan karein</p>
-                  <div className="text-[10px] font-mono font-bold text-blue-600 mt-1">{upiId}</div>
+                  <div className="text-xs font-black" style={{ color: "#0f172a" }}>Scan to Pay (UPI)</div>
+                  <p className="text-[10px]" style={{ color: "#64748b" }}>GPay, PhonePe, Paytm supported</p>
+                  <div className="text-[10px] font-mono font-bold mt-1" style={{ color: "#1d4ed8" }}>{upiId}</div>
                 </div>
               </div>
 
-              <div className="space-y-2 text-sm text-slate-600 rounded-2xl border border-slate-200 p-4 bg-slate-50">
+              <div className="space-y-2 text-sm p-4" style={{ color: "#475569", border: "1px solid #d8e0ec", borderRadius: "18px", background: "#f8fafc" }}>
                 <div className="flex justify-between"><span>Subtotal:</span><span>₹{invoice.subtotal.toLocaleString("en-IN")}</span></div>
                 {invoice.discount > 0 && <div className="flex justify-between text-red-500"><span>Discount:</span><span>- ₹{invoice.discount.toLocaleString("en-IN")}</span></div>}
                 {invoice.gst > 0 && <div className="flex justify-between"><span>GST ({invoice.gst}%):</span><span>₹{Math.round((invoice.subtotal * invoice.gst) / 100).toLocaleString("en-IN")}</span></div>}
-                <div className="flex justify-between font-bold text-lg border-t border-slate-200 pt-2 text-slate-900">
+                <div className="flex justify-between font-black text-lg pt-3 mt-2" style={{ color: "#0f172a", borderTop: "2px solid #cbd5e1" }}>
                   <span>Grand Total:</span>
-                  <span className="text-blue-600">₹{invoice.total.toLocaleString("en-IN")}</span>
+                  <span style={{ color: "#1d4ed8" }}>₹{invoice.total.toLocaleString("en-IN")}</span>
                 </div>
                 <div className="flex justify-between font-semibold mt-1"><span>Amount Paid:</span><span className="text-emerald-600">₹{(invoice.amountPaid || 0).toLocaleString("en-IN")}</span></div>
                 <div className="flex justify-between font-bold text-red-500 mt-1"><span>Balance Due:</span><span>₹{Math.max(0, invoice.total - (invoice.amountPaid || 0)).toLocaleString("en-IN")}</span></div>
@@ -760,50 +762,55 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
             style={{
               width: "300px",
               background: "#ffffff",
-              padding: "12px 10px",
+              padding: "14px 12px",
               boxSizing: "border-box",
               color: "#000000",
               fontFamily: "'Courier New', Courier, monospace",
               fontSize: "11px",
-              lineHeight: "1.25",
+              lineHeight: "1.28",
             }}
           >
             {/* Store Header */}
-            <div className="text-center pb-2">
-              <h2 className="font-black uppercase tracking-wider" style={{ fontSize: "18px", lineHeight: "1.15" }}>{shopName}</h2>
-              <p className="mt-1" style={{ fontSize: "10px" }}>{shopTagline}</p>
-              <p>Ph: {shopPhone}</p>
-              <p>{shopAddress}</p>
+            <div className="text-center pb-2" style={{ borderBottom: "2px solid #000" }}>
+              <h2 className="font-black uppercase" style={{ fontSize: "18px", lineHeight: "1.12", letterSpacing: "0.4px" }}>{shopName}</h2>
+              <p className="mt-1 font-bold uppercase" style={{ fontSize: "9px" }}>{shopTagline}</p>
+              <p style={{ fontSize: "10px" }}>{shopAddress}</p>
+              <p className="font-bold" style={{ fontSize: "10px" }}>Ph: {shopPhone}</p>
             </div>
 
-            <div style={{ borderTop: "1px dashed #000", margin: "5px 0" }} />
+            <div className="text-center font-black uppercase" style={{ margin: "7px 0", padding: "4px 0", borderTop: "1px dashed #000", borderBottom: "1px dashed #000", fontSize: "13px", letterSpacing: "1px" }}>
+              {invoice.type === 'QUOTATION' ? 'PROFORMA SLIP' : 'RETAIL INVOICE'}
+            </div>
 
             {/* Bill Meta */}
-            <div className="pb-2 space-y-0.5">
-              <div className="flex justify-between font-bold" style={{ fontSize: "13px" }}>
-                <span>INV #{invoice.invoiceNumber}</span>
+            <div className="pb-2 space-y-0.5" style={{ fontSize: "11px" }}>
+              <div className="flex justify-between font-bold">
+                <span>No: {invoice.invoiceNumber}</span>
                 <span>{formatDate(invoice.createdAt)}</span>
               </div>
-              <div style={{ fontSize: "13px" }}>Customer: <span className="font-bold">{invoice.customer.name}</span></div>
-              <div style={{ fontSize: "13px" }}>Mobile: {invoice.customer.mobile}</div>
-              <div style={{ fontSize: "13px" }}>Mode: {PAYMENT_MODE_LABELS[invoice.paymentMode] || invoice.paymentMode}</div>
+              <div>Customer: <span className="font-bold uppercase">{invoice.customer.name}</span></div>
+              <div>Mobile: {invoice.customer.mobile}</div>
+              <div className="flex justify-between"><span>Mode: {PAYMENT_MODE_LABELS[invoice.paymentMode] || invoice.paymentMode}</span><span className="font-bold">{invoice.paymentStatus}</span></div>
             </div>
 
             {/* Items Table */}
             <table style={{ width: "100%", borderCollapse: "collapse", borderTop: "1px dashed #000", borderBottom: "1px dashed #000", marginBottom: "8px" }}>
               <thead>
                 <tr style={{ borderBottom: "1px dashed #000" }}>
-                  <th style={{ padding: "4px 0", textAlign: "left", fontWeight: "bold" }}>ITEM</th>
-                  <th style={{ padding: "4px 0", textAlign: "center", fontWeight: "bold" }}>QTY</th>
-                  <th style={{ padding: "4px 0", textAlign: "right", fontWeight: "bold" }}>AMT</th>
+                  <th style={{ padding: "5px 0", textAlign: "left", fontWeight: "bold" }}>ITEM</th>
+                  <th style={{ padding: "5px 0", textAlign: "center", fontWeight: "bold" }}>QTY</th>
+                  <th style={{ padding: "5px 0", textAlign: "right", fontWeight: "bold" }}>AMOUNT</th>
                 </tr>
               </thead>
               <tbody>
                 {invoice.items.map((item: any, idx: number) => (
                   <tr key={item.id || idx}>
-                    <td style={{ padding: "4px 0", textTransform: "uppercase", wordBreak: "break-word" }}>{item.name}</td>
-                    <td style={{ padding: "4px 0", textAlign: "center" }}>{item.quantity}</td>
-                    <td style={{ padding: "4px 0", textAlign: "right", fontWeight: "bold" }}>{item.total.toFixed(2)}</td>
+                    <td style={{ padding: "5px 0", textTransform: "uppercase", wordBreak: "break-word" }}>
+                      <div className="font-bold">{item.name}</div>
+                      <div style={{ fontSize: "10px" }}>@ {item.price.toFixed(2)}</div>
+                    </td>
+                    <td style={{ padding: "5px 0", textAlign: "center", fontWeight: "bold" }}>{item.quantity}</td>
+                    <td style={{ padding: "5px 0", textAlign: "right", fontWeight: "bold" }}>{item.total.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -815,14 +822,14 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
               {invoice.discount > 0 && <div className="flex justify-between"><span>Discount:</span><span>-₹{invoice.discount.toFixed(2)}</span></div>}
               {invoice.gst > 0 && <div className="flex justify-between"><span>GST:</span><span>₹{((invoice.subtotal * invoice.gst) / 100).toFixed(2)}</span></div>}
               
-              <div className="flex justify-between font-bold" style={{ fontSize: "16px", borderTop: "1px dashed #000", borderBottom: "1px dashed #000", margin: "5px 0", padding: "4px 0" }}>
+              <div className="flex justify-between font-black" style={{ fontSize: "17px", borderTop: "2px solid #000", borderBottom: "2px solid #000", margin: "6px 0", padding: "5px 0" }}>
                 <span>TOTAL:</span>
                 <span>₹{invoice.total.toFixed(2)}</span>
               </div>
               
               <div className="flex justify-between"><span>Paid:</span><span>₹{(invoice.amountPaid || 0).toFixed(2)}</span></div>
               {invoice.total - (invoice.amountPaid || 0) > 0 && (
-                <div className="flex justify-between font-bold text-red-700">
+                <div className="flex justify-between font-black">
                   <span>DUE:</span>
                   <span>₹{(invoice.total - (invoice.amountPaid || 0)).toFixed(2)}</span>
                 </div>
@@ -831,17 +838,17 @@ export default function InvoiceDetailPage({ params }: { params: Promise<{ id: st
 
             {/* QR Code */}
             {upiLink && (
-              <div className="text-center py-2 flex flex-col items-center">
-                <QRCodeSVG value={upiLink} size={104} />
-                <span className="mt-1 font-bold" style={{ fontSize: "13px" }}>Scan & Pay via UPI</span>
+              <div className="text-center py-2 flex flex-col items-center" style={{ borderTop: "1px dashed #000", borderBottom: "1px dashed #000", margin: "4px 0" }}>
+                <QRCodeSVG value={upiLink} size={108} />
+                <span className="mt-1 font-black uppercase" style={{ fontSize: "12px" }}>Scan & Pay via UPI</span>
+                <span className="font-bold" style={{ fontSize: "10px" }}>{upiId}</span>
               </div>
             )}
 
-            <div style={{ borderTop: "1px dashed #000", margin: "5px 0" }} />
-
             {/* Footer */}
-            <div className="text-center mt-2" style={{ fontSize: "11px" }}>
-              <p className="font-bold" style={{ fontSize: "13px" }}>Thank You! Visit Again.</p>
+            <div className="text-center mt-2" style={{ fontSize: "10px" }}>
+              <p className="font-black uppercase" style={{ fontSize: "13px" }}>Thank You! Visit Again.</p>
+              <p>Goods once sold will not be returned.</p>
               <p>*** Computer Generated Receipt ***</p>
             </div>
           </div>
