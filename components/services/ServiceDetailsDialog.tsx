@@ -37,14 +37,14 @@ const PAYMENT_META: Record<string,{bg:string;color:string;label:string}> = {
 };
 
 const WA_TEMPLATES: Record<string, { label: string; text: string }> = {
-  PENDING:    { label:"Application Received", text:"Hello {name},\n\nWe have received your application for *{service}*.\nTracking ID: *{trackingId}*\n\nWe will notify you once it is processed.\n\n— RA Seva Point" },
-  DOCS:       { label:"Documents Needed",     text:"Hello {name},\n\nFor your *{service}* application, we need some additional documents. Please visit our center at your earliest convenience.\n\n— RA Seva Point" },
-  SUBMITTED:  { label:"Application Submitted",text:"Hello {name},\n\nYour *{service}* application has been successfully *SUBMITTED* to the respective department.\nTracking ID: *{trackingId}*\n\n— RA Seva Point" },
-  PROCESSING: { label:"Processing",           text:"Hello {name},\n\nYour *{service}* application is currently *PROCESSING*.\nTracking ID: *{trackingId}*\n\n— RA Seva Point" },
-  APPROVED:   { label:"Application Approved", text:"Hello {name},\n\n🎉 Great news! Your *{service}* application has been *APPROVED*.\nTracking ID: *{trackingId}*\n\n— RA Seva Point" },
-  DELIVERED:  { label:"Application Ready",    text:"Hello {name},\n\nYour *{service}* is ready for collection. Please visit our center with this message.\nTracking ID: *{trackingId}*\n\n— RA Seva Point" },
-  DELAYED:    { label:"Processing Delayed",   text:"Hello {name},\n\nWe regret to inform that your *{service}* application is slightly delayed. We will notify you as soon as it is ready.\n\n— RA Seva Point" },
-  PAYMENT:    { label:"Payment Reminder",     text:"Hello {name},\n\nAapka *{service}* ka kaam ho gaya hai. Aapka pending amount ₹{pending} baaki hai. Kripya payment clear karein.\n\n— RA Seva Point" },
+  PENDING:    { label:"Application Received", text:"Hello {name},\n\nWe have received your application for *{service}*.\nTracking ID: *{trackingId}*\n\nWe will notify you once it is processed.\n\nTrack your status here: {trackingLink}\n\n— RA Seva Point" },
+  DOCS:       { label:"Documents Needed",     text:"Hello {name},\n\nFor your *{service}* application, we need some additional documents. Please visit our center at your earliest convenience.\n\nTrack your status here: {trackingLink}\n\n— RA Seva Point" },
+  SUBMITTED:  { label:"Application Submitted",text:"Hello {name},\n\nYour *{service}* application has been successfully *SUBMITTED* to the respective department.\nTracking ID: *{trackingId}*\n\nTrack your status here: {trackingLink}\n\n— RA Seva Point" },
+  PROCESSING: { label:"Processing",           text:"Hello {name},\n\nYour *{service}* application is currently *PROCESSING*.\nTracking ID: *{trackingId}*\n\nTrack your status here: {trackingLink}\n\n— RA Seva Point" },
+  APPROVED:   { label:"Application Approved", text:"Hello {name},\n\n🎉 Great news! Your *{service}* application has been *APPROVED*.\nTracking ID: *{trackingId}*\n\nTrack your status here: {trackingLink}\n\n— RA Seva Point" },
+  DELIVERED:  { label:"Application Ready",    text:"Hello {name},\n\nYour *{service}* is ready for collection. Please visit our center with this message.\nTracking ID: *{trackingId}*\n\nTrack your status here: {trackingLink}\n\n— RA Seva Point" },
+  DELAYED:    { label:"Processing Delayed",   text:"Hello {name},\n\nWe regret to inform that your *{service}* application is slightly delayed. We will notify you as soon as it is ready.\n\nTrack your status here: {trackingLink}\n\n— RA Seva Point" },
+  PAYMENT:    { label:"Payment Reminder",     text:"Hello {name},\n\nAapka *{service}* ka kaam ho gaya hai. Aapka pending amount ₹{pending} baaki hai. Kripya payment clear karein.\n\nTrack your status here: {trackingLink}\n\n— RA Seva Point" },
 };
 
 type Tab = "general" | "documents" | "comments" | "activity" | "payment";
@@ -296,10 +296,12 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
 
   const sendWA = (tpl: { text: string }, extraData?: Record<string, string>) => {
     if (!service?.customer?.mobile) { toast.error("No mobile number"); return; }
+    const trackingLink = `${window.location.origin}/track/${service.trackingId}`;
     let text = tpl.text
       .replace(/{name}/g, service.customer.name)
       .replace(/{service}/g, service.serviceType)
-      .replace(/{trackingId}/g, service.trackingId || "N/A");
+      .replace(/{trackingId}/g, service.trackingId || "N/A")
+      .replace(/{trackingLink}/g, trackingLink);
       
     if (extraData) {
       Object.keys(extraData).forEach(k => {

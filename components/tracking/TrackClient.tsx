@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
-import { Search, Clock, CreditCard, MessageSquare, AlertTriangle, FileUp, Loader2, CheckCircle, Download, Phone, Star } from "lucide-react";
+import React, { useState, useRef, useEffect } from 'react';
+import { Search, Clock, CreditCard, MessageSquare, AlertTriangle, FileUp, Loader2, CheckCircle, Download, Phone, Star, Share2, MapPin, Printer, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import html2canvas from "html2canvas-pro";
 import TokenReceipt from "@/components/kiosk/TokenReceipt";
@@ -36,14 +36,46 @@ const btn: React.CSSProperties = {
   gap: '6px',
 };
 
-export default function TrackClient({ service, settings, queuePosition }: { service: any, settings: any, queuePosition: number }) {
+export default function TrackClient({ service: initialService, settings, queuePosition }: { service: any, settings: any, queuePosition: number }) {
+  const [service, setService] = useState(initialService);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [uploadedCount, setUploadedCount] = useState(0);
-  const [rating, setRating] = useState<number>(service.rating || 0);
-  const [feedback, setFeedback] = useState<string>(service.feedback || "");
+  
+  const [rating, setRating] = useState<number>(initialService.rating || 0);
+  const [feedback, setFeedback] = useState<string>(initialService.feedback || "");
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
   const [ratingSuccess, setRatingSuccess] = useState(false);
+  
+  const [chatMessage, setChatMessage] = useState("");
+  const [chatSending, setChatSending] = useState(false);
+  const [chatSuccess, setChatSuccess] = useState(false);
+  
+  const [printRequesting, setPrintRequesting] = useState(false);
+  const [printRequested, setPrintRequested] = useState(false);
+  
+  const [refreshCountdown, setRefreshCountdown] = useState(60);
+
   const receiptRef = useRef<HTMLDivElement>(null);
+
+  // Auto-Refresh Logic (Feature 6)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setRefreshCountdown((prev) => {
+        if (prev <= 1) {
+          // Fetch updated service data
+          fetch(`/api/services/${service.id}`)
+            .then(res => res.json())
+            .then(data => {
+              if (data && !data.error) setService(data);
+            })
+            .catch(console.error);
+          return 60;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [service.id]);
 
   const formatCurrency = (amt: number) => `₹${amt.toFixed(2)}`;
 
@@ -82,10 +114,67 @@ export default function TrackClient({ service, settings, queuePosition }: { serv
       });
       if (!res.ok) throw new Error("Failed to submit rating");
       setRatingSuccess(true);
+      setService((prev: any) => ({ ...prev, rating, feedback }));
     } catch (err) {
       alert("Error saving rating");
     } finally {
       setRatingSubmitting(false);
+    }
+  };
+
+  // Feature 5: In-App Chat
+  const sendChatMessage = async () => {
+    if (!chatMessage.trim()) return;
+    setChatSending(true);
+    try {
+      const res = await fetch(`/api/services/${service.id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: `[Customer Msg]: ${chatMessage}` }),
+      });
+      if (!res.ok) throw new Error("Failed to send message");
+      setChatSuccess(true);
+      setChatMessage("");
+      setTimeout(() => setChatSuccess(false), 3000);
+    } catch (err) {
+      alert("Error sending message");
+    } finally {
+      setChatSending(false);
+    }
+  };
+
+  // Feature 3: Request Printout
+  const requestPrintout = async () => {
+    setPrintRequesting(true);
+    try {
+      await fetch(`/api/services/${service.id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: `🖨️ [SYSTEM]: Customer requested a physical printout of the final documents.` }),
+      });
+      setPrintRequested(true);
+    } catch (err) {
+      alert("Error requesting printout");
+    } finally {
+      setPrintRequesting(false);
+    }
+  };
+
+  // Feature 2: Share Status
+  const shareStatus = async () => {
+    const url = window.location.href;
+    const title = `${settings?.shopName || 'RA Seva Point'} Tracking`;
+    const text = `Track my ${service.serviceType} application here:`;
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      navigator.clipboard.writeText(`${text} ${url}`);
+      alert("Tracking link copied to clipboard!");
     }
   };
 
@@ -109,9 +198,6 @@ export default function TrackClient({ service, settings, queuePosition }: { serv
     ? `upi://pay?pa=${settings.upiId}&pn=${encodeURIComponent(settings.shopName || "RA Seva Point")}&tr=${service.trackingId}&am=${amountDue}&cu=INR` 
     : null;
 
-  // Final Documents (assuming admin uploads documents containing 'FINAL' or 'CERTIFICATE' in the name or type)
-  // Actually, we can just show all serviceDocUrls if status is DELIVERED. For simplicity, we just show them if they exist and status is DELIVERED.
-  
   return (
     <div className="min-h-screen flex flex-col items-center p-4 pt-10 pb-20"
       style={{ backgroundColor: '#008080', backgroundImage: "repeating-linear-gradient(45deg, rgba(0,0,0,0.04) 0, rgba(0,0,0,0.04) 1px, transparent 0, transparent 50%)", backgroundSize: '10px 10px' }}>
@@ -123,6 +209,9 @@ export default function TrackClient({ service, settings, queuePosition }: { serv
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Search size={14} />
             {settings?.shopName || 'RA Seva Point'} Tracker
+          </div>
+          <div style={{ fontSize: '10px', fontWeight: 'normal', display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Clock size={10} /> Auto-refresh in {refreshCountdown}s
           </div>
         </div>
 
@@ -139,7 +228,6 @@ export default function TrackClient({ service, settings, queuePosition }: { serv
               </div>
               <div style={{ fontFamily: 'Tahoma', fontSize: '11px', color: '#888', marginTop: '4px' }}>Tracking ID: {service.trackingId}</div>
               
-              {/* Feature 2: Deadline */}
               {service.deadline && (
                 <div style={{ fontFamily: 'Tahoma', fontSize: '11px', color: '#d97706', marginTop: '4px', fontWeight: 'bold' }}>
                   Expected: {format(new Date(service.deadline), "dd MMM yyyy")}
@@ -147,7 +235,11 @@ export default function TrackClient({ service, settings, queuePosition }: { serv
               )}
             </div>
 
-            {/* Feature 5: Queue Position */}
+            {/* Feature 2: Share Button */}
+            <button onClick={shareStatus} style={{ ...btn, width: '100%', height: '32px' }}>
+              <Share2 size={14} /> Share Status Link
+            </button>
+
             {service.status === 'PENDING' && queuePosition > 0 && (
               <div style={{ background: '#e0f2fe', border: '1px solid #7dd3fc', padding: '8px', textAlign: 'center', fontFamily: 'Tahoma', fontSize: '12px', color: '#0369a1', fontWeight: 'bold' }}>
                 You are number {queuePosition} in queue.
@@ -174,22 +266,35 @@ export default function TrackClient({ service, settings, queuePosition }: { serv
               </div>
             </div>
 
-            {/* Feature 1: UPI Pay Now Button */}
             {upiLink && (
               <a href={upiLink} style={{ ...btn, background: '#10b981', color: 'white', padding: '10px', fontSize: '14px', fontWeight: 'bold', textDecoration: 'none' }}>
                 Pay {formatCurrency(amountDue)} via UPI
               </a>
             )}
 
-            {/* Feature 12: Loyalty Points Display */}
-            {service.status === 'DELIVERED' && service.fees > 0 && (
-              <div style={{ background: '#fef3c7', border: '1px solid #fde68a', padding: '8px', textAlign: 'center', fontFamily: 'Tahoma', fontSize: '11px', color: '#92400e' }}>
-                <strong>Reward Points Earned: {Math.floor(service.fees / 10)}</strong><br/>
-                Total Balance: {service.customer.loyaltyPoints} Points
+            {/* Feature 4: Govt Tracking Link */}
+            {service.referenceNo && (
+              <div style={{ background: '#f5f5f5', border: '1px solid #ccc', padding: '8px', textAlign: 'center' }}>
+                <div style={{ fontFamily: 'Tahoma', fontSize: '11px', color: '#333', marginBottom: '4px' }}>
+                  Reference / AWB: <strong>{service.referenceNo}</strong>
+                </div>
+                <a href={`https://www.indiapost.gov.in/_layouts/15/dop.portal.tracking/trackconsignment.aspx`} target="_blank" rel="noreferrer" style={{ ...btn, background: '#e0f2fe', width: '100%' }}>
+                  <ExternalLink size={12} /> Track on India Post
+                </a>
               </div>
             )}
 
-            {/* Feature 4: Final Documents Download */}
+            {/* Feature 1: Loyalty Points Catalog */}
+            {service.status === 'DELIVERED' && service.fees > 0 && (
+              <div style={{ background: '#fef3c7', border: '1px solid #fde68a', padding: '8px', textAlign: 'center', fontFamily: 'Tahoma', fontSize: '11px', color: '#92400e' }}>
+                <strong style={{ fontSize: '12px' }}>Reward Points Earned: {Math.floor(service.fees / 10)}</strong><br/>
+                Total Balance: {service.customer.loyaltyPoints} Points
+                <hr style={{ borderTop: '1px dotted #d97706', margin: '4px 0' }} />
+                <em>💡 100 Points = 1 Free Color Printout!</em>
+              </div>
+            )}
+
+            {/* Feature 3: Request Physical Printout */}
             {service.status === 'DELIVERED' && service.serviceDocUrls?.length > 0 && (
               <fieldset style={{ border: '2px groove #c0c0c0', padding: '8px', background: '#e0f2fe' }}>
                 <legend style={{ fontFamily: 'Tahoma', fontSize: '11px', padding: '0 4px', color: '#0369a1', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -201,11 +306,16 @@ export default function TrackClient({ service, settings, queuePosition }: { serv
                       📄 Download File {idx + 1}
                     </a>
                   ))}
+                  <button 
+                    onClick={requestPrintout} 
+                    disabled={printRequesting || printRequested}
+                    style={{ ...btn, marginTop: '4px', background: printRequested ? '#d4edda' : '#d4d0c8', color: printRequested ? '#155724' : '#000' }}>
+                    <Printer size={12} /> {printRequested ? 'Print Requested!' : 'Request Physical Print at Shop'}
+                  </button>
                 </div>
               </fieldset>
             )}
 
-            {/* Remarks */}
             {service.notes && (
               <fieldset style={{ border: '2px groove #c0c0c0', padding: '8px', background: '#f5f5f5' }}>
                 <legend style={{ fontFamily: 'Tahoma', fontSize: '11px', padding: '0 4px', color: '#333', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -217,7 +327,6 @@ export default function TrackClient({ service, settings, queuePosition }: { serv
               </fieldset>
             )}
 
-            {/* Feature 3 & 7: Missing Docs Action & Upload */}
             {(service.missingDocs || uploadedCount > 0) && (
               <fieldset style={{ border: '2px groove #c0c0c0', padding: '8px', background: '#ffebeb' }}>
                 <legend style={{ fontFamily: 'Tahoma', fontSize: '11px', padding: '0 4px', color: '#cc0000', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -248,7 +357,29 @@ export default function TrackClient({ service, settings, queuePosition }: { serv
               </fieldset>
             )}
 
-            {/* Feature 8: 5-Star Rating */}
+            {/* Feature 5: In-App Chat */}
+            {service.status !== 'DELIVERED' && (
+              <fieldset style={{ border: '2px groove #c0c0c0', padding: '8px', background: '#fff' }}>
+                <legend style={{ fontFamily: 'Tahoma', fontSize: '11px', padding: '0 4px', color: '#333', fontWeight: 'bold' }}>
+                  Ask a Question
+                </legend>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  <input 
+                    type="text" 
+                    value={chatMessage} 
+                    onChange={e => setChatMessage(e.target.value)}
+                    placeholder="Type your message..."
+                    style={{ ...inset, flex: 1, padding: '4px', fontSize: '11px', fontFamily: 'Tahoma' }}
+                    onKeyDown={e => e.key === 'Enter' && sendChatMessage()}
+                  />
+                  <button onClick={sendChatMessage} disabled={chatSending || !chatMessage.trim()} style={{ ...btn, background: '#0a246a', color: 'white' }}>
+                    Send
+                  </button>
+                </div>
+                {chatSuccess && <div style={{ fontSize: '10px', color: 'green', marginTop: '4px' }}>Message sent to Admin!</div>}
+              </fieldset>
+            )}
+
             {service.status === 'DELIVERED' && !service.rating && !ratingSuccess && (
               <fieldset style={{ border: '2px groove #c0c0c0', padding: '8px', background: '#fff' }}>
                 <legend style={{ fontFamily: 'Tahoma', fontSize: '11px', padding: '0 4px', color: '#333', fontWeight: 'bold' }}>
@@ -291,25 +422,29 @@ export default function TrackClient({ service, settings, queuePosition }: { serv
               </div>
             )}
             
-            {/* Action Buttons: WhatsApp & Call & Download Receipt */}
-            <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+            {/* Action Buttons: WhatsApp & Call & Map */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '10px' }}>
               {settings?.shopPhone && (
-                <a href={`https://wa.me/${settings.shopPhone.replace(/\\D/g,'')}?text=Hi, I need help with my tracking ID: ${service.trackingId}`} target="_blank" rel="noreferrer" style={{ ...btn, flex: 1, textDecoration: 'none', background: '#25D366', color: 'white' }}>
+                <a href={`https://wa.me/${settings.shopPhone.replace(/\\D/g,'')}?text=Hi, I need help with my tracking ID: ${service.trackingId}`} target="_blank" rel="noreferrer" style={{ ...btn, textDecoration: 'none', background: '#25D366', color: 'white' }}>
                   <MessageSquare size={14} /> WhatsApp
                 </a>
               )}
               {settings?.shopPhone && (
-                <a href={`tel:${settings.shopPhone.replace(/\\D/g,'')}`} style={{ ...btn, flex: 1, textDecoration: 'none' }}>
+                <a href={`tel:${settings.shopPhone.replace(/\\D/g,'')}`} style={{ ...btn, textDecoration: 'none' }}>
                   <Phone size={14} /> Call
                 </a>
               )}
+              
+              {/* Feature 7: Navigate to Shop */}
+              <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(settings?.shopName || 'RA Seva Point')}`} target="_blank" rel="noreferrer" style={{ ...btn, gridColumn: '1 / -1', textDecoration: 'none' }}>
+                <MapPin size={14} /> Get Directions to Shop
+              </a>
             </div>
 
             <button onClick={handleDownloadReceipt} style={{ ...btn, width: '100%', height: '32px' }}>
               <Download size={14} /> Save Token Receipt
             </button>
 
-            {/* Feature 9: Cross-Selling Banner */}
             <div style={{ marginTop: '10px', background: '#0a246a', color: 'white', padding: '10px', textAlign: 'center', fontFamily: 'Tahoma', fontSize: '11px', border: '1px solid #000' }}>
               <strong>🌟 SPECIAL OFFER 🌟</strong><br/>
               Need a Flight Ticket or Hotel? Ask us today for best rates!
