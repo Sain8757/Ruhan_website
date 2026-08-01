@@ -51,6 +51,7 @@ export default function CustomerActionsDialog({
     fees: "",
     paymentStatus: "UNPAID",
     paymentMode: "CASH",
+    amountPaid: "",
     notes: "",
     requiredDocs: [] as string[],
   });
@@ -184,12 +185,17 @@ export default function CustomerActionsDialog({
     setIsCreatingService(true);
     const trackingId = "RA-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
+    const finalAmountPaid = serviceForm.paymentStatus === "PAID" 
+      ? Number(serviceForm.fees) 
+      : (serviceForm.paymentStatus === "PARTIAL" ? Number(serviceForm.amountPaid) : 0);
+
     try {
       const res = await fetch("/api/services", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...serviceForm,
+          amountPaid: finalAmountPaid,
           serviceType: finalType,
           customerId: customerId,
           trackingId,
@@ -509,6 +515,18 @@ export default function CustomerActionsDialog({
                           </select>
                         </div>
                       </div>
+
+                      {serviceForm.paymentStatus === "PARTIAL" && (
+                        <div>
+                          <label style={{ display: "block", marginBottom: "2px" }}>Amount Paid (₹):</label>
+                          <input 
+                            type="number" className="legacy-input" style={{ width: "100%" }}
+                            value={serviceForm.amountPaid} onChange={e => setServiceForm({...serviceForm, amountPaid: e.target.value})}
+                            required
+                            max={serviceForm.fees || undefined}
+                          />
+                        </div>
+                      )}
 
                       <div>
                         <label style={{ display: "block", marginBottom: "2px" }}>Service Notes / Comments:</label>
