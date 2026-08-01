@@ -108,20 +108,31 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
 
       // Temporarily enforce fixed canvas width for capture
       const origWidth = element.style.width;
+      const noPrintElements = Array.from(element.querySelectorAll<HTMLElement>(".no-print"));
+      const previousNoPrintDisplays = noPrintElements.map((el) => el.style.display);
       if (!isThermal) {
         element.style.width = "794px";
       } else {
         element.style.width = "300px";
       }
-
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#ffffff",
-        logging: false,
+      noPrintElements.forEach((el) => {
+        el.style.display = "none";
       });
 
-      element.style.width = origWidth;
+      let canvas;
+      try {
+        canvas = await html2canvas(element, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          logging: false,
+        });
+      } finally {
+        element.style.width = origWidth;
+        noPrintElements.forEach((el, index) => {
+          el.style.display = previousNoPrintDisplays[index] || "";
+        });
+      }
 
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", isThermal ? [80, (canvas.height * 80) / canvas.width] : "a4");
@@ -130,12 +141,24 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
         // For thermal, use exact width without margins
         pdf.addImage(imgData, "PNG", 0, 0, 80, (canvas.height * 80) / canvas.width);
       } else {
-        // For A4, use margins
-        const pdfWidth = pdf.internal.pageSize.getWidth(); // 210mm
+        // For A4, split long invoices across pages instead of shrinking/cutting content.
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
         const margin = 8;
-        const printWidth = pdfWidth - (margin * 2); // 194mm
+        const printWidth = pdfWidth - margin * 2;
         const printHeight = (canvas.height * printWidth) / canvas.width;
-        pdf.addImage(imgData, "PNG", margin, margin, printWidth, printHeight);
+        let heightLeft = printHeight;
+        let position = margin;
+
+        pdf.addImage(imgData, "PNG", margin, position, printWidth, printHeight);
+        heightLeft -= pdfHeight - margin * 2;
+
+        while (heightLeft > 0) {
+          position = heightLeft - printHeight + margin;
+          pdf.addPage();
+          pdf.addImage(imgData, "PNG", margin, position, printWidth, printHeight);
+          heightLeft -= pdfHeight - margin * 2;
+        }
       }
       
       const fileName = `${invoice.customer.name.replace(/[^a-zA-Z0-9 ]/g, "")}_Invoice_${invoice.invoiceNumber}.pdf`;
@@ -318,14 +341,16 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
               width: "100%",
               maxWidth: "794px",
               fontFamily: "'Courier New', Courier, 'Consolas', monospace",
-              border: "2px solid #000000",
+              border: "3px double #111111",
               color: "#000000",
-              background: "#ffffff",
-              boxSizing: "border-box"
+              background: "linear-gradient(180deg,#fffef8 0%,#ffffff 42%,#fbfaf3 100%)",
+              boxSizing: "border-box",
+              padding: "30px 34px",
+              boxShadow: "0 8px 30px rgba(0,0,0,0.12)"
             }}
           >
             {/* Top Brand Header */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "2px solid #000000", paddingBottom: "12px", marginBottom: "12px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", borderBottom: "3px double #000000", paddingBottom: "14px", marginBottom: "14px" }}>
               <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
                 <div style={{ width: "60px", height: "60px", border: "1px solid #000", display: "flex", alignItems: "center", justifyContent: "center", background: "#fff" }}>
                   <img
@@ -361,9 +386,12 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
               </div>
 
               <div style={{ textAlign: "right" }}>
-                <h2 style={{ fontSize: "28px", fontWeight: "900", margin: 0, textTransform: "uppercase", letterSpacing: "2px", color: "#000" }}>
+                <h2 style={{ fontSize: "30px", fontWeight: "900", margin: 0, textTransform: "uppercase", letterSpacing: "2px", color: "#000" }}>
                   {invoice.type === "QUOTATION" ? "QUOTATION" : "INVOICE"}
                 </h2>
+                <div style={{ display: "inline-block", marginTop: "4px", padding: "2px 8px", border: "1px solid #000", fontSize: "10px", fontWeight: "bold" }}>
+                  {invoice.paymentStatus}
+                </div>
                 <div style={{ fontSize: "12px", fontWeight: "bold", marginTop: "4px" }}>
                   INVOICE NO. <span style={{ textDecoration: "underline" }}>{invoice.invoiceNumber}</span>
                 </div>
@@ -371,7 +399,7 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
             </div>
 
             {/* Billed To & Order Details Grid Table */}
-            <table style={{ width: "100%", borderCollapse: "collapse", border: "1.5px solid #000", fontSize: "11px", marginBottom: "12px" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", border: "1.5px solid #000", fontSize: "11px", marginBottom: "14px" }}>
               <thead>
                 <tr style={{ background: "#f2f2f2", borderBottom: "1.5px solid #000", textAlign: "left" }}>
                   <th style={{ padding: "4px 8px", width: "40%", borderRight: "1px solid #000", fontWeight: "bold" }}>BILL TO</th>
@@ -405,7 +433,7 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
             </table>
 
             {/* Line Items Table with Vertical Grid Borders */}
-            <table style={{ width: "100%", borderCollapse: "collapse", border: "1.5px solid #000", fontSize: "11px", marginBottom: "12px" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", border: "1.5px solid #000", fontSize: "11px", marginBottom: "14px", background: "#fff" }}>
               <thead>
                 <tr style={{ background: "#f2f2f2", borderBottom: "1.5px solid #000" }}>
                   <th style={{ padding: "6px 8px", width: "8%", borderRight: "1px solid #000", textAlign: "center" }}>ITEM #</th>
@@ -450,7 +478,7 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
             </table>
 
             {/* Bottom Grid Section: Left Note & Term | Right Sub-Total & Totals */}
-            <div style={{ display: "flex", gap: "12px", alignItems: "stretch", marginBottom: "12px" }}>
+            <div style={{ display: "flex", gap: "14px", alignItems: "stretch", marginBottom: "14px" }}>
               {/* NOTE & TERM Box */}
               <div style={{ flex: 1.2, border: "1.5px solid #000", padding: "8px 10px", fontSize: "9px", lineHeight: "1.3" }}>
                 <div style={{ fontWeight: "bold", fontSize: "11px", textTransform: "uppercase", borderBottom: "1.5px solid #000", paddingBottom: "3px", marginBottom: "5px" }}>
@@ -544,22 +572,22 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
           /* ========================================================================= */
           <div
             ref={invoiceCardRef}
-            className="invoice-print-card glass-card p-8 bg-white border text-slate-900 shadow-md"
-            style={{ width: "100%", maxWidth: "794px", background: "#ffffff", borderColor: "var(--border-primary)" }}
+            className="invoice-print-card p-8 bg-white border text-slate-900 shadow-md"
+            style={{ width: "100%", maxWidth: "794px", background: "#ffffff", borderColor: "#d7dde8", borderRadius: "18px", overflow: "hidden", boxShadow: "0 18px 45px rgba(15,23,42,0.12)" }}
           >
             {/* Header */}
-            <div className="flex justify-between items-start gap-4 flex-wrap pb-6 border-b-2 border-slate-200">
+            <div className="flex justify-between items-start gap-4 flex-wrap pb-6 border-b-2 border-slate-200" style={{ margin: "-32px -32px 0", padding: "28px 32px 24px", background: "linear-gradient(135deg,#0f172a 0%,#1d4ed8 100%)", color: "#ffffff" }}>
               <div>
                 <div className="flex items-center gap-4 mb-3">
                   <div className="rounded-xl flex items-center justify-center bg-white border border-slate-200 shadow-sm overflow-hidden" style={{ width: '56px', height: '56px', flexShrink: 0 }}>
                     <img src="/logo.png" alt="RA" className="object-contain p-1" style={{ width: '100%', height: '100%' }} />
                   </div>
                   <div>
-                    <h2 className="font-extrabold text-2xl tracking-tight text-slate-900">{shopName}</h2>
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-blue-600 mt-0.5">{shopTagline}</p>
+                    <h2 className="font-extrabold text-2xl tracking-tight" style={{ color: "#ffffff" }}>{shopName}</h2>
+                    <p className="text-[11px] font-bold uppercase tracking-widest mt-0.5" style={{ color: "#bfdbfe" }}>{shopTagline}</p>
                   </div>
                 </div>
-                <div className="space-y-1 text-xs text-slate-500">
+                <div className="space-y-1 text-xs" style={{ color: "#dbeafe" }}>
                   {shopAddress && <p className="flex items-center gap-1.5"><MapPin size={12} /> {shopAddress}</p>}
                   {shopPhone && <p className="flex items-center gap-1.5"><Phone size={12} /> {shopPhone}</p>}
                   {shopEmail && <p className="flex items-center gap-1.5"><Mail size={12} /> {shopEmail}</p>}
@@ -567,12 +595,12 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
               </div>
 
               <div className="text-right">
-                <div className={`inline-block px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider mb-2 ${invoice.type === 'QUOTATION' ? 'bg-orange-50 text-orange-600' : 'bg-blue-50 text-blue-600'}`}>
+                <div className={`inline-block px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider mb-2 ${invoice.type === 'QUOTATION' ? 'bg-orange-50 text-orange-600' : 'bg-white text-blue-700'}`}>
                   {invoice.type === 'QUOTATION' ? 'Quotation / Proforma' : 'Tax Invoice'}
                 </div>
-                <div className="font-mono font-bold text-lg text-slate-900">#{invoice.invoiceNumber}</div>
-                <div className="text-xs text-slate-500 mt-1">Date: {formatDate(invoice.createdAt)}</div>
-                <div className="text-xs text-slate-500 mt-0.5">Operator: {invoice.createdBy?.name || "—"}</div>
+                <div className="font-mono font-bold text-lg" style={{ color: "#ffffff" }}>#{invoice.invoiceNumber}</div>
+                <div className="text-xs mt-1" style={{ color: "#dbeafe" }}>Date: {formatDate(invoice.createdAt)}</div>
+                <div className="text-xs mt-0.5" style={{ color: "#dbeafe" }}>Operator: {invoice.createdBy?.name || "—"}</div>
               </div>
             </div>
 
@@ -674,7 +702,7 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
                 </div>
               </div>
 
-              <div className="space-y-2 text-sm text-slate-600">
+              <div className="space-y-2 text-sm text-slate-600 rounded-2xl border border-slate-200 p-4 bg-slate-50">
                 <div className="flex justify-between"><span>Subtotal:</span><span>₹{invoice.subtotal.toLocaleString("en-IN")}</span></div>
                 {invoice.discount > 0 && <div className="flex justify-between text-red-500"><span>Discount:</span><span>- ₹{invoice.discount.toLocaleString("en-IN")}</span></div>}
                 {invoice.gst > 0 && <div className="flex justify-between"><span>GST ({invoice.gst}%):</span><span>₹{Math.round((invoice.subtotal * invoice.gst) / 100).toLocaleString("en-IN")}</span></div>}
@@ -724,23 +752,23 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
             style={{
               width: "300px",
               background: "#ffffff",
-              padding: "16px 12px",
+              padding: "12px 10px",
               boxSizing: "border-box",
               color: "#000000",
-              fontFamily: "Arial, Helvetica, sans-serif",
-              fontSize: "12px",
-              lineHeight: "1.3",
+              fontFamily: "'Courier New', Courier, monospace",
+              fontSize: "11px",
+              lineHeight: "1.25",
             }}
           >
             {/* Store Header */}
             <div className="text-center pb-2">
-              <h2 className="font-black uppercase tracking-wider" style={{ fontSize: "22px", lineHeight: "1.2" }}>{shopName}</h2>
-              <p className="mt-1">{shopTagline}</p>
+              <h2 className="font-black uppercase tracking-wider" style={{ fontSize: "18px", lineHeight: "1.15" }}>{shopName}</h2>
+              <p className="mt-1" style={{ fontSize: "10px" }}>{shopTagline}</p>
               <p>Ph: {shopPhone}</p>
-              <p className="text-slate-700">{shopAddress}</p>
+              <p>{shopAddress}</p>
             </div>
 
-            <hr style={{ borderColor: "#000", borderWidth: "1px", margin: "4px 0" }} />
+            <div style={{ borderTop: "1px dashed #000", margin: "5px 0" }} />
 
             {/* Bill Meta */}
             <div className="pb-2 space-y-0.5">
@@ -754,20 +782,20 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
             </div>
 
             {/* Items Table */}
-            <table style={{ width: "100%", borderCollapse: "collapse", border: "1.5px solid #000", marginBottom: "8px" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", borderTop: "1px dashed #000", borderBottom: "1px dashed #000", marginBottom: "8px" }}>
               <thead>
-                <tr style={{ background: "#e5e7eb", borderBottom: "1.5px solid #000" }}>
-                  <th style={{ padding: "4px", borderRight: "1px solid #000", textAlign: "left", fontWeight: "normal" }}>Item</th>
-                  <th style={{ padding: "4px", borderRight: "1px solid #000", textAlign: "center", fontWeight: "normal" }}>Qty</th>
-                  <th style={{ padding: "4px", textAlign: "right", fontWeight: "normal" }}>Amt</th>
+                <tr style={{ borderBottom: "1px dashed #000" }}>
+                  <th style={{ padding: "4px 0", textAlign: "left", fontWeight: "bold" }}>ITEM</th>
+                  <th style={{ padding: "4px 0", textAlign: "center", fontWeight: "bold" }}>QTY</th>
+                  <th style={{ padding: "4px 0", textAlign: "right", fontWeight: "bold" }}>AMT</th>
                 </tr>
               </thead>
               <tbody>
                 {invoice.items.map((item: any, idx: number) => (
-                  <tr key={item.id || idx} style={{ borderBottom: "1px solid #000" }}>
-                    <td style={{ padding: "4px", borderRight: "1px solid #000", textTransform: "uppercase" }}>{item.name}</td>
-                    <td style={{ padding: "4px", borderRight: "1px solid #000", textAlign: "center" }}>{item.quantity}</td>
-                    <td style={{ padding: "4px", textAlign: "right", fontWeight: "bold" }}>{item.total.toFixed(2)}</td>
+                  <tr key={item.id || idx}>
+                    <td style={{ padding: "4px 0", textTransform: "uppercase", wordBreak: "break-word" }}>{item.name}</td>
+                    <td style={{ padding: "4px 0", textAlign: "center" }}>{item.quantity}</td>
+                    <td style={{ padding: "4px 0", textAlign: "right", fontWeight: "bold" }}>{item.total.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -779,7 +807,7 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
               {invoice.discount > 0 && <div className="flex justify-between"><span>Discount:</span><span>-₹{invoice.discount.toFixed(2)}</span></div>}
               {invoice.gst > 0 && <div className="flex justify-between"><span>GST:</span><span>₹{((invoice.subtotal * invoice.gst) / 100).toFixed(2)}</span></div>}
               
-              <div className="flex justify-between font-bold" style={{ fontSize: "16px", borderTop: "1.5px solid #000", borderBottom: "1px solid #000", margin: "4px 0", padding: "2px 0" }}>
+              <div className="flex justify-between font-bold" style={{ fontSize: "16px", borderTop: "1px dashed #000", borderBottom: "1px dashed #000", margin: "5px 0", padding: "4px 0" }}>
                 <span>TOTAL:</span>
                 <span>₹{invoice.total.toFixed(2)}</span>
               </div>
@@ -796,12 +824,12 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
             {/* QR Code */}
             {upiLink && (
               <div className="text-center py-2 flex flex-col items-center">
-                <QRCodeSVG value={upiLink} size={120} />
+                <QRCodeSVG value={upiLink} size={104} />
                 <span className="mt-1 font-bold" style={{ fontSize: "13px" }}>Scan & Pay via UPI</span>
               </div>
             )}
 
-            <hr style={{ borderColor: "#000", borderWidth: "1px", margin: "4px 0" }} />
+            <div style={{ borderTop: "1px dashed #000", margin: "5px 0" }} />
 
             {/* Footer */}
             <div className="text-center mt-2" style={{ fontSize: "11px" }}>
