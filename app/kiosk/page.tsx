@@ -1,9 +1,11 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { SERVICE_TYPES } from '@/lib/utils';
-import { Loader2, Users, Globe, Upload } from 'lucide-react';
+import { Loader2, Users, Globe, Upload, Download, Share2, Clock, CheckCircle2, ChevronRight, UploadCloud } from 'lucide-react';
 import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import html2canvas from 'html2canvas-pro';
+import TokenReceipt from '@/components/kiosk/TokenReceipt';
 
 // ─── Translations ──────────────────────────────────────────
 const T = {
@@ -231,6 +233,50 @@ export default function KioskPage() {
   const [crop, setCrop] = useState<Crop>({ unit: '%', width: 90, height: 90, x: 5, y: 5 });
   const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
   const imgRef = useRef<HTMLImageElement | null>(null);
+  const receiptRef = useRef<HTMLDivElement>(null);
+
+  const handleDownloadReceipt = async () => {
+    if (!receiptRef.current) return;
+    try {
+      const canvas = await html2canvas(receiptRef.current, { scale: 2 });
+      const image = canvas.toDataURL("image/jpeg", 0.9);
+      const link = document.createElement("a");
+      link.href = image;
+      link.download = `ruhan-receipt-${ticket}.jpg`;
+      link.click();
+    } catch (error) {
+      console.error("Failed to generate receipt", error);
+      setErrorMsg("Failed to download receipt.");
+    }
+  };
+
+  const handleShareReceipt = async () => {
+    if (!receiptRef.current) return;
+    try {
+      const canvas = await html2canvas(receiptRef.current, { scale: 2 });
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        const file = new File([blob], `receipt-${ticket}.jpg`, { type: 'image/jpeg' });
+        
+        // Use Web Share API if available
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: 'My Service Token',
+            text: 'Here is my token receipt from Ruhan Seva Point',
+            files: [file]
+          });
+        } else {
+          // Fallback: Share to WhatsApp directly via URL (though you can't attach files directly without Web Share API)
+          // We can't easily auto-attach a file to web whatsapp, so we'll fallback to just downloading it.
+          const text = encodeURIComponent(`Here is my tracking ID for ${serviceType}: ${ticket}\nTrack it here: ${window.location.origin}/track/${ticket}`);
+          window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
+      }, "image/jpeg", 0.9);
+    } catch (error) {
+      console.error("Failed to share receipt", error);
+      setErrorMsg("Failed to share receipt.");
+    }
+  };
 
   const handleDocClick = (docName: string) => {
     setActiveDoc(docName);
@@ -477,6 +523,15 @@ export default function KioskPage() {
                 <p style={{ fontFamily: 'Tahoma', fontSize: '11px', color: '#555', marginTop: '8px', textAlign: 'center' }}>
                   {t.successMsg}
                 </p>
+
+                <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                  <button type="button" onClick={handleDownloadReceipt} style={{ ...btn, flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#e0e0e0', color: '#000' }}>
+                    <Download size={14} /> {lang === 'en' ? 'Download Receipt' : 'रसीद डाउनलोड करें'}
+                  </button>
+                  <button type="button" onClick={handleShareReceipt} style={{ ...btn, flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#25d366', color: '#fff' }}>
+                    <Share2 size={14} /> {lang === 'en' ? 'Share' : 'शेयर करें'}
+                  </button>
+                </div>
               </fieldset>
 
               {/* Upload Documents Section */}
@@ -596,6 +651,23 @@ export default function KioskPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Hidden Receipt for html2canvas */}
+      {step === 3 && (
+        <div style={{ position: 'fixed', left: '-9999px', top: 0, pointerEvents: 'none' }}>
+          <TokenReceipt 
+            ref={receiptRef}
+            data={{
+              tokenNumber: parseInt(tokenLabel.replace('T', '')) || 0,
+              trackingId: ticket,
+              customerName: name,
+              customerMobile: mobile,
+              serviceType: serviceType,
+              createdAt: new Date().toISOString()
+            }}
+          />
         </div>
       )}
 

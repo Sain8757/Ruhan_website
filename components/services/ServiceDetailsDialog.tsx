@@ -9,6 +9,8 @@ import {
   Upload, X, Download, Clock, Send, AlertTriangle, PlusCircle,
   CreditCard, Activity
 } from "lucide-react";
+import html2canvas from 'html2canvas-pro';
+import TokenReceipt from '@/components/kiosk/TokenReceipt';
 
 // ── Constants ────────────────────────────────────────────────────
 const COMMON_DOCS = [
@@ -100,6 +102,7 @@ const SHead = ({ icon, label, color="black" }: { icon: React.ReactNode; label: s
 export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuccess }: Props) {
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const receiptRef = useRef<HTMLDivElement>(null);
 
   // ── Core state ───────────────────────────────────────────────
   const [service,       setService]       = useState<any>(null);
@@ -261,6 +264,21 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
       onClose();
     } catch (err: any) { toast.error(err.message); }
     finally { setSaving(false); }
+  };
+
+  const handleDownloadReceipt = async () => {
+    if (!receiptRef.current) return;
+    try {
+      const canvas = await html2canvas(receiptRef.current, { scale: 2 });
+      const image = canvas.toDataURL("image/jpeg", 0.9);
+      const link = document.createElement("a");
+      link.href = image;
+      link.download = `receipt-${service?.trackingId}.jpg`;
+      link.click();
+    } catch (error) {
+      console.error("Failed to generate receipt", error);
+      toast.error("Failed to download receipt.");
+    }
   };
 
   const handleDelete = async () => {
@@ -602,6 +620,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                   ))}
                 </div>
                 <div style={{ display:"flex",gap:"5px",flexShrink:0 }}>
+                  <button type="button" onClick={handleDownloadReceipt} style={Btn({background:"#0a246a",color:"white"})}><Download size={12}/> Download Receipt</button>
                   <button type="button" onClick={() => window.print()} style={Btn()}><Printer size={12}/> Print Slip</button>
                   <button type="button" onClick={() => window.open(`/billing?customerId=${service.customer.id}`,"_blank")} style={Btn({background:"#0a246a",color:"white"})}>
                     <FileText size={12}/> 1-Click Invoice
@@ -1211,6 +1230,23 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
       )}
 
       <style>{`@media print { body > *:not(.print-only) { display: none !important; } .print-only { display: block !important; } }`}</style>
+
+      {/* Hidden Receipt for html2canvas */}
+      {service && (
+        <div style={{ position: 'fixed', left: '-9999px', top: 0, pointerEvents: 'none' }}>
+          <TokenReceipt 
+            ref={receiptRef}
+            data={{
+              tokenNumber: service.tokenNumber || 0,
+              trackingId: service.trackingId || '',
+              customerName: service.customer?.name || '',
+              customerMobile: service.customer?.mobile || '',
+              serviceType: service.serviceType,
+              createdAt: service.createdAt
+            }}
+          />
+        </div>
+      )}
     </>
   );
 }
