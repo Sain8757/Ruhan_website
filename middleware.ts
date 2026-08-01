@@ -5,6 +5,7 @@ export default auth((req) => {
   const isAuthenticated = !!req.auth;
   const isAuthPage = req.nextUrl.pathname.startsWith("/login");
   const isPublicPage = req.nextUrl.pathname.startsWith("/kiosk") || 
+                       req.nextUrl.pathname.startsWith("/drop") ||
                        req.nextUrl.pathname.startsWith("/status") || 
                        req.nextUrl.pathname.startsWith("/track");
 
