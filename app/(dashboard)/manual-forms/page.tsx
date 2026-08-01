@@ -24,8 +24,10 @@ export default function ManualFormsDashboard() {
       <div
         style={{
           background: "#d4d0c8",
-          border: "2px solid",
-          borderColor: "#ffffff #808080 #808080 #ffffff",
+          borderTop: "2px solid #ffffff",
+          borderLeft: "2px solid #ffffff",
+          borderRight: "2px solid #404040",
+          borderBottom: "2px solid #404040",
           boxShadow: "1px 1px 0 #000",
         }}
       >
@@ -44,6 +46,7 @@ export default function ManualFormsDashboard() {
           <span
             style={{
               color: "#ffffff",
+              WebkitTextFillColor: "#ffffff",
               fontWeight: "bold",
               fontSize: "13px",
               fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif",
@@ -56,7 +59,14 @@ export default function ManualFormsDashboard() {
         {/* Window body */}
         <div style={{ padding: "12px" }}>
           {/* Page heading */}
-          <p style={{ ...win95Font, color: "#444", marginBottom: "12px" }}>
+          <p
+            style={{
+              ...win95Font,
+              color: "#000000",
+              WebkitTextFillColor: "#000000",
+              marginBottom: "12px",
+            }}
+          >
             Select a category and form type to start filling.
           </p>
 
@@ -89,11 +99,19 @@ export default function ManualFormsDashboard() {
                     fontSize: "13px",
                     fontWeight: "bold",
                     color: "#000080",
+                    WebkitTextFillColor: "#000080",
                   }}
                 >
                   Bihar Ration Card (बिहार राशन कार्ड)
                 </div>
-                <div style={{ ...win95Font, fontSize: "11px", color: "#444" }}>
+                <div
+                  style={{
+                    ...win95Font,
+                    fontSize: "11px",
+                    color: "#000000",
+                    WebkitTextFillColor: "#000000",
+                  }}
+                >
                   Official government forms for Bihar Ration Card
                 </div>
               </div>
@@ -101,24 +119,18 @@ export default function ManualFormsDashboard() {
 
             {/* Form rows */}
             <div style={{ background: "#ffffff" }}>
-
-              {/* Row: New Apply */}
               <FormRow
                 href="/manual-forms/ration-card/new"
                 icon={<FilePlus2 size={16} color="#000080" />}
                 title="New Apply (Old)"
                 description="Application for new ration card (Old Template)."
               />
-
-              {/* Row: Form Ka */}
               <FormRow
                 href="/manual-forms/ration-card/ka"
                 icon={<FilePlus2 size={16} color="#000080" />}
                 title="प्रपत्र क (Form Ka)"
                 description="Application for generating a completely new ration card."
               />
-
-              {/* Row: Form Kha — last row, no bottom border */}
               <FormRow
                 href="/manual-forms/ration-card/kha"
                 icon={<FileText size={16} color="#000080" />}
@@ -149,9 +161,11 @@ function FormRow({ href, icon, title, description, isLast }: FormRowProps) {
       style={{ textDecoration: "none", display: "block" }}
       onMouseOver={(e) => {
         (e.currentTarget as HTMLElement).style.outline = "1px dotted #000000";
+        (e.currentTarget as HTMLElement).style.background = "#f0f0f0";
       }}
       onMouseOut={(e) => {
         (e.currentTarget as HTMLElement).style.outline = "none";
+        (e.currentTarget as HTMLElement).style.background = "transparent";
       }}
     >
       <div
@@ -179,6 +193,7 @@ function FormRow({ href, icon, title, description, isLast }: FormRowProps) {
               fontSize: "13px",
               fontWeight: "bold",
               color: "#000080",
+              WebkitTextFillColor: "#000080",
             }}
           >
             {title}
@@ -187,7 +202,8 @@ function FormRow({ href, icon, title, description, isLast }: FormRowProps) {
             style={{
               fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif",
               fontSize: "11px",
-              color: "#444",
+              color: "#000000",
+              WebkitTextFillColor: "#000000",
               marginTop: "2px",
             }}
           >
