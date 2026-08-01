@@ -513,87 +513,131 @@ export default function DashboardPage() {
 
   return (
     <div className="page-shell page-shell-dashboard">
-      {/* ===== WELCOME HERO ===== */}
+      {/* ===== WELCOME HERO (Windows 95 Classic Style) ===== */}
       <div
-        className="relative overflow-hidden rounded-xl p-4 sm:p-5 animate-fade-in flex flex-col gap-3.5"
+        className="p-4 flex flex-col gap-4 mb-4"
         style={{
-          background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%)",
-          border: "1px solid rgba(255,255,255,0.1)",
-          boxShadow: "0 12px 24px -6px rgba(49, 46, 129, 0.3), inset 0 1px 0 rgba(255,255,255,0.15)",
+          background: "#c0c0c0",
+          borderTop: "2px solid #ffffff",
+          borderLeft: "2px solid #ffffff",
+          borderRight: "2px solid #808080",
+          borderBottom: "2px solid #808080",
+          color: "#000000",
+          boxShadow: "1px 1px 0 #000000",
+          fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
         }}
       >
-        {/* Background orbs */}
-        <div
-          className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none"
-          style={{
-            background: "radial-gradient(circle, rgba(167,139,250,0.15) 0%, transparent 70%)",
-            transform: "translate(20%, -30%)",
-          }}
-        />
-
-        <div className="relative z-10 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-2 mb-1.5">
+            <div className="flex items-center gap-2 mb-2">
               <div
-                className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest text-white"
+                className="flex items-center gap-1.5 px-1.5 py-0.5 text-xs font-bold uppercase tracking-wide"
                 style={{
-                  background: "linear-gradient(90deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)",
-                  border: "1px solid rgba(255,255,255,0.15)",
-                  backdropFilter: "blur(10px)",
+                  background: "#000080", // Classic Win95 Titlebar Blue
+                  color: "#ffffff",
                 }}
               >
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Live Dashboard
+                <div className="w-2 h-2 bg-cyan-400" style={{ border: "1px solid #fff" }} />
+                LIVE DASHBOARD
               </div>
-              {/* Last refresh indicator */}
               <div
-                className="flex items-center gap-1 text-[10px] font-medium"
-                style={{ color: "rgba(255,255,255,0.45)" }}
+                className="flex items-center gap-1 text-xs font-medium"
+                style={{ color: "#333333" }}
               >
-                <RefreshCw size={9} className={refreshing ? "animate-spin" : ""} />
+                <RefreshCw size={10} className={refreshing ? "animate-spin" : ""} />
                 {refreshing ? "Refreshing..." : `Updated ${timeAgo(lastRefreshed.toISOString())}`}
               </div>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white mb-1 tracking-tight">
+            
+            <h1 className="text-xl sm:text-2xl font-bold mb-1" style={{ color: "#000000", letterSpacing: "0px" }}>
               {greeting}, Ruhan! {greetingEmoji}
             </h1>
-            <p
-              className="text-xs font-semibold flex items-center gap-1.5"
-              style={{ color: "rgba(255,255,255,0.75)" }}
-            >
-              <Clock size={13} className="opacity-80" />
+            
+            <p className="text-xs font-semibold flex items-center gap-1.5" style={{ color: "#000000" }}>
+              <Clock size={13} />
               {format(now, "EEEE, dd MMMM yyyy • hh:mm:ss a")}
             </p>
           </div>
 
           <div className="hidden sm:flex items-center gap-2 shrink-0">
-            {/* Manual refresh button */}
+            {/* Win95 Button: Refresh */}
             <button
               onClick={() => fetchData(true)}
               disabled={refreshing}
-              className="flex items-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all hover:scale-105 disabled:opacity-60"
+              className="flex items-center gap-1.5 py-1 px-3 text-xs font-bold active:bg-gray-300"
               style={{
-                background: "rgba(255,255,255,0.1)",
-                color: "rgba(255,255,255,0.85)",
-                border: "1px solid rgba(255,255,255,0.2)",
+                background: "#c0c0c0",
+                color: "#000000",
+                borderTop: "2px solid #ffffff",
+                borderLeft: "2px solid #ffffff",
+                borderRight: "2px solid #000000",
+                borderBottom: "2px solid #000000",
+                boxShadow: "inset -1px -1px 0 #808080, inset 1px 1px 0 #dfdfdf",
+                outline: "none"
               }}
-              title="Refresh dashboard"
+              onMouseDown={(e) => {
+                e.currentTarget.style.borderTop = "2px solid #000000";
+                e.currentTarget.style.borderLeft = "2px solid #000000";
+                e.currentTarget.style.borderRight = "2px solid #ffffff";
+                e.currentTarget.style.borderBottom = "2px solid #ffffff";
+                e.currentTarget.style.boxShadow = "inset 1px 1px 0 #808080";
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.borderTop = "2px solid #ffffff";
+                e.currentTarget.style.borderLeft = "2px solid #ffffff";
+                e.currentTarget.style.borderRight = "2px solid #000000";
+                e.currentTarget.style.borderBottom = "2px solid #000000";
+                e.currentTarget.style.boxShadow = "inset -1px -1px 0 #808080, inset 1px 1px 0 #dfdfdf";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderTop = "2px solid #ffffff";
+                e.currentTarget.style.borderLeft = "2px solid #ffffff";
+                e.currentTarget.style.borderRight = "2px solid #000000";
+                e.currentTarget.style.borderBottom = "2px solid #000000";
+                e.currentTarget.style.boxShadow = "inset -1px -1px 0 #808080, inset 1px 1px 0 #dfdfdf";
+              }}
             >
-              <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
+              <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
               Refresh
             </button>
 
+            {/* Win95 Button: New Service */}
             <Link
               href="/services"
-              className="btn-primary shrink-0 py-2 px-3 text-xs transition-transform hover:scale-105"
+              className="flex items-center gap-1.5 py-1 px-3 text-xs font-bold active:bg-gray-300"
               style={{
-                background: "#ffffff",
-                color: "#312e81",
-                border: "none",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                background: "#c0c0c0",
+                color: "#000000",
+                borderTop: "2px solid #ffffff",
+                borderLeft: "2px solid #ffffff",
+                borderRight: "2px solid #000000",
+                borderBottom: "2px solid #000000",
+                boxShadow: "inset -1px -1px 0 #808080, inset 1px 1px 0 #dfdfdf",
+                textDecoration: "none"
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.borderTop = "2px solid #000000";
+                e.currentTarget.style.borderLeft = "2px solid #000000";
+                e.currentTarget.style.borderRight = "2px solid #ffffff";
+                e.currentTarget.style.borderBottom = "2px solid #ffffff";
+                e.currentTarget.style.boxShadow = "inset 1px 1px 0 #808080";
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.borderTop = "2px solid #ffffff";
+                e.currentTarget.style.borderLeft = "2px solid #ffffff";
+                e.currentTarget.style.borderRight = "2px solid #000000";
+                e.currentTarget.style.borderBottom = "2px solid #000000";
+                e.currentTarget.style.boxShadow = "inset -1px -1px 0 #808080, inset 1px 1px 0 #dfdfdf";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderTop = "2px solid #ffffff";
+                e.currentTarget.style.borderLeft = "2px solid #ffffff";
+                e.currentTarget.style.borderRight = "2px solid #000000";
+                e.currentTarget.style.borderBottom = "2px solid #000000";
+                e.currentTarget.style.boxShadow = "inset -1px -1px 0 #808080, inset 1px 1px 0 #dfdfdf";
               }}
             >
-              <Plus size={14} />
+              <Plus size={12} color="#000080" />
               New Service
             </Link>
           </div>
@@ -601,8 +645,8 @@ export default function DashboardPage() {
 
         {/* Stats preview strip */}
         <div
-          className="relative z-10 pt-2.5 flex items-center flex-wrap gap-x-6 gap-y-2 text-xs"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}
+          className="pt-3 flex items-center flex-wrap gap-x-6 gap-y-2 text-xs"
+          style={{ borderTop: "2px groove #ffffff" }}
         >
           {[
             { label: "Today's Income", value: formatCurrency(data?.todayIncome || 0), icon: "💰" },
@@ -610,10 +654,10 @@ export default function DashboardPage() {
             { label: "New Today", value: data?.todayCustomers || 0, icon: "👥" },
           ].map((item) => (
             <div key={item.label} className="flex items-center gap-2">
-              <span className="text-base filter drop-shadow-sm">{item.icon}</span>
-              <div className="flex items-center gap-1.5 text-white font-semibold">
-                <span className="opacity-75 text-xs font-medium">{item.label}:</span>
-                <span className="text-sm font-bold tracking-tight">{item.value}</span>
+              <span className="text-sm">{item.icon}</span>
+              <div className="flex items-center gap-1.5 text-black">
+                <span className="text-xs">{item.label}:</span>
+                <span className="text-xs font-bold">{item.value}</span>
               </div>
             </div>
           ))}
