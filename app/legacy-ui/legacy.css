@@ -995,8 +995,8 @@
 
 /* ---- links ---- */
 .legacy-tab-content a {
-  color: #0000cc !important;
-  text-decoration: underline !important;
+  color: #0000cc;
+  text-decoration: underline;
 }
 
 .legacy-tab-content a:hover {

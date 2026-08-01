@@ -250,7 +250,7 @@ function BillingContent() {
                     }}
                     className="hover:bg-blue-50 transition-colors"
                   >
-                    <td style={{ padding: "8px 10px", fontWeight: "bold", color: "#000080" }}>
+                    <td style={{ padding: "8px 10px", fontWeight: "bold" }}>
                       #{inv.invoiceNumber}
                       {inv.type === "QUOTATION" && (
                         <span style={{ marginLeft: "6px", fontSize: "9px", background: "orange", color: "white", padding: "2px 4px", borderRadius: "2px" }}>
@@ -259,10 +259,10 @@ function BillingContent() {
                       )}
                     </td>
                     <td style={{ padding: "8px 10px" }}>
-                      <div style={{ fontWeight: "bold", color: "#0f172a" }}>{inv.customer.name}</div>
-                      <div style={{ fontSize: "10px", color: "#64748b" }}>📞 {inv.customer.mobile}</div>
+                      <div style={{ fontWeight: "bold" }}>{inv.customer.name}</div>
+                      <div style={{ fontSize: "10px" }}>📞 {inv.customer.mobile}</div>
                     </td>
-                    <td style={{ padding: "8px 10px", textAlign: "center", color: "#334155" }}>
+                    <td style={{ padding: "8px 10px", textAlign: "center" }}>
                       {inv.items.length} item{inv.items.length !== 1 ? "s" : ""}
                     </td>
                     <td style={{ padding: "8px 10px", textAlign: "center" }}>
@@ -279,13 +279,13 @@ function BillingContent() {
                         {inv.paymentStatus}
                       </span>
                     </td>
-                    <td style={{ padding: "8px 10px", textAlign: "center", fontWeight: "bold", color: "#475569" }}>
+                    <td style={{ padding: "8px 10px", textAlign: "center", fontWeight: "bold" }}>
                       {PAYMENT_MODE_LABELS[inv.paymentMode] || inv.paymentMode}
                     </td>
-                    <td style={{ padding: "8px 10px", textAlign: "right", fontWeight: "900", color: "#0f172a" }}>
+                    <td style={{ padding: "8px 10px", textAlign: "right", fontWeight: "900" }}>
                       {formatCurrency(inv.total)}
                     </td>
-                    <td style={{ padding: "8px 10px", color: "#475569" }}>
+                    <td style={{ padding: "8px 10px" }}>
                       {formatDate(inv.createdAt)}
                     </td>
                     <td style={{ padding: "8px 10px", textAlign: "center" }} onClick={(e) => e.stopPropagation()}>

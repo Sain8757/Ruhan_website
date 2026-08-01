@@ -140,14 +140,14 @@ function CustomerTable({ customers, onOpen }: { customers: Customer[]; onOpen: (
               className="hover:bg-blue-50 transition-colors"
             >
               <td style={{ padding: "8px 10px" }}>
-                <div style={{ fontWeight: "bold", color: "#000080", fontSize: "13px" }}>{customer.name}</div>
+                <div style={{ fontWeight: "bold", fontSize: "13px" }}>{customer.name}</div>
                 {customer.aadhaarNumber && (
-                  <div style={{ fontSize: "10px", color: "#64748b" }}>Aadhaar: {customer.aadhaarNumber}</div>
+                  <div style={{ fontSize: "10px" }}>Aadhaar: {customer.aadhaarNumber}</div>
                 )}
               </td>
               <td style={{ padding: "8px 10px" }}>
-                <div style={{ fontWeight: "bold", color: "#0f172a" }}>📞 {customer.mobile}</div>
-                <div style={{ fontSize: "10px", color: "#64748b" }}>{customer.email || "No email"}</div>
+                <div style={{ fontWeight: "bold" }}>📞 {customer.mobile}</div>
+                <div style={{ fontSize: "10px" }}>{customer.email || "No email"}</div>
               </td>
               <td style={{ padding: "8px 10px", textAlign: "center" }}>
                 <span style={{ background: "#e0f2fe", color: "#0369a1", fontWeight: "bold", padding: "2px 8px", borderRadius: "3px", border: "1px solid #bae6fd", fontSize: "11px" }}>
@@ -159,7 +159,7 @@ function CustomerTable({ customers, onOpen }: { customers: Customer[]; onOpen: (
                   {customer._count.invoices} Invoices
                 </span>
               </td>
-              <td style={{ padding: "8px 10px", color: "#475569" }}>
+              <td style={{ padding: "8px 10px" }}>
                 {formatRelativeTime(customer.createdAt)}
               </td>
               <td style={{ padding: "8px 10px", textAlign: "center" }}>
