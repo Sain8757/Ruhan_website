@@ -3,74 +3,201 @@
 import Link from "next/link";
 import { FileText, FilePlus2, ChevronRight } from "lucide-react";
 
+const win95Font: React.CSSProperties = {
+  fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif",
+  fontSize: "12px",
+};
+
 export default function ManualFormsDashboard() {
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Manual Form Filling</h1>
-          <p className="text-slate-500 mt-2 font-medium">Select a category and form type to start filling.</p>
+    <div
+      style={{
+        ...win95Font,
+        padding: "16px",
+        maxWidth: "720px",
+        margin: "0 auto",
+        background: "#d4d0c8",
+        minHeight: "100vh",
+      }}
+    >
+      {/* Outer Win95 window panel */}
+      <div
+        style={{
+          background: "#d4d0c8",
+          border: "2px solid",
+          borderColor: "#ffffff #808080 #808080 #ffffff",
+          boxShadow: "1px 1px 0 #000",
+        }}
+      >
+        {/* Title bar */}
+        <div
+          style={{
+            background: "linear-gradient(90deg, #000080, #1084d0)",
+            padding: "4px 8px",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            userSelect: "none",
+          }}
+        >
+          <FileText size={14} color="#ffffff" />
+          <span
+            style={{
+              color: "#ffffff",
+              fontWeight: "bold",
+              fontSize: "13px",
+              fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif",
+            }}
+          >
+            Manual Form Filling
+          </span>
         </div>
-      </div>
 
-      {/* Category: Ration Card */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600">
-            <FileText size={20} className="stroke-[2.5]" />
+        {/* Window body */}
+        <div style={{ padding: "12px" }}>
+          {/* Page heading */}
+          <p style={{ ...win95Font, color: "#444", marginBottom: "12px" }}>
+            Select a category and form type to start filling.
+          </p>
+
+          {/* Category: Ration Card */}
+          <div
+            style={{
+              border: "1px solid #808080",
+              marginBottom: "8px",
+            }}
+          >
+            {/* Section header */}
+            <div
+              style={{
+                background: "#d4d0c8",
+                borderTop: "2px solid #ffffff",
+                borderLeft: "2px solid #ffffff",
+                borderRight: "2px solid #808080",
+                borderBottom: "2px solid #808080",
+                padding: "6px 10px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <FileText size={16} color="#000080" />
+              <div>
+                <div
+                  style={{
+                    ...win95Font,
+                    fontSize: "13px",
+                    fontWeight: "bold",
+                    color: "#000080",
+                  }}
+                >
+                  Bihar Ration Card (बिहार राशन कार्ड)
+                </div>
+                <div style={{ ...win95Font, fontSize: "11px", color: "#444" }}>
+                  Official government forms for Bihar Ration Card
+                </div>
+              </div>
+            </div>
+
+            {/* Form rows */}
+            <div style={{ background: "#ffffff" }}>
+
+              {/* Row: New Apply */}
+              <FormRow
+                href="/manual-forms/ration-card/new"
+                icon={<FilePlus2 size={16} color="#000080" />}
+                title="New Apply (Old)"
+                description="Application for new ration card (Old Template)."
+              />
+
+              {/* Row: Form Ka */}
+              <FormRow
+                href="/manual-forms/ration-card/ka"
+                icon={<FilePlus2 size={16} color="#000080" />}
+                title="प्रपत्र क (Form Ka)"
+                description="Application for generating a completely new ration card."
+              />
+
+              {/* Row: Form Kha — last row, no bottom border */}
+              <FormRow
+                href="/manual-forms/ration-card/kha"
+                icon={<FileText size={16} color="#000080" />}
+                title="प्रपत्र ख (Form Kha)"
+                description="Application for modification, name addition, or surrender."
+                isLast
+              />
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-bold text-slate-800">Bihar Ration Card (बिहार राशन कार्ड)</h2>
-            <p className="text-sm text-slate-500">Official government forms for Bihar Ration Card</p>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6 bg-slate-50/50">
-          
-          {/* Sub-category: New Apply */}
-          <Link href="/manual-forms/ration-card/new" className="group">
-            <div className="bg-white rounded-xl border border-slate-200 p-5 hover:border-blue-400 hover:shadow-md transition-all h-full flex items-center gap-4 cursor-pointer">
-              <div className="w-12 h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center group-hover:bg-green-100 group-hover:scale-110 transition-transform">
-                <FilePlus2 size={24} className="stroke-[2]" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">New Apply (Old)</h3>
-                <p className="text-xs text-slate-500 mt-1">Application for new ration card (Old Template).</p>
-              </div>
-              <ChevronRight size={20} className="text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
-            </div>
-          </Link>
-
-          {/* Sub-category: Form Ka */}
-          <Link href="/manual-forms/ration-card/ka" className="group">
-            <div className="bg-white rounded-xl border border-slate-200 p-5 hover:border-blue-400 hover:shadow-md transition-all h-full flex items-center gap-4 cursor-pointer">
-              <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-100 group-hover:scale-110 transition-transform">
-                <FilePlus2 size={24} className="stroke-[2]" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">प्रपत्र क (Form Ka)</h3>
-                <p className="text-xs text-slate-500 mt-1">Application for generating a completely new ration card.</p>
-              </div>
-              <ChevronRight size={20} className="text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
-            </div>
-          </Link>
-
-          {/* Sub-category: Form Kha */}
-          <Link href="/manual-forms/ration-card/kha" className="group">
-            <div className="bg-white rounded-xl border border-slate-200 p-5 hover:border-blue-400 hover:shadow-md transition-all h-full flex items-center gap-4 cursor-pointer">
-              <div className="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-100 group-hover:scale-110 transition-transform">
-                <FileText size={24} className="stroke-[2]" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">प्रपत्र ख (Form Kha)</h3>
-                <p className="text-xs text-slate-500 mt-1">Application for modification, name addition, or surrender.</p>
-              </div>
-              <ChevronRight size={20} className="text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
-            </div>
-          </Link>
-
         </div>
       </div>
     </div>
+  );
+}
+
+interface FormRowProps {
+  href: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  isLast?: boolean;
+}
+
+function FormRow({ href, icon, title, description, isLast }: FormRowProps) {
+  return (
+    <Link
+      href={href}
+      style={{ textDecoration: "none", display: "block" }}
+      onMouseOver={(e) => {
+        (e.currentTarget as HTMLElement).style.outline = "1px dotted #000000";
+      }}
+      onMouseOut={(e) => {
+        (e.currentTarget as HTMLElement).style.outline = "none";
+      }}
+    >
+      <div
+        style={{
+          background: "#ffffff",
+          border: "none",
+          borderBottom: isLast ? "none" : "1px solid #c0c0c0",
+          padding: "8px 10px",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          cursor: "pointer",
+        }}
+      >
+        {/* Icon */}
+        <div style={{ flexShrink: 0, display: "flex", alignItems: "center" }}>
+          {icon}
+        </div>
+
+        {/* Text */}
+        <div style={{ flex: 1 }}>
+          <div
+            style={{
+              fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif",
+              fontSize: "13px",
+              fontWeight: "bold",
+              color: "#000080",
+            }}
+          >
+            {title}
+          </div>
+          <div
+            style={{
+              fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif",
+              fontSize: "11px",
+              color: "#444",
+              marginTop: "2px",
+            }}
+          >
+            {description}
+          </div>
+        </div>
+
+        {/* Arrow */}
+        <ChevronRight size={16} color="#808080" style={{ flexShrink: 0 }} />
+      </div>
+    </Link>
   );
 }

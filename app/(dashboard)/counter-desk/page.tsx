@@ -72,10 +72,87 @@ const useStoredState = <T,>(key: string, initialValue: T) => {
 const buildWhatsAppText = (service: ServiceCatalogItem, customerName: string) =>
   service.message.replace("{name}", customerName || "customer");
 
+// Win95 style constants
+const w95Panel = {
+  background: "#d4d0c8",
+  borderTop: "2px solid #ffffff",
+  borderLeft: "2px solid #ffffff",
+  borderRight: "2px solid #808080",
+  borderBottom: "2px solid #808080",
+  padding: "8px",
+  fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif",
+  fontSize: "12px",
+  marginBottom: "8px",
+} as React.CSSProperties;
+
+const w95Button = {
+  background: "#d4d0c8",
+  borderTop: "2px solid #ffffff",
+  borderLeft: "2px solid #ffffff",
+  borderRight: "2px solid #404040",
+  borderBottom: "2px solid #404040",
+  boxShadow: "inset 1px 1px #dfdfdf, inset -1px -1px #808080",
+  color: "#000",
+  padding: "3px 10px",
+  fontSize: "12px",
+  fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif",
+  cursor: "default",
+  display: "inline-flex" as const,
+  alignItems: "center" as const,
+  gap: "4px",
+  whiteSpace: "nowrap" as const,
+} as React.CSSProperties;
+
+const w95Input = {
+  background: "#ffffff",
+  borderTop: "2px solid #808080",
+  borderLeft: "2px solid #808080",
+  borderRight: "2px solid #ffffff",
+  borderBottom: "2px solid #ffffff",
+  boxShadow: "inset 1px 1px #404040",
+  color: "#000",
+  padding: "2px 4px",
+  fontSize: "12px",
+  fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif",
+  outline: "none",
+  width: "100%",
+} as React.CSSProperties;
+
+const w95TitleBar = {
+  background: "linear-gradient(90deg, #000080, #1084d0)",
+  color: "#ffffff",
+  fontWeight: "bold",
+  fontSize: "12px",
+  padding: "3px 6px",
+  marginBottom: "6px",
+} as React.CSSProperties;
+
+const w95Fieldset = {
+  border: "none",
+  borderTop: "1px solid #808080",
+  borderLeft: "1px solid #808080",
+  borderRight: "1px solid #ffffff",
+  borderBottom: "1px solid #ffffff",
+  padding: "8px 8px 10px 8px",
+  marginBottom: "8px",
+  position: "relative" as const,
+  background: "transparent",
+} as React.CSSProperties;
+
+const w95Legend = {
+  color: "#000080",
+  padding: "0 4px",
+  position: "absolute" as const,
+  top: "-8px",
+  left: "8px",
+  background: "#d4d0c8",
+  fontSize: "12px",
+  fontWeight: "bold",
+} as React.CSSProperties;
+
 export default function CounterDeskPage() {
   const toast = useToast();
   const { downloadWithRename } = useDownload();
-  const [activeTab, setActiveTab] = useState<"favorites" | "print" | "credentials" | "cash">("favorites");
   const importInputRef = useRef<HTMLInputElement>(null);
 
   const [query, setQuery] = useState("");
@@ -111,7 +188,6 @@ export default function CounterDeskPage() {
         if (searchInput) searchInput.focus();
       } else if (e.key === "F8") {
         e.preventDefault();
-        setActiveTab("cash");
       } else if (e.key === "F1" || (e.key === "?" && !isTyping)) {
         e.preventDefault();
         setIsShortcutsOpen(true);
@@ -196,7 +272,6 @@ export default function CounterDeskPage() {
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     downloadWithRename(url, `RA_Counter_Backup_${Date.now()}.json`);
-    // URL will be revoked later or handled by the system
   };
 
   const importCounterData = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -220,24 +295,15 @@ export default function CounterDeskPage() {
           throw new Error("Missing required fields");
         }
 
-        if (Array.isArray(parsed.favorites)) {
-          setFavorites(parsed.favorites as string[]);
-        }
-        if (Array.isArray(parsed.printQueue)) {
-          setPrintQueue(parsed.printQueue as PrintJob[]);
-        }
-        if (typeof parsed.cashClosing === "object" && parsed.cashClosing !== null) {
-          setCashClosing(parsed.cashClosing as CashClosing);
-        }
+        if (Array.isArray(parsed.favorites)) setFavorites(parsed.favorites as string[]);
+        if (Array.isArray(parsed.printQueue)) setPrintQueue(parsed.printQueue as PrintJob[]);
+        if (typeof parsed.cashClosing === "object" && parsed.cashClosing !== null) setCashClosing(parsed.cashClosing as CashClosing);
 
         toast.success("Counter data imported!");
       } catch {
         toast.error("Invalid or corrupt JSON file. Import failed.");
       } finally {
-        // Reset the input so the same file can be re-imported if needed
-        if (importInputRef.current) {
-          importInputRef.current.value = "";
-        }
+        if (importInputRef.current) importInputRef.current.value = "";
       }
     };
     reader.readAsText(file);
@@ -246,13 +312,15 @@ export default function CounterDeskPage() {
   const hasDeliveredJobs = printQueue.some((job) => job.status === "Delivered");
 
   return (
-    <div className="page-shell page-shell-list">
-      {/* Hidden file input for import */}
+    <div
+      className="page-shell page-shell-list"
+      style={{ fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif", fontSize: "12px" }}
+    >
       <input
         ref={importInputRef}
         type="file"
         accept=".json"
-        className="hidden"
+        style={{ display: "none" }}
         onChange={importCounterData}
         aria-hidden="true"
       />
@@ -261,108 +329,91 @@ export default function CounterDeskPage() {
         title="Counter Desk"
         subtitle="Rate list, document checklist, WhatsApp templates, print queue and daily cash closing"
         actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              className="btn-primary px-3 py-2 flex items-center gap-1.5 text-xs font-extrabold cursor-pointer"
-              onClick={() => setIsTokenModalOpen(true)}
-              title="Issue Counter Token Ticket (F2)"
-            >
-              <Ticket size={16} />
-              <span>Issue Token Ticket</span>
-              <span className="text-[10px] bg-white/25 px-1.5 py-0.5 rounded font-mono">F2</span>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", alignItems: "center" }}>
+            <button type="button" style={w95Button} onClick={() => setIsTokenModalOpen(true)} title="Issue Counter Token Ticket (F2)">
+              <Ticket size={14} /> Issue Token <span style={{ fontSize: "10px", background: "#000080", color: "#fff", padding: "0 4px" }}>F2</span>
             </button>
-
-            <button
-              type="button"
-              className="btn-secondary px-3 py-2 flex items-center gap-1.5 text-xs font-bold cursor-pointer"
-              onClick={() => setIsShortcutsOpen(true)}
-              title="View Keyboard Shortcuts (F1 / ?)"
-            >
-              <Keyboard size={16} />
-              <span>Hotkeys</span>
-              <span className="text-[10px] bg-slate-200 px-1.5 py-0.5 rounded font-mono">F1</span>
+            <button type="button" style={w95Button} onClick={() => setIsShortcutsOpen(true)} title="View Keyboard Shortcuts (F1)">
+              <Keyboard size={14} /> Hotkeys <span style={{ fontSize: "10px", background: "#808080", color: "#fff", padding: "0 4px" }}>F1</span>
             </button>
-
-            <button type="button" className="btn-secondary" onClick={() => importInputRef.current?.click()}>
-              <Upload size={16} />
-              Import Data
+            <button type="button" style={w95Button} onClick={() => importInputRef.current?.click()}>
+              <Upload size={14} /> Import
             </button>
-            <button type="button" className="btn-secondary" onClick={exportCounterData}>
-              <Download size={16} />
-              Export Counter Data
+            <button type="button" style={w95Button} onClick={exportCounterData}>
+              <Download size={14} /> Export
             </button>
           </div>
         }
       />
 
-      <div className="metric-grid">
-        <div className="stat-card">
-          <span className="label">Services</span>
-          <p className="text-2xl font-bold">{SERVICE_CATALOG.length}</p>
-        </div>
-        <div className="stat-card">
-          <span className="label">Print Queue</span>
-          <p className="text-2xl font-bold">{printQueue.filter((job) => job.status !== "Delivered").length}</p>
-        </div>
-        <div className="stat-card">
-          <span className="label">Daily Net</span>
-          <p className="text-2xl font-bold">{formatCurrency(netTotal)}</p>
-        </div>
+      {/* Summary Stats */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "8px", marginBottom: "8px" }}>
+        {[
+          { label: "Services", value: SERVICE_CATALOG.length },
+          { label: "Print Queue", value: printQueue.filter((job) => job.status !== "Delivered").length },
+          { label: "Daily Net", value: formatCurrency(netTotal) },
+        ].map(({ label, value }) => (
+          <div key={label} style={{ ...w95Panel, textAlign: "center" }}>
+            <div style={{ fontSize: "11px", color: "#444", marginBottom: "2px" }}>{label}</div>
+            <div style={{ fontSize: "18px", fontWeight: "bold", color: "#000080" }}>{value}</div>
+          </div>
+        ))}
       </div>
 
-      {/* CSC & Govt Portals Quick Launcher */}
-      <div className="mt-4">
+      {/* Govt Portals Launcher */}
+      <div style={{ marginBottom: "8px" }}>
         <GovtPortalsLauncher />
       </div>
 
-      <div className="content-grid content-grid-wide">
-        <section className="glass-card p-4">
-          <div className="flex items-center justify-between gap-3 mb-3">
-            <h2 className="section-title mb-0">Service Rate List</h2>
+      {/* Main 2-column grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "8px", alignItems: "start" }}>
+
+        {/* Left: Service Rate List */}
+        <div style={w95Panel}>
+          <div style={w95TitleBar}>📋 Service Rate List</div>
+          <div style={{ display: "flex", gap: "6px", marginBottom: "6px", alignItems: "center" }}>
+            <label style={{ fontSize: "12px", whiteSpace: "nowrap" }}>Search:</label>
             <input
-              className="input-field max-w-[280px]"
+              id="counter-search-input"
+              style={w95Input}
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(e) => setQuery(e.target.value)}
               placeholder="Search service..."
             />
           </div>
-
-          <div className="table-wrapper">
-            <table className="data-table">
+          <div style={{ background: "#ffffff", border: "2px solid #808080", overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
               <thead>
-                <tr>
-                  <th>Service</th>
-                  <th>Fee</th>
-                  <th>Time</th>
-                  <th>Docs</th>
-                  <th></th>
+                <tr style={{ background: "#d4d0c8" }}>
+                  {["Service", "Fee", "Time", "Docs", ""].map((h) => (
+                    <th key={h} style={{ borderTop: "1px solid #fff", borderLeft: "1px solid #fff", borderRight: "1px solid #808080", borderBottom: "2px solid #808080", padding: "3px 6px", textAlign: "left", fontWeight: "bold", whiteSpace: "nowrap" }}>{h}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {filteredServices.map((service) => (
-                  <tr key={service.id}>
-                    <td>
+                {filteredServices.map((service, i) => (
+                  <tr key={service.id} style={{ background: i % 2 === 0 ? "#ffffff" : "#f8f8f8" }}>
+                    <td style={{ border: "1px solid #c0c0c0", padding: "3px 6px" }}>
                       <button
                         type="button"
-                        className="font-bold text-left"
+                        style={{ background: "none", border: "none", color: "#000080", fontWeight: "bold", cursor: "default", padding: 0, fontSize: "12px", fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif", textAlign: "left" }}
                         onClick={() => setSelectedServiceId(service.id)}
                       >
                         {service.name}
                       </button>
-                      <div className="text-xs">{service.category}</div>
+                      <div style={{ fontSize: "10px", color: "#555" }}>{service.category}</div>
                     </td>
-                    <td className="font-bold">{formatCurrency(service.fee)}</td>
-                    <td>{service.estimate}</td>
-                    <td>{service.documents.length}</td>
-                    <td>
-                      <div className="flex items-center justify-end gap-1">
-                        <button type="button" className="btn-ghost p-1" onClick={() => toggleFavorite(service.id)} title="Favorite">
-                          <Star size={14} fill={favorites.includes(service.id) ? "currentColor" : "none"} />
+                    <td style={{ border: "1px solid #c0c0c0", padding: "3px 6px", fontWeight: "bold", whiteSpace: "nowrap" }}>{formatCurrency(service.fee)}</td>
+                    <td style={{ border: "1px solid #c0c0c0", padding: "3px 6px", whiteSpace: "nowrap" }}>{service.estimate}</td>
+                    <td style={{ border: "1px solid #c0c0c0", padding: "3px 6px", textAlign: "center" }}>{service.documents.length}</td>
+                    <td style={{ border: "1px solid #c0c0c0", padding: "3px 6px" }}>
+                      <div style={{ display: "flex", gap: "4px", alignItems: "center", justifyContent: "flex-end" }}>
+                        <button type="button" style={{ ...w95Button, padding: "1px 4px" }} onClick={() => toggleFavorite(service.id)} title="Favorite">
+                          <Star size={12} fill={favorites.includes(service.id) ? "#d4af37" : "none"} color={favorites.includes(service.id) ? "#d4af37" : "#000"} />
                         </button>
                         {service.portal && (
-                          <a className="btn-ghost p-1" href={service.portal} target="_blank" rel="noreferrer" title="Open portal">
-                            <ExternalLink size={14} />
+                          <a style={{ ...w95Button, padding: "1px 4px", textDecoration: "none" }} href={service.portal} target="_blank" rel="noreferrer" title="Open portal">
+                            <ExternalLink size={12} />
                           </a>
                         )}
                       </div>
@@ -372,186 +423,166 @@ export default function CounterDeskPage() {
               </tbody>
             </table>
           </div>
-        </section>
+        </div>
 
-        <aside className="panel-stack">
-          <section className="glass-card p-4">
-            <h2 className="section-title">Required Documents</h2>
-            <p className="font-bold text-sm">{selectedService.name}</p>
-            <div className="flex flex-wrap gap-2 mt-3">
+        {/* Right sidebar: Documents + WhatsApp */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          {/* Required Documents */}
+          <div style={w95Panel}>
+            <div style={w95TitleBar}>📄 Required Documents</div>
+            <div style={{ fontWeight: "bold", marginBottom: "6px", color: "#000080" }}>{selectedService.name}</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginBottom: "8px" }}>
               {selectedService.documents.map((doc) => (
-                <span key={doc} className="badge badge-submitted">{doc}</span>
+                <span key={doc} style={{ border: "1px solid #000080", color: "#000080", padding: "1px 6px", fontSize: "11px" }}>{doc}</span>
               ))}
             </div>
-            <button
-              type="button"
-              className="btn-secondary w-full mt-3"
-              onClick={() => copyText(selectedService.documents.join(", "), "Document list")}
-            >
-              <Copy size={14} />
-              Copy Documents
+            <button type="button" style={{ ...w95Button, width: "100%", justifyContent: "center" }} onClick={() => copyText(selectedService.documents.join(", "), "Document list")}>
+              <Copy size={12} /> Copy Documents
             </button>
-          </section>
+          </div>
 
-          <section className="glass-card p-4">
-            <h2 className="section-title">WhatsApp Template</h2>
+          {/* WhatsApp Template */}
+          <div style={w95Panel}>
+            <div style={w95TitleBar}>💬 WhatsApp Template</div>
             <input
-              className="input-field mb-2"
+              style={{ ...w95Input, marginBottom: "6px" }}
               value={customerName}
-              onChange={(event) => setCustomerName(event.target.value)}
+              onChange={(e) => setCustomerName(e.target.value)}
               placeholder="Customer name"
             />
-            <div className="info-tile text-sm leading-relaxed">
+            <div style={{ background: "#ffffff", border: "2px inset #808080", borderTop: "2px solid #808080", borderLeft: "2px solid #808080", borderRight: "2px solid #ffffff", borderBottom: "2px solid #ffffff", padding: "4px 6px", fontSize: "11px", minHeight: "60px", marginBottom: "6px", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
               {buildWhatsAppText(selectedService, customerName)}
             </div>
-            <button
-              type="button"
-              className="btn-primary w-full mt-3"
-              onClick={() => copyText(buildWhatsAppText(selectedService, customerName), "WhatsApp message")}
-            >
-              <MessageSquare size={14} />
-              Copy Message
+            <button type="button" style={{ ...w95Button, width: "100%", justifyContent: "center", background: "#d4d0c8" }} onClick={() => copyText(buildWhatsAppText(selectedService, customerName), "WhatsApp message")}>
+              <MessageSquare size={12} /> Copy Message
             </button>
-          </section>
-        </aside>
+          </div>
+        </div>
       </div>
 
-      <div className="content-grid content-grid-wide">
-        <section className="glass-card p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="section-title mb-0">Print Queue</h2>
+      {/* Print Queue + Cash Closing */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: "8px", alignItems: "start" }}>
+        {/* Print Queue */}
+        <div style={w95Panel}>
+          <div style={{ ...w95TitleBar, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>🖨️ Print Queue</span>
             {hasDeliveredJobs && (
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => setPrintQueue(printQueue.filter((job) => job.status !== "Delivered"))}
-              >
-                <Trash2 size={14} />
-                Clear All Delivered
+              <button type="button" style={{ ...w95Button, fontSize: "11px", padding: "1px 6px" }} onClick={() => setPrintQueue(printQueue.filter((job) => job.status !== "Delivered"))}>
+                <Trash2 size={11} /> Clear Delivered
               </button>
             )}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2 mb-3">
-            <input className="input-field" value={printName} onChange={(event) => setPrintName(event.target.value)} placeholder="Document name" />
-            <input className="input-field" value={printCustomer} onChange={(event) => setPrintCustomer(event.target.value)} placeholder="Customer name" />
-            <button type="button" className="btn-primary" onClick={addPrintJob}>
-              <Plus size={14} />
-              Add
-            </button>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: "4px", marginBottom: "6px" }}>
+            <input style={w95Input} value={printName} onChange={(e) => setPrintName(e.target.value)} placeholder="Document name" />
+            <input style={w95Input} value={printCustomer} onChange={(e) => setPrintCustomer(e.target.value)} placeholder="Customer name" />
+            <button type="button" style={w95Button} onClick={addPrintJob}><Plus size={12} /> Add</button>
           </div>
-          <div className="space-y-2">
+          <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
             {printQueue.length === 0 ? (
-              <div className="empty-state py-8">No print jobs</div>
+              <div style={{ background: "#ffffff", border: "2px solid #808080", padding: "16px", textAlign: "center", color: "#808080" }}>No print jobs</div>
             ) : (
               printQueue.map((job) => (
-                <div key={job.id} className="file-row">
-                  <Printer size={16} />
+                <div key={job.id} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto auto", gap: "6px", alignItems: "center", background: "#ffffff", border: "1px solid #c0c0c0", padding: "4px 6px" }}>
+                  <Printer size={14} color="#000080" />
                   <div>
-                    <p className="font-bold text-sm">{job.name}</p>
-                    <p className="text-xs">{job.customer}</p>
+                    <div style={{ fontWeight: "bold" }}>{job.name}</div>
+                    <div style={{ fontSize: "10px", color: "#555" }}>{job.customer}</div>
                   </div>
-                  <select className="input-field" value={job.status} onChange={(event) => updatePrintStatus(job.id, event.target.value as PrintJob["status"])}>
+                  <select style={{ ...w95Input, width: "auto", fontSize: "11px" }} value={job.status} onChange={(e) => updatePrintStatus(job.id, e.target.value as PrintJob["status"])}>
                     <option>Pending</option>
                     <option>Printed</option>
                     <option>Delivered</option>
                   </select>
-                  <button type="button" className="btn-ghost p-1" onClick={() => setPrintQueue(printQueue.filter((item) => item.id !== job.id))}>
-                    <Trash2 size={14} />
+                  <button type="button" style={{ ...w95Button, padding: "2px 4px" }} onClick={() => setPrintQueue(printQueue.filter((item) => item.id !== job.id))}>
+                    <Trash2 size={12} />
                   </button>
                 </div>
               ))
             )}
           </div>
-        </section>
+        </div>
 
-        <section className="glass-card p-4">
-          <h2 className="section-title">Daily Cash Closing</h2>
-          <div className="form-grid form-grid-2">
-            {[
-              ["cash", "Cash"],
-              ["upi", "UPI"],
-              ["card", "Card"],
-              ["expense", "Expense"],
-            ].map(([key, label]) => (
+        {/* Cash Closing */}
+        <div style={w95Panel}>
+          <div style={w95TitleBar}>💰 Daily Cash Closing</div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", marginBottom: "8px" }}>
+            {([["cash", "Cash (₹)"], ["upi", "UPI (₹)"], ["card", "Card (₹)"], ["expense", "Expense (₹)"]] as const).map(([key, label]) => (
               <div key={key}>
-                <label className="label">{label}</label>
+                <label style={{ display: "block", fontSize: "11px", marginBottom: "2px" }}>{label}:</label>
                 <input
-                  className="input-field"
+                  style={w95Input}
                   type="number"
-                  value={cashClosing[key as keyof CashClosing]}
-                  onChange={(event) => setCashClosing({ ...cashClosing, [key]: event.target.value })}
+                  value={cashClosing[key]}
+                  onChange={(e) => setCashClosing({ ...cashClosing, [key]: e.target.value })}
                 />
               </div>
             ))}
           </div>
-          <div className="info-grid mt-3">
-            <div className="info-tile">
-              <span className="label">Gross</span>
-              <p className="font-bold">{formatCurrency(grossTotal)}</p>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+            <div style={{ background: "#ffffff", border: "2px solid #808080", borderTop: "2px solid #808080", borderLeft: "2px solid #808080", borderRight: "2px solid #ffffff", borderBottom: "2px solid #ffffff", padding: "6px" }}>
+              <div style={{ fontSize: "11px", color: "#555" }}>Gross Total</div>
+              <div style={{ fontWeight: "bold", fontSize: "14px", color: "#000080" }}>{formatCurrency(grossTotal)}</div>
             </div>
-            <div className="info-tile">
-              <span className="label">Net</span>
-              <p className="font-bold">{formatCurrency(netTotal)}</p>
+            <div style={{ background: "#ffffff", border: "2px solid #808080", borderTop: "2px solid #808080", borderLeft: "2px solid #808080", borderRight: "2px solid #ffffff", borderBottom: "2px solid #ffffff", padding: "6px" }}>
+              <div style={{ fontSize: "11px", color: "#555" }}>Net Total</div>
+              <div style={{ fontWeight: "bold", fontSize: "14px", color: "#006400" }}>{formatCurrency(netTotal)}</div>
             </div>
           </div>
-        </section>
+        </div>
       </div>
 
-      <section className="glass-card p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="section-title mb-0">Portal Credential Vault</h2>
-          <button type="button" className="btn-secondary" onClick={() => setShowPasswords(!showPasswords)}>
-            {showPasswords ? <EyeOff size={14} /> : <Eye size={14} />}
-            {showPasswords ? "Hide" : "Show"}
+      {/* Credential Vault */}
+      <div style={w95Panel}>
+        <div style={{ ...w95TitleBar, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span>🔑 Portal Credential Vault</span>
+          <button type="button" style={{ ...w95Button, fontSize: "11px", padding: "1px 6px" }} onClick={() => setShowPasswords(!showPasswords)}>
+            {showPasswords ? <><EyeOff size={11} /> Hide</> : <><Eye size={11} /> Show</>}
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_1fr_auto] gap-2 mb-3">
-          <input className="input-field" value={credentialForm.portal} onChange={(event) => setCredentialForm({ ...credentialForm, portal: event.target.value })} placeholder="Portal" />
-          <input className="input-field" value={credentialForm.username} onChange={(event) => setCredentialForm({ ...credentialForm, username: event.target.value })} placeholder="Username" />
-          <input className="input-field" value={credentialForm.password} onChange={(event) => setCredentialForm({ ...credentialForm, password: event.target.value })} placeholder="Password" type={showPasswords ? "text" : "password"} />
-          <input className="input-field" value={credentialForm.note} onChange={(event) => setCredentialForm({ ...credentialForm, note: event.target.value })} placeholder="Note" />
-          <button type="button" className="btn-primary" onClick={addCredential}>
-            <Save size={14} />
-            Save
-          </button>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr auto", gap: "4px", marginBottom: "6px" }}>
+          <input style={w95Input} value={credentialForm.portal} onChange={(e) => setCredentialForm({ ...credentialForm, portal: e.target.value })} placeholder="Portal" />
+          <input style={w95Input} value={credentialForm.username} onChange={(e) => setCredentialForm({ ...credentialForm, username: e.target.value })} placeholder="Username" />
+          <input style={w95Input} value={credentialForm.password} onChange={(e) => setCredentialForm({ ...credentialForm, password: e.target.value })} placeholder="Password" type={showPasswords ? "text" : "password"} />
+          <input style={w95Input} value={credentialForm.note} onChange={(e) => setCredentialForm({ ...credentialForm, note: e.target.value })} placeholder="Note" />
+          <button type="button" style={w95Button} onClick={addCredential}><Save size={12} /> Save</button>
         </div>
-        <div className="table-wrapper">
-          <table className="data-table">
+        <div style={{ background: "#ffffff", border: "2px solid #808080", overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
             <thead>
-              <tr>
-                <th>Portal</th>
-                <th>Username</th>
-                <th>Password</th>
-                <th>Note</th>
-                <th></th>
+              <tr style={{ background: "#d4d0c8" }}>
+                {["Portal", "Username", "Password", "Note", ""].map((h) => (
+                  <th key={h} style={{ borderTop: "1px solid #fff", borderLeft: "1px solid #fff", borderRight: "1px solid #808080", borderBottom: "2px solid #808080", padding: "3px 6px", textAlign: "left", fontWeight: "bold" }}>{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {credentials.map((item) => (
                 <tr key={item.id}>
-                  <td>{item.portal}</td>
-                  <td>{item.username}</td>
-                  <td>{showPasswords ? item.password : "••••••••"}</td>
-                  <td>{item.note}</td>
-                  <td>
-                    <button type="button" className="btn-ghost p-1" onClick={() => setCredentials(credentials.filter((credential) => credential.id !== item.id))}>
-                      <Trash2 size={14} />
+                  <td style={{ border: "1px solid #c0c0c0", padding: "3px 6px" }}>{item.portal}</td>
+                  <td style={{ border: "1px solid #c0c0c0", padding: "3px 6px" }}>{item.username}</td>
+                  <td style={{ border: "1px solid #c0c0c0", padding: "3px 6px" }}>{showPasswords ? item.password : "••••••••"}</td>
+                  <td style={{ border: "1px solid #c0c0c0", padding: "3px 6px" }}>{item.note}</td>
+                  <td style={{ border: "1px solid #c0c0c0", padding: "3px 6px" }}>
+                    <button type="button" style={{ ...w95Button, padding: "1px 4px" }} onClick={() => setCredentials(credentials.filter((c) => c.id !== item.id))}>
+                      <Trash2 size={12} />
                     </button>
                   </td>
                 </tr>
               ))}
               {credentials.length === 0 && (
                 <tr>
-                  <td colSpan={5}>No credentials saved. Data stays in this browser local storage.</td>
+                  <td colSpan={5} style={{ border: "1px solid #c0c0c0", padding: "8px", textAlign: "center", color: "#808080" }}>
+                    No credentials saved. Data stays in browser local storage.
+                  </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-        <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
-          Sensitive data yahan browser ke local storage me save hota hai. Shared computer par password save na karein.
+        <p style={{ fontSize: "10px", color: "#808080", marginTop: "4px" }}>
+          ⚠️ Sensitive data yahan browser ke local storage me save hota hai. Shared computer par password save na karein.
         </p>
-      </section>
+      </div>
 
       {/* Modals */}
       <TokenTicketModal isOpen={isTokenModalOpen} onClose={() => setIsTokenModalOpen(false)} />
