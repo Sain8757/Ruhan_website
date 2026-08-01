@@ -86,6 +86,7 @@ model Service {
   fees           Float         @default(0)
   paymentStatus  PaymentStatus @default(UNPAID)
   paymentMode    PaymentMode   @default(PENDING)
+  amountPaid     Float         @default(0)
   notes          String?
   requiredDocs   String[]
   submittedAt    DateTime?
