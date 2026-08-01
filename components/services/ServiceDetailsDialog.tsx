@@ -37,14 +37,14 @@ const PAYMENT_META: Record<string,{bg:string;color:string;label:string}> = {
 };
 
 const WA_TEMPLATES: Record<string, { label: string; text: string }> = {
-  PENDING:    { label:"Application Received", text:"Hello {name},\n\nWe have received your application for *{service}*.\nTracking ID: *{trackingId}*\n\nWe will notify you once it is processed.\n\nTrack your status here: {trackingLink}\n\n— RA Seva Point" },
-  DOCS:       { label:"Documents Needed",     text:"Hello {name},\n\nFor your *{service}* application, we need some additional documents. Please visit our center at your earliest convenience.\n\nTrack your status here: {trackingLink}\n\n— RA Seva Point" },
-  SUBMITTED:  { label:"Application Submitted",text:"Hello {name},\n\nYour *{service}* application has been successfully *SUBMITTED* to the respective department.\nTracking ID: *{trackingId}*\n\nTrack your status here: {trackingLink}\n\n— RA Seva Point" },
-  PROCESSING: { label:"Processing",           text:"Hello {name},\n\nYour *{service}* application is currently *PROCESSING*.\nTracking ID: *{trackingId}*\n\nTrack your status here: {trackingLink}\n\n— RA Seva Point" },
-  APPROVED:   { label:"Application Approved", text:"Hello {name},\n\n🎉 Great news! Your *{service}* application has been *APPROVED*.\nTracking ID: *{trackingId}*\n\nTrack your status here: {trackingLink}\n\n— RA Seva Point" },
-  DELIVERED:  { label:"Application Ready",    text:"Hello {name},\n\nYour *{service}* is ready for collection. Please visit our center with this message.\nTracking ID: *{trackingId}*\n\nTrack your status here: {trackingLink}\n\n— RA Seva Point" },
-  DELAYED:    { label:"Processing Delayed",   text:"Hello {name},\n\nWe regret to inform that your *{service}* application is slightly delayed. We will notify you as soon as it is ready.\n\nTrack your status here: {trackingLink}\n\n— RA Seva Point" },
-  PAYMENT:    { label:"Payment Reminder",     text:"Hello {name},\n\nAapka *{service}* ka kaam ho gaya hai. Aapka pending amount ₹{pending} baaki hai. Kripya payment clear karein.\n\nTrack your status here: {trackingLink}\n\n— RA Seva Point" },
+  PENDING:    { label:"Application Received", text:"नमस्ते {name},\n\nहमें आपके *{service}* के लिए आवेदन प्राप्त हो गया है।\nट्रैकिंग आईडी: *{trackingId}*\n\nहम इस पर काम शुरू करने के बाद आपको सूचित करेंगे।\n\nअपना स्टेटस यहाँ ट्रैक करें: {trackingLink}\n\n— RA Seva Point" },
+  DOCS:       { label:"Documents Needed",     text:"नमस्ते {name},\n\nआपके *{service}* आवेदन के लिए हमें कुछ अतिरिक्त दस्तावेज़ों की आवश्यकता है। कृपया जल्द से जल्द हमारे केंद्र पर संपर्क करें।\n\nअपना स्टेटस यहाँ ट्रैक करें: {trackingLink}\n\n— RA Seva Point" },
+  SUBMITTED:  { label:"Application Submitted",text:"नमस्ते {name},\n\nआपका *{service}* का आवेदन सफलतापूर्वक संबंधित विभाग में *जमा (Submit)* कर दिया गया है।\nट्रैकिंग आईडी: *{trackingId}*\n\nअपना स्टेटस यहाँ ट्रैक करें: {trackingLink}\n\n— RA Seva Point" },
+  PROCESSING: { label:"Processing",           text:"नमस्ते {name},\n\nआपके *{service}* आवेदन पर वर्तमान में *कार्य चल रहा है (Processing)*।\nट्रैकिंग आईडी: *{trackingId}*\n\nअपना स्टेटस यहाँ ट्रैक करें: {trackingLink}\n\n— RA Seva Point" },
+  APPROVED:   { label:"Application Approved", text:"नमस्ते {name},\n\nयह सूचित करते हुए खुशी हो रही है कि आपका *{service}* का आवेदन *स्वीकृत (Approved)* हो गया है।\nट्रैकिंग आईडी: *{trackingId}*\n\nअपना स्टेटस यहाँ ट्रैक करें: {trackingLink}\n\n— RA Seva Point" },
+  DELIVERED:  { label:"Application Ready",    text:"नमस्ते {name},\n\nआपका *{service}* का कार्य *पूरा हो गया है*। कृपया अपना दस्तावेज़ प्राप्त करने के लिए हमारे केंद्र पर पधारें।\nट्रैकिंग आईडी: *{trackingId}*\n\nअपना स्टेटस यहाँ ट्रैक करें: {trackingLink}\n\n— RA Seva Point" },
+  DELAYED:    { label:"Processing Delayed",   text:"नमस्ते {name},\n\nहमें खेद है कि आपके *{service}* के कार्य में कुछ *विलंब* हो रहा है। हम जल्द ही आपको इसकी अद्यतन स्थिति से अवगत कराएंगे।\n\nअपना स्टेटस यहाँ ट्रैक करें: {trackingLink}\n\n— RA Seva Point" },
+  PAYMENT:    { label:"Payment Reminder",     text:"नमस्ते {name},\n\nआपके *{service}* का कार्य पूर्ण हो गया है। आपका *₹{pending}* का भुगतान अभी बाकी है। कृपया अपना बकाया भुगतान करें।\n\nअपना स्टेटस यहाँ ट्रैक करें: {trackingLink}\n\n— RA Seva Point" },
 };
 
 type Tab = "general" | "documents" | "comments" | "activity" | "payment";
