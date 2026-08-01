@@ -69,6 +69,9 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
     }
   };
 
+  if (!isOpen) return null;
+
+  return (
     <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Tahoma', 'MS Sans Serif', sans-serif", fontSize: "12px" }}>
       <div style={{ width: "520px", maxWidth: "95vw", height: "480px", maxHeight: "90vh", display: "flex", flexDirection: "column", background: "#d4d0c8", borderTop: "2px solid #ffffff", borderLeft: "2px solid #ffffff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", outline: "1px solid #808080" }}>
         {/* Header */}
