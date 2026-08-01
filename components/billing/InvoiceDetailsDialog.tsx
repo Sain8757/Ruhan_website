@@ -122,7 +122,7 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
       let canvas;
       try {
         canvas = await html2canvas(element, {
-          scale: 2,
+          scale: isThermal ? 4 : 2, // Scale 4 for thermal ensures extremely sharp text in the PDF
           useCORS: true,
           backgroundColor: "#ffffff",
           logging: false,
@@ -750,78 +750,92 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
           /* ========================================================================= */
           <div
             ref={invoiceCardRef}
-            className="invoice-printable-card text-black shadow-md border border-slate-300 print:shadow-none print:border-none print:m-0"
+            className="invoice-printable-card text-black shadow-none border-none print:shadow-none print:border-none print:m-0"
             style={{
-              width: "300px",
+              width: "320px", /* Slightly wider for better text fit */
               background: "#ffffff",
-              padding: "14px 12px",
+              padding: "16px 14px",
               boxSizing: "border-box",
               color: "#000000",
-              fontFamily: "'Courier New', Courier, monospace",
-              fontSize: "11px",
-              lineHeight: "1.28",
+              fontFamily: "var(--font-geist-mono), 'Courier New', Courier, monospace", /* Sharper font if available */
+              fontSize: "12px",
+              lineHeight: "1.4",
+              fontWeight: 500,
             }}
           >
             {/* Store Header */}
-            <div className="text-center pb-2" style={{ borderBottom: "2px solid #000" }}>
-              <h2 className="font-black uppercase" style={{ fontSize: "18px", lineHeight: "1.12", letterSpacing: "0.4px" }}>{shopName}</h2>
-              <p className="mt-1 font-bold uppercase" style={{ fontSize: "9px" }}>{shopTagline}</p>
-              <p style={{ fontSize: "10px" }}>{shopAddress}</p>
-              <p className="font-bold" style={{ fontSize: "10px" }}>Ph: {shopPhone}</p>
+            <div className="text-center pb-3">
+              <h2 className="font-black uppercase" style={{ fontSize: "22px", lineHeight: "1.1", letterSpacing: "0.5px", marginBottom: "4px" }}>{shopName}</h2>
+              <p className="font-bold uppercase" style={{ fontSize: "10px", margin: "0 0 6px 0", letterSpacing: "0.5px" }}>{shopTagline}</p>
+              <p style={{ fontSize: "11px", margin: "0 0 2px 0" }}>{shopAddress}</p>
+              <p className="font-bold" style={{ fontSize: "11px", margin: "0" }}>Ph: {shopPhone}</p>
             </div>
 
-            <div className="text-center font-black uppercase" style={{ margin: "7px 0", padding: "4px 0", borderTop: "1px dashed #000", borderBottom: "1px dashed #000", fontSize: "13px", letterSpacing: "1px" }}>
+            <div style={{ borderTop: "1.5px dashed #000", margin: "4px 0" }}></div>
+
+            <div className="text-center font-black uppercase" style={{ margin: "6px 0", fontSize: "14px", letterSpacing: "1px" }}>
               {invoice.type === 'QUOTATION' ? 'PROFORMA SLIP' : 'RETAIL INVOICE'}
             </div>
 
+            <div style={{ borderBottom: "1.5px dashed #000", margin: "4px 0 8px 0" }}></div>
+
             {/* Bill Meta */}
-            <div className="pb-2 space-y-0.5" style={{ fontSize: "11px" }}>
-              <div className="flex justify-between font-bold">
-                <span>No: {invoice.invoiceNumber}</span>
+            <div className="space-y-1 pb-3" style={{ fontSize: "11px" }}>
+              <div className="flex justify-between">
+                <span>No: <span className="font-bold">{invoice.invoiceNumber}</span></span>
                 <span>{formatDate(invoice.createdAt)}</span>
               </div>
-              <div>Customer: <span className="font-bold uppercase">{invoice.customer.name}</span></div>
-              <div>Mobile: {invoice.customer.mobile}</div>
-              <div className="flex justify-between"><span>Mode: {PAYMENT_MODE_LABELS[invoice.paymentMode] || invoice.paymentMode}</span><span className="font-bold">{invoice.paymentStatus}</span></div>
+              <div className="flex justify-between">
+                <span>Cust: <span className="font-bold uppercase">{invoice.customer.name}</span></span>
+              </div>
+              <div className="flex justify-between">
+                <span>Mob: {invoice.customer.mobile}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Mode: {PAYMENT_MODE_LABELS[invoice.paymentMode] || invoice.paymentMode}</span>
+                <span className="font-bold uppercase">{invoice.paymentStatus}</span>
+              </div>
             </div>
 
             {/* Items Table */}
-            <table style={{ width: "100%", borderCollapse: "collapse", borderTop: "1px dashed #000", borderBottom: "1px dashed #000", marginBottom: "8px" }}>
-              <thead>
-                <tr style={{ borderBottom: "1px dashed #000" }}>
-                  <th style={{ padding: "5px 0", textAlign: "left", fontWeight: "bold" }}>ITEM</th>
-                  <th style={{ padding: "5px 0", textAlign: "center", fontWeight: "bold" }}>QTY</th>
-                  <th style={{ padding: "5px 0", textAlign: "right", fontWeight: "bold" }}>AMOUNT</th>
-                </tr>
-              </thead>
-              <tbody>
-                {invoice.items.map((item: any, idx: number) => (
-                  <tr key={item.id || idx}>
-                    <td style={{ padding: "5px 0", textTransform: "uppercase", wordBreak: "break-word" }}>
-                      <div className="font-bold">{item.name}</div>
-                      <div style={{ fontSize: "10px" }}>@ {item.price.toFixed(2)}</div>
-                    </td>
-                    <td style={{ padding: "5px 0", textAlign: "center", fontWeight: "bold" }}>{item.quantity}</td>
-                    <td style={{ padding: "5px 0", textAlign: "right", fontWeight: "bold" }}>{item.total.toFixed(2)}</td>
+            <div style={{ borderTop: "1.5px dashed #000", borderBottom: "1.5px dashed #000", margin: "4px 0 8px 0" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ borderBottom: "1.5px dashed #000" }}>
+                    <th style={{ padding: "6px 0", textAlign: "left", fontWeight: "900", fontSize: "11px" }}>ITEM</th>
+                    <th style={{ padding: "6px 0", textAlign: "center", fontWeight: "900", fontSize: "11px" }}>QTY</th>
+                    <th style={{ padding: "6px 0", textAlign: "right", fontWeight: "900", fontSize: "11px" }}>AMOUNT</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {invoice.items.map((item: any, idx: number) => (
+                    <tr key={item.id || idx}>
+                      <td style={{ padding: "6px 0", textTransform: "uppercase", wordBreak: "break-word" }}>
+                        <div className="font-bold" style={{ fontSize: "11px" }}>{item.name}</div>
+                        <div style={{ fontSize: "10px", color: "#333" }}>@ {item.price.toFixed(2)}</div>
+                      </td>
+                      <td style={{ padding: "6px 0", textAlign: "center", fontWeight: "bold", fontSize: "11px" }}>{item.quantity}</td>
+                      <td style={{ padding: "6px 0", textAlign: "right", fontWeight: "bold", fontSize: "11px" }}>{item.total.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
             {/* Totals */}
-            <div className="space-y-0.5 text-right pb-2" style={{ fontSize: "13px" }}>
+            <div className="space-y-1 text-right pb-3" style={{ fontSize: "13px" }}>
               <div className="flex justify-between"><span>Subtotal:</span><span>₹{invoice.subtotal.toFixed(2)}</span></div>
               {invoice.discount > 0 && <div className="flex justify-between"><span>Discount:</span><span>-₹{invoice.discount.toFixed(2)}</span></div>}
               {invoice.gst > 0 && <div className="flex justify-between"><span>GST:</span><span>₹{((invoice.subtotal * invoice.gst) / 100).toFixed(2)}</span></div>}
               
-              <div className="flex justify-between font-black" style={{ fontSize: "17px", borderTop: "2px solid #000", borderBottom: "2px solid #000", margin: "6px 0", padding: "5px 0" }}>
+              <div className="flex justify-between font-black" style={{ fontSize: "18px", borderTop: "2px solid #000", borderBottom: "2px solid #000", margin: "8px 0", padding: "6px 0" }}>
                 <span>TOTAL:</span>
                 <span>₹{invoice.total.toFixed(2)}</span>
               </div>
               
-              <div className="flex justify-between"><span>Paid:</span><span>₹{(invoice.amountPaid || 0).toFixed(2)}</span></div>
+              <div className="flex justify-between" style={{ fontSize: "12px" }}><span>Paid:</span><span className="font-bold">₹{(invoice.amountPaid || 0).toFixed(2)}</span></div>
               {invoice.total - (invoice.amountPaid || 0) > 0 && (
-                <div className="flex justify-between font-black">
+                <div className="flex justify-between font-black" style={{ fontSize: "14px", marginTop: "2px" }}>
                   <span>DUE:</span>
                   <span>₹{(invoice.total - (invoice.amountPaid || 0)).toFixed(2)}</span>
                 </div>
@@ -830,19 +844,25 @@ export default function InvoiceDetailsDialog({ isOpen, onClose, invoiceId }: Pro
 
             {/* QR Code */}
             {upiLink && (
-              <div className="text-center py-2 flex flex-col items-center" style={{ borderTop: "1px dashed #000", borderBottom: "1px dashed #000", margin: "4px 0" }}>
-                <QRCodeSVG value={upiLink} size={108} />
-                <span className="mt-1 font-black uppercase" style={{ fontSize: "12px" }}>Scan & Pay via UPI</span>
-                <span className="font-bold" style={{ fontSize: "10px" }}>{upiId}</span>
+              <div className="text-center py-3 flex flex-col items-center" style={{ borderTop: "1.5px dashed #000", borderBottom: "1.5px dashed #000", margin: "4px 0 8px 0" }}>
+                <div style={{ background: "#fff", padding: "4px", borderRadius: "4px" }}>
+                  <QRCodeSVG value={upiLink} size={120} />
+                </div>
+                <span className="mt-2 font-black uppercase" style={{ fontSize: "13px", letterSpacing: "0.5px" }}>Scan & Pay via UPI</span>
+                <span className="font-bold" style={{ fontSize: "11px", marginTop: "2px" }}>{upiId}</span>
               </div>
             )}
 
             {/* Footer */}
-            <div className="text-center mt-2" style={{ fontSize: "10px" }}>
-              <p className="font-black uppercase" style={{ fontSize: "13px" }}>Thank You! Visit Again.</p>
-              <p>Goods once sold will not be returned.</p>
-              <p>*** Computer Generated Receipt ***</p>
+            <div className="text-center mt-4" style={{ fontSize: "11px" }}>
+              <p className="font-black uppercase" style={{ fontSize: "15px", marginBottom: "4px", letterSpacing: "0.5px" }}>Thank You!</p>
+              <p className="font-bold uppercase" style={{ fontSize: "12px", marginBottom: "8px" }}>Visit Again</p>
+              <p style={{ fontSize: "10px", margin: "0 0 2px 0" }}>Goods once sold will not be returned.</p>
+              <p style={{ fontSize: "10px", margin: "0" }}>*** Computer Generated Receipt ***</p>
             </div>
+            
+            {/* End of slip marker */}
+            <div style={{ borderBottom: "1px solid #eee", margin: "16px auto 0", width: "50%" }}></div>
           </div>
         )}
           </div>
