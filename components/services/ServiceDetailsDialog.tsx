@@ -34,14 +34,16 @@ const PAYMENT_META: Record<string,{bg:string;color:string;label:string}> = {
   PAID:    {bg:"#f0fff0",color:"#135200",label:"PAID"},
 };
 
-const WA_TEMPLATES = [
-  { label:"Application Received", text:"Hello {name},\n\nWe have received your application for *{service}*.\nTracking ID: *{trackingId}*\n\nWe will notify you once it is processed.\n\n— RA Seva Point" },
-  { label:"Documents Needed",     text:"Hello {name},\n\nFor your *{service}* application, we need some additional documents. Please visit our center at your earliest convenience.\n\n— RA Seva Point" },
-  { label:"Application Approved", text:"Hello {name},\n\n🎉 Great news! Your *{service}* application has been *APPROVED*.\nTracking ID: *{trackingId}*\n\nPlease collect your document from our center.\n\n— RA Seva Point" },
-  { label:"Application Ready",    text:"Hello {name},\n\nYour *{service}* is ready for collection. Please visit our center with this message.\nTracking ID: *{trackingId}*\n\n— RA Seva Point" },
-  { label:"Processing Delayed",   text:"Hello {name},\n\nWe regret to inform that your *{service}* application is slightly delayed. We will notify you as soon as it is ready.\n\n— RA Seva Point" },
-  { label:"Payment Reminder",     text:"Hello {name},\n\nThis is a reminder that payment for your *{service}* service is pending. Please visit our center to clear the dues.\n\n— RA Seva Point" },
-];
+const WA_TEMPLATES: Record<string, { label: string; text: string }> = {
+  PENDING:    { label:"Application Received", text:"Hello {name},\n\nWe have received your application for *{service}*.\nTracking ID: *{trackingId}*\n\nWe will notify you once it is processed.\n\n— RA Seva Point" },
+  DOCS:       { label:"Documents Needed",     text:"Hello {name},\n\nFor your *{service}* application, we need some additional documents. Please visit our center at your earliest convenience.\n\n— RA Seva Point" },
+  SUBMITTED:  { label:"Application Submitted",text:"Hello {name},\n\nYour *{service}* application has been successfully *SUBMITTED* to the respective department.\nTracking ID: *{trackingId}*\n\n— RA Seva Point" },
+  PROCESSING: { label:"Processing",           text:"Hello {name},\n\nYour *{service}* application is currently *PROCESSING*.\nTracking ID: *{trackingId}*\n\n— RA Seva Point" },
+  APPROVED:   { label:"Application Approved", text:"Hello {name},\n\n🎉 Great news! Your *{service}* application has been *APPROVED*.\nTracking ID: *{trackingId}*\n\n— RA Seva Point" },
+  DELIVERED:  { label:"Application Ready",    text:"Hello {name},\n\nYour *{service}* is ready for collection. Please visit our center with this message.\nTracking ID: *{trackingId}*\n\n— RA Seva Point" },
+  DELAYED:    { label:"Processing Delayed",   text:"Hello {name},\n\nWe regret to inform that your *{service}* application is slightly delayed. We will notify you as soon as it is ready.\n\n— RA Seva Point" },
+  PAYMENT:    { label:"Payment Reminder",     text:"Hello {name},\n\nAapka *{service}* ka kaam ho gaya hai. Aapka pending amount ₹{pending} baaki hai. Kripya payment clear karein.\n\n— RA Seva Point" },
+};
 
 type Tab = "general" | "documents" | "comments" | "activity" | "payment";
 type PreviewType = "image" | "pdf" | "docx" | "unsupported";
@@ -250,8 +252,11 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
       if (!res.ok) throw new Error("Failed to update service");
       toast.success("Service updated!");
       if (onSuccess) onSuccess();
-      if ((status === "APPROVED" || status === "DELIVERED") && service.status !== status) {
-        if (window.confirm(`Status is now ${status}. Notify customer via WhatsApp?`)) sendWA(WA_TEMPLATES[status === "APPROVED" ? 2 : 3]);
+      if (status !== "PENDING" && service.status !== status) {
+        const tpl = WA_TEMPLATES[status as keyof typeof WA_TEMPLATES];
+        if (tpl && window.confirm(`Status is now ${status}. Notify customer via WhatsApp?`)) {
+          sendWA(tpl);
+        }
       }
       onClose();
     } catch (err: any) { toast.error(err.message); }
@@ -271,12 +276,19 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
     finally { setDeleting(false); setConfirmDelete(false); }
   };
 
-  const sendWA = (tpl: { text: string }) => {
+  const sendWA = (tpl: { text: string }, extraData?: Record<string, string>) => {
     if (!service?.customer?.mobile) { toast.error("No mobile number"); return; }
-    const text = tpl.text
+    let text = tpl.text
       .replace(/{name}/g, service.customer.name)
       .replace(/{service}/g, service.serviceType)
       .replace(/{trackingId}/g, service.trackingId || "N/A");
+      
+    if (extraData) {
+      Object.keys(extraData).forEach(k => {
+        text = text.replace(new RegExp(`{${k}}`, 'g'), extraData[k]);
+      });
+    }
+    
     window.open(`https://wa.me/91${service.customer.mobile.replace(/\D/g,"").slice(-10)}?text=${encodeURIComponent(text)}`, "_blank");
     setShowWATemplates(false);
   };
@@ -619,12 +631,15 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                       {showWATemplates && (
                         <div style={{ position:"absolute",top:"100%",left:0,zIndex:100,background:"#d4d0c8",...raised,width:"220px",padding:"4px" }}>
                           <div style={{ fontSize:"11px",fontWeight:"bold",padding:"2px 4px",borderBottom:"1px solid #aaa",marginBottom:"3px" }}>Select Template:</div>
-                          {WA_TEMPLATES.map((tpl,i) => (
-                            <div key={i} onClick={() => sendWA(tpl)} style={{ padding:"4px 6px",fontSize:"11px",cursor:"pointer",borderBottom:"1px solid #e0e0e0" }}
-                              className="hover:bg-[#000080] hover:text-white">
-                              {tpl.label}
-                            </div>
-                          ))}
+                          <div style={{ padding:"4px",borderTop:"1px solid #eee",background:"#f9f9f9",maxHeight:"200px",overflowY:"auto" }}>
+                            {Object.values(WA_TEMPLATES).map((tpl,i) => (
+                              <div key={i} onClick={() => sendWA(tpl, { pending: (fees - amountPaid).toString() })} style={{ padding:"4px 6px",fontSize:"11px",cursor:"pointer",borderBottom:"1px solid #e0e0e0" }}
+                                onMouseEnter={e => e.currentTarget.style.background="#fff"}
+                                onMouseLeave={e => e.currentTarget.style.background="transparent"}>
+                                {tpl.label}
+                              </div>
+                            ))}
+                          </div>
                           <button type="button" onClick={() => setShowWATemplates(false)} style={Btn({width:"100%",justifyContent:"center",marginTop:"4px",fontSize:"11px"})}>Cancel</button>
                         </div>
                       )}
@@ -670,7 +685,12 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                     <SHead icon={<Briefcase size={11}/>} label="Service Info" />
                     <table style={{ width:"100%",fontSize:"11px",borderCollapse:"collapse" }}>
                       <tbody>
-                        {[["Fee:", formatCurrency(service.fees)],["Mode:", service.paymentMode],["Assignee:", service.assignedTo?.name||"Admin"]].map(([k,v]) => (
+                        {[
+                          ["Fee:", formatCurrency(service.fees)],
+                          ["Mode:", service.paymentMode],
+                          ["Assignee:", service.assignedTo?.name||"Admin"],
+                          ...(service.vendorId ? [["Vendor:", vendors.find(v => v.id === service.vendorId)?.name || "Assigned 🏢"]] : [])
+                        ].map(([k,v]) => (
                           <tr key={k}><td style={{ color:"#555",padding:"1px 0" }}>{k}</td><td style={{ textAlign:"right",fontWeight:"bold" }}>{v}</td></tr>
                         ))}
                       </tbody>
@@ -1007,6 +1027,14 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                             ))}
                           </div>
                         </div>
+                        {fees - amountPaid > 0 && (
+                          <div style={{ display:"flex",justifyContent:"flex-end" }}>
+                            <button type="button" onClick={() => sendWA(WA_TEMPLATES.PAYMENT, { pending: (fees - amountPaid).toString() })}
+                              style={Btn({background:"#075e54",color:"white",fontSize:"11px"})}>
+                              <MessageCircle size={11} style={{ marginRight: "4px" }}/> Send Payment Reminder
+                            </button>
+                          </div>
+                        )}
 
                         {/* Collect Payment */}
                         <div style={{ ...groove,padding:"10px",background:"#d4d0c8" }}>

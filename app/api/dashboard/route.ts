@@ -41,6 +41,8 @@ export async function GET() {
     lastMonthInvoices,
     lastMonthServicesRevenue,
     topServicesRaw,
+    overdueServices,
+    dueTodayServices,
   ] = await Promise.all([
     // Today's invoices
     prisma.invoice.aggregate({
@@ -190,7 +192,25 @@ export async function GET() {
       },
       _count: { serviceType: true },
       orderBy: { _count: { serviceType: "desc" } },
-      take: 6,
+      take: 5,
+    }),
+    // Overdue services (deadline passed, not delivered/cancelled)
+    prisma.service.findMany({
+      where: {
+        deadline: { lt: startToday },
+        status: { notIn: ["DELIVERED", "CANCELLED"] },
+      },
+      include: { customer: { select: { name: true, mobile: true } } },
+      orderBy: { deadline: "asc" },
+    }),
+    // Due today services (deadline is today, not delivered/cancelled)
+    prisma.service.findMany({
+      where: {
+        deadline: { gte: startToday, lte: endToday },
+        status: { notIn: ["DELIVERED", "CANCELLED"] },
+      },
+      include: { customer: { select: { name: true, mobile: true } } },
+      orderBy: { deadline: "asc" },
     }),
   ]);
 
@@ -257,6 +277,8 @@ export async function GET() {
     chartData,
     partialInvoicesCount,
     topServices,
+    overdueServices,
+    dueTodayServices,
     percentChanges: {
       income: calcChange(todayIncome, yesterdayIncome),
       customers: calcChange(todayCustomers, yesterdayCustomers),

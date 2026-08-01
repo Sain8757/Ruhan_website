@@ -41,6 +41,7 @@ import BulkRemindersWidget from "@/components/dashboard/BulkRemindersWidget";
 import GoalTrackerWidget from "@/components/dashboard/GoalTrackerWidget";
 import TopServicesWidget from "@/components/dashboard/TopServicesWidget";
 import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton";
+import MorningSummaryWidget from "@/components/dashboard/MorningSummaryWidget";
 
 interface PercentChange {
   value: string;
@@ -60,6 +61,8 @@ interface DashboardData {
   chartData: ChartDataPoint[];
   partialInvoicesCount: number;
   topServices: TopService[];
+  overdueServices: RecentService[];
+  dueTodayServices: RecentService[];
   percentChanges: {
     income: PercentChange;
     customers: PercentChange;
@@ -402,6 +405,8 @@ export default function DashboardPage() {
           chartData: [],
           partialInvoicesCount: 0,
           topServices: [],
+          overdueServices: [],
+          dueTodayServices: [],
           percentChanges: {
             income: { value: "—", positive: true },
             customers: { value: "—", positive: true },
@@ -513,6 +518,12 @@ export default function DashboardPage() {
 
   return (
     <div className="page-shell page-shell-dashboard">
+      <MorningSummaryWidget 
+        overdueCount={data?.overdueServices?.length || 0} 
+        dueTodayCount={data?.dueTodayServices?.length || 0} 
+        pendingPaymentsCount={data?.partialInvoicesCount || 0} 
+      />
+
       {/* ===== WELCOME HERO (Windows 95 Classic Style) ===== */}
       <div
         className="p-4 flex flex-col gap-4 mb-4"
