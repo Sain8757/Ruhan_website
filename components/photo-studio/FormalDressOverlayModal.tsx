@@ -26,8 +26,9 @@ export const DRESS_PRESETS: FormalDressPreset[] = [
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400">
         <defs>
           <linearGradient id="fbbBlazer" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#27272a"/>
-            <stop offset="100%" stop-color="#09090b"/>
+            <stop offset="0%" stop-color="#2d3748"/>
+            <stop offset="50%" stop-color="#1a202c"/>
+            <stop offset="100%" stop-color="#0f172a"/>
           </linearGradient>
           <linearGradient id="fbbInner" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stop-color="#ffffff"/>
@@ -41,15 +42,14 @@ export const DRESS_PRESETS: FormalDressPreset[] = [
         <path d="M 180 80 Q 250 160 320 80 L 295 240 L 205 240 Z" fill="url(#fbbInner)"/>
         <path d="M 205 110 L 250 145 L 295 110" stroke="#e4e4e7" stroke-width="2" fill="none"/>
         
-        <!-- Left Body & Shoulder -->
-        <path d="M 25 400 C 65 270 120 160 185 85 L 250 170 L 315 85 C 380 160 435 270 475 400 Z" fill="url(#fbbBlazer)" filter="url(#fbbShd)"/>
+        <!-- Shoulders & Body (Natural Curved Body Shape) -->
+        <path d="M 20 400 C 65 270 120 160 185 85 L 250 170 L 315 85 C 380 160 435 270 480 400 Z" fill="url(#fbbBlazer)" filter="url(#fbbShd)"/>
         
-        <!-- Left Elegant Lapel -->
-        <path d="M 185 85 L 230 230 L 250 190 L 195 130 Z" fill="#3f3f46"/>
-        <!-- Right Elegant Lapel -->
-        <path d="M 315 85 L 270 230 L 250 190 L 305 130 Z" fill="#3f3f46"/>
+        <!-- Elegant Lapels -->
+        <path d="M 185 85 L 230 230 L 250 190 L 195 130 Z" fill="#4a5568"/>
+        <path d="M 315 85 L 270 230 L 250 190 L 305 130 Z" fill="#4a5568"/>
         
-        <!-- Single Waist Button -->
+        <!-- Button -->
         <circle cx="250" cy="265" r="5" fill="#a1a1aa" stroke="#52525b" stroke-width="1.5"/>
       </svg>
     `),
@@ -170,47 +170,6 @@ export const DRESS_PRESETS: FormalDressPreset[] = [
       </svg>
     `),
   },
-  {
-    id: "graduation_gown",
-    name: "🎓 Academic Graduation Gown",
-    category: "male",
-    prompt: "Academic graduation portrait wearing a black graduation gown with academic gold collar and hood",
-    svgDataUrl: buildSvgDataUrl(`
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400">
-        <defs>
-          <filter id="ggShd">
-            <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.3"/>
-          </filter>
-        </defs>
-        <path d="M 30 400 C 70 260 120 150 185 75 L 250 125 L 315 75 C 380 150 430 260 470 400 Z" fill="#09090b" filter="url(#ggShd)"/>
-        <path d="M 185 75 L 250 170 L 315 75 Z" fill="#eab308"/>
-        <path d="M 195 85 L 250 155 L 305 85 Z" fill="#ffffff"/>
-      </svg>
-    `),
-  },
-  {
-    id: "male_tuxedo",
-    name: "🤵 Classic Black Tuxedo & Bow Tie",
-    category: "male",
-    prompt: "Formal portrait photo wearing a classic black tuxedo, white pleated tuxedo shirt, and black bow tie",
-    svgDataUrl: buildSvgDataUrl(`
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 400">
-        <defs>
-          <filter id="tuxShd">
-            <feDropShadow dx="0" dy="4" stdDeviation="3" flood-opacity="0.3"/>
-          </filter>
-        </defs>
-        <path d="M 180 85 L 250 180 L 320 85 Z" fill="#ffffff"/>
-        <!-- Bow Tie -->
-        <polygon points="220,125 250,135 220,145" fill="#0f172a"/>
-        <polygon points="280,125 250,135 280,145" fill="#0f172a"/>
-        <circle cx="250" cy="135" r="4" fill="#334155"/>
-        <path d="M 20 400 C 60 265 120 155 185 80 L 250 165 L 315 80 C 380 155 440 265 480 400 Z" fill="#020617" filter="url(#tuxShd)"/>
-        <path d="M 185 80 L 225 235 L 250 195 L 195 135 Z" fill="#1e293b"/>
-        <path d="M 315 80 L 275 235 L 250 195 L 305 135 Z" fill="#1e293b"/>
-      </svg>
-    `),
-  },
 ];
 
 interface FormalDressOverlayModalProps {
@@ -263,29 +222,28 @@ export default function FormalDressOverlayModal({
 
     ctx.clearRect(0, 0, width, height);
 
-    // If showing original
+    // If user holds "View Original" button
     if (showOriginal) {
       ctx.drawImage(photoImgRef.current, 0, 0, width, height);
       return;
     }
 
-    // If AI image generated
+    // Priority 1: If AI image generated via Cloudinary / Gemini AI
     if (aiGeneratedImage && aiImgRef.current) {
       ctx.drawImage(aiImgRef.current, 0, 0, width, height);
       return;
     }
 
-    // Always draw base photo first
+    // Priority 2: Base User Photo
     ctx.drawImage(photoImgRef.current, 0, 0, width, height);
 
-    // ONLY render suit overlay if in manual overlay mode OR if suit is applied
+    // Render suit overlay ONLY if user explicitly switched to manual overlay tab
     if (activeTab === "manual_overlay" && suitImgRef.current) {
       const baseSuitW = width * 1.15;
       const baseSuitH = baseSuitW * 0.8;
       const suitW = baseSuitW * (scale / 100);
       const suitH = baseSuitH * (scale / 100);
 
-      // Default position puts suit neck/shoulder comfortably at lower neck level (~44% down)
       const defaultPosY = height * 0.44;
       const posX = (width - suitW) / 2 + (offsetX * width) / 100;
       const posY = defaultPosY + (offsetY * height) / 100;
@@ -328,15 +286,15 @@ export default function FormalDressOverlayModal({
     loadPresetSuit(preset);
   };
 
-  // Call Gemini AI Dress-Up API
+  // Call AI Dress-Up API (Cloudinary Generative AI / Gemini)
   const handleGenerateGeminiAi = async () => {
     if (!customPrompt.trim()) {
-      toast.error("Please enter or select a prompt for Gemini AI");
+      toast.error("Please enter or select a prompt for AI dress up");
       return;
     }
 
     setIsAiGenerating(true);
-    toast.info("Gemini AI is processing formal attire prompt...");
+    toast.info("✨ AI is transforming clothes with Generative Replace...");
 
     try {
       const res = await fetch("/api/ai/dress-up", {
@@ -354,27 +312,21 @@ export default function FormalDressOverlayModal({
       if (data.image) {
         setAiGeneratedImage(data.image);
         const img = new Image();
+        img.crossOrigin = "anonymous";
         img.src = data.image;
         img.onload = () => {
           aiImgRef.current = img;
           renderComposition();
-          toast.success("✨ Gemini AI successfully dressed photo in formal attire!");
+          toast.success("✨ AI successfully replaced clothing with formal attire!");
         };
       } else {
-        // Fallback: Enable precision fitted overlay for the selected prompt
-        setAiGeneratedImage(null);
-        aiImgRef.current = null;
+        toast.error(data.message || "AI image replacement failed. Switched to manual mode.");
         setActiveTab("manual_overlay");
-        loadPresetSuit(selectedPreset);
-        toast.success(`✨ Applied formal prompt: ${selectedPreset.name}! Adjust sliders if needed.`);
       }
     } catch (err) {
-      console.error("Gemini AI dress up error:", err);
-      toast.error("AI processing offline. Switched to precision formal suit mode.");
-      setAiGeneratedImage(null);
-      aiImgRef.current = null;
+      console.error("AI dress up error:", err);
+      toast.error("AI processing error. Switched to manual overlay mode.");
       setActiveTab("manual_overlay");
-      loadPresetSuit(selectedPreset);
     } finally {
       setIsAiGenerating(false);
     }
@@ -436,10 +388,10 @@ export default function FormalDressOverlayModal({
               <Sparkles size={16} className="text-yellow-400 animate-pulse" />
               <p className="text-xs font-black text-slate-200 uppercase tracking-wider">
                 {aiGeneratedImage
-                  ? "✨ Gemini AI Photo Result"
+                  ? "✨ AI Generative Suit Result"
                   : activeTab === "ai_prompt"
-                  ? "Photo Preview (Click button to apply prompt)"
-                  : "Manual Overlay (Drag suit to position)"}
+                  ? "Photo Preview (Click button below to apply AI)"
+                  : "Manual Overlay Mode"}
               </p>
             </div>
 
@@ -452,17 +404,17 @@ export default function FormalDressOverlayModal({
                 onTouchEnd={() => setShowOriginal(false)}
                 className="text-[10px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full font-bold flex items-center gap-1 transition cursor-pointer select-none"
               >
-                <Eye size={12} /> Press to View Original
+                <Eye size={12} /> View Original
               </button>
             )}
           </div>
 
           <div className="relative border-4 border-white/20 rounded-2xl overflow-hidden shadow-2xl bg-black max-h-[52vh] flex items-center justify-center">
             {isAiGenerating && (
-              <div className="absolute inset-0 z-20 bg-slate-950/85 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center text-white space-y-3">
-                <Loader2 size={38} className="animate-spin text-blue-400" />
-                <p className="text-sm font-black tracking-wide">Gemini AI is Dressing Photo...</p>
-                <p className="text-xs text-slate-300 max-w-xs">Applying formal attire based on prompt. Please wait a moment.</p>
+              <div className="absolute inset-0 z-20 bg-slate-950/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center text-white space-y-3">
+                <Loader2 size={40} className="animate-spin text-blue-400" />
+                <p className="text-sm font-black tracking-wide">AI Generative Replace Processing...</p>
+                <p className="text-xs text-slate-300 max-w-xs">Detecting clothes & replacing with realistic formal attire. Please wait 3-5 seconds.</p>
               </div>
             )}
 
@@ -481,14 +433,14 @@ export default function FormalDressOverlayModal({
 
           {activeTab === "ai_prompt" && !aiGeneratedImage && (
             <div className="mt-3 bg-blue-950/80 border border-blue-800/80 text-blue-200 text-xs px-4 py-2 rounded-xl text-center font-medium max-w-md">
-              💡 Select a ready prompt below and click <span className="font-black text-white">"✨ Gemini Automatic Pehnao"</span> to dress the photo.
+              💡 Select a prompt below & click <span className="font-black text-white">"✨ Gemini Automatic Pehnao"</span> to replace clothes with AI.
             </div>
           )}
 
           {aiGeneratedImage && (
             <div className="flex items-center gap-2 mt-3">
               <span className="text-[11px] bg-green-950 text-green-300 border border-green-700 px-3 py-1 rounded-full font-bold flex items-center gap-1">
-                <Bot size={13} /> Gemini AI Automatic Dress Applied
+                <Bot size={13} /> AI Generative Clothing Replace Active
               </span>
               <button
                 onClick={() => {
@@ -498,15 +450,9 @@ export default function FormalDressOverlayModal({
                 }}
                 className="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 px-2.5 py-1 rounded-full font-semibold transition cursor-pointer flex items-center gap-1"
               >
-                <RefreshCw size={11} /> Reset
+                <RefreshCw size={11} /> Reset to Original
               </button>
             </div>
-          )}
-
-          {activeTab === "manual_overlay" && !aiGeneratedImage && (
-            <p className="text-[11px] text-slate-400 mt-3 font-semibold flex items-center gap-1">
-              <Move size={12} className="text-blue-400" /> Drag directly on photo to position suit over shoulders
-            </p>
           )}
         </div>
 
@@ -583,7 +529,7 @@ export default function FormalDressOverlayModal({
                   <label className="text-xs font-black text-slate-800">
                     ✍️ AI Dress Prompt:
                   </label>
-                  <span className="text-[10px] text-slate-500 font-semibold">Gemini AI Engine</span>
+                  <span className="text-[10px] text-blue-600 font-bold">Generative Replace Active</span>
                 </div>
 
                 <textarea
@@ -603,7 +549,7 @@ export default function FormalDressOverlayModal({
                 {isAiGenerating ? (
                   <>
                     <Loader2 size={16} className="animate-spin" />
-                    <span>Gemini AI Pehna Raha Hai...</span>
+                    <span>AI Kapde Badalke Pehna Raha Hai...</span>
                   </>
                 ) : (
                   <>
