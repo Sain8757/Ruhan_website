@@ -1194,17 +1194,11 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                         {/* Manual Status Override */}
                         <div style={{ ...groove,padding:"10px",background:"#d4d0c8" }}>
                           <SHead icon={<CheckCircle size={11}/>} label="Update Payment Status" color="#000080" />
-                          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px" }}>
+                          <div style={{ display:"grid",gridTemplateColumns:"1fr",gap:"8px" }}>
                             <div>
                               <label style={{ fontSize:"11px",display:"block",marginBottom:"3px" }}>Payment Status:</label>
                               <select style={Sel()} value={paymentStatus} onChange={e => setPaymentStatus(e.target.value)}>
                                 <option value="UNPAID">Unpaid</option><option value="PARTIAL">Partial</option><option value="PAID">Paid</option>
-                              </select>
-                            </div>
-                            <div>
-                              <label style={{ fontSize:"11px",display:"block",marginBottom:"3px" }}>Payment Mode:</label>
-                              <select style={Sel()} value={paymentMode} onChange={e => setPaymentMode(e.target.value)}>
-                                <option value="PENDING">Pending</option><option value="CASH">Cash</option><option value="UPI">UPI</option><option value="CARD">Card</option>
                               </select>
                             </div>
                           </div>
