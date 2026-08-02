@@ -378,11 +378,11 @@ model FileDrop {
 model CustomerPayment {
   id            String   @id @default(cuid())
   customerId    String
-  customer      Customer @relation(fields: [customerId], references: [id])
+  customer      Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   serviceId     String?
-  service       Service? @relation(fields: [serviceId], references: [id])
+  service       Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   invoiceId     String?
-  invoice       Invoice? @relation(fields: [invoiceId], references: [id])
+  invoice       Invoice? @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   
   amount        Float
   paymentMode   PaymentMode @default(CASH)

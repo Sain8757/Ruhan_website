@@ -47,7 +47,26 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     notes: body.notes || null,
   };
 
-  if (body.walletBalance !== undefined) dataToUpdate.walletBalance = Number(body.walletBalance);
+  const existingCustomer = await prisma.customer.findUnique({
+    where: { id },
+    select: { walletBalance: true }
+  });
+
+  if (body.walletBalance !== undefined) {
+    const newWalletBalance = Number(body.walletBalance);
+    dataToUpdate.walletBalance = newWalletBalance;
+    
+    if (existingCustomer && newWalletBalance > existingCustomer.walletBalance) {
+      const addedAmount = newWalletBalance - existingCustomer.walletBalance;
+      await prisma.customerPayment.create({
+        data: {
+          customerId: id,
+          amount: addedAmount,
+          notes: "Added to Wallet",
+        }
+      });
+    }
+  }
   if (body.rating !== undefined) dataToUpdate.rating = body.rating ? Number(body.rating) : null;
   if (body.tags !== undefined) dataToUpdate.tags = body.tags;
   if (body.dob !== undefined) dataToUpdate.dob = body.dob ? new Date(body.dob) : null;

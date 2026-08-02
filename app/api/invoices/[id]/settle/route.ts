@@ -24,6 +24,10 @@ export async function POST(
       return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
     }
 
+    if (invoice.notes?.includes("Service ID:")) {
+      return NextResponse.json({ error: "Auto-generated service invoices must be settled via the Service page." }, { status: 400 });
+    }
+
     const newAmountPaid = (invoice.amountPaid || 0) + Number(amountPaid);
     
     let paymentStatus = "PARTIAL";

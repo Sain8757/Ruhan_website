@@ -24,6 +24,7 @@ interface Invoice {
   paymentStatus: string;
   type: string;
   dueDate: string | null;
+  notes: string | null;
   createdAt: string;
   customer: { id: string; name: string; mobile: string };
   items: any[];
@@ -342,10 +343,13 @@ function BillingContent() {
                         >
                           <MessageCircle size={11} /> WA
                         </button>
-                        {inv.paymentStatus !== "PAID" && (
+                        {inv.paymentStatus !== "PAID" && !inv.notes?.includes("Service ID:") && (
                           <button
                             type="button"
-                            onClick={() => handleSettleInvoice(inv)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSettleInvoice(inv);
+                            }}
                             style={{
                               backgroundColor: "#166534",
                               color: "#ffffff",
@@ -360,6 +364,35 @@ function BillingContent() {
                             }}
                           >
                             Settle
+                          </button>
+                        )}
+                        {inv.paymentStatus !== "PAID" && inv.notes?.includes("Service ID:") && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const serviceId = inv.notes?.split("Service ID: ")[1]?.trim();
+                              if (serviceId) {
+                                router.push(`/services/${serviceId}`);
+                              } else {
+                                toast.error("Service ID not found");
+                              }
+                            }}
+                            style={{
+                              backgroundColor: "#d97706",
+                              color: "#ffffff",
+                              borderTop: "2px solid #ffffff",
+                              borderLeft: "2px solid #ffffff",
+                              borderRight: "2px solid #78350f",
+                              borderBottom: "2px solid #78350f",
+                              padding: "2px 6px",
+                              fontWeight: "bold",
+                              fontSize: "11px",
+                              cursor: "pointer",
+                            }}
+                            title="Go to Service to receive payment"
+                          >
+                            Pay via Service
                           </button>
                         )}
                         <button
