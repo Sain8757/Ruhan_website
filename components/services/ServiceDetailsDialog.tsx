@@ -89,7 +89,7 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   serviceId: string | null;
-  onSuccess?: () => void;
+  onSuccess?: (shouldClose?: boolean) => void;
 }
 
 const SHead = ({ icon, label, color="black" }: { icon: React.ReactNode; label: string; color?: string }) => (
@@ -272,7 +272,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
       });
       if (!res.ok) throw new Error("Failed to update service");
       toast.success("Service updated!");
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess(false);
       if (status !== "PENDING" && service.status !== status) {
         const tpl = WA_TEMPLATES[status as keyof typeof WA_TEMPLATES];
         if (tpl && window.confirm(`Status is now ${status}. Notify customer via WhatsApp?`)) {
@@ -323,7 +323,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
       const res = await fetch(`/api/services/${serviceId}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Delete failed");
       toast.success("Service deleted.");
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess(false);
       onClose();
     } catch (err: any) { toast.error(err.message); }
     finally { setDeleting(false); setConfirmDelete(false); }
@@ -490,7 +490,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Sync failed");
       setStatus(data.status); toast.success(data.message);
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess(false);
     } catch (err: any) { toast.error(err.message); }
   };
 
@@ -562,7 +562,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
       setPaymentStatus(data.paymentStatus);
       setAmountPaid(data.service.amountPaid);
       toast.success(`₹${payAmount} collected via ${payMode}! Status: ${data.paymentStatus}`);
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess(false);
     } catch (err: any) { toast.error(err.message); }
     finally { setCollecting(false); }
   };

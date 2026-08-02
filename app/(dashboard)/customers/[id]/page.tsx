@@ -789,9 +789,18 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
       {isServiceModalOpen && selectedServiceId && (
         <ServiceDetailsDialog
           isOpen={isServiceModalOpen}
-          onClose={() => { setIsServiceModalOpen(false); setSelectedServiceId(null); }}
+          onClose={() => {
+            setIsServiceModalOpen(false);
+            setSelectedServiceId(null);
+          }}
           serviceId={selectedServiceId}
-          onSuccess={() => fetchCustomer()}
+          onSuccess={(shouldClose = true) => {
+            refreshCustomer();
+            if (shouldClose) {
+              setIsServiceModalOpen(false);
+              setSelectedServiceId(null);
+            }
+          }}
         />
       )}
 

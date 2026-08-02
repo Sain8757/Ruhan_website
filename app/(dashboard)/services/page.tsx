@@ -829,7 +829,7 @@ export default function ServicesPage() {
       </div>
 
       <NewServiceDialog isOpen={isNewOpen} onClose={()=>setIsNewOpen(false)} onSuccess={fetchServices}/>
-      <ServiceDetailsDialog isOpen={isDetailsOpen} onClose={()=>{setIsDetailsOpen(false);setSelectedService(null);}} serviceId={selectedService?.id||null} onSuccess={()=>{setIsDetailsOpen(false);setSelectedService(null);fetchServices();}}/>
+      <ServiceDetailsDialog isOpen={isDetailsOpen} onClose={()=>{setIsDetailsOpen(false);setSelectedService(null);}} serviceId={selectedService?.id||null} onSuccess={(shouldClose = true)=>{fetchServices(); if(shouldClose){setIsDetailsOpen(false);setSelectedService(null);}}}/>
     </div>
   );
 }
