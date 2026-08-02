@@ -43,6 +43,22 @@ export async function GET(req: NextRequest) {
     },
   });
 
+  // Get input GST from Expenses
+  const expenses = await prisma.expense.findMany({
+    where: {
+      date: { gte: fromDate, lte: toDate },
+      gstAmount: { gt: 0 },
+    },
+  });
+
+  // Get input GST from Vendor Transactions
+  const vendorTransactions = await prisma.vendorTransaction.findMany({
+    where: {
+      date: { gte: fromDate, lte: toDate },
+      gstAmount: { gt: 0 },
+    },
+  });
+
   // Calculate GST output (collected from customers)
   let totalOutputGST = 0;
   let totalTaxableAmount = 0;
@@ -87,6 +103,11 @@ export async function GET(req: NextRequest) {
   const cgst = totalOutputGST / 2;
   const sgst = totalOutputGST / 2;
 
+  // Calculate Input GST
+  const totalExpenseGST = expenses.reduce((sum, exp) => sum + (exp.gstAmount || 0), 0);
+  const totalVendorGST = vendorTransactions.reduce((sum, vt) => sum + (vt.gstAmount || 0), 0);
+  const totalInputGST = totalExpenseGST + totalVendorGST;
+
   return NextResponse.json({
     dateRange: { from: fromDate, to: toDate },
     period: month || `${format(fromDate, "dd MMM yyyy")} – ${format(toDate, "dd MMM yyyy")}`,
@@ -94,9 +115,10 @@ export async function GET(req: NextRequest) {
       totalInvoicesWithGST: invoices.length,
       totalTaxableAmount: Math.round(totalTaxableAmount),
       totalOutputGST: Math.round(totalOutputGST),
+      totalInputGST: Math.round(totalInputGST),
       cgst: Math.round(cgst),
       sgst: Math.round(sgst),
-      netGSTPayable: Math.round(totalOutputGST), // No input credit tracked yet
+      netGSTPayable: Math.round(totalOutputGST - totalInputGST), 
     },
     breakdown: gstBreakdown,
     invoices: invoices.map((inv) => ({

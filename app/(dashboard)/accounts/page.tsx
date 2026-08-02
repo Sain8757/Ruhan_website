@@ -54,6 +54,7 @@ interface GSTData {
     totalInvoicesWithGST: number;
     totalTaxableAmount: number;
     totalOutputGST: number;
+    totalInputGST: number;
     cgst: number;
     sgst: number;
     netGSTPayable: number;
@@ -83,7 +84,7 @@ interface CashFlowData {
 const fmt = (n: number) =>
   "₹" + Math.abs(n).toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
-const TABS = ["P&L Statement", "Ledger", "Cash Flow", "GST Summary"] as const;
+const TABS = ["P&L Statement", "Balance Sheet", "Ledger", "Cash Flow", "GST Summary"] as const;
 type Tab = (typeof TABS)[number];
 
 function TabButton({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
@@ -632,11 +633,12 @@ function GSTTab({ from, to }: { from: string; to: string }) {
   return (
     <div>
       {/* GST Summary Cards */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8, marginBottom: 12 }}>
         <StatCard label="GST Invoices" value={String(data.summary.totalInvoicesWithGST)} sub="With GST charged" color="#000080" icon={Receipt} />
         <StatCard label="Taxable Amount" value={fmt(data.summary.totalTaxableAmount)} color="#d97706" icon={IndianRupee} />
-        <StatCard label="Output GST" value={fmt(data.summary.totalOutputGST)} sub="Total tax collected" color="#7e3af2" icon={TrendingUp} />
-        <StatCard label="Net GST Payable" value={fmt(data.summary.netGSTPayable)} sub="Payable to govt" color="#dc2626" icon={Building2} />
+        <StatCard label="Output GST (Collected)" value={fmt(data.summary.totalOutputGST)} sub="Total tax collected" color="#7e3af2" icon={TrendingUp} />
+        <StatCard label="Input GST (Paid)" value={fmt(data.summary.totalInputGST || 0)} sub="From Expenses/Vendors" color="#166534" icon={TrendingDown} />
+        <StatCard label="Net GST Payable" value={fmt(data.summary.netGSTPayable)} sub="Output - Input" color="#dc2626" icon={Building2} />
       </div>
 
       {/* CGST + SGST Split */}
@@ -724,6 +726,114 @@ function GSTTab({ from, to }: { from: string; to: string }) {
             )}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+// ─── Balance Sheet Tab ────────────────────────────────────────────────────────
+
+interface BalanceSheetData {
+  assets: { cashInHand: number; accountsReceivable: number; closingStock: number; total: number };
+  liabilities: { accountsPayable: number; total: number };
+  equity: { retainedEarnings: number };
+}
+
+function BalanceSheetTab() {
+  const [data, setData] = useState<BalanceSheetData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const toast = useToast();
+
+  useEffect(() => {
+    setLoading(true);
+    fetch("/api/accounts/balance-sheet")
+      .then((r) => r.json())
+      .then(setData)
+      .catch(() => toast.error("Balance Sheet load nahi hua"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <div style={{ padding: 40, textAlign: "center" }}><Loader2 size={24} className="animate-spin" style={{ color: "#000080", margin: "0 auto" }} /></div>;
+  if (!data) return <div style={{ padding: 20, color: "red" }}>Data load nahi hua</div>;
+
+  return (
+    <div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        
+        {/* Liabilities & Equity (Left side in Tally) */}
+        <div style={{ background: "#fff", borderTop: "2px solid #808080", borderLeft: "2px solid #808080", borderRight: "2px solid #fff", borderBottom: "2px solid #fff" }}>
+          <div style={{ background: "#000080", color: "#fff", padding: "4px 10px", fontWeight: "bold", fontSize: 12 }}>
+            Liabilities & Equity
+          </div>
+          <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ background: "#d4d0c8", borderBottom: "1px solid #808080" }}>
+                <th style={{ padding: "5px 10px", textAlign: "left" }}>Particulars</th>
+                <th style={{ padding: "5px 10px", textAlign: "right" }}>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ padding: "6px 10px", fontWeight: "bold" }}>Capital Account / Retained Earnings</td>
+                <td style={{ padding: "6px 10px", textAlign: "right", fontWeight: "bold" }}>{fmt(data.equity.retainedEarnings)}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: "6px 10px", fontWeight: "bold", color: "#dc2626" }}>Current Liabilities</td>
+                <td style={{ padding: "6px 10px", textAlign: "right" }}></td>
+              </tr>
+              <tr>
+                <td style={{ padding: "3px 10px 3px 20px", color: "#555" }}>Accounts Payable (Vendor Dues)</td>
+                <td style={{ padding: "3px 10px", textAlign: "right" }}>{fmt(data.liabilities.accountsPayable)}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr style={{ background: "#d4d0c8", borderTop: "2px solid #808080" }}>
+                <td style={{ padding: "6px 10px", fontWeight: "900" }}>TOTAL LIABILITIES</td>
+                <td style={{ padding: "6px 10px", textAlign: "right", fontWeight: "900" }}>{fmt(data.liabilities.total + data.equity.retainedEarnings)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        {/* Assets (Right side in Tally) */}
+        <div style={{ background: "#fff", borderTop: "2px solid #808080", borderLeft: "2px solid #808080", borderRight: "2px solid #fff", borderBottom: "2px solid #fff" }}>
+          <div style={{ background: "#166534", color: "#fff", padding: "4px 10px", fontWeight: "bold", fontSize: 12 }}>
+            Assets
+          </div>
+          <table style={{ width: "100%", fontSize: 12, borderCollapse: "collapse" }}>
+            <thead>
+              <tr style={{ background: "#d4d0c8", borderBottom: "1px solid #808080" }}>
+                <th style={{ padding: "5px 10px", textAlign: "left" }}>Particulars</th>
+                <th style={{ padding: "5px 10px", textAlign: "right" }}>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style={{ padding: "6px 10px", fontWeight: "bold", color: "#166534" }}>Current Assets</td>
+                <td style={{ padding: "6px 10px", textAlign: "right" }}></td>
+              </tr>
+              <tr>
+                <td style={{ padding: "3px 10px 3px 20px", color: "#555" }}>Cash in Hand / Bank</td>
+                <td style={{ padding: "3px 10px", textAlign: "right" }}>{fmt(data.assets.cashInHand)}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: "3px 10px 3px 20px", color: "#555" }}>Sundry Debtors (Udhaar / Unpaid)</td>
+                <td style={{ padding: "3px 10px", textAlign: "right" }}>{fmt(data.assets.accountsReceivable)}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: "3px 10px 3px 20px", color: "#555" }}>Closing Stock (Inventory)</td>
+                <td style={{ padding: "3px 10px", textAlign: "right" }}>{fmt(data.assets.closingStock)}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr style={{ background: "#d4d0c8", borderTop: "2px solid #808080" }}>
+                <td style={{ padding: "6px 10px", fontWeight: "900" }}>TOTAL ASSETS</td>
+                <td style={{ padding: "6px 10px", textAlign: "right", fontWeight: "900" }}>{fmt(data.assets.total)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        
       </div>
     </div>
   );
@@ -822,6 +932,7 @@ export default function AccountsPage() {
         minHeight: 400,
       }}>
         {activeTab === "P&L Statement" && <PLTab from={from} to={to} />}
+        {activeTab === "Balance Sheet" && <BalanceSheetTab />}
         {activeTab === "Ledger" && <LedgerTab from={from} to={to} />}
         {activeTab === "Cash Flow" && <CashFlowTab from={from} to={to} />}
         {activeTab === "GST Summary" && <GSTTab from={from} to={to} />}

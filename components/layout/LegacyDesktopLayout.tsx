@@ -110,14 +110,21 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
   }>({ pendingServices: [], lowStockItems: [], overdueInvoices: [] });
 
   useEffect(() => {
-    fetch("/api/notifications")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && !data.error) {
-          setNotifications(data);
-        }
-      })
-      .catch(() => {});
+    const fetchNotifs = () => {
+      fetch("/api/notifications")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && !data.error) {
+            setNotifications(data);
+          }
+        })
+        .catch(() => {});
+    };
+    
+    fetchNotifs();
+    const interval = setInterval(fetchNotifs, 30000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const totalNotifs =

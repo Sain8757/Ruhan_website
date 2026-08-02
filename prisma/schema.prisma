@@ -119,6 +119,10 @@ model Invoice {
   amountPaid    Float             @default(0)
   dueDate       DateTime?
   type          String            @default("INVOICE")
+  isRecurring   Boolean           @default(false)
+  recurringInterval String?
+  nextRunDate   DateTime?
+  parentId      String?
   payments      CustomerPayment[]
   createdBy     User              @relation(fields: [createdById], references: [id])
   customer      Customer          @relation(fields: [customerId], references: [id])
@@ -128,6 +132,7 @@ model Invoice {
   @@index([paymentStatus])
   @@index([paymentMode])
   @@index([createdAt])
+  @@index([nextRunDate])
 }
 
 model InvoiceItem {
@@ -252,6 +257,8 @@ model Expense {
   category    String
   amount      Float
   description String?
+  gstAmount   Float?   @default(0)
+  gstRate     Float?   @default(0)
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -291,6 +298,8 @@ model VendorTransaction {
   type        String
   amount      Float
   description String?
+  gstAmount   Float?   @default(0)
+  gstRate     Float?   @default(0)
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
   vendor      Vendor   @relation(fields: [vendorId], references: [id])

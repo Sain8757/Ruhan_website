@@ -168,6 +168,8 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess, defaultCusto
       setDiscount(0);
       setGst(0);
       setPointsRedeemed(0);
+      setIsRecurring(false);
+      setRecurringInterval("MONTHLY");
     }
   }, [isOpen, defaultCustomer]);
 
@@ -180,6 +182,8 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess, defaultCusto
   const [amountPaid, setAmountPaid] = useState<number | "">("");
   const [type, setType] = useState("INVOICE");
   const [dueDate, setDueDate] = useState("");
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringInterval, setRecurringInterval] = useState("MONTHLY");
   const [notes, setNotes] = useState("");
 
   // Customer search
@@ -218,6 +222,7 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess, defaultCusto
           items, discount, pointsRedeemed, gst, paymentMode, paymentStatus,
           amountPaid: finalAmountPaid, notes,
           type, dueDate: dueDate ? new Date(dueDate).toISOString() : null,
+          isRecurring, recurringInterval,
         }),
       });
       if (!res.ok) throw new Error("Failed to create invoice");
@@ -424,6 +429,28 @@ export default function NewBillDialog({ isOpen, onClose, onSuccess, defaultCusto
                   value={dueDate} 
                   onChange={(e) => setDueDate(e.target.value)} 
                 />
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <input 
+                type="checkbox" 
+                id="recurring" 
+                checked={isRecurring}
+                onChange={(e) => setIsRecurring(e.target.checked)}
+              />
+              <label htmlFor="recurring" style={{ fontWeight: 'bold' }}>Auto-Recurring Bill?</label>
+            </div>
+            {isRecurring && (
+              <div>
+                <label className="label">Frequency</label>
+                <select className="legacy-input w-full" value={recurringInterval} onChange={(e) => setRecurringInterval(e.target.value)}>
+                  <option value="WEEKLY">Weekly</option>
+                  <option value="MONTHLY">Monthly</option>
+                  <option value="YEARLY">Yearly</option>
+                </select>
               </div>
             )}
           </div>

@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
-  const { category, amount, description, date } = body;
+  const { category, amount, description, date, gstAmount, gstRate } = body;
 
   if (!category || !amount) {
     return NextResponse.json({ error: "Category and amount are required" }, { status: 400 });
@@ -54,6 +54,8 @@ export async function POST(req: NextRequest) {
       category,
       amount: parseFloat(amount),
       description,
+      gstAmount: gstAmount ? parseFloat(gstAmount) : 0,
+      gstRate: gstRate ? parseFloat(gstRate) : 0,
       date: date ? new Date(date) : new Date(),
     },
   });

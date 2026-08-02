@@ -66,14 +66,21 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
   };
 
   useEffect(() => {
-    fetch("/api/notifications")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data && !data.error) {
-          setNotifications(data);
-        }
-      })
-      .catch(() => {});
+    const fetchNotifs = () => {
+      fetch("/api/notifications")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && !data.error) {
+            setNotifications(data);
+          }
+        })
+        .catch(() => {});
+    };
+    
+    fetchNotifs(); // initial fetch
+    const interval = setInterval(fetchNotifs, 30000); // 30 seconds polling
+    
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {

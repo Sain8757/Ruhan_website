@@ -3,6 +3,14 @@ import { auth } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { generateInvoiceNumber } from "@/lib/utils";
 
+function calculateNextRunDate(interval: string) {
+  const d = new Date();
+  if (interval === "WEEKLY") d.setDate(d.getDate() + 7);
+  else if (interval === "MONTHLY") d.setMonth(d.getMonth() + 1);
+  else if (interval === "YEARLY") d.setFullYear(d.getFullYear() + 1);
+  return d;
+}
+
 export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -80,6 +88,9 @@ export async function POST(req: NextRequest) {
       paymentStatus: body.paymentStatus || "UNPAID",
       type: body.type || "INVOICE",
       dueDate: body.dueDate ? new Date(body.dueDate) : null,
+      isRecurring: body.isRecurring || false,
+      recurringInterval: body.isRecurring ? body.recurringInterval : null,
+      nextRunDate: body.isRecurring ? calculateNextRunDate(body.recurringInterval) : null,
       notes: body.notes || null,
       items: {
         create: body.items.map((item: any) => ({

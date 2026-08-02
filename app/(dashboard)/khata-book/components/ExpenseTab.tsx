@@ -12,6 +12,8 @@ interface Expense {
   category: string;
   amount: number;
   description: string | null;
+  gstAmount: number | null;
+  gstRate: number | null;
   date: string;
   createdAt: string;
 }
@@ -43,6 +45,8 @@ export default function ExpenseTab() {
     category: EXPENSE_CATEGORIES[0],
     amount: "",
     description: "",
+    gstAmount: "",
+    gstRate: "",
     date: new Date().toISOString().split("T")[0]
   });
   const [modalOpen, setModalOpen] = useState(false);
@@ -91,6 +95,8 @@ export default function ExpenseTab() {
             : form.category,
           amount: parseFloat(form.amount),
           description: form.description,
+          gstAmount: form.gstAmount ? parseFloat(form.gstAmount) : 0,
+          gstRate: form.gstRate ? parseFloat(form.gstRate) : 0,
           date: form.date,
         }),
       });
@@ -102,6 +108,8 @@ export default function ExpenseTab() {
         category: EXPENSE_CATEGORIES[0],
         amount: "",
         description: "",
+        gstAmount: "",
+        gstRate: "",
         date: new Date().toISOString().split("T")[0]
       });
       setModalOpen(false);
@@ -156,9 +164,10 @@ export default function ExpenseTab() {
           formatDate(exp.date),
           exp.category,
           exp.description || "-",
+          (exp.gstAmount || 0).toFixed(2),
           exp.amount.toFixed(2)
         ]),
-        foot: [["", "", "Total", totalExpenses.toFixed(2)]],
+        foot: [["", "", "Total GST", expenses.reduce((sum, e) => sum + (e.gstAmount||0), 0).toFixed(2), "Total", totalExpenses.toFixed(2)]],
         theme: 'grid'
       });
       
@@ -249,6 +258,12 @@ export default function ExpenseTab() {
                             <span className="text-xs text-gray-500 truncate max-w-[200px]">{expense.description}</span>
                           </>
                         )}
+                        {expense.gstAmount ? (
+                          <>
+                            <span className="text-gray-300">•</span>
+                            <span className="text-xs text-green-600 font-medium">Input GST: {formatCurrency(expense.gstAmount)}</span>
+                          </>
+                        ) : null}
                       </div>
                     </div>
                   </div>
@@ -286,6 +301,32 @@ export default function ExpenseTab() {
                 onChange={(e) => setForm({ ...form, amount: e.target.value })}
                 required
               />
+            </div>
+            <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+              <div style={{ flex: 1 }}>
+                <label>Input GST (₹) <span style={{ fontSize: 10, color: "#888" }}>(Optional)</span></label>
+                <input
+                  type="number"
+                  style={{ width: '100%' }}
+                  placeholder="0.00"
+                  min="0"
+                  step="0.01"
+                  value={form.gstAmount}
+                  onChange={(e) => setForm({ ...form, gstAmount: e.target.value })}
+                />
+              </div>
+              <div style={{ width: "80px" }}>
+                <label>Rate (%)</label>
+                <input
+                  type="number"
+                  style={{ width: '100%' }}
+                  placeholder="18"
+                  min="0"
+                  max="100"
+                  value={form.gstRate}
+                  onChange={(e) => setForm({ ...form, gstRate: e.target.value })}
+                />
+              </div>
             </div>
             <div style={{ marginBottom: '8px' }}>
               <label>Category</label>
