@@ -15,10 +15,9 @@ export async function GET(req: NextRequest) {
   const startRange = startOfDay(subDays(today, days - 1));
 
   try {
-    // 1. Get all PAID invoices within range
+    // 1. Get all invoices within range
     const invoices = await prisma.invoice.findMany({
       where: {
-        paymentStatus: { in: ["PAID", "PARTIAL"] },
         createdAt: { gte: startRange },
       },
       include: { items: true },
@@ -80,20 +79,19 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // 5. Get all PAID services within range
+    // 5. Get all services within range
     const services = await prisma.service.findMany({
       where: {
-        paymentStatus: { in: ["PAID", "PARTIAL"] },
         createdAt: { gte: startRange },
       },
-      select: { serviceType: true, amountPaid: true },
+      select: { serviceType: true, fees: true },
     });
 
     // 6. Aggregate Service Profits into the existing serviceSalesMap
     for (const srv of services) {
       const current = serviceSalesMap.get(srv.serviceType) || { quantity: 0, profit: 0 };
       current.quantity += 1;
-      current.profit += srv.amountPaid;
+      current.profit += srv.fees;
       serviceSalesMap.set(srv.serviceType, current);
     }
 

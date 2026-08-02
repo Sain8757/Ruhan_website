@@ -99,7 +99,6 @@ export async function GET(req: NextRequest) {
     // Invoices with items for accurate Product vs POS Service separation
     prisma.invoice.findMany({
       where: { 
-        paymentStatus: { in: ["PAID", "PARTIAL"] }, 
         createdAt: { gte: startRange, lte: endRange },
         NOT: { notes: { contains: "Service ID:" } }
       },
@@ -110,8 +109,8 @@ export async function GET(req: NextRequest) {
     }),
     // Service sales total in range
     prisma.service.aggregate({
-      where: { paymentStatus: { in: ["PAID", "PARTIAL"] }, createdAt: { gte: startRange, lte: endRange } },
-      _sum: { amountPaid: true },
+      where: { createdAt: { gte: startRange, lte: endRange } },
+      _sum: { fees: true },
       _count: true,
     }),
     // Total expenses in range
@@ -141,15 +140,8 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    if (inv.paymentStatus === "PAID") {
-      posProductRevenue += invProductTotal;
-      posServiceRevenue += invServiceTotal;
-    } else if (inv.paymentStatus === "PARTIAL") {
-      // distribute amountPaid proportionally
-      const ratio = inv.total > 0 ? (inv.amountPaid / inv.total) : 0;
-      posProductRevenue += (invProductTotal * ratio);
-      posServiceRevenue += (invServiceTotal * ratio);
-    }
+    posProductRevenue += invProductTotal;
+    posServiceRevenue += invServiceTotal;
   }
 
   // Build daily chart data

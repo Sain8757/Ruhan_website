@@ -530,7 +530,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
 
           {/* Services Tab */}
           {activeTab === "services" && (
-            <div className="space-y-3">
+            <div className="space-y-3" style={{ maxHeight: "400px", overflowY: "auto", paddingRight: "4px" }}>
               {customer.services?.length === 0 ? (
                 <div className="text-center py-12 glass-card text-sm text-slate-400">
                   No service records found.
@@ -574,7 +574,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
 
           {/* Invoices Tab */}
           {activeTab === "invoices" && (
-            <div className="space-y-3">
+            <div className="space-y-3" style={{ maxHeight: "400px", overflowY: "auto", paddingRight: "4px" }}>
               {customer.invoices?.length === 0 ? (
                 <div className="text-center py-12 glass-card text-sm text-slate-400">
                   No billing records found.
@@ -700,7 +700,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                   No documents saved for this customer.
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ maxHeight: "400px", overflowY: "auto", paddingRight: "4px" }}>
                   {customer.documents.map((doc: any) => {
                     const isExpired = doc.expiryDate && new Date(doc.expiryDate) < new Date();
                     const isNearExpiry = doc.expiryDate && new Date(doc.expiryDate) >= new Date() && new Date(doc.expiryDate).getTime() - new Date().getTime() < 30 * 24 * 60 * 60 * 1000;

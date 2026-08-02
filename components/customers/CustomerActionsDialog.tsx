@@ -45,6 +45,7 @@ export default function CustomerActionsDialog({
     dob: "",
     tags: "",
     rating: "",
+    walletBalance: "",
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -99,6 +100,7 @@ export default function CustomerActionsDialog({
           dob: data.dob ? data.dob.split('T')[0] : "",
           tags: data.tags ? data.tags.join(', ') : "",
           rating: data.rating ? data.rating.toString() : "",
+          walletBalance: data.walletBalance ? data.walletBalance.toString() : "0",
         });
         // Reset service form
         setServiceForm({
@@ -495,6 +497,14 @@ export default function CustomerActionsDialog({
                         <input 
                           type="number" className="legacy-input" style={{ flex: 1 }} min="1" max="5"
                           value={editForm.rating} onChange={e => setEditForm({...editForm, rating: e.target.value})}
+                        />
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <label style={{ width: "120px" }}>Wallet Balance (Rs.):</label>
+                        <input 
+                          type="number" className="legacy-input" style={{ flex: 1 }}
+                          value={editForm.walletBalance} onChange={e => setEditForm({...editForm, walletBalance: e.target.value})}
                         />
                       </div>
 

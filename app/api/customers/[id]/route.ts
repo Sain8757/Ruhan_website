@@ -37,15 +37,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
   const body = await req.json();
 
-  const dataToUpdate: any = {
-    name: body.name,
-    mobile: body.mobile,
-    email: body.email || null,
-    address: body.address || null,
-    aadhaarNumber: body.aadhaarNumber || null,
-    panNumber: body.panNumber || null,
-    notes: body.notes || null,
-  };
+  const dataToUpdate: any = {};
+  if (body.name !== undefined) dataToUpdate.name = body.name;
+  if (body.mobile !== undefined) dataToUpdate.mobile = body.mobile;
+  if (body.email !== undefined) dataToUpdate.email = body.email || null;
+  if (body.address !== undefined) dataToUpdate.address = body.address || null;
+  if (body.aadhaarNumber !== undefined) dataToUpdate.aadhaarNumber = body.aadhaarNumber || null;
+  if (body.panNumber !== undefined) dataToUpdate.panNumber = body.panNumber || null;
+  if (body.notes !== undefined) dataToUpdate.notes = body.notes || null;
 
   const existingCustomer = await prisma.customer.findUnique({
     where: { id },
