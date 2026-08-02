@@ -133,7 +133,7 @@ function CustomerTable({
                 <input type="checkbox" checked={isSelected} onChange={() => toggleSelect(customer.id)} />
               </td>
               <td style={{ padding: "8px 10px", position: "relative" }}>
-                <div style={{ fontWeight: "bold", fontSize: "13px", color: isSelected ? "#ffffff" : "#000080", cursor: "pointer" }} onClick={() => onOpenAction(customer.id, "profile")}>
+                <div style={{ fontWeight: "bold", fontSize: "13px", cursor: "pointer" }} onClick={() => onOpenAction(customer.id, "profile")}>
                   {customer.name}
                   {customer.rating && (
                     <span style={{ marginLeft: "4px", color: isSelected ? "#fbbf24" : "#d97706", fontSize: "10px" }}>
