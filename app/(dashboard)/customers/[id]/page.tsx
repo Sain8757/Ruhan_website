@@ -425,6 +425,48 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
 
               <button
                 type="button"
+                onClick={async () => {
+                  const amount = window.prompt("Enter amount to add to wallet (Advance):");
+                  if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) return;
+                  
+                  toast.info("Adding to wallet...");
+                  try {
+                    const res = await fetch(`/api/customers/${customer.id}`, { 
+                      method: "PUT",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ walletBalance: customer.walletBalance + Number(amount) })
+                    });
+                    if (!res.ok) throw new Error("Failed to add to wallet");
+                    toast.success(`₹${amount} added to wallet successfully!`);
+                    refreshCustomer();
+                  } catch (err: any) {
+                    toast.error(err.message);
+                  }
+                }}
+                style={{
+                  width: "100%",
+                  marginTop: "8px",
+                  padding: "6px 8px",
+                  backgroundColor: "#d4d0c8",
+                  borderTop: "2px solid #ffffff",
+                  borderLeft: "2px solid #ffffff",
+                  borderRight: "2px solid #404040",
+                  borderBottom: "2px solid #404040",
+                  color: "#000000",
+                  fontSize: "11px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "6px",
+                }}
+              >
+                <span>💰 Add Advance to Wallet</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => {
                   window.open(`/print/ledger/${customer.id}`, '_blank');
                 }}
