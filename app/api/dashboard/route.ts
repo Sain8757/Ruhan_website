@@ -49,6 +49,7 @@ export async function GET() {
       where: {
         createdAt: { gte: startToday, lte: endToday },
         paymentStatus: { in: ["PAID", "PARTIAL"] },
+        NOT: { notes: { contains: "Service ID:" } }
       },
       _sum: { amountPaid: true },
       _count: true,
@@ -80,6 +81,7 @@ export async function GET() {
       where: {
         createdAt: { gte: startMonth },
         paymentStatus: { in: ["PAID", "PARTIAL"] },
+        NOT: { notes: { contains: "Service ID:" } }
       },
       _sum: { amountPaid: true },
     }),
@@ -116,6 +118,7 @@ export async function GET() {
       where: {
         createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
         paymentStatus: { in: ["PAID", "PARTIAL"] },
+        NOT: { notes: { contains: "Service ID:" } }
       },
       select: { amountPaid: true, createdAt: true },
     }),
@@ -129,13 +132,17 @@ export async function GET() {
     }),
     // Partial Invoices Count
     prisma.invoice.count({
-      where: { paymentStatus: "PARTIAL" }
+      where: { 
+        paymentStatus: "PARTIAL",
+        NOT: { notes: { contains: "Service ID:" } }
+      }
     }),
     // Yesterday invoices
     prisma.invoice.aggregate({
       where: {
         createdAt: { gte: yesterdayStart, lte: yesterdayEnd },
         paymentStatus: { in: ["PAID", "PARTIAL"] },
+        NOT: { notes: { contains: "Service ID:" } }
       },
       _sum: { amountPaid: true },
       _count: true,
@@ -157,6 +164,7 @@ export async function GET() {
       where: {
         createdAt: { gte: lastWeekDayStart, lte: lastWeekDayEnd },
         paymentStatus: { in: ["PAID", "PARTIAL"] },
+        NOT: { notes: { contains: "Service ID:" } }
       },
       _sum: { amountPaid: true },
     }),
@@ -173,6 +181,7 @@ export async function GET() {
       where: {
         createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
         paymentStatus: { in: ["PAID", "PARTIAL"] },
+        NOT: { notes: { contains: "Service ID:" } }
       },
       _sum: { amountPaid: true },
     }),

@@ -27,6 +27,9 @@ export async function GET(req: NextRequest) {
     // 2. Aggregate InvoiceItems
     const productSalesMap = new Map<string, { quantity: number; revenue: number }>();
     for (const inv of invoices) {
+      // Skip auto-generated invoices to prevent double-billing with the Services table
+      if (inv.notes?.includes("Service ID: ")) continue;
+      
       for (const item of inv.items) {
         const current = productSalesMap.get(item.name) || { quantity: 0, revenue: 0 };
         current.quantity += item.quantity;

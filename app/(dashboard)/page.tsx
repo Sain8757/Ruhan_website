@@ -42,10 +42,19 @@ import GoalTrackerWidget from "@/components/dashboard/GoalTrackerWidget";
 import TopServicesWidget from "@/components/dashboard/TopServicesWidget";
 import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton";
 import MorningSummaryWidget from "@/components/dashboard/MorningSummaryWidget";
+import LowStockWidget from "@/components/dashboard/LowStockWidget";
+import QuickExpenseWidget from "@/components/dashboard/QuickExpenseWidget";
 
 interface PercentChange {
   value: string;
   positive: boolean;
+}
+
+interface LowStockItem {
+  id: string;
+  name: string;
+  quantity: number;
+  minStock: number;
 }
 
 interface DashboardData {
@@ -63,6 +72,7 @@ interface DashboardData {
   topServices: TopService[];
   overdueServices: RecentService[];
   dueTodayServices: RecentService[];
+  lowStockItems: LowStockItem[];
   percentChanges: {
     income: PercentChange;
     customers: PercentChange;
@@ -407,6 +417,7 @@ export default function DashboardPage() {
           topServices: [],
           overdueServices: [],
           dueTodayServices: [],
+          lowStockItems: [],
           percentChanges: {
             income: { value: "—", positive: true },
             customers: { value: "—", positive: true },
@@ -962,6 +973,12 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <GoalTrackerWidget currentIncome={data?.todayIncome || 0} />
         <TopServicesWidget services={data?.topServices || []} />
+      </div>
+
+      {/* ===== LOW STOCK + QUICK EXPENSE ROW ===== */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <LowStockWidget items={data?.lowStockItems || []} />
+        <QuickExpenseWidget />
       </div>
 
       {/* ===== INVOICE BAR CHART + RECENT SERVICES TABLE ===== */}

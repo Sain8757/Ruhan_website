@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Download, FileDown, TrendingUp, IndianRupee, Users, Briefcase, BookOpen, Loader2, FileText, X, Package, AlertTriangle, Search, MessageCircle } from "lucide-react";
+import { Download, FileDown, TrendingUp, IndianRupee, Users, Briefcase, BookOpen, Loader2, FileText, X, Package, AlertTriangle, Search, MessageCircle, Activity, Sparkles } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, BarChart, Bar, Cell, PieChart, Pie, Legend,
@@ -25,6 +25,7 @@ interface ReportData {
     serviceSalesRevenue: number;
     serviceSalesCount: number;
     totalPendingDueBalance?: number;
+    totalExpenses?: number;
   };
   chartData: { date: string; revenue: number }[];
   serviceStats: Record<string, number>;
@@ -448,9 +449,36 @@ export default function ReportsPage() {
           <div className="text-2xl font-extrabold tracking-tight" style={{ color: "var(--text-primary)" }}>
             {formatCurrency(summary.serviceSalesRevenue)}
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            {summary.serviceSalesCount} paid services (selected period)
-          </p>
+          <p className="text-xs text-slate-400 mt-1">{summary.serviceSalesCount} paid services (selected period)</p>
+        </div>
+
+        {/* Expenses (Selected Period) */}
+        <div className="glass-card p-6 bg-orange-500/5 hover:bg-orange-500/10 transition-colors">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <Activity size={14} style={{ color: "#f97316" }} />
+              <span className="label text-orange-500">Expenses (Selected Period)</span>
+            </div>
+          </div>
+          <div className="text-2xl font-extrabold text-orange-500 tracking-tight">
+            {formatCurrency(summary.totalExpenses || 0)}
+          </div>
+          <p className="text-xs text-slate-400 mt-1">Total expenses logged</p>
+        </div>
+
+        {/* Net Profit (P&L) */}
+        <div className="glass-card p-6 bg-blue-900 text-white shadow-lg">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <Sparkles size={14} className="text-blue-300" />
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-300">Net Profit (P&L)</span>
+            </div>
+            <span className="text-[10px] font-bold bg-white/20 px-2 py-0.5 rounded-full">Selected Period</span>
+          </div>
+          <div className="text-2xl font-black tracking-tight mt-1">
+            {formatCurrency((summary.inventorySalesRevenue + summary.serviceSalesRevenue) - (summary.totalExpenses || 0))}
+          </div>
+          <p className="text-xs text-blue-200 mt-1">Gross Revenue - Expenses</p>
         </div>
       </div>
 

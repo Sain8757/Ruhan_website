@@ -40,10 +40,14 @@ export async function GET(req: NextRequest) {
     invoicesWithItems,
     inventoryItems,
     serviceSalesTotalInRange,
+    expensesInRange,
   ] = await Promise.all([
     // Total all-time invoice revenue
     prisma.invoice.aggregate({
-      where: { paymentStatus: { in: ["PAID", "PARTIAL"] } },
+      where: { 
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
+        NOT: { notes: { contains: "Service ID:" } }
+      },
       _sum: { amountPaid: true },
       _count: true,
     }),
@@ -57,6 +61,7 @@ export async function GET(req: NextRequest) {
       where: {
         paymentStatus: { in: ["PAID", "PARTIAL"] },
         createdAt: { gte: startMonth, lte: endMonth },
+        NOT: { notes: { contains: "Service ID:" } }
       },
       _sum: { amountPaid: true },
       _count: true,
@@ -74,6 +79,7 @@ export async function GET(req: NextRequest) {
       where: {
         paymentStatus: { in: ["PAID", "PARTIAL"] },
         createdAt: { gte: startOfDay(today), lte: endOfDay(today) },
+        NOT: { notes: { contains: "Service ID:" } }
       },
       _sum: { amountPaid: true },
       _count: true,
@@ -91,6 +97,7 @@ export async function GET(req: NextRequest) {
       where: {
         paymentStatus: { in: ["PAID", "PARTIAL"] },
         createdAt: { gte: startRange, lte: endRange },
+        NOT: { notes: { contains: "Service ID:" } }
       },
       select: { amountPaid: true, createdAt: true },
       orderBy: { createdAt: "asc" },
@@ -121,6 +128,9 @@ export async function GET(req: NextRequest) {
     // Invoices by payment status
     prisma.invoice.groupBy({
       by: ["paymentStatus"],
+      where: {
+        NOT: { notes: { contains: "Service ID:" } }
+      },
       _sum: { total: true },
       _count: true,
     }),
@@ -130,6 +140,7 @@ export async function GET(req: NextRequest) {
       orderBy: { total: "desc" },
       where: {
         createdAt: { gte: startRange, lte: endRange },
+        NOT: { notes: { contains: "Service ID:" } }
       },
       include: {
         customer: { select: { name: true, mobile: true } },
@@ -137,7 +148,11 @@ export async function GET(req: NextRequest) {
     }),
     // Invoices with items for accurate Product vs POS Service separation
     prisma.invoice.findMany({
-      where: { paymentStatus: { in: ["PAID", "PARTIAL"] }, createdAt: { gte: startRange, lte: endRange } },
+      where: { 
+        paymentStatus: { in: ["PAID", "PARTIAL"] }, 
+        createdAt: { gte: startRange, lte: endRange },
+        NOT: { notes: { contains: "Service ID:" } }
+      },
       include: { items: true },
     }),
     prisma.inventoryItem.findMany({
@@ -149,6 +164,11 @@ export async function GET(req: NextRequest) {
       _sum: { fees: true },
       _count: true,
     }),
+    // Total expenses in range
+    prisma.expense.aggregate({
+      where: { date: { gte: startRange, lte: endRange } },
+      _sum: { amount: true },
+    })
   ]);
 
   // Separate Product vs Service revenue for POS Invoices
@@ -282,6 +302,7 @@ export async function GET(req: NextRequest) {
       serviceSalesRevenue: Math.round((serviceSalesTotalInRange._sum.fees || 0) + posServiceRevenue),
       serviceSalesCount: serviceSalesTotalInRange._count,
       totalPendingDueBalance,
+      totalExpenses: expensesInRange._sum.amount || 0,
     },
     chartData,
     serviceStats,
