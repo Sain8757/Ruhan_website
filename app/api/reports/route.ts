@@ -235,7 +235,7 @@ export async function GET(req: NextRequest) {
       totalCustomers,
       inventorySalesRevenue: Math.round(posProductRevenue),
       inventorySalesCount: posProductCount,
-      serviceSalesRevenue: Math.round((serviceSalesTotalInRange._sum.amountPaid || 0) + posServiceRevenue),
+      serviceSalesRevenue: Math.round((serviceSalesTotalInRange._sum.fees || 0) + posServiceRevenue),
       serviceSalesCount: serviceSalesTotalInRange._count,
       totalPendingDueBalance,
       totalExpenses: expensesInRange._sum.amount || 0,
