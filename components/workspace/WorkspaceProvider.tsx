@@ -37,6 +37,7 @@ import {
   WalletCards,
   X,
   Smartphone,
+  IndianRupee,
 } from "lucide-react";
 import { useToast } from "@/contexts/ToastContext";
 import type { GlobalSearchResult, SearchResultType } from "@/lib/search";
@@ -95,6 +96,7 @@ const iconMap = {
   FileImage,
   MessageCircle,
   Smartphone,
+  IndianRupee,
 } satisfies Record<WorkspaceIcon, React.ComponentType<{ size?: number; className?: string }>>;
 
 const recordIconMap = {

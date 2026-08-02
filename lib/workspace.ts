@@ -19,7 +19,8 @@ export type WorkspaceIcon =
   | "QrCode"
   | "FileImage"
   | "MessageCircle"
-  | "Smartphone";
+  | "Smartphone"
+  | "IndianRupee";
 
 export type WorkspaceSection = "Core" | "Tools" | "Inventory" | "Business";
 
@@ -203,6 +204,14 @@ export const WORKSPACE_MODULES: WorkspaceModule[] = [
     icon: "BookOpen",
     section: "Business",
     keywords: ["expenses", "profit", "ledger", "kharcha"],
+  },
+  {
+    id: "accounts",
+    label: "Accounts",
+    href: "/accounts",
+    icon: "IndianRupee",
+    section: "Business",
+    keywords: ["tally", "p&l", "profit loss", "ledger", "gst", "cash flow", "balance sheet", "accounts", "accounting"],
   },
   {
     id: "marketing",

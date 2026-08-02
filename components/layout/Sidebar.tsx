@@ -24,6 +24,7 @@ import {
   WalletCards,
   QrCode,
   FileImage,
+  IndianRupee,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -47,6 +48,7 @@ const iconColors: Partial<Record<WorkspaceIcon, string>> = {
   Settings: "#6b7280",
   QrCode: "#4f46e5",
   FileImage: "#ec4899",
+  IndianRupee: "#f59e0b",
 };
 
 const iconMap: Partial<Record<WorkspaceIcon, React.ElementType>> = {
@@ -65,6 +67,7 @@ const iconMap: Partial<Record<WorkspaceIcon, React.ElementType>> = {
   Settings,
   QrCode,
   FileImage,
+  IndianRupee,
 };
 
 const NAV_SECTIONS = ["Core", "Tools", "Inventory", "Business"] as const;

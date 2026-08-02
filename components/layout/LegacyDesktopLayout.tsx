@@ -7,7 +7,7 @@ import {
   ScanLine, Layers, WalletCards, BookOpen, Package,
   MessageSquare, BarChart3, Settings, QrCode, FileImage,
   Search, Bell, MessageCircle, Mail, Sparkles, LogOut, AlertTriangle, Clock,
-  Download, Printer, Copy, Smartphone, Languages, Volume2, VolumeX
+  Download, Printer, Copy, Smartphone, Languages, Volume2, VolumeX, IndianRupee
 } from "lucide-react";
 import { WorkspaceProvider, useWorkspace } from "@/components/workspace/WorkspaceProvider";
 import Providers from "@/components/Providers";
@@ -38,6 +38,7 @@ const iconMap: Record<string, React.ComponentType<{ size?: number; color?: strin
   FileImage,
   MessageCircle,
   Smartphone,
+  IndianRupee,
 };
 
 function LegacyDesktopInner({ children }: { children: React.ReactNode }) {

@@ -328,6 +328,17 @@ model OnlineServiceLink {
   @@index([order])
 }
 
+model AccountBalance {
+  id        String   @id @default(cuid())
+  date      DateTime @unique
+  opening   Float    @default(0)
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([date])
+}
+
 model FileDrop {
   id           String   @id @default(cuid())
   filename     String
