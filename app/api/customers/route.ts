@@ -75,8 +75,8 @@ export async function GET(req: NextRequest) {
         orderBy: { createdAt: "desc" },
         include: {
           _count: { select: { services: true, invoices: true, documents: true } },
-          invoices: { where: { paymentStatus: { not: "PAID" } }, select: { total: true, amountPaid: true } },
-          services: { where: { paymentStatus: { not: "PAID" } }, select: { fees: true, amountPaid: true } }
+          invoices: { select: { total: true, amountPaid: true, notes: true } },
+          services: { select: { id: true, fees: true, amountPaid: true } }
         },
       }),
       prisma.customer.count({ where }),
@@ -84,9 +84,22 @@ export async function GET(req: NextRequest) {
   }
 
   const customers = customersData.map(c => {
-    const invoiceDues = c.invoices.reduce((acc, inv) => acc + (inv.total - inv.amountPaid), 0);
-    const serviceDues = c.services.reduce((acc, srv) => acc + (srv.fees - srv.amountPaid), 0);
-    const totalDues = invoiceDues + serviceDues;
+    const autoBilledServiceIds = new Set(
+      c.invoices.filter((inv: any) => inv.notes?.includes("Service ID: "))
+      .map((inv: any) => inv.notes.split("Service ID: ")[1]?.trim())
+    );
+
+    const totalInvoiceBilled = c.invoices.reduce((acc: number, inv: any) => acc + (inv.total || 0), 0);
+    const totalInvoicePaid = c.invoices.reduce((acc: number, inv: any) => acc + (inv.amountPaid || 0), 0);
+    
+    const unbilledServices = c.services.filter((srv: any) => !autoBilledServiceIds.has(srv.id));
+    const totalServiceBilled = unbilledServices.reduce((acc: number, srv: any) => acc + (srv.fees || 0), 0);
+    const totalServicePaid = unbilledServices.reduce((acc: number, srv: any) => acc + (srv.amountPaid || 0), 0);
+    
+    const totalBilled = totalInvoiceBilled + totalServiceBilled;
+    const totalPaid = totalInvoicePaid + totalServicePaid;
+    const totalDues = Math.max(0, totalBilled - totalPaid);
+    
     const { invoices, services, ...rest } = c;
     return { ...rest, totalDues };
   });

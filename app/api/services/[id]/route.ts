@@ -82,7 +82,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
             createdById: userId,
             subtotal: service.fees,
             total: service.fees,
-            amountPaid: service.paymentStatus === 'PAID' ? service.fees : 0,
+            amountPaid: service.amountPaid,
             paymentMode: service.paymentMode,
             paymentStatus: service.paymentStatus,
             notes: `Auto-generated for Service ID: ${service.id}`,

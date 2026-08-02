@@ -159,10 +159,17 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
   };
 
   // Khata ledger calculations
+  const autoBilledServiceIds = new Set(
+    customer?.invoices?.filter((inv: any) => inv.notes?.includes("Service ID: "))
+    .map((inv: any) => inv.notes.split("Service ID: ")[1]?.trim()) || []
+  );
+
   const totalInvoiceBilled = customer?.invoices?.reduce((sum: number, inv: any) => sum + (inv.total || 0), 0) || 0;
   const totalInvoicePaid = customer?.invoices?.reduce((sum: number, inv: any) => sum + (inv.amountPaid || 0), 0) || 0;
-  const totalServiceBilled = customer?.services?.reduce((sum: number, srv: any) => sum + (srv.fees || 0), 0) || 0;
-  const totalServicePaid = customer?.services?.reduce((sum: number, srv: any) => sum + (srv.amountPaid || 0), 0) || 0;
+  
+  const unbilledServices = customer?.services?.filter((srv: any) => !autoBilledServiceIds.has(srv.id)) || [];
+  const totalServiceBilled = unbilledServices.reduce((sum: number, srv: any) => sum + (srv.fees || 0), 0) || 0;
+  const totalServicePaid = unbilledServices.reduce((sum: number, srv: any) => sum + (srv.amountPaid || 0), 0) || 0;
   
   const totalBilled = totalInvoiceBilled + totalServiceBilled;
   const totalPaid = totalInvoicePaid + totalServicePaid;
