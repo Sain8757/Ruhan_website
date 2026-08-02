@@ -116,30 +116,33 @@ function CustomerTable({
           </tr>
         </thead>
         <tbody>
-          {customers.map((customer, index) => (
+          {customers.map((customer, index) => {
+            const isSelected = selectedIds.includes(customer.id);
+            return (
             <tr
               key={customer.id}
               style={{
-                backgroundColor: selectedIds.includes(customer.id) ? "#e0f2fe" : index % 2 === 0 ? "#ffffff" : "#f9f9f6",
+                backgroundColor: isSelected ? "#000080" : index % 2 === 0 ? "#ffffff" : "#f9f9f6",
+                color: isSelected ? "#ffffff" : "#000000",
                 borderBottom: "1px solid #e2e8f0",
               }}
               onMouseEnter={() => setHoveredCustomer(customer.id)}
               onMouseLeave={() => setHoveredCustomer(null)}
             >
               <td style={{ padding: "8px 10px", textAlign: "center" }}>
-                <input type="checkbox" checked={selectedIds.includes(customer.id)} onChange={() => toggleSelect(customer.id)} />
+                <input type="checkbox" checked={isSelected} onChange={() => toggleSelect(customer.id)} />
               </td>
               <td style={{ padding: "8px 10px", position: "relative" }}>
-                <div style={{ fontWeight: "bold", fontSize: "13px", color: "#000080", cursor: "pointer" }} onClick={() => onOpenAction(customer.id, "profile")}>
+                <div style={{ fontWeight: "bold", fontSize: "13px", color: isSelected ? "#ffffff" : "#000080", cursor: "pointer" }} onClick={() => onOpenAction(customer.id, "profile")}>
                   {customer.name}
                   {customer.rating && (
-                    <span style={{ marginLeft: "4px", color: "#d97706", fontSize: "10px" }}>
+                    <span style={{ marginLeft: "4px", color: isSelected ? "#fbbf24" : "#d97706", fontSize: "10px" }}>
                       {Array.from({length: customer.rating}).map((_, i) => "★").join("")}
                     </span>
                   )}
                 </div>
                 {customer.aadhaarNumber && (
-                  <div style={{ fontSize: "10px", color: "#666" }}>Aadhaar: {customer.aadhaarNumber}</div>
+                  <div style={{ fontSize: "10px", color: isSelected ? "#d1d5db" : "#666" }}>Aadhaar: {customer.aadhaarNumber}</div>
                 )}
                 
                 {/* Quick Peek Hover Tooltip */}
@@ -147,7 +150,8 @@ function CustomerTable({
                   <div style={{
                     position: "absolute", top: "100%", left: "10px", zIndex: 10,
                     background: "#ffffe1", border: "1px solid #000", padding: "8px",
-                    boxShadow: "2px 2px 5px rgba(0,0,0,0.2)", width: "220px", fontSize: "11px"
+                    boxShadow: "2px 2px 5px rgba(0,0,0,0.2)", width: "220px", fontSize: "11px",
+                    color: "#000000"
                   }}>
                     <strong>Quick Peek:</strong><br/>
                     Registered: {formatRelativeTime(customer.createdAt)}<br/>
@@ -167,7 +171,7 @@ function CustomerTable({
                       {tag}
                     </span>
                   ))}
-                  {(!customer.tags || customer.tags.length === 0) && <span style={{ fontSize: "10px", color: "#999" }}>-</span>}
+                  {(!customer.tags || customer.tags.length === 0) && <span style={{ fontSize: "10px", color: isSelected ? "#a1a1aa" : "#999" }}>No Tags</span>}
                 </div>
               </td>
               <td style={{ padding: "8px 10px", textAlign: "center" }}>
@@ -187,14 +191,14 @@ function CustomerTable({
               </td>
               <td style={{ padding: "8px 10px", textAlign: "center" }}>
                 {customer.totalDues && customer.totalDues > 0 ? (
-                  <div style={{ color: "#dc2626", fontWeight: "bold" }}>Due: ₹{customer.totalDues}</div>
+                  <div style={{ color: isSelected ? "#fca5a5" : "#dc2626", fontWeight: "bold" }}>Due: ₹{customer.totalDues}</div>
                 ) : customer.walletBalance && customer.walletBalance > 0 ? (
-                  <div style={{ color: "#16a34a", fontWeight: "bold" }}>Wallet: ₹{customer.walletBalance}</div>
+                  <div style={{ color: isSelected ? "#86efac" : "#16a34a", fontWeight: "bold" }}>Wallet: ₹{customer.walletBalance}</div>
                 ) : (
-                  <div style={{ color: "#64748b" }}>₹0</div>
+                  <div style={{ color: isSelected ? "#cbd5e1" : "#64748b" }}>₹0</div>
                 )}
                 {customer.loyaltyPoints && customer.loyaltyPoints > 0 ? (
-                  <div style={{ fontSize: "10px", color: "#ca8a04", marginTop: "2px" }}>🎁 {customer.loyaltyPoints} Pts</div>
+                  <div style={{ fontSize: "10px", color: isSelected ? "#fde047" : "#ca8a04", marginTop: "2px" }}>🎁 {customer.loyaltyPoints} Pts</div>
                 ) : null}
               </td>
               <td style={{ padding: "8px 10px", textAlign: "center", position: "relative" }}>
@@ -244,7 +248,8 @@ function CustomerTable({
                 )}
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>
