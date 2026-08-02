@@ -44,6 +44,7 @@ import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton";
 import MorningSummaryWidget from "@/components/dashboard/MorningSummaryWidget";
 import LowStockWidget from "@/components/dashboard/LowStockWidget";
 import QuickExpenseWidget from "@/components/dashboard/QuickExpenseWidget";
+import ServiceDetailsDialog from "@/components/services/ServiceDetailsDialog";
 
 interface PercentChange {
   value: string;
@@ -379,6 +380,8 @@ function timeAgo(dateString: string) {
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const [isServiceDetailsOpen, setIsServiceDetailsOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
@@ -1083,7 +1086,10 @@ export default function DashboardPage() {
                       key={service.id}
                       className="animate-slide-up cursor-pointer"
                       style={{ animationDelay: `${i * 50}ms`, animationFillMode: "both" }}
-                      onClick={() => window.location.href = `/services/${service.id}`}
+                      onClick={() => {
+                        setSelectedServiceId(service.id);
+                        setIsServiceDetailsOpen(true);
+                      }}
                       title="Click to view service details"
                     >
                       <td>
@@ -1132,6 +1138,22 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      <ServiceDetailsDialog
+        isOpen={isServiceDetailsOpen}
+        onClose={() => {
+          setIsServiceDetailsOpen(false);
+          setSelectedServiceId(null);
+        }}
+        serviceId={selectedServiceId}
+        onSuccess={(shouldClose = true) => {
+          fetchData(true);
+          if (shouldClose) {
+            setIsServiceDetailsOpen(false);
+            setSelectedServiceId(null);
+          }
+        }}
+      />
     </div>
   );
 }
