@@ -27,6 +27,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const fetchCustomer = () => {
     fetch(`/api/customers/${resolvedParams.id}`)
@@ -667,14 +668,13 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                           {doc.expiryDate && <><br/>Expires: <span style={{color: isExpired ? '#dc2626' : (isNearExpiry ? '#d97706' : '#16a34a')}}>{formatDate(doc.expiryDate)}</span></>}
                         </div>
                         {doc.url && (
-                          <a
-                            href={doc.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-xs font-semibold underline mt-1 inline-block text-blue-600 hover:text-blue-800"
+                          <button
+                            type="button"
+                            onClick={() => setPreviewUrl(doc.url)}
+                            className="text-xs font-semibold underline mt-1 inline-block text-blue-600 hover:text-blue-800 bg-transparent border-none p-0 cursor-pointer text-left"
                           >
                             Preview / Download
-                          </a>
+                          </button>
                         )}
                       </div>
                       <button
@@ -752,6 +752,35 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           onClose={() => setSelectedInvoiceId(null)}
           invoiceId={selectedInvoiceId}
         />
+      )}
+
+      {/* Document Preview Modal */}
+      {previewUrl && (
+        <div style={{ position:"fixed",inset:0,zIndex:100000,background:"rgba(0,0,0,0.7)",display:"flex",alignItems:"center",justifyContent:"center" }}>
+          <div style={{ background:"#d4d0c8", borderTop:"2px solid #ffffff", borderLeft:"2px solid #ffffff", borderRight:"2px solid #404040", borderBottom:"2px solid #404040", display:"flex", flexDirection:"column", width:"80%", maxWidth:"700px", maxHeight:"85vh", boxShadow:"0 10px 30px rgba(0,0,0,0.8)" }}>
+            <div style={{ background:"linear-gradient(90deg,#000080,#1084d0)", color:"white", padding:"6px 10px", fontWeight:"bold", fontSize:"13px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+              <span>Document Preview</span>
+              <button onClick={() => setPreviewUrl(null)} style={{ background:"#d4d0c8", color:"black", borderTop:"1px solid #ffffff", borderLeft:"1px solid #ffffff", borderRight:"1px solid #404040", borderBottom:"1px solid #404040", padding:"1px 6px", cursor:"pointer", fontWeight:"bold" }}>✕</button>
+            </div>
+            
+            <div style={{ flex:1, background:"#000", display:"flex", alignItems:"center", justifyContent:"center", padding:"10px", overflow:"hidden", minHeight:"300px" }}>
+              {(previewUrl.includes('data:image/') || previewUrl.match(/\.(jpeg|jpg|gif|png|webp|bmp)$/i)) ? (
+                <img src={previewUrl} alt="Preview" style={{ maxWidth:"100%", maxHeight:"100%", objectFit:"contain" }} />
+              ) : (
+                <iframe src={previewUrl} style={{ width:"100%", height:"500px", border:"none", background:"white" }} title="Document Preview" />
+              )}
+            </div>
+            
+            <div style={{ padding:"10px", display:"flex", justifyContent:"center", gap:"10px", background:"#111" }}>
+              <button onClick={() => setPreviewUrl(null)} style={{ background:"#d4d0c8", color:"black", borderTop:"1px solid #ffffff", borderLeft:"1px solid #ffffff", borderRight:"1px solid #404040", borderBottom:"1px solid #404040", padding:"6px 20px", fontWeight:"bold", cursor:"pointer" }}>
+                Close
+              </button>
+              <button onClick={() => { window.open(previewUrl, '_blank'); }} style={{ background:"#d4d0c8", color:"black", borderTop:"1px solid #ffffff", borderLeft:"1px solid #ffffff", borderRight:"1px solid #404040", borderBottom:"1px solid #404040", padding:"6px 16px", fontWeight:"bold", cursor:"pointer" }}>
+                ↗️ Open in New Tab
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
