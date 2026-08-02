@@ -41,6 +41,9 @@ interface Customer {
   walletBalance?: number;
   rating?: number;
   tags?: string[];
+  dob?: string;
+  anniversary?: string;
+  followUpDate?: string;
   loyaltyPoints?: number;
   _count: { services: number; invoices: number; documents: number };
 }
@@ -141,6 +144,15 @@ function CustomerTable({
                       {Array.from({length: customer.rating}).map((_, i) => "★").join("")}
                     </span>
                   )}
+                  {customer.dob && new Date(customer.dob).getDate() === new Date().getDate() && new Date(customer.dob).getMonth() === new Date().getMonth() && (
+                    <span style={{ marginLeft: "4px", fontSize: "12px" }} title="Birthday Today!">🎂</span>
+                  )}
+                  {customer.anniversary && new Date(customer.anniversary).getDate() === new Date().getDate() && new Date(customer.anniversary).getMonth() === new Date().getMonth() && (
+                    <span style={{ marginLeft: "4px", fontSize: "12px" }} title="Anniversary Today!">💍</span>
+                  )}
+                  {customer.followUpDate && new Date(customer.followUpDate) <= new Date() && (
+                    <span style={{ marginLeft: "4px", fontSize: "12px" }} title="Follow-up Due!">⏰</span>
+                  )}
                 </div>
                 {customer.aadhaarNumber && (
                   <div style={{ fontSize: "10px", color: isSelected ? "#d1d5db" : "#666" }}>Aadhaar: {customer.aadhaarNumber}</div>
@@ -158,6 +170,9 @@ function CustomerTable({
                     Registered: {formatRelativeTime(customer.createdAt)}<br/>
                     Wallet: ₹{customer.walletBalance || 0}<br/>
                     Points: {customer.loyaltyPoints || 0} 🎁<br/>
+                    {customer.dob && <>DOB: {new Date(customer.dob).toLocaleDateString()}<br/></>}
+                    {customer.anniversary && <>Anniversary: {new Date(customer.anniversary).toLocaleDateString()}<br/></>}
+                    {customer.followUpDate && <>Follow-up: {new Date(customer.followUpDate).toLocaleDateString()}<br/></>}
                     Documents Vault: {customer._count?.documents || 0} files
                   </div>
                 )}
@@ -477,7 +492,9 @@ export default function CustomersPage() {
           { key: "VIP", label: "VIP ✨", color: "#854d0e", bg: "#fef08a" },
           { key: "DEFAULTER", label: "Defaulters ⚠️", color: "#991b1b", bg: "#fecaca" },
           { key: "WALLET", label: "Wallet Active 💰", color: "#166534", bg: "#dcfce7" },
-          { key: "NO_DOCS", label: "Missing Docs 📄", color: "#1e40af", bg: "#dbeafe" }
+          { key: "NO_DOCS", label: "Missing Docs 📄", color: "#1e40af", bg: "#dbeafe" },
+          { key: "BIRTHDAY", label: "Birthday Today 🎂", color: "#be185d", bg: "#fce7f3" },
+          { key: "FOLLOW_UP", label: "Follow-up Due ⏰", color: "#c2410c", bg: "#ffedd5" }
         ].map(f => (
           <button 
             key={f.key} 

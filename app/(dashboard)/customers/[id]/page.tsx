@@ -351,7 +351,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
               {totalDue > 0 && (
                 <button
                   type="button"
-                  onClick={() => sendWhatsApp(`Namaste ${customer.name} ji! 🙏\n\nRA Seva Point se aapka total pending due (udhaar) *${formatCurrency(totalDue)}* baaki hai.\n\nKripya ise jald se jald cash ya UPI dwara bhugtan karein.\n\nDhanyawad! 📱 RA Seva Point`)}
+                  onClick={() => sendWhatsApp(`Namaste ${customer.name} ji! 🙏\n\nRA Seva Point se aapka total pending due (udhaar) *${formatCurrency(totalDue)}* baaki baaki hai.\n\nKripya ise jald se jald cash ya UPI dwara bhugtan karein.\n\nDhanyawad! 📱 RA Seva Point`)}
                   style={{
                     width: "100%",
                     marginTop: "10px",
@@ -373,6 +373,45 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                 >
                   <MessageCircle size={15} color="#25D366" />
                   <span>Send Due Reminder on WhatsApp</span>
+                </button>
+              )}
+
+              {totalDue > 0 && customer.walletBalance > 0 && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (confirm(`Settle dues of ${formatCurrency(Math.min(totalDue, customer.walletBalance))} from wallet?`)) {
+                      toast.info("Settling from wallet...");
+                      try {
+                        const res = await fetch(`/api/customers/${customer.id}/settle-wallet`, { method: "POST" });
+                        if (!res.ok) throw new Error("Failed to settle");
+                        toast.success("Wallet amount settled against dues!");
+                        refreshCustomer();
+                      } catch (err: any) {
+                        toast.error(err.message);
+                      }
+                    }
+                  }}
+                  style={{
+                    width: "100%",
+                    marginTop: "8px",
+                    padding: "6px 8px",
+                    backgroundColor: "#dcfce7",
+                    borderTop: "2px solid #ffffff",
+                    borderLeft: "2px solid #ffffff",
+                    borderRight: "2px solid #404040",
+                    borderBottom: "2px solid #404040",
+                    color: "#166534",
+                    fontSize: "11px",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <span>💸 Auto-Settle from Wallet</span>
                 </button>
               )}
 
@@ -572,6 +611,13 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                     <option value="Marksheet">Marksheet</option>
                     <option value="Other">Other Document</option>
                   </select>
+                  <input
+                    type="date"
+                    className="input-field"
+                    title="Expiry Date (Optional)"
+                    value={(docForm as any).expiryDate || ""}
+                    onChange={(e) => setDocForm({ ...docForm, expiryDate: e.target.value } as any)}
+                  />
                   
                   <div className="flex items-center gap-2">
                     <input
@@ -595,7 +641,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                 </div>
 
                 <div className="text-[11px] text-slate-400">
-                  Tip: Upload Aadhaar, PAN, Photos or Certificates directly to save them permanently for future form applications.
+                  Tip: Upload Aadhaar, PAN, Photos or Certificates directly to save them permanently for future form applications. Add an Expiry Date for alerts.
                 </div>
               </div>
 
@@ -605,14 +651,20 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {customer.documents.map((doc: any) => (
+                  {customer.documents.map((doc: any) => {
+                    const isExpired = doc.expiryDate && new Date(doc.expiryDate) < new Date();
+                    const isNearExpiry = doc.expiryDate && new Date(doc.expiryDate) >= new Date() && new Date(doc.expiryDate).getTime() - new Date().getTime() < 30 * 24 * 60 * 60 * 1000;
+                    return (
                     <div key={doc.id} className="glass-card p-4 flex items-center justify-between gap-3 border border-slate-200 hover:shadow-md transition-shadow">
                       <div className="truncate">
-                        <div className="font-bold text-sm truncate" style={{ color: "var(--text-primary)" }}>
+                        <div className="font-bold text-sm truncate flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
                           {doc.name}
+                          {isExpired && <span className="badge bg-red-100 text-red-700 text-[10px]">Expired</span>}
+                          {isNearExpiry && <span className="badge bg-orange-100 text-orange-700 text-[10px]">Expiring Soon</span>}
                         </div>
                         <div className="text-xs text-slate-500 mt-0.5">
                           Category: <span className="font-semibold text-blue-600">{doc.type}</span> · {formatDate(doc.createdAt)}
+                          {doc.expiryDate && <><br/>Expires: <span style={{color: isExpired ? '#dc2626' : (isNearExpiry ? '#d97706' : '#16a34a')}}>{formatDate(doc.expiryDate)}</span></>}
                         </div>
                         {doc.url && (
                           <a
@@ -634,7 +686,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                         <Trash2 size={14} />
                       </button>
                     </div>
-                  ))}
+                  )})}
                 </div>
               )}
             </div>

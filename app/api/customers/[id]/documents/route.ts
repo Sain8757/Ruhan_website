@@ -32,6 +32,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       name: body.name,
       url: body.url,
       type: body.type || "OTHER",
+      expiryDate: body.expiryDate ? new Date(body.expiryDate) : null,
     },
   });
 

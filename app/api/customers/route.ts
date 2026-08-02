@@ -37,24 +37,51 @@ export async function GET(req: NextRequest) {
     ];
     baseWhere.aadhaarNumber = null;
     baseWhere.panNumber = null;
+  } else if (filter === "FOLLOW_UP") {
+    baseWhere.followUpDate = { lte: new Date() };
   }
   
   const where = baseWhere;
 
-  const [customersData, total] = await Promise.all([
-    prisma.customer.findMany({
-      where,
-      skip,
-      take: limit,
+  let customersData, total;
+
+  if (filter === "BIRTHDAY") {
+    // Fetch all with dob, then filter in JS because Prisma doesn't support day/month matching easily
+    const allWithDob = await prisma.customer.findMany({
+      where: { ...where, dob: { not: null } },
       orderBy: { createdAt: "desc" },
       include: {
         _count: { select: { services: true, invoices: true, documents: true } },
         invoices: { where: { paymentStatus: { not: "PAID" } }, select: { total: true, amountPaid: true } },
         services: { where: { paymentStatus: { not: "PAID" } }, select: { fees: true, amountPaid: true } }
       },
-    }),
-    prisma.customer.count({ where }),
-  ]);
+    });
+    
+    const today = new Date();
+    const bdayCustomers = allWithDob.filter(c => 
+      c.dob && 
+      c.dob.getDate() === today.getDate() && 
+      c.dob.getMonth() === today.getMonth()
+    );
+    
+    total = bdayCustomers.length;
+    customersData = bdayCustomers.slice(skip, skip + limit);
+  } else {
+    [customersData, total] = await Promise.all([
+      prisma.customer.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        include: {
+          _count: { select: { services: true, invoices: true, documents: true } },
+          invoices: { where: { paymentStatus: { not: "PAID" } }, select: { total: true, amountPaid: true } },
+          services: { where: { paymentStatus: { not: "PAID" } }, select: { fees: true, amountPaid: true } }
+        },
+      }),
+      prisma.customer.count({ where }),
+    ]);
+  }
 
   const customers = customersData.map(c => {
     const invoiceDues = c.invoices.reduce((acc, inv) => acc + (inv.total - inv.amountPaid), 0);

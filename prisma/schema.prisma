@@ -76,6 +76,7 @@ model Customer {
   dob            DateTime?
   anniversary    DateTime?
   groupId        String?
+  followUpDate   DateTime?
 
   referredById   String?
   referredBy     Customer?     @relation("CustomerReferral", fields: [referredById], references: [id])
@@ -249,6 +250,7 @@ model Document {
   name        String
   url         String
   type        String
+  expiryDate  DateTime?
   createdAt   DateTime @default(now())
 
   @@index([customerId])

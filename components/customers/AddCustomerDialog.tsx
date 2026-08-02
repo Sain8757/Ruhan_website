@@ -16,7 +16,7 @@ export default function AddCustomerDialog({ isOpen, onClose, onSuccess, zIndex, 
   const [formData, setFormData] = useState({
     name: '', mobile: '', email: '', address: '',
     aadhaarNumber: '', panNumber: '',
-    dob: '', tags: '', rating: '5'
+    dob: '', anniversary: '', tags: '', rating: '5'
   });
 
   // Pre-fill initial input if provided when opened
@@ -28,7 +28,7 @@ export default function AddCustomerDialog({ isOpen, onClose, onSuccess, zIndex, 
         name: isMobile ? '' : search,
         mobile: isMobile ? search : '',
         email: '', address: '', aadhaarNumber: '', panNumber: '',
-        dob: '', tags: '', rating: '5'
+        dob: '', anniversary: '', tags: '', rating: '0'
       });
     }
   }, [isOpen, initialSearch]);
@@ -42,6 +42,7 @@ export default function AddCustomerDialog({ isOpen, onClose, onSuccess, zIndex, 
         ...formData,
         tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
         dob: formData.dob || undefined,
+        anniversary: formData.anniversary || undefined,
         rating: formData.rating ? parseInt(formData.rating) : undefined
       };
       
@@ -63,7 +64,7 @@ export default function AddCustomerDialog({ isOpen, onClose, onSuccess, zIndex, 
 
       const createdCustomer = await response.json();
       toast.success('Customer created successfully');
-      setFormData({ name: '', mobile: '', email: '', address: '', aadhaarNumber: '', panNumber: '', dob: '', tags: '', rating: '5' });
+      setFormData({ name: '', mobile: '', email: '', address: '', aadhaarNumber: '', panNumber: '', dob: '', anniversary: '', tags: '', rating: '5' });
       if (onSuccess) onSuccess(createdCustomer);
       onClose();
     } catch (error: any) {
@@ -223,6 +224,12 @@ export default function AddCustomerDialog({ isOpen, onClose, onSuccess, zIndex, 
               />
             </div>
             <div style={{ display: 'flex', alignItems: 'center' }}>
+              <label style={{ width: '120px' }}>Anniversary:</label>
+              <input type="date" className="legacy-input" style={{ flex: 1 }}
+                value={formData.anniversary} onChange={(e) => setFormData({...formData, anniversary: e.target.value})}
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
               <label style={{ width: '120px' }}>Tags (comma-separated):</label>
               <input type="text" placeholder="e.g. VIP, Regular" className="legacy-input" style={{ flex: 1 }}
                 value={formData.tags} onChange={(e) => setFormData({...formData, tags: e.target.value})}
@@ -236,7 +243,7 @@ export default function AddCustomerDialog({ isOpen, onClose, onSuccess, zIndex, 
           <button type="submit" className="legacy-button" disabled={isSubmitting} style={{ width: '80px' }}>
             <span style={{ color: 'green' }}>✓</span> {isSubmitting ? 'Wait...' : 'OK'}
           </button>
-          <button type="button" className="legacy-button" onClick={() => setFormData({name: '', mobile: '', email: '', address: '', aadhaarNumber: '', panNumber: '', dob: '', tags: '', rating: '5'})} style={{ width: '80px' }}>
+          <button type="button" className="legacy-button" onClick={() => setFormData({name: '', mobile: '', email: '', address: '', aadhaarNumber: '', panNumber: '', dob: '', anniversary: '', tags: '', rating: '5'})} style={{ width: '80px' }}>
             <span style={{ color: 'red' }}>⊗</span> Clear
           </button>
           <button type="button" className="legacy-button" onClick={onClose} style={{ marginLeft: 'auto', width: '80px' }}>
