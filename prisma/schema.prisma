@@ -68,6 +68,7 @@ model Customer {
   services       Service[]
   invoices       Invoice[]
   documents      Document[]
+  payments       CustomerPayment[]
 
   // Advanced CRM Features
   walletBalance  Float         @default(0)
@@ -120,6 +121,7 @@ model Service {
   callbackAt     DateTime?        // Appointment/callback reminder
   comments       Json?            // Internal comment thread [{text,author,createdAt}]
   serviceDocUrls String[]         // Uploaded document URLs
+  payments       CustomerPayment[]
 
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
@@ -143,6 +145,7 @@ model Invoice {
   createdById    String
   createdBy      User          @relation(fields: [createdById], references: [id])
   items          InvoiceItem[]
+  payments       CustomerPayment[]
   subtotal       Float
   discount       Float         @default(0)
   gst            Float         @default(0)
@@ -370,4 +373,28 @@ model FileDrop {
   mobileNumber String?
   direction    String   @default("MOBILE_TO_PC") // "MOBILE_TO_PC" or "PC_TO_MOBILE"
   createdAt    DateTime @default(now())
+}
+
+model CustomerPayment {
+  id            String   @id @default(cuid())
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id])
+  serviceId     String?
+  service       Service? @relation(fields: [serviceId], references: [id])
+  invoiceId     String?
+  invoice       Invoice? @relation(fields: [invoiceId], references: [id])
+  
+  amount        Float
+  paymentMode   PaymentMode @default(CASH)
+  referenceNo   String?
+  notes         String?
+  
+  date          DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  @@index([customerId])
+  @@index([serviceId])
+  @@index([invoiceId])
+  @@index([date])
 }

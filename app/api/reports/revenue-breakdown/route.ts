@@ -13,15 +13,14 @@ export async function GET(req: NextRequest) {
 
   try {
     if (type === "all-time") {
-      const invoices = await prisma.invoice.findMany({
-        where: { paymentStatus: "PAID" },
-        select: { total: true, createdAt: true },
+      const payments = await prisma.customerPayment.findMany({
+        select: { amount: true, date: true },
       });
 
       const grouped = new Map<string, number>();
-      for (const inv of invoices) {
-        const monthYear = format(new Date(inv.createdAt), "MMM yyyy");
-        grouped.set(monthYear, (grouped.get(monthYear) || 0) + inv.total);
+      for (const pay of payments) {
+        const monthYear = format(new Date(pay.date), "MMM yyyy");
+        grouped.set(monthYear, (grouped.get(monthYear) || 0) + pay.amount);
       }
 
       // Format for response
@@ -39,18 +38,15 @@ export async function GET(req: NextRequest) {
       const start = startOfMonth(today);
       const end = endOfMonth(today);
 
-      const invoices = await prisma.invoice.findMany({
-        where: {
-          paymentStatus: "PAID",
-          createdAt: { gte: start, lte: end },
-        },
-        select: { total: true, createdAt: true },
+      const payments = await prisma.customerPayment.findMany({
+        where: { date: { gte: start, lte: end } },
+        select: { amount: true, date: true },
       });
 
       const grouped = new Map<string, number>();
-      for (const inv of invoices) {
-        const dayLabel = format(new Date(inv.createdAt), "dd MMM");
-        grouped.set(dayLabel, (grouped.get(dayLabel) || 0) + inv.total);
+      for (const pay of payments) {
+        const dayLabel = format(new Date(pay.date), "dd MMM");
+        grouped.set(dayLabel, (grouped.get(dayLabel) || 0) + pay.amount);
       }
 
       const results = Array.from(grouped.entries()).map(([dateLabel, revenue]) => ({
@@ -66,27 +62,25 @@ export async function GET(req: NextRequest) {
       const start = startOfDay(today);
       const end = endOfDay(today);
 
-      const invoices = await prisma.invoice.findMany({
-        where: {
-          paymentStatus: "PAID",
-          createdAt: { gte: start, lte: end },
-        },
+      const payments = await prisma.customerPayment.findMany({
+        where: { date: { gte: start, lte: end } },
         select: { 
           id: true, 
-          invoiceNumber: true, 
-          total: true, 
-          createdAt: true,
-          customer: { select: { name: true } }
+          amount: true, 
+          date: true,
+          customer: { select: { name: true } },
+          invoice: { select: { invoiceNumber: true } },
+          service: { select: { serviceType: true, trackingId: true } }
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { date: 'desc' }
       });
 
-      const results = invoices.map(inv => ({
-        id: inv.id,
-        invoiceNumber: inv.invoiceNumber,
-        customerName: inv.customer?.name || "Unknown",
-        time: format(new Date(inv.createdAt), "hh:mm a"),
-        revenue: inv.total
+      const results = payments.map(pay => ({
+        id: pay.id,
+        invoiceNumber: pay.invoice?.invoiceNumber || pay.service?.trackingId || pay.service?.serviceType || "Payment",
+        customerName: pay.customer?.name || "Unknown",
+        time: format(new Date(pay.date), "hh:mm a"),
+        revenue: pay.amount
       }));
 
       return NextResponse.json({ type: "list", data: results });

@@ -42,6 +42,18 @@ export async function POST(
       },
     });
 
+    if (Number(amountPaid) > 0 && !invoice.notes?.includes("Service ID:")) {
+      await prisma.customerPayment.create({
+        data: {
+          customerId: invoice.customerId,
+          invoiceId: invoice.id,
+          amount: Number(amountPaid),
+          paymentMode: (paymentMode || invoice.paymentMode) as any,
+          notes: "Invoice settlement payment",
+        }
+      });
+    }
+
     return NextResponse.json(updatedInvoice);
   } catch (error: any) {
     console.error("Error settling invoice:", error);

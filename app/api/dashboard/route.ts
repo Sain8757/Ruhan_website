@@ -19,48 +19,30 @@ export async function GET() {
   const lastMonthEnd = endOfDay(subDays(startMonth, 1));
 
   const [
-    todayInvoices,
-    todayServicesRevenue,
+    todayPayments,
     todayCustomers,
     pendingServices,
     completedToday,
     totalCustomers,
-    monthlyInvoices,
-    monthlyServicesRevenue,
+    monthlyPayments,
     recentServices,
     recentActivities,
     lowStockItems,
-    invoicesLast7,
-    servicesLast7,
+    paymentsLast7,
     partialInvoicesCount,
-    yesterdayInvoices,
-    yesterdayServicesRevenue,
+    yesterdayPayments,
     yesterdayCustomers,
-    lastWeekDayInvoices,
-    lastWeekDayServicesRevenue,
-    lastMonthInvoices,
-    lastMonthServicesRevenue,
+    lastWeekDayPayments,
+    lastMonthPayments,
     topServicesRaw,
     overdueServices,
     dueTodayServices,
   ] = await Promise.all([
-    // Today's invoices
-    prisma.invoice.aggregate({
-      where: {
-        createdAt: { gte: startToday, lte: endToday },
-        paymentStatus: { in: ["PAID", "PARTIAL"] },
-        NOT: { notes: { contains: "Service ID:" } }
-      },
-      _sum: { amountPaid: true },
+    // Today's Payments
+    prisma.customerPayment.aggregate({
+      where: { date: { gte: startToday, lte: endToday } },
+      _sum: { amount: true },
       _count: true,
-    }),
-    // Today's services fees
-    prisma.service.aggregate({
-      where: {
-        createdAt: { gte: startToday, lte: endToday },
-        paymentStatus: { in: ["PAID", "PARTIAL"] },
-      },
-      _sum: { amountPaid: true },
     }),
     // Today's new customers
     prisma.customer.count({
@@ -76,22 +58,10 @@ export async function GET() {
     }),
     // Total customers
     prisma.customer.count(),
-    // Monthly invoice revenue
-    prisma.invoice.aggregate({
-      where: {
-        createdAt: { gte: startMonth },
-        paymentStatus: { in: ["PAID", "PARTIAL"] },
-        NOT: { notes: { contains: "Service ID:" } }
-      },
-      _sum: { amountPaid: true },
-    }),
-    // Monthly service revenue
-    prisma.service.aggregate({
-      where: {
-        createdAt: { gte: startMonth },
-        paymentStatus: { in: ["PAID", "PARTIAL"] },
-      },
-      _sum: { amountPaid: true },
+    // Monthly Payments
+    prisma.customerPayment.aggregate({
+      where: { date: { gte: startMonth } },
+      _sum: { amount: true },
     }),
     // Recent services
     prisma.service.findMany({
@@ -113,22 +83,10 @@ export async function GET() {
       ORDER BY quantity ASC
       LIMIT 5
     `.catch(() => []),
-    // Last 7 days invoices
-    prisma.invoice.findMany({
-      where: {
-        createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
-        paymentStatus: { in: ["PAID", "PARTIAL"] },
-        NOT: { notes: { contains: "Service ID:" } }
-      },
-      select: { amountPaid: true, createdAt: true },
-    }),
-    // Last 7 days services
-    prisma.service.findMany({
-      where: {
-        createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
-        paymentStatus: { in: ["PAID", "PARTIAL"] },
-      },
-      select: { amountPaid: true, createdAt: true },
+    // Last 7 days Payments
+    prisma.customerPayment.findMany({
+      where: { date: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } },
+      select: { amount: true, date: true, invoiceId: true },
     }),
     // Partial Invoices Count
     prisma.invoice.count({
@@ -137,61 +95,24 @@ export async function GET() {
         NOT: { notes: { contains: "Service ID:" } }
       }
     }),
-    // Yesterday invoices
-    prisma.invoice.aggregate({
-      where: {
-        createdAt: { gte: yesterdayStart, lte: yesterdayEnd },
-        paymentStatus: { in: ["PAID", "PARTIAL"] },
-        NOT: { notes: { contains: "Service ID:" } }
-      },
-      _sum: { amountPaid: true },
-      _count: true,
-    }),
-    // Yesterday services
-    prisma.service.aggregate({
-      where: {
-        createdAt: { gte: yesterdayStart, lte: yesterdayEnd },
-        paymentStatus: { in: ["PAID", "PARTIAL"] },
-      },
-      _sum: { amountPaid: true },
+    // Yesterday Payments
+    prisma.customerPayment.aggregate({
+      where: { date: { gte: yesterdayStart, lte: yesterdayEnd } },
+      _sum: { amount: true },
     }),
     // Yesterday customers
     prisma.customer.count({
       where: { createdAt: { gte: yesterdayStart, lte: yesterdayEnd } },
     }),
-    // Last week same day invoices
-    prisma.invoice.aggregate({
-      where: {
-        createdAt: { gte: lastWeekDayStart, lte: lastWeekDayEnd },
-        paymentStatus: { in: ["PAID", "PARTIAL"] },
-        NOT: { notes: { contains: "Service ID:" } }
-      },
-      _sum: { amountPaid: true },
+    // Last week same day Payments
+    prisma.customerPayment.aggregate({
+      where: { date: { gte: lastWeekDayStart, lte: lastWeekDayEnd } },
+      _sum: { amount: true },
     }),
-    // Last week same day services
-    prisma.service.aggregate({
-      where: {
-        createdAt: { gte: lastWeekDayStart, lte: lastWeekDayEnd },
-        paymentStatus: { in: ["PAID", "PARTIAL"] },
-      },
-      _sum: { amountPaid: true },
-    }),
-    // Last month invoices
-    prisma.invoice.aggregate({
-      where: {
-        createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
-        paymentStatus: { in: ["PAID", "PARTIAL"] },
-        NOT: { notes: { contains: "Service ID:" } }
-      },
-      _sum: { amountPaid: true },
-    }),
-    // Last month services
-    prisma.service.aggregate({
-      where: {
-        createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
-        paymentStatus: { in: ["PAID", "PARTIAL"] },
-      },
-      _sum: { amountPaid: true },
+    // Last month Payments
+    prisma.customerPayment.aggregate({
+      where: { date: { gte: lastMonthStart, lte: lastMonthEnd } },
+      _sum: { amount: true },
     }),
     // Top services last 30 days
     prisma.service.groupBy({
@@ -230,18 +151,13 @@ export async function GET() {
     revenueByDate[d] = { revenue: 0, invoices: 0 };
   }
   
-  for (const inv of invoicesLast7) {
-    const d = format(new Date(inv.createdAt), "yyyy-MM-dd");
+  for (const pay of paymentsLast7) {
+    const d = format(new Date(pay.date), "yyyy-MM-dd");
     if (d in revenueByDate) {
-      revenueByDate[d].revenue += inv.amountPaid || 0;
-      revenueByDate[d].invoices += 1;
-    }
-  }
-  
-  for (const srv of servicesLast7) {
-    const d = format(new Date(srv.createdAt), "yyyy-MM-dd");
-    if (d in revenueByDate) {
-      revenueByDate[d].revenue += srv.amountPaid || 0;
+      revenueByDate[d].revenue += pay.amount || 0;
+      if (pay.invoiceId) {
+        revenueByDate[d].invoices += 1;
+      }
     }
   }
 
@@ -252,11 +168,11 @@ export async function GET() {
   }));
 
   // Calculate real % changes
-  const todayIncome = (todayInvoices._sum.amountPaid || 0) + (todayServicesRevenue._sum.amountPaid || 0);
-  const yesterdayIncome = (yesterdayInvoices._sum.amountPaid || 0) + (yesterdayServicesRevenue._sum.amountPaid || 0);
-  const lastWeekDayIncome = (lastWeekDayInvoices._sum.amountPaid || 0) + (lastWeekDayServicesRevenue._sum.amountPaid || 0);
-  const monthlyRevenue = (monthlyInvoices._sum.amountPaid || 0) + (monthlyServicesRevenue._sum.amountPaid || 0);
-  const lastMonthRevenue = (lastMonthInvoices._sum.amountPaid || 0) + (lastMonthServicesRevenue._sum.amountPaid || 0);
+  const todayIncome = todayPayments._sum.amount || 0;
+  const yesterdayIncome = yesterdayPayments._sum.amount || 0;
+  const lastWeekDayIncome = lastWeekDayPayments._sum.amount || 0;
+  const monthlyRevenue = monthlyPayments._sum.amount || 0;
+  const lastMonthRevenue = lastMonthPayments._sum.amount || 0;
 
   const calcChange = (current: number, previous: number): { value: string; positive: boolean } => {
     if (previous === 0) return current > 0 ? { value: "+100%", positive: true } : { value: "—", positive: true };
@@ -274,7 +190,7 @@ export async function GET() {
 
   return NextResponse.json({
     todayIncome,
-    todayTransactions: todayInvoices._count,
+    todayTransactions: todayPayments._count,
     todayCustomers,
     pendingServices,
     completedToday,

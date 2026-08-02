@@ -26,6 +26,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
   });
 
+  await prisma.customerPayment.create({
+    data: {
+      customerId: service.customerId,
+      serviceId: service.id,
+      amount: parseFloat(amount),
+      paymentMode: paymentMode as any,
+      notes: "Service fee payment",
+    }
+  });
+
+
   // Log
   const userId = (session.user as any).id;
   await prisma.activityLog.create({

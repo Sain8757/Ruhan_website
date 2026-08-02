@@ -25,26 +25,14 @@ export async function GET(req: NextRequest) {
   };
 
   try {
-    // 1. Get total settled invoices for today
-    const invoices = await prisma.invoice.findMany({
+    // 1. Get total settled payments for today
+    const payments = await prisma.customerPayment.findMany({
       where: {
-        createdAt: dateFilter, // Using createdAt or if we had a settledDate
-        paymentStatus: "PAID",
+        date: dateFilter,
       },
     });
-    
-    // Partially paid invoices (if any) could be calculated by total - balance
-    // Note: If Invoice model doesn't have balance, we use total - amountPaid
-    const partialInvoices = await prisma.invoice.findMany({
-      where: {
-        createdAt: dateFilter,
-        paymentStatus: "PARTIAL",
-      }
-    });
 
-    const invoiceIncome = 
-      invoices.reduce((sum, inv) => sum + inv.amountPaid, 0) + 
-      partialInvoices.reduce((sum, inv) => sum + inv.amountPaid, 0);
+    const invoiceIncome = payments.reduce((sum, pay) => sum + pay.amount, 0);
 
     // 2. Get extra income
     const incomes = await prisma.income.findMany({

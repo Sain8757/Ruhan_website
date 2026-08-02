@@ -96,6 +96,19 @@ export async function POST(req: NextRequest) {
     },
   });
 
+  if (invoice.amountPaid > 0 && !invoice.notes?.includes("Service ID:")) {
+    await prisma.customerPayment.create({
+      data: {
+        customerId: invoice.customerId,
+        invoiceId: invoice.id,
+        amount: invoice.amountPaid,
+        paymentMode: invoice.paymentMode,
+        notes: "Advance/Full payment on invoice creation",
+      },
+    });
+  }
+
+
   // Decrease inventory for each sold item
   if (body.items && body.items.length > 0) {
     for (const item of body.items) {

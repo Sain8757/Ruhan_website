@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
       vendorId: body.vendorId || null,
       vendorCost: parseFloat(body.vendorCost) || 0,
       missingDocs: body.missingDocs || null,
+      amountPaid: parseFloat(body.amountPaid) || 0,
     },
     include: {
       customer: { select: { id: true, name: true, mobile: true } },
@@ -74,6 +75,18 @@ export async function POST(req: NextRequest) {
       details: `Created service: ${service.serviceType} for ${service.customer.name}`,
     },
   });
+
+  if (service.amountPaid > 0) {
+    await prisma.customerPayment.create({
+      data: {
+        customerId: service.customerId,
+        serviceId: service.id,
+        amount: service.amountPaid,
+        paymentMode: service.paymentMode,
+        notes: "Advance payment on service creation",
+      },
+    });
+  }
 
   return NextResponse.json(service, { status: 201 });
 }
