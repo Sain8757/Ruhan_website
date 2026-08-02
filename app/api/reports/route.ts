@@ -164,7 +164,10 @@ export async function GET(req: NextRequest) {
   // Calculate pending dues per customer
   const [unpaidInvoices, unpaidServices] = await Promise.all([
     prisma.invoice.findMany({
-      where: { paymentStatus: { in: ["UNPAID", "PARTIAL"] } },
+      where: { 
+        paymentStatus: { in: ["UNPAID", "PARTIAL"] },
+        NOT: { notes: { contains: "Service ID:" } }
+      },
       include: { customer: true },
     }),
     prisma.service.findMany({
@@ -198,7 +201,7 @@ export async function GET(req: NextRequest) {
   for (const srv of unpaidServices) {
     if (!srv.customer) continue;
     const cid = srv.customerId;
-    const due = srv.fees;
+    const due = srv.fees - (srv.amountPaid || 0);
     if (due <= 0) continue;
 
     if (!customerDuesMap[cid]) {
