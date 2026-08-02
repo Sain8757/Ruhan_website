@@ -58,9 +58,9 @@ export async function GET() {
     prisma.service.aggregate({
       where: {
         createdAt: { gte: startToday, lte: endToday },
-        paymentStatus: "PAID",
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
       },
-      _sum: { fees: true },
+      _sum: { amountPaid: true },
     }),
     // Today's new customers
     prisma.customer.count({
@@ -89,9 +89,9 @@ export async function GET() {
     prisma.service.aggregate({
       where: {
         createdAt: { gte: startMonth },
-        paymentStatus: "PAID",
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
       },
-      _sum: { fees: true },
+      _sum: { amountPaid: true },
     }),
     // Recent services
     prisma.service.findMany({
@@ -126,9 +126,9 @@ export async function GET() {
     prisma.service.findMany({
       where: {
         createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
-        paymentStatus: "PAID",
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
       },
-      select: { fees: true, createdAt: true },
+      select: { amountPaid: true, createdAt: true },
     }),
     // Partial Invoices Count
     prisma.invoice.count({
@@ -151,9 +151,9 @@ export async function GET() {
     prisma.service.aggregate({
       where: {
         createdAt: { gte: yesterdayStart, lte: yesterdayEnd },
-        paymentStatus: "PAID",
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
       },
-      _sum: { fees: true },
+      _sum: { amountPaid: true },
     }),
     // Yesterday customers
     prisma.customer.count({
@@ -172,9 +172,9 @@ export async function GET() {
     prisma.service.aggregate({
       where: {
         createdAt: { gte: lastWeekDayStart, lte: lastWeekDayEnd },
-        paymentStatus: "PAID",
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
       },
-      _sum: { fees: true },
+      _sum: { amountPaid: true },
     }),
     // Last month invoices
     prisma.invoice.aggregate({
@@ -189,9 +189,9 @@ export async function GET() {
     prisma.service.aggregate({
       where: {
         createdAt: { gte: lastMonthStart, lte: lastMonthEnd },
-        paymentStatus: "PAID",
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
       },
-      _sum: { fees: true },
+      _sum: { amountPaid: true },
     }),
     // Top services last 30 days
     prisma.service.groupBy({
@@ -241,7 +241,7 @@ export async function GET() {
   for (const srv of servicesLast7) {
     const d = format(new Date(srv.createdAt), "yyyy-MM-dd");
     if (d in revenueByDate) {
-      revenueByDate[d].revenue += srv.fees;
+      revenueByDate[d].revenue += srv.amountPaid || 0;
     }
   }
 
@@ -252,11 +252,11 @@ export async function GET() {
   }));
 
   // Calculate real % changes
-  const todayIncome = (todayInvoices._sum.amountPaid || 0) + (todayServicesRevenue._sum.fees || 0);
-  const yesterdayIncome = (yesterdayInvoices._sum.amountPaid || 0) + (yesterdayServicesRevenue._sum.fees || 0);
-  const lastWeekDayIncome = (lastWeekDayInvoices._sum.amountPaid || 0) + (lastWeekDayServicesRevenue._sum.fees || 0);
-  const monthlyRevenue = (monthlyInvoices._sum.amountPaid || 0) + (monthlyServicesRevenue._sum.fees || 0);
-  const lastMonthRevenue = (lastMonthInvoices._sum.amountPaid || 0) + (lastMonthServicesRevenue._sum.fees || 0);
+  const todayIncome = (todayInvoices._sum.amountPaid || 0) + (todayServicesRevenue._sum.amountPaid || 0);
+  const yesterdayIncome = (yesterdayInvoices._sum.amountPaid || 0) + (yesterdayServicesRevenue._sum.amountPaid || 0);
+  const lastWeekDayIncome = (lastWeekDayInvoices._sum.amountPaid || 0) + (lastWeekDayServicesRevenue._sum.amountPaid || 0);
+  const monthlyRevenue = (monthlyInvoices._sum.amountPaid || 0) + (monthlyServicesRevenue._sum.amountPaid || 0);
+  const lastMonthRevenue = (lastMonthInvoices._sum.amountPaid || 0) + (lastMonthServicesRevenue._sum.amountPaid || 0);
 
   const calcChange = (current: number, previous: number): { value: string; positive: boolean } => {
     if (previous === 0) return current > 0 ? { value: "+100%", positive: true } : { value: "—", positive: true };

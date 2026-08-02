@@ -53,8 +53,8 @@ export async function GET(req: NextRequest) {
     }),
     // Total all-time service revenue
     prisma.service.aggregate({
-      where: { paymentStatus: "PAID" },
-      _sum: { fees: true },
+      where: { paymentStatus: { in: ["PAID", "PARTIAL"] } },
+      _sum: { amountPaid: true },
     }),
     // This month invoice revenue
     prisma.invoice.aggregate({
@@ -69,10 +69,10 @@ export async function GET(req: NextRequest) {
     // This month service revenue
     prisma.service.aggregate({
       where: {
-        paymentStatus: "PAID",
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
         createdAt: { gte: startMonth, lte: endMonth },
       },
-      _sum: { fees: true },
+      _sum: { amountPaid: true },
     }),
     // Today invoice revenue
     prisma.invoice.aggregate({
@@ -87,10 +87,10 @@ export async function GET(req: NextRequest) {
     // Today service revenue
     prisma.service.aggregate({
       where: {
-        paymentStatus: "PAID",
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
         createdAt: { gte: startOfDay(today), lte: endOfDay(today) },
       },
-      _sum: { fees: true },
+      _sum: { amountPaid: true },
     }),
     // Invoices for chart range
     prisma.invoice.findMany({
@@ -105,10 +105,10 @@ export async function GET(req: NextRequest) {
     // Services for chart range
     prisma.service.findMany({
       where: {
-        paymentStatus: "PAID",
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
         createdAt: { gte: startRange, lte: endRange },
       },
-      select: { fees: true, createdAt: true },
+      select: { amountPaid: true, createdAt: true },
       orderBy: { createdAt: "asc" },
     }),
     // Total services counts
@@ -160,8 +160,8 @@ export async function GET(req: NextRequest) {
     }),
     // Service sales total in range
     prisma.service.aggregate({
-      where: { paymentStatus: "PAID", createdAt: { gte: startRange, lte: endRange } },
-      _sum: { fees: true },
+      where: { paymentStatus: { in: ["PAID", "PARTIAL"] }, createdAt: { gte: startRange, lte: endRange } },
+      _sum: { amountPaid: true },
       _count: true,
     }),
     // Total expenses in range
@@ -217,7 +217,7 @@ export async function GET(req: NextRequest) {
   for (const srv of servicesInRange) {
     const label = format(new Date(srv.createdAt), "dd MMM");
     if (label in revenueByDate) {
-      revenueByDate[label] += srv.fees;
+      revenueByDate[label] += srv.amountPaid || 0;
     }
   }
   const chartData = Object.entries(revenueByDate).map(([date, revenue]) => ({
@@ -290,16 +290,16 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     summary: {
-      allTimeRevenue: (totalSalesAgg._sum.amountPaid || 0) + (totalServiceSalesAgg._sum.fees || 0),
+      allTimeRevenue: (totalSalesAgg._sum.amountPaid || 0) + (totalServiceSalesAgg._sum.amountPaid || 0),
       allTimeInvoices: totalSalesAgg._count,
-      monthRevenue: (monthSalesAgg._sum.amountPaid || 0) + (monthServiceSalesAgg._sum.fees || 0),
+      monthRevenue: (monthSalesAgg._sum.amountPaid || 0) + (monthServiceSalesAgg._sum.amountPaid || 0),
       monthInvoices: monthSalesAgg._count,
-      todayRevenue: (todaySalesAgg._sum.amountPaid || 0) + (todayServiceSalesAgg._sum.fees || 0),
+      todayRevenue: (todaySalesAgg._sum.amountPaid || 0) + (todayServiceSalesAgg._sum.amountPaid || 0),
       todayInvoices: todaySalesAgg._count,
       totalCustomers,
       inventorySalesRevenue: Math.round(posProductRevenue),
       inventorySalesCount: posProductCount,
-      serviceSalesRevenue: Math.round((serviceSalesTotalInRange._sum.fees || 0) + posServiceRevenue),
+      serviceSalesRevenue: Math.round((serviceSalesTotalInRange._sum.amountPaid || 0) + posServiceRevenue),
       serviceSalesCount: serviceSalesTotalInRange._count,
       totalPendingDueBalance,
       totalExpenses: expensesInRange._sum.amount || 0,
