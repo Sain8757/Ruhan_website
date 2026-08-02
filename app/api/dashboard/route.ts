@@ -37,6 +37,12 @@ export async function GET() {
     topServicesRaw,
     overdueServices,
     dueTodayServices,
+    todayIncomeRaw,
+    monthlyIncomeRaw,
+    incomeLast7,
+    yesterdayIncomeRaw,
+    lastWeekDayIncomeRaw,
+    lastMonthIncomeRaw,
   ] = await Promise.all([
     // Today's Payments
     prisma.customerPayment.aggregate({
@@ -142,6 +148,36 @@ export async function GET() {
       include: { customer: { select: { name: true, mobile: true } } },
       orderBy: { deadline: "asc" },
     }),
+    // Today's Income (Manual)
+    prisma.income.aggregate({
+      where: { date: { gte: startToday, lte: endToday } },
+      _sum: { amount: true },
+    }),
+    // Monthly Income (Manual)
+    prisma.income.aggregate({
+      where: { date: { gte: startMonth } },
+      _sum: { amount: true },
+    }),
+    // Last 7 days Income (Manual)
+    prisma.income.findMany({
+      where: { date: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } },
+      select: { amount: true, date: true },
+    }),
+    // Yesterday Income (Manual)
+    prisma.income.aggregate({
+      where: { date: { gte: yesterdayStart, lte: yesterdayEnd } },
+      _sum: { amount: true },
+    }),
+    // Last week same day Income (Manual)
+    prisma.income.aggregate({
+      where: { date: { gte: lastWeekDayStart, lte: lastWeekDayEnd } },
+      _sum: { amount: true },
+    }),
+    // Last month Income (Manual)
+    prisma.income.aggregate({
+      where: { date: { gte: lastMonthStart, lte: lastMonthEnd } },
+      _sum: { amount: true },
+    }),
   ]);
 
   // Build daily chart data for last 7 days
@@ -160,6 +196,13 @@ export async function GET() {
       }
     }
   }
+  
+  for (const inc of incomeLast7) {
+    const d = format(new Date(inc.date), "yyyy-MM-dd");
+    if (d in revenueByDate) {
+      revenueByDate[d].revenue += inc.amount || 0;
+    }
+  }
 
   const chartData = Object.entries(revenueByDate).map(([date, data]) => ({
     date,
@@ -168,11 +211,11 @@ export async function GET() {
   }));
 
   // Calculate real % changes
-  const todayIncome = todayPayments._sum.amount || 0;
-  const yesterdayIncome = yesterdayPayments._sum.amount || 0;
-  const lastWeekDayIncome = lastWeekDayPayments._sum.amount || 0;
-  const monthlyRevenue = monthlyPayments._sum.amount || 0;
-  const lastMonthRevenue = lastMonthPayments._sum.amount || 0;
+  const todayIncome = (todayPayments._sum.amount || 0) + (todayIncomeRaw._sum.amount || 0);
+  const yesterdayIncome = (yesterdayPayments._sum.amount || 0) + (yesterdayIncomeRaw._sum.amount || 0);
+  const lastWeekDayIncome = (lastWeekDayPayments._sum.amount || 0) + (lastWeekDayIncomeRaw._sum.amount || 0);
+  const monthlyRevenue = (monthlyPayments._sum.amount || 0) + (monthlyIncomeRaw._sum.amount || 0);
+  const lastMonthRevenue = (lastMonthPayments._sum.amount || 0) + (lastMonthIncomeRaw._sum.amount || 0);
 
   const calcChange = (current: number, previous: number): { value: string; positive: boolean } => {
     if (previous === 0) return current > 0 ? { value: "+100%", positive: true } : { value: "—", positive: true };

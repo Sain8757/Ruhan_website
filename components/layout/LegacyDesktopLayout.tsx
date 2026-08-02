@@ -106,7 +106,8 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<{
     pendingServices: any[];
     lowStockItems: any[];
-  }>({ pendingServices: [], lowStockItems: [] });
+    overdueInvoices: any[];
+  }>({ pendingServices: [], lowStockItems: [], overdueInvoices: [] });
 
   useEffect(() => {
     fetch("/api/notifications")
@@ -120,7 +121,7 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
   }, []);
 
   const totalNotifs =
-    notifications.pendingServices.length + notifications.lowStockItems.length;
+    notifications.pendingServices.length + notifications.lowStockItems.length + notifications.overdueInvoices.length;
 
   const getWindowTitle = () => {
     if (pathname === "/") return "Dashboard";
@@ -490,6 +491,42 @@ function LegacyDesktopInner({ children }: { children: React.ReactNode }) {
                             </div>
                           ))}
                         </div>
+
+                        {notifications.overdueInvoices.length > 0 && (
+                          <div style={{ padding: "4px" }}>
+                            <div
+                              style={{
+                                background: "#cc0000",
+                                color: "#fff",
+                                fontWeight: "bold",
+                                padding: "2px 4px",
+                                marginBottom: "4px",
+                              }}
+                            >
+                              OVERDUE INVOICES
+                            </div>
+                            {notifications.overdueInvoices.map((inv) => (
+                              <div
+                                key={inv.id}
+                                style={{
+                                  display: "flex",
+                                  gap: "8px",
+                                  padding: "4px",
+                                  borderBottom: "1px dotted #808080",
+                                }}
+                              >
+                                <AlertTriangle size={14} color="#cc0000" style={{ marginTop: "2px", flexShrink: 0 }} />
+                                <div>
+                                  <div style={{ fontWeight: "bold" }}>{inv.customer?.name}</div>
+                                  <div style={{ color: "#404040", fontSize: "10px" }}>
+                                    Rs. {inv.total} - Due {new Date(inv.dueDate).toLocaleDateString()}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
                         <button
                           type="button"
                           onClick={() => {

@@ -10,7 +10,7 @@ export async function GET() {
   startOfToday.setHours(0, 0, 0, 0);
 
   try {
-    const [pendingServices, lowStockItems] = await Promise.all([
+    const [pendingServices, lowStockItems, overdueInvoices] = await Promise.all([
       prisma.service.findMany({
         where: {
           status: { notIn: ["DELIVERED", "CANCELLED"] },
@@ -25,11 +25,21 @@ export async function GET() {
         WHERE quantity <= "minStock"
         ORDER BY quantity ASC
       `.catch(() => []),
+      prisma.invoice.findMany({
+        where: {
+          paymentStatus: { in: ["UNPAID", "PARTIAL"] },
+          dueDate: { lt: startOfToday },
+          NOT: { notes: { contains: "Service ID:" } }
+        },
+        include: { customer: { select: { name: true, mobile: true } } },
+        orderBy: { dueDate: "asc" },
+      }),
     ]);
 
     return NextResponse.json({
       pendingServices,
       lowStockItems,
+      overdueInvoices,
     });
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch notifications" }, { status: 500 });

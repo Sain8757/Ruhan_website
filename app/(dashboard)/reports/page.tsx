@@ -26,6 +26,8 @@ interface ReportData {
     serviceSalesCount: number;
     totalPendingDueBalance?: number;
     totalExpenses?: number;
+    allTimeExpenses?: number;
+    rangeRevenue?: number;
   };
   chartData: { date: string; revenue: number }[];
   serviceStats: Record<string, number>;
@@ -476,7 +478,7 @@ export default function ReportsPage() {
             <span className="text-[10px] font-bold bg-white/20 px-2 py-0.5 rounded-full">Selected Period</span>
           </div>
           <div className="text-2xl font-black tracking-tight mt-1">
-            {formatCurrency((summary.inventorySalesRevenue + summary.serviceSalesRevenue) - (summary.totalExpenses || 0))}
+            {formatCurrency((summary.rangeRevenue || 0) - (summary.totalExpenses || 0))}
           </div>
           <p className="text-xs text-blue-200 mt-1">Gross Revenue - Expenses</p>
         </div>

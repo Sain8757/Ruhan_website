@@ -77,6 +77,14 @@ export const WORKSPACE_MODULES: WorkspaceModule[] = [
     keywords: ["invoice", "payment", "cash", "upi", "card"],
   },
   {
+    id: "udhaar",
+    label: "Udhaar Ledger",
+    href: "/udhaar",
+    icon: "BookOpen",
+    section: "Business",
+    keywords: ["udhaar", "credit", "pending", "ledger", "customer"],
+  },
+  {
     id: "photo-studio",
     label: "Photo Studio",
     href: "/photo-studio",

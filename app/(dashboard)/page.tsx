@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import {
   TrendingUp,
   Users,
@@ -388,6 +389,9 @@ export default function DashboardPage() {
   const [now, setNow] = useState(new Date());
   const autoRefreshRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const { data: session } = useSession();
+  const userName = session?.user?.name || "Ruhan";
+
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(timer);
@@ -575,7 +579,7 @@ export default function DashboardPage() {
             </div>
             
             <h1 className="text-xl sm:text-2xl font-bold mb-1" style={{ color: "#000000", letterSpacing: "0px" }}>
-              {greeting}, Ruhan! {greetingEmoji}
+              {greeting}, {userName}! {greetingEmoji}
             </h1>
             
             <p className="text-xs font-semibold flex items-center gap-1.5" style={{ color: "#000000" }}>

@@ -112,7 +112,7 @@ function ContextMenu({ ctx, onClose, onStatusChange, onOpenDetails }: { ctx:CtxS
   const is:React.CSSProperties={ display:"flex",alignItems:"center",gap:8,padding:"5px 12px",cursor:"pointer" };
   const s=ctx.service;
   const Item=({icon,label,onClick,danger}:{icon:string;label:string;onClick:()=>void;danger?:boolean})=>(
-    <div style={{ ...is,color:danger?"#cc0000":"black" }} onMouseEnter={e=>(e.currentTarget.style.background="#000080,e.currentTarget.style.color=danger?'#ff8080':'white'")} onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color=danger?"#cc0000":"black";}} onClick={()=>{onClick();onClose();}}>
+    <div style={{ ...is,color:danger?"#cc0000":"black" }} onMouseEnter={e=>{e.currentTarget.style.background="#000080";e.currentTarget.style.color=danger?'#ff8080':'white';}} onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color=danger?"#cc0000":"black";}} onClick={()=>{onClick();onClose();}}>
       <span>{icon}</span>{label}
     </div>
   );
@@ -443,7 +443,7 @@ export default function ServicesPage() {
   const fetchServices=useCallback(async()=>{
     setLoading(true);
     try {
-      const res=await fetch("/api/services?limit=200");
+      const res=await fetch("/api/services");
       const data=await res.json();
       const svcs:Service[]=data.services||[];
       setServices(svcs); setTotal(data.total||0);

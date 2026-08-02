@@ -5,7 +5,7 @@ import {
   BookOpen, TrendingUp, TrendingDown, IndianRupee, ArrowUpRight, ArrowDownRight,
   FileText, Loader2, Download, RefreshCw, ChevronRight, X, Printer,
   BarChart3, Wallet, Receipt, Calendar, AlertCircle, CheckCircle2,
-  CreditCard, Smartphone, Banknote, Building2
+  CreditCard, Smartphone, Banknote, Building2, Edit3
 } from "lucide-react";
 import PageHeader from "@/components/layout/PageHeader";
 import { useToast } from "@/contexts/ToastContext";
@@ -477,16 +477,38 @@ function LedgerTab({ from, to }: { from: string; to: string }) {
 function CashFlowTab({ from, to }: { from: string; to: string }) {
   const [data, setData] = useState<CashFlowData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editingOb, setEditingOb] = useState<{ date: string; amount: number } | null>(null);
   const toast = useToast();
 
-  useEffect(() => {
+  const fetchCashFlow = useCallback(() => {
     setLoading(true);
     fetch(`/api/accounts/cash-flow?from=${from}&to=${to}`)
       .then((r) => r.json())
       .then(setData)
       .catch(() => toast.error("Cash Flow load nahi hua"))
       .finally(() => setLoading(false));
-  }, [from, to]);
+  }, [from, to, toast]);
+
+  useEffect(() => {
+    fetchCashFlow();
+  }, [fetchCashFlow]);
+
+  const handleUpdateOb = async () => {
+    if (!editingOb) return;
+    try {
+      const res = await fetch("/api/accounts/cash-flow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: editingOb.date, opening: editingOb.amount }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      toast.success("Opening balance updated!");
+      setEditingOb(null);
+      fetchCashFlow();
+    } catch {
+      toast.error("Failed to update opening balance");
+    }
+  };
 
   if (loading) return <div style={{ padding: 40, textAlign: "center" }}><Loader2 size={24} className="animate-spin" style={{ color: "#000080", margin: "0 auto" }} /></div>;
   if (!data) return <div style={{ padding: 20, color: "red" }}>Data load nahi hua</div>;
@@ -523,7 +545,12 @@ function CashFlowTab({ from, to }: { from: string; to: string }) {
             {data.dailyFlow.map((row, idx) => (
               <tr key={row.date} style={{ background: idx % 2 === 0 ? "#fff" : "#f9f9f6", borderBottom: "1px solid #e8e8e8" }}>
                 <td style={{ padding: "6px 10px", borderRight: "1px solid #e8e8e8", fontWeight: "bold" }}>{row.displayDate}</td>
-                <td style={{ padding: "6px 10px", textAlign: "right", borderRight: "1px solid #e8e8e8", color: "#555" }}>{fmt(row.opening)}</td>
+                <td style={{ padding: "6px 10px", textAlign: "right", borderRight: "1px solid #e8e8e8", color: "#555", cursor: "pointer" }}
+                    onClick={() => setEditingOb({ date: row.date, amount: row.opening })}
+                    title="Click to edit Opening Balance"
+                >
+                  {fmt(row.opening)} <Edit3 size={10} className="inline ml-1 text-gray-400" />
+                </td>
                 <td style={{ padding: "6px 10px", textAlign: "right", borderRight: "1px solid #e8e8e8", color: "#166534", fontWeight: "bold" }}>{row.cashIn > 0 ? fmt(row.cashIn) : "—"}</td>
                 <td style={{ padding: "6px 10px", textAlign: "right", borderRight: "1px solid #e8e8e8", color: "#dc2626", fontWeight: "bold" }}>{row.cashOut > 0 ? fmt(row.cashOut) : "—"}</td>
                 <td style={{ padding: "6px 10px", textAlign: "right", borderRight: "1px solid #e8e8e8", fontWeight: "bold", color: row.net >= 0 ? "#166534" : "#dc2626" }}>
@@ -555,6 +582,30 @@ function CashFlowTab({ from, to }: { from: string; to: string }) {
           </tfoot>
         </table>
       </div>
+
+      {editingOb && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999 }}>
+          <div className="legacy-window" style={{ width: 300, background: "#d4d0c8" }}>
+            <div className="legacy-window-titlebar">
+              <div className="title-text">Set Opening Balance</div>
+              <button className="legacy-btn-close" onClick={() => setEditingOb(null)}>×</button>
+            </div>
+            <div style={{ padding: 12 }}>
+              <div style={{ marginBottom: 12, fontSize: 12, fontWeight: "bold" }}>Date: {new Date(editingOb.date).toLocaleDateString()}</div>
+              <input
+                type="number"
+                value={editingOb.amount}
+                onChange={(e) => setEditingOb({ ...editingOb, amount: parseFloat(e.target.value) || 0 })}
+                style={{ width: "100%", padding: 4, marginBottom: 12, borderTop: "2px solid #808080", borderLeft: "2px solid #808080", borderBottom: "2px solid #fff", borderRight: "2px solid #fff", outline: "none" }}
+              />
+              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                <button style={{ padding: "4px 12px", background: "#d4d0c8", borderTop: "2px solid #fff", borderLeft: "2px solid #fff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", cursor: "pointer" }} onClick={() => setEditingOb(null)}>Cancel</button>
+                <button style={{ padding: "4px 12px", background: "#d4d0c8", borderTop: "2px solid #fff", borderLeft: "2px solid #fff", borderRight: "2px solid #404040", borderBottom: "2px solid #404040", fontWeight: "bold", cursor: "pointer" }} onClick={handleUpdateOb}>Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -25,9 +25,14 @@ export async function GET(req: NextRequest) {
 
   const [
     allTimePayments,
+    allTimeIncome,
+    allTimeExpenses,
     monthPayments,
+    monthIncome,
     todayPayments,
+    todayIncome,
     paymentsInRange,
+    incomeInRange,
     totalServices,
     totalCustomers,
     topServices,
@@ -43,8 +48,20 @@ export async function GET(req: NextRequest) {
       _sum: { amount: true },
       _count: true,
     }),
+    prisma.income.aggregate({
+      _sum: { amount: true },
+      _count: true,
+    }),
+    prisma.expense.aggregate({
+      _sum: { amount: true },
+    }),
     // This month Payments
     prisma.customerPayment.aggregate({
+      where: { date: { gte: startMonth, lte: endMonth } },
+      _sum: { amount: true },
+      _count: true,
+    }),
+    prisma.income.aggregate({
       where: { date: { gte: startMonth, lte: endMonth } },
       _sum: { amount: true },
       _count: true,
@@ -55,8 +72,18 @@ export async function GET(req: NextRequest) {
       _sum: { amount: true },
       _count: true,
     }),
+    prisma.income.aggregate({
+      where: { date: { gte: startOfDay(today), lte: endOfDay(today) } },
+      _sum: { amount: true },
+      _count: true,
+    }),
     // Payments for chart range
     prisma.customerPayment.findMany({
+      where: { date: { gte: startRange, lte: endRange } },
+      select: { amount: true, date: true },
+      orderBy: { date: "asc" },
+    }),
+    prisma.income.findMany({
       where: { date: { gte: startRange, lte: endRange } },
       select: { amount: true, date: true },
       orderBy: { date: "asc" },
@@ -156,6 +183,12 @@ export async function GET(req: NextRequest) {
       revenueByDate[label] += pay.amount || 0;
     }
   }
+  for (const inc of incomeInRange) {
+    const label = format(new Date(inc.date), "dd MMM");
+    if (label in revenueByDate) {
+      revenueByDate[label] += inc.amount || 0;
+    }
+  }
   const chartData = Object.entries(revenueByDate).map(([date, revenue]) => ({
     date,
     revenue: Math.round(revenue),
@@ -220,6 +253,8 @@ export async function GET(req: NextRequest) {
 
   const pendingDueCustomers = Object.values(customerDuesMap).sort((a, b) => b.totalDue - a.totalDue);
   const totalPendingDueBalance = pendingDueCustomers.reduce((acc, c) => acc + c.totalDue, 0);
+  
+  const rangeRevenue = paymentsInRange.reduce((acc, p) => acc + (p.amount || 0), 0) + incomeInRange.reduce((acc, i) => acc + (i.amount || 0), 0);
 
   // Service status breakdown
   const serviceStats: Record<string, number> = {};
@@ -229,12 +264,13 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     summary: {
-      allTimeRevenue: allTimePayments._sum.amount || 0,
-      allTimeInvoices: allTimePayments._count || 0,
-      monthRevenue: monthPayments._sum.amount || 0,
-      monthInvoices: monthPayments._count || 0,
-      todayRevenue: todayPayments._sum.amount || 0,
-      todayInvoices: todayPayments._count || 0,
+      allTimeRevenue: (allTimePayments._sum.amount || 0) + (allTimeIncome._sum.amount || 0),
+      allTimeInvoices: (allTimePayments._count || 0) + (allTimeIncome._count || 0),
+      monthRevenue: (monthPayments._sum.amount || 0) + (monthIncome._sum.amount || 0),
+      monthInvoices: (monthPayments._count || 0) + (monthIncome._count || 0),
+      todayRevenue: (todayPayments._sum.amount || 0) + (todayIncome._sum.amount || 0),
+      todayInvoices: (todayPayments._count || 0) + (todayIncome._count || 0),
+      rangeRevenue,
       totalCustomers,
       inventorySalesRevenue: Math.round(posProductRevenue),
       inventorySalesCount: posProductCount,
@@ -242,6 +278,7 @@ export async function GET(req: NextRequest) {
       serviceSalesCount: serviceSalesTotalInRange._count,
       totalPendingDueBalance,
       totalExpenses: expensesInRange._sum.amount || 0,
+      allTimeExpenses: allTimeExpenses._sum.amount || 0,
     },
     chartData,
     serviceStats,

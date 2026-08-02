@@ -22,7 +22,8 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
   const [notifications, setNotifications] = useState<{
     pendingServices: Array<{ id: string; customer?: { name: string }; serviceType: string; createdAt: string }>;
     lowStockItems: Array<{ id: string; name: string; quantity: number; minStock: number }>;
-  }>({ pendingServices: [], lowStockItems: [] });
+    overdueInvoices: Array<{ id: string; customer?: { name: string }; total: number; dueDate: string }>;
+  }>({ pendingServices: [], lowStockItems: [], overdueInvoices: [] });
 
   const notifRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -85,7 +86,7 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const totalNotifs = notifications.pendingServices.length + notifications.lowStockItems.length;
+  const totalNotifs = notifications.pendingServices.length + notifications.lowStockItems.length + notifications.overdueInvoices.length;
 
   return (
     <header className="app-header">
@@ -301,6 +302,35 @@ export default function Header({ onMenuToggle, pageTitle }: HeaderProps) {
                                   </div>
                                   <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                                     Only {item.quantity} left (Min: {item.minStock})
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {notifications.overdueInvoices.length > 0 && (
+                        <div>
+                          <div className="px-2 py-1 text-xs font-semibold uppercase tracking-wider mb-1 text-red-500">
+                            Overdue Invoices
+                          </div>
+                          {notifications.overdueInvoices.map((inv) => (
+                            <div
+                              key={inv.id}
+                              className="p-2 rounded-lg hover:bg-[var(--bg-tertiary)] transition-colors mb-1 cursor-default"
+                            >
+                              <div className="flex items-start gap-2">
+                                <AlertTriangle size={14} className="text-red-500 mt-0.5 shrink-0" />
+                                <div>
+                                  <div
+                                    className="text-sm font-medium leading-tight"
+                                    style={{ color: "var(--text-primary)" }}
+                                  >
+                                    {inv.customer?.name}
+                                  </div>
+                                  <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                                    Rs. {inv.total} - Due {new Date(inv.dueDate).toLocaleDateString()}
                                   </div>
                                 </div>
                               </div>
