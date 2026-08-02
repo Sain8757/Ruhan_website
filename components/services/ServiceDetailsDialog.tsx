@@ -7,7 +7,7 @@ import {
   Loader2, Copy, ExternalLink, MessageCircle, RefreshCw, Printer,
   FileText, Trash2, Check, User, IndianRupee, Tag, Briefcase,
   Upload, X, Download, Clock, Send, AlertTriangle, PlusCircle,
-  CreditCard, Activity
+  CreditCard, Activity, CheckCircle
 } from "lucide-react";
 import html2canvas from 'html2canvas-pro';
 import TokenReceipt from '@/components/kiosk/TokenReceipt';
@@ -198,7 +198,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
         setCallbackAt(data.callbackAt ? new Date(data.callbackAt).toISOString().slice(0,16) : "");
         setDocUrls(data.serviceDocUrls || []);
         setComments(Array.isArray(data.comments) ? data.comments : []);
-        setPayAmount(String(data.fees || ""));
+        setPayAmount(String(Math.max(0, (data.fees || 0) - (data.amountPaid || 0))));
         setLoading(false);
         // Load related services
         fetch(`/api/services?customerId=${data.customerId}&limit=10`)
@@ -554,6 +554,12 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
 
   const collectPayment = async () => {
     if (!payAmount || !serviceId) return;
+    const payAmt = parseFloat(payAmount);
+    const pending = Math.max(0, fees - amountPaid);
+    if (payAmt > pending) {
+      toast.error(`Cannot collect more than pending dues (₹${pending}).`);
+      return;
+    }
     setCollecting(true);
     try {
       const res = await fetch(`/api/services/${serviceId}/payment`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ amount: parseFloat(payAmount), paymentMode: payMode }) });
@@ -884,20 +890,8 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                               </select>
                             </div>
                             <div>
-                              <label style={{ fontSize:"11px",display:"block",marginBottom:"3px" }}>Payment Status:</label>
-                              <select style={Sel()} value={paymentStatus} onChange={e => setPaymentStatus(e.target.value)}>
-                                <option value="UNPAID">Unpaid</option><option value="PARTIAL">Partial</option><option value="PAID">Paid</option>
-                              </select>
-                            </div>
-                            <div>
-                              <label style={{ fontSize:"11px",display:"block",marginBottom:"3px" }}>Payment Mode:</label>
-                              <select style={Sel()} value={paymentMode} onChange={e => setPaymentMode(e.target.value)}>
-                                <option value="PENDING">Pending</option><option value="CASH">Cash</option><option value="UPI">UPI</option><option value="CARD">Card</option>
-                              </select>
-                            </div>
-                            <div>
                               <label style={{ fontSize:"11px",display:"block",marginBottom:"3px" }}>Fees Amount (₹):</label>
-                              <input type="number" style={Inp()} value={fees} min={0} onChange={e => setFees(parseFloat(e.target.value)||0)} />
+                              <input type="number" style={Inp()} value={fees} disabled={true} title="To change fees, edit the Service Master price." />
                             </div>
                           </div>
                         </div>
@@ -1196,6 +1190,25 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                             ))}
                           </div>
                         </div>
+
+                        {/* Manual Status Override */}
+                        <div style={{ ...groove,padding:"10px",background:"#d4d0c8" }}>
+                          <SHead icon={<CheckCircle size={11}/>} label="Update Payment Status" color="#000080" />
+                          <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px" }}>
+                            <div>
+                              <label style={{ fontSize:"11px",display:"block",marginBottom:"3px" }}>Payment Status:</label>
+                              <select style={Sel()} value={paymentStatus} onChange={e => setPaymentStatus(e.target.value)}>
+                                <option value="UNPAID">Unpaid</option><option value="PARTIAL">Partial</option><option value="PAID">Paid</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label style={{ fontSize:"11px",display:"block",marginBottom:"3px" }}>Payment Mode:</label>
+                              <select style={Sel()} value={paymentMode} onChange={e => setPaymentMode(e.target.value)}>
+                                <option value="PENDING">Pending</option><option value="CASH">Cash</option><option value="UPI">UPI</option><option value="CARD">Card</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
                         {fees - amountPaid > 0 && (
                           <div style={{ display:"flex",justifyContent:"flex-end" }}>
                             <button type="button" onClick={() => sendWA(WA_TEMPLATES.PAYMENT, { pending: (fees - amountPaid).toString() })}
@@ -1222,13 +1235,13 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                               </select>
                             </div>
                           </div>
-                          <button type="button" onClick={collectPayment} disabled={collecting || !payAmount}
-                            style={Btn({background:"#006600",color:"white",width:"100%",justifyContent:"center",padding:"8px",fontSize:"13px",fontWeight:"bold"})}>
+                          <button type="button" onClick={collectPayment} disabled={collecting || !payAmount || parseFloat(payAmount) > Math.max(0, fees - amountPaid) || Math.max(0, fees - amountPaid) === 0}
+                            style={Btn({background: Math.max(0, fees - amountPaid) === 0 ? "#ccc" : "#006600",color: Math.max(0, fees - amountPaid) === 0 ? "#888" : "white",width:"100%",justifyContent:"center",padding:"8px",fontSize:"13px",fontWeight:"bold"})}>
                             {collecting ? <Loader2 size={13} className="animate-spin"/> : <Check size={13}/>}
-                            {collecting ? "Processing..." : `Collect ₹${payAmount||"0"} via ${payMode}`}
+                            {collecting ? "Processing..." : Math.max(0, fees - amountPaid) === 0 ? "Fully Paid" : `Collect ₹${payAmount||"0"} via ${payMode}`}
                           </button>
                           <div style={{ fontSize:"10px",color:"#666",marginTop:"6px",textAlign:"center" }}>
-                            {parseFloat(payAmount||"0") >= fees ? "✓ Full payment" : `Partial — ₹${Math.max(0, fees - parseFloat(payAmount||"0"))} remaining`}
+                            {parseFloat(payAmount||"0") === Math.max(0, fees - amountPaid) ? "✓ Full pending amount" : `Partial — ₹${Math.max(0, Math.max(0, fees - amountPaid) - parseFloat(payAmount||"0"))} will remain`}
                           </div>
                         </div>
 
@@ -1236,7 +1249,7 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                         <div style={{ ...groove,padding:"8px",background:"#d4d0c8" }}>
                           <SHead icon="⚡" label="Quick Amounts" />
                           <div style={{ display:"flex",gap:"6px",flexWrap:"wrap" }}>
-                            {[fees, Math.ceil(fees/2), 10, 20, 50, 100, 200, 500].filter((v,i,a) => v>0 && a.indexOf(v)===i).slice(0,6).map(amt => (
+                            {[Math.max(0, fees - amountPaid), Math.ceil(Math.max(0, fees - amountPaid)/2), 10, 20, 50, 100, 200, 500].filter((v,i,a) => v>0 && v<=Math.max(0, fees - amountPaid) && a.indexOf(v)===i).slice(0,6).map(amt => (
                               <button key={amt} type="button" onClick={() => setPayAmount(String(amt))} style={Btn({padding:"4px 12px",fontSize:"12px"})}>₹{amt}</button>
                             ))}
                           </div>

@@ -70,32 +70,44 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     // Auto-Billing logic
     if (body.status === "DELIVERED" && oldService.status !== "DELIVERED" && service.fees > 0) {
-      const existingInvoice = await prisma.invoice.findFirst({
-        where: { notes: { contains: service.id } }
-      });
-      if (!existingInvoice) {
-        const invNumber = 'INV-' + Math.random().toString(36).substr(2, 6).toUpperCase();
-        await prisma.invoice.create({
-          data: {
-            invoiceNumber: invNumber,
-            customerId: service.customerId,
-            createdById: userId,
-            subtotal: service.fees,
-            total: service.fees,
-            amountPaid: service.amountPaid,
-            paymentMode: service.paymentMode,
-            paymentStatus: service.paymentStatus,
-            notes: `Auto-generated for Service ID: ${service.id}`,
-            items: {
-              create: [{
-                name: service.serviceType,
-                quantity: 1,
-                price: service.fees,
-                total: service.fees
-              }]
-            }
-          }
+      try {
+        const existingInvoice = await prisma.invoice.findFirst({
+          where: { notes: { contains: service.id } }
         });
+        if (!existingInvoice) {
+          const invNumber = 'INV-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+          
+          // Fallback to real admin user if userId is "admin-hardcoded"
+          let finalUserId = userId;
+          if (finalUserId === "admin-hardcoded") {
+            const firstAdmin = await prisma.user.findFirst();
+            if (firstAdmin) finalUserId = firstAdmin.id;
+          }
+
+          await prisma.invoice.create({
+            data: {
+              invoiceNumber: invNumber,
+              customerId: service.customerId,
+              createdById: finalUserId,
+              subtotal: service.fees,
+              total: service.fees,
+              amountPaid: service.amountPaid,
+              paymentMode: service.paymentMode,
+              paymentStatus: service.paymentStatus,
+              notes: `Auto-generated for Service ID: ${service.id}`,
+              items: {
+                create: [{
+                  name: service.serviceType,
+                  quantity: 1,
+                  price: service.fees,
+                  total: service.fees
+                }]
+              }
+            }
+          });
+        }
+      } catch (invoiceError) {
+        console.error("Failed to auto-generate invoice:", invoiceError);
       }
 
       // Add Loyalty Points to Customer

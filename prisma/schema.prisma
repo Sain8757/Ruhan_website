@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,78 +7,48 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  ADMIN
-  OPERATOR
-}
-
-enum ServiceStatus {
-  PENDING
-  SUBMITTED
-  PROCESSING
-  APPROVED
-  DELIVERED
-  CANCELLED
-}
-
-enum PaymentMode {
-  CASH
-  UPI
-  CARD
-  PENDING
-}
-
-enum PaymentStatus {
-  UNPAID
-  PARTIAL
-  PAID
-}
-
 model User {
-  id             String        @id @default(cuid())
-  name           String
-  email          String        @unique
-  password       String
-  role           UserRole      @default(OPERATOR)
-  isActive       Boolean       @default(true)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  activityLogs   ActivityLog[]
-  services       Service[]
-  invoices       Invoice[]
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  password     String
+  role         UserRole      @default(OPERATOR)
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  activityLogs ActivityLog[]
+  invoices     Invoice[]
+  services     Service[]
 }
 
 model Customer {
-  id             String        @id @default(cuid())
-  name           String
-  mobile         String        @unique
-  email          String?
-  address        String?
-  aadhaarNumber  String?
-  panNumber      String?
-  photoUrl       String?
-  signatureUrl   String?
-  notes          String?
-  loyaltyPoints  Int           @default(0)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-  services       Service[]
-  invoices       Invoice[]
-  documents      Document[]
-  payments       CustomerPayment[]
-
-  // Advanced CRM Features
-  walletBalance  Float         @default(0)
-  rating         Int?
-  tags           String[]
-  dob            DateTime?
-  anniversary    DateTime?
-  groupId        String?
-  followUpDate   DateTime?
-
-  referredById   String?
-  referredBy     Customer?     @relation("CustomerReferral", fields: [referredById], references: [id])
-  referrals      Customer[]    @relation("CustomerReferral")
+  id            String            @id @default(cuid())
+  name          String
+  mobile        String            @unique
+  email         String?
+  address       String?
+  aadhaarNumber String?
+  panNumber     String?
+  photoUrl      String?
+  signatureUrl  String?
+  notes         String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  loyaltyPoints Int               @default(0)
+  anniversary   DateTime?
+  dob           DateTime?
+  groupId       String?
+  rating        Int?
+  referredById  String?
+  tags          String[]
+  walletBalance Float             @default(0)
+  followUpDate  DateTime?
+  referredBy    Customer?         @relation("CustomerReferral", fields: [referredById], references: [id])
+  referrals     Customer[]        @relation("CustomerReferral")
+  payments      CustomerPayment[]
+  documents     Document[]
+  invoices      Invoice[]
+  services      Service[]
 
   @@index([name])
   @@index([aadhaarNumber])
@@ -91,43 +58,41 @@ model Customer {
 }
 
 model Service {
-  id             String        @id @default(cuid())
+  id             String            @id @default(cuid())
   serviceType    String
-  status         ServiceStatus @default(PENDING)
+  status         ServiceStatus     @default(PENDING)
   customerId     String
-  customer       Customer      @relation(fields: [customerId], references: [id])
   assignedToId   String?
-  assignedTo     User?         @relation(fields: [assignedToId], references: [id])
-  fees           Float         @default(0)
-  paymentStatus  PaymentStatus @default(UNPAID)
-  paymentMode    PaymentMode   @default(PENDING)
-  amountPaid     Float         @default(0)
+  fees           Float             @default(0)
+  paymentStatus  PaymentStatus     @default(UNPAID)
+  paymentMode    PaymentMode       @default(PENDING)
   notes          String?
   requiredDocs   String[]
   submittedAt    DateTime?
   approvedAt     DateTime?
-  trackingId     String?       @unique // Unique short ID for customer tracking portal
-  tokenNumber    Int?          // Sequential token e.g. T001, T002 for kiosk queue
-  isKioskRequest Boolean       @default(false)
-  deadline       DateTime?
-  referenceNo    String?       // Government portal application reference number
-  vendorId       String?
-  vendor         Vendor?       @relation(fields: [vendorId], references: [id])
-  vendorCost     Float?        @default(0)
-  missingDocs    String?
   deliveredAt    DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  deadline       DateTime?
+  missingDocs    String?
+  referenceNo    String?
+  trackingId     String?           @unique
+  vendorCost     Float?            @default(0)
+  vendorId       String?
   tasks          Json?
-  tags           String[]         // e.g. ["urgent", "govt-portal", "outsourced"]
-  callbackAt     DateTime?        // Appointment/callback reminder
-  comments       Json?            // Internal comment thread [{text,author,createdAt}]
-  serviceDocUrls String[]         // Uploaded document URLs
-  payments       CustomerPayment[]
-
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-
-  rating         Int?
+  isKioskRequest Boolean           @default(false)
+  tokenNumber    Int?
+  callbackAt     DateTime?
+  comments       Json?
+  serviceDocUrls String[]
+  tags           String[]
+  amountPaid     Float             @default(0)
   feedback       String?
+  rating         Int?
+  payments       CustomerPayment[]
+  assignedTo     User?             @relation(fields: [assignedToId], references: [id])
+  customer       Customer          @relation(fields: [customerId], references: [id])
+  vendor         Vendor?           @relation(fields: [vendorId], references: [id])
 
   @@index([trackingId])
   @@index([serviceType])
@@ -138,26 +103,26 @@ model Service {
 }
 
 model Invoice {
-  id             String        @id @default(cuid())
-  invoiceNumber  String        @unique
-  customerId     String
-  customer       Customer      @relation(fields: [customerId], references: [id])
-  createdById    String
-  createdBy      User          @relation(fields: [createdById], references: [id])
-  items          InvoiceItem[]
-  payments       CustomerPayment[]
-  subtotal       Float
-  discount       Float         @default(0)
-  gst            Float         @default(0)
-  total          Float
-  amountPaid     Float         @default(0)
-  paymentMode    PaymentMode   @default(CASH)
-  paymentStatus  PaymentStatus @default(UNPAID)
-  type           String        @default("INVOICE") // INVOICE | QUOTATION
-  dueDate        DateTime?
-  notes          String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id            String            @id @default(cuid())
+  invoiceNumber String            @unique
+  customerId    String
+  createdById   String
+  subtotal      Float
+  discount      Float             @default(0)
+  gst           Float             @default(0)
+  total         Float
+  paymentMode   PaymentMode       @default(CASH)
+  paymentStatus PaymentStatus     @default(UNPAID)
+  notes         String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  amountPaid    Float             @default(0)
+  dueDate       DateTime?
+  type          String            @default("INVOICE")
+  payments      CustomerPayment[]
+  createdBy     User              @relation(fields: [createdById], references: [id])
+  customer      Customer          @relation(fields: [customerId], references: [id])
+  items         InvoiceItem[]
 
   @@index([customerId])
   @@index([paymentStatus])
@@ -166,31 +131,31 @@ model Invoice {
 }
 
 model InvoiceItem {
-  id             String   @id @default(cuid())
-  invoiceId      String
-  invoice        Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  name           String
-  quantity       Int
-  price          Float
-  total          Float
+  id        String  @id @default(cuid())
+  invoiceId String
+  name      String
+  quantity  Int
+  price     Float
+  total     Float
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@index([name])
 }
 
 model Book {
-  id             String     @id @default(cuid())
-  name           String
-  author         String?
-  category       String?
-  isbn           String?
-  purchasePrice  Float
-  sellingPrice   Float
-  quantity       Int        @default(0)
-  minStock       Int        @default(5)
-  barcode        String?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  sales          BookSale[]
+  id            String     @id @default(cuid())
+  name          String
+  author        String?
+  category      String?
+  isbn          String?
+  purchasePrice Float
+  sellingPrice  Float
+  quantity      Int        @default(0)
+  minStock      Int        @default(5)
+  barcode       String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  sales         BookSale[]
 
   @@index([name])
   @@index([category])
@@ -200,31 +165,31 @@ model Book {
 }
 
 model BookSale {
-  id         String   @id @default(cuid())
-  bookId     String
-  book       Book     @relation(fields: [bookId], references: [id])
-  quantity   Int
-  price      Float
-  total      Float
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  bookId    String
+  quantity  Int
+  price     Float
+  total     Float
+  createdAt DateTime @default(now())
+  book      Book     @relation(fields: [bookId], references: [id])
 
   @@index([bookId])
   @@index([createdAt])
 }
 
 model InventoryItem {
-  id             String                  @id @default(cuid())
-  name           String
-  category       String
-  purchasePrice  Float
-  sellingPrice   Float
-  quantity       Int                     @default(0)
-  minStock       Int                     @default(5)
-  unit           String                  @default("piece")
-  requiredDocs   String[]                @default([])
-  createdAt      DateTime                @default(now())
-  updatedAt      DateTime                @updatedAt
-  transactions   InventoryTransaction[]
+  id            String                 @id @default(cuid())
+  name          String
+  category      String
+  purchasePrice Float
+  sellingPrice  Float
+  quantity      Int                    @default(0)
+  minStock      Int                    @default(5)
+  unit          String                 @default("piece")
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  requiredDocs  String[]               @default([])
+  transactions  InventoryTransaction[]
 
   @@index([name])
   @@index([category])
@@ -232,14 +197,14 @@ model InventoryItem {
 }
 
 model InventoryTransaction {
-  id          String        @id @default(cuid())
-  itemId      String
-  item        InventoryItem @relation(fields: [itemId], references: [id])
-  type        String        // PURCHASE | SALE
-  quantity    Int
-  price       Float
-  notes       String?
-  createdAt   DateTime      @default(now())
+  id        String        @id @default(cuid())
+  itemId    String
+  type      String
+  quantity  Int
+  price     Float
+  notes     String?
+  createdAt DateTime      @default(now())
+  item      InventoryItem @relation(fields: [itemId], references: [id])
 
   @@index([itemId])
   @@index([type])
@@ -247,28 +212,28 @@ model InventoryTransaction {
 }
 
 model Document {
-  id          String   @id @default(cuid())
-  customerId  String
-  customer    Customer @relation(fields: [customerId], references: [id])
-  name        String
-  url         String
-  type        String
-  expiryDate  DateTime?
-  createdAt   DateTime @default(now())
+  id         String    @id @default(cuid())
+  customerId String
+  name       String
+  url        String
+  type       String
+  createdAt  DateTime  @default(now())
+  expiryDate DateTime?
+  customer   Customer  @relation(fields: [customerId], references: [id])
 
   @@index([customerId])
   @@index([type])
 }
 
 model ActivityLog {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  action      String
-  entity      String?
-  entityId    String?
-  details     String?
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
+  entity    String?
+  entityId  String?
+  details   String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([entity, entityId])
@@ -276,10 +241,10 @@ model ActivityLog {
 }
 
 model ShopSettings {
-  id          String   @id @default(cuid())
-  key         String   @unique
-  value       String
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
 }
 
 model Expense {
@@ -309,26 +274,26 @@ model Income {
 }
 
 model Vendor {
-  id          String   @id @default(cuid())
-  name        String
-  phone       String?
-  company     String?
-  balance     Float    @default(0) // Positive means we owe them, negative means they owe us
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String              @id @default(cuid())
+  name         String
+  phone        String?
+  company      String?
+  balance      Float               @default(0)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  services     Service[]
   transactions VendorTransaction[]
-  services    Service[]
 }
 
 model VendorTransaction {
   id          String   @id @default(cuid())
   vendorId    String
-  vendor      Vendor   @relation(fields: [vendorId], references: [id])
-  type        String   // PURCHASE (Adds to Udhaar/Balance) | PAYMENT (Reduces Balance)
+  type        String
   amount      Float
   description String?
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
+  vendor      Vendor   @relation(fields: [vendorId], references: [id])
 
   @@index([vendorId])
   @@index([type])
@@ -340,24 +305,24 @@ model OnlineServiceCategory {
   title       String
   description String?
   tag         String?
-  icon        String?             // e.g. "HeartPulse"
+  icon        String?
   order       Int                 @default(0)
-  links       OnlineServiceLink[]
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
+  links       OnlineServiceLink[]
 
   @@index([order])
 }
 
 model OnlineServiceLink {
-  id          String                @id @default(cuid())
-  categoryId  String
-  category    OnlineServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  title       String
-  href        String
-  order       Int                   @default(0)
-  createdAt   DateTime              @default(now())
-  updatedAt   DateTime              @updatedAt
+  id         String                @id @default(cuid())
+  categoryId String
+  title      String
+  href       String
+  order      Int                   @default(0)
+  createdAt  DateTime              @default(now())
+  updatedAt  DateTime              @updatedAt
+  category   OnlineServiceCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@index([categoryId])
   @@index([order])
@@ -369,32 +334,57 @@ model FileDrop {
   url          String
   size         Int
   type         String   @default("unknown")
-  customerName String?
-  mobileNumber String?
-  direction    String   @default("MOBILE_TO_PC") // "MOBILE_TO_PC" or "PC_TO_MOBILE"
   createdAt    DateTime @default(now())
+  customerName String?
+  direction    String   @default("MOBILE_TO_PC")
+  mobileNumber String?
 }
 
 model CustomerPayment {
-  id            String   @id @default(cuid())
-  customerId    String
-  customer      Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  serviceId     String?
-  service       Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  invoiceId     String?
-  invoice       Invoice? @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  
-  amount        Float
-  paymentMode   PaymentMode @default(CASH)
-  referenceNo   String?
-  notes         String?
-  
-  date          DateTime @default(now())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
+  id          String      @id @default(cuid())
+  customerId  String
+  serviceId   String?
+  invoiceId   String?
+  amount      Float
+  paymentMode PaymentMode @default(CASH)
+  referenceNo String?
+  notes       String?
+  date        DateTime    @default(now())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  customer    Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  invoice     Invoice?    @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  service     Service?    @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
   @@index([customerId])
   @@index([serviceId])
   @@index([invoiceId])
   @@index([date])
+}
+
+enum UserRole {
+  ADMIN
+  OPERATOR
+}
+
+enum ServiceStatus {
+  PENDING
+  SUBMITTED
+  PROCESSING
+  APPROVED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMode {
+  CASH
+  UPI
+  CARD
+  PENDING
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIAL
+  PAID
 }
