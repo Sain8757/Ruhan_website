@@ -8,16 +8,25 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { id } = await params;
 
-  const customer = await prisma.customer.findUnique({
+  const customerData = await prisma.customer.findUnique({
     where: { id },
     include: {
       services: { orderBy: { createdAt: "desc" } },
       invoices: { orderBy: { createdAt: "desc" }, include: { items: true } },
       documents: { orderBy: { createdAt: "desc" } },
+      _count: { select: { services: true, invoices: true, documents: true } }
     },
   });
 
-  if (!customer) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!customerData) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  // Calculate dues
+  const invoiceDues = customerData.invoices.reduce((acc, inv) => acc + (inv.total - inv.amountPaid), 0);
+  const serviceDues = customerData.services.reduce((acc, srv) => acc + (srv.fees - srv.amountPaid), 0);
+  const totalDues = invoiceDues + serviceDues;
+
+  const customer = { ...customerData, totalDues };
+
   return NextResponse.json(customer);
 }
 
@@ -28,17 +37,26 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
   const body = await req.json();
 
+  const dataToUpdate: any = {
+    name: body.name,
+    mobile: body.mobile,
+    email: body.email || null,
+    address: body.address || null,
+    aadhaarNumber: body.aadhaarNumber || null,
+    panNumber: body.panNumber || null,
+    notes: body.notes || null,
+  };
+
+  if (body.walletBalance !== undefined) dataToUpdate.walletBalance = Number(body.walletBalance);
+  if (body.rating !== undefined) dataToUpdate.rating = body.rating ? Number(body.rating) : null;
+  if (body.tags !== undefined) dataToUpdate.tags = body.tags;
+  if (body.dob !== undefined) dataToUpdate.dob = body.dob ? new Date(body.dob) : null;
+  if (body.anniversary !== undefined) dataToUpdate.anniversary = body.anniversary ? new Date(body.anniversary) : null;
+  if (body.groupId !== undefined) dataToUpdate.groupId = body.groupId || null;
+
   const customer = await prisma.customer.update({
     where: { id },
-    data: {
-      name: body.name,
-      mobile: body.mobile,
-      email: body.email || null,
-      address: body.address || null,
-      aadhaarNumber: body.aadhaarNumber || null,
-      panNumber: body.panNumber || null,
-      notes: body.notes || null,
-    },
+    data: dataToUpdate,
   });
 
   return NextResponse.json(customer);

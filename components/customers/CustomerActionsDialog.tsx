@@ -42,6 +42,9 @@ export default function CustomerActionsDialog({
     address: "",
     aadhaarNumber: "",
     panNumber: "",
+    dob: "",
+    tags: "",
+    rating: "",
   });
   const [isSaving, setIsSaving] = useState(false);
 
@@ -93,6 +96,9 @@ export default function CustomerActionsDialog({
           address: data.address || "",
           aadhaarNumber: data.aadhaarNumber || "",
           panNumber: data.panNumber || "",
+          dob: data.dob ? data.dob.split('T')[0] : "",
+          tags: data.tags ? data.tags.join(', ') : "",
+          rating: data.rating ? data.rating.toString() : "",
         });
         // Reset service form
         setServiceForm({
@@ -122,7 +128,12 @@ export default function CustomerActionsDialog({
       const res = await fetch(`/api/customers/${customerId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editForm),
+        body: JSON.stringify({
+          ...editForm,
+          tags: editForm.tags ? editForm.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+          dob: editForm.dob || undefined,
+          rating: editForm.rating ? parseInt(editForm.rating) : undefined
+        }),
       });
       if (!res.ok) throw new Error("Failed to update customer");
       toast.success("Customer profile updated!");
@@ -460,6 +471,30 @@ export default function CustomerActionsDialog({
                         <input 
                           type="text" pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}" className="legacy-input" style={{ flex: 1, textTransform: "uppercase" }}
                           value={editForm.panNumber} onChange={e => setEditForm({...editForm, panNumber: e.target.value.toUpperCase()})}
+                        />
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <label style={{ width: "120px" }}>Date of Birth:</label>
+                        <input 
+                          type="date" className="legacy-input" style={{ flex: 1 }}
+                          value={editForm.dob} onChange={e => setEditForm({...editForm, dob: e.target.value})}
+                        />
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <label style={{ width: "120px" }}>Tags (csv):</label>
+                        <input 
+                          type="text" className="legacy-input" style={{ flex: 1 }} placeholder="VIP, Defaulter"
+                          value={editForm.tags} onChange={e => setEditForm({...editForm, tags: e.target.value})}
+                        />
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <label style={{ width: "120px" }}>Rating (1-5):</label>
+                        <input 
+                          type="number" className="legacy-input" style={{ flex: 1 }} min="1" max="5"
+                          value={editForm.rating} onChange={e => setEditForm({...editForm, rating: e.target.value})}
                         />
                       </div>
 

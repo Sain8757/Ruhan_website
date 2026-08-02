@@ -24,18 +24,28 @@ export async function GET(req: NextRequest) {
       }
     : {};
 
-  const [customers, total] = await Promise.all([
+  const [customersData, total] = await Promise.all([
     prisma.customer.findMany({
       where,
       skip,
       take: limit,
       orderBy: { createdAt: "desc" },
       include: {
-        _count: { select: { services: true, invoices: true } },
+        _count: { select: { services: true, invoices: true, documents: true } },
+        invoices: { where: { paymentStatus: { not: "PAID" } }, select: { total: true, amountPaid: true } },
+        services: { where: { paymentStatus: { not: "PAID" } }, select: { fees: true, amountPaid: true } }
       },
     }),
     prisma.customer.count({ where }),
   ]);
+
+  const customers = customersData.map(c => {
+    const invoiceDues = c.invoices.reduce((acc, inv) => acc + (inv.total - inv.amountPaid), 0);
+    const serviceDues = c.services.reduce((acc, srv) => acc + (srv.fees - srv.amountPaid), 0);
+    const totalDues = invoiceDues + serviceDues;
+    const { invoices, services, ...rest } = c;
+    return { ...rest, totalDues };
+  });
 
   return NextResponse.json({ customers, total, page, limit });
 }
@@ -56,6 +66,13 @@ export async function POST(req: NextRequest) {
         aadhaarNumber: body.aadhaarNumber || null,
         panNumber: body.panNumber || null,
         notes: body.notes || null,
+        walletBalance: body.walletBalance ? Number(body.walletBalance) : 0,
+        rating: body.rating ? Number(body.rating) : null,
+        tags: body.tags || [],
+        dob: body.dob ? new Date(body.dob) : null,
+        anniversary: body.anniversary ? new Date(body.anniversary) : null,
+        referredById: body.referredById || null,
+        groupId: body.groupId || null,
       },
     });
 

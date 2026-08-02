@@ -69,10 +69,23 @@ model Customer {
   invoices       Invoice[]
   documents      Document[]
 
+  // Advanced CRM Features
+  walletBalance  Float         @default(0)
+  rating         Int?
+  tags           String[]
+  dob            DateTime?
+  anniversary    DateTime?
+  groupId        String?
+
+  referredById   String?
+  referredBy     Customer?     @relation("CustomerReferral", fields: [referredById], references: [id])
+  referrals      Customer[]    @relation("CustomerReferral")
+
   @@index([name])
   @@index([aadhaarNumber])
   @@index([panNumber])
   @@index([createdAt])
+  @@index([referredById])
 }
 
 model Service {

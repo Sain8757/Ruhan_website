@@ -14,12 +14,9 @@ export default function AddCustomerDialog({ isOpen, onClose, onSuccess, zIndex, 
   const toast = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    mobile: '',
-    email: '',
-    address: '',
-    aadhaarNumber: '',
-    panNumber: ''
+    name: '', mobile: '', email: '', address: '',
+    aadhaarNumber: '', panNumber: '',
+    dob: '', tags: '', rating: '5'
   });
 
   // Pre-fill initial input if provided when opened
@@ -30,10 +27,8 @@ export default function AddCustomerDialog({ isOpen, onClose, onSuccess, zIndex, 
       setFormData({
         name: isMobile ? '' : search,
         mobile: isMobile ? search : '',
-        email: '',
-        address: '',
-        aadhaarNumber: '',
-        panNumber: ''
+        email: '', address: '', aadhaarNumber: '', panNumber: '',
+        dob: '', tags: '', rating: '5'
       });
     }
   }, [isOpen, initialSearch]);
@@ -43,10 +38,17 @@ export default function AddCustomerDialog({ isOpen, onClose, onSuccess, zIndex, 
     setIsSubmitting(true);
 
     try {
+      const payload = {
+        ...formData,
+        tags: formData.tags ? formData.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+        dob: formData.dob || undefined,
+        rating: formData.rating ? parseInt(formData.rating) : undefined
+      };
+      
       const response = await fetch('/api/customers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -61,7 +63,7 @@ export default function AddCustomerDialog({ isOpen, onClose, onSuccess, zIndex, 
 
       const createdCustomer = await response.json();
       toast.success('Customer created successfully');
-      setFormData({ name: '', mobile: '', email: '', address: '', aadhaarNumber: '', panNumber: '' });
+      setFormData({ name: '', mobile: '', email: '', address: '', aadhaarNumber: '', panNumber: '', dob: '', tags: '', rating: '5' });
       if (onSuccess) onSuccess(createdCustomer);
       onClose();
     } catch (error: any) {
@@ -209,12 +211,32 @@ export default function AddCustomerDialog({ isOpen, onClose, onSuccess, zIndex, 
           </div>
         </div>
 
+        {/* CRM Details */}
+        <div className="legacy-fieldset" style={{ marginTop: '4px' }}>
+          <div className="legacy-legend">CRM Details</div>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <label style={{ width: '120px' }}>Date of Birth:</label>
+              <input type="date" className="legacy-input" style={{ flex: 1 }}
+                value={formData.dob} onChange={(e) => setFormData({...formData, dob: e.target.value})}
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <label style={{ width: '120px' }}>Tags (comma-separated):</label>
+              <input type="text" placeholder="e.g. VIP, Regular" className="legacy-input" style={{ flex: 1 }}
+                value={formData.tags} onChange={(e) => setFormData({...formData, tags: e.target.value})}
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Action Buttons */}
         <div style={{ display: 'flex', justifyContent: 'flex-start', gap: '8px', marginTop: '8px' }}>
           <button type="submit" className="legacy-button" disabled={isSubmitting} style={{ width: '80px' }}>
             <span style={{ color: 'green' }}>✓</span> {isSubmitting ? 'Wait...' : 'OK'}
           </button>
-          <button type="button" className="legacy-button" onClick={() => setFormData({name: '', mobile: '', email: '', address: '', aadhaarNumber: '', panNumber: ''})} style={{ width: '80px' }}>
+          <button type="button" className="legacy-button" onClick={() => setFormData({name: '', mobile: '', email: '', address: '', aadhaarNumber: '', panNumber: '', dob: '', tags: '', rating: '5'})} style={{ width: '80px' }}>
             <span style={{ color: 'red' }}>⊗</span> Clear
           </button>
           <button type="button" className="legacy-button" onClick={onClose} style={{ marginLeft: 'auto', width: '80px' }}>
