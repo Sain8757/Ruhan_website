@@ -797,6 +797,15 @@ export default function ServiceDetailsDialog({ isOpen, onClose, serviceId, onSuc
                       <button type="button" onClick={() => { navigator.clipboard.writeText(service.trackingId||""); toast.success("Copied!"); }} style={Btn({flex:1,justifyContent:"center",fontSize:"10px"})}><Copy size={9}/> Copy</button>
                       <button type="button" onClick={() => window.open(`/status?query=${service.trackingId}`,"_blank")} style={Btn({flex:1,justifyContent:"center",fontSize:"10px"})}><ExternalLink size={9}/> View</button>
                     </div>
+                    {/* Feature: Send Tracking WA */}
+                    <button type="button" onClick={() => {
+                        if (!service?.customer?.mobile) { toast.error("No mobile number"); return; }
+                        const link = `${window.location.origin}/status`;
+                        const text = `नमस्ते ${service.customer.name},\n\nआपके *${service.serviceType}* का कार्य दर्ज हो चुका है।\nट्रैकिंग आईडी: *${service.trackingId}*\n\nनीचे दिए लिंक पर क्लिक कर के आप ये सभी सुविधाएँ प्राप्त कर सकते हैं:\n✅ लाइव स्टेटस चेक करें\n✅ आवश्यक दस्तावेज़ घर बैठे अपलोड करें\n✅ रसीद और पूरे दस्तावेज़ डाउनलोड करें\n✅ पेंडिंग पेमेंट की जानकारी देखें\n\n🔗 अपना स्टेटस यहाँ ट्रैक करें: ${link}\n\n— RA Seva Point`;
+                        window.open(`https://wa.me/91${service.customer.mobile.replace(/\D/g,"").slice(-10)}?text=${encodeURIComponent(text)}`, "_blank");
+                    }} style={Btn({width:"100%",justifyContent:"center",fontSize:"10px",marginTop:"4px",background:"#25D366",color:"white"})}>
+                      <MessageCircle size={10}/> Send Tracking WA
+                    </button>
                   </div>
 
                   {/* Service Info */}
