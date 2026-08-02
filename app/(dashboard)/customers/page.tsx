@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import * as XLSX from "xlsx";
 import Link from "next/link";
 import {
   Search,
@@ -256,12 +257,47 @@ function CustomerTable({
   );
 }
 
+function ShortcutsHelp({ onClose }: { onClose: () => void }) {
+  const SHORTCUTS = [
+    ["N", "New Customer"],
+    ["E", "Export Excel"],
+    ["?", "Shortcuts Help"],
+    ["Esc", "Close dialogs"],
+    ["/", "Focus Search"],
+  ];
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 99999, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onClose}>
+      <div style={{ background: "#d4d0c8", borderTop: "2px solid #fff", borderLeft: "2px solid #fff", borderRight: "2px solid #808080", borderBottom: "2px solid #808080", width: 320, fontFamily: "Tahoma,sans-serif", boxShadow: "4px 4px 16px rgba(0,0,0,0.4)" }} onClick={e => e.stopPropagation()}>
+        <div style={{ background: "linear-gradient(to right,#000080,#1084d0)", color: "white", padding: "4px 8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontWeight: "bold", fontSize: 12 }}>⌨ Keyboard Shortcuts</span>
+          <button onClick={onClose} style={{ background: "#d4d0c8", borderTop: "2px solid #fff", borderLeft: "2px solid #fff", borderRight: "2px solid #808080", borderBottom: "2px solid #808080", border: "none", width: 18, height: 18, cursor: "pointer", fontSize: 11, fontWeight: "bold" }}>✕</button>
+        </div>
+        <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
+          {SHORTCUTS.map(([key, label]) => (
+            <div key={key} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <kbd style={{ background: "#e8e8e8", borderTop: "2px solid #fff", borderLeft: "2px solid #fff", borderRight: "2px solid #808080", borderBottom: "2px solid #808080", padding: "1px 8px", fontFamily: "monospace", fontSize: 12, minWidth: 50, textAlign: "center" }}>{key}</kbd>
+              <span style={{ fontSize: 12 }}>{label}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ padding: "0 16px 12px" }}>
+          <button onClick={onClose} style={{ width: "100%", padding: "5px", background: "#d4d0c8", fontFamily: "Tahoma,sans-serif", fontSize: 12, cursor: "pointer", borderTop: "2px solid #fff", borderLeft: "2px solid #fff", borderRight: "2px solid #808080", borderBottom: "2px solid #808080" }}>Close (Esc)</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [quickFilter, setQuickFilter] = useState("ALL");
+  const [stats, setStats] = useState({ totalCustomers: 0, totalWallet: 0, totalDues: 0 });
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const toast = useToast();
 
@@ -273,10 +309,26 @@ export default function CustomersPage() {
   // Bulk Selection
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+  const fetchStats = useCallback(async () => {
+    try {
+      const res = await fetch("/api/customers/stats");
+      const data = await res.json();
+      setStats({
+        totalCustomers: data.totalCustomers || 0,
+        totalWallet: data.totalWallet || 0,
+        totalDues: data.totalDues || 0
+      });
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
   const fetchCustomers = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/customers?q=${encodeURIComponent(query)}&page=${page}&limit=20`);
+      const res = await fetch(`/api/customers?q=${encodeURIComponent(query)}&filter=${quickFilter}&page=${page}&limit=20`);
       const data = await res.json();
       setCustomers(data.customers || []);
       setTotal(data.total || 0);
@@ -285,12 +337,28 @@ export default function CustomersPage() {
     } finally {
       setLoading(false);
     }
-  }, [query, page, toast]);
+  }, [query, quickFilter, page, toast]);
 
   useEffect(() => {
     const timer = setTimeout(fetchCustomers, 300);
     return () => clearTimeout(timer);
   }, [fetchCustomers]);
+
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement).tagName;
+      if (["INPUT", "TEXTAREA", "SELECT"].includes(tag)) return;
+      switch (e.key.toLowerCase()) {
+        case "n": setIsAddCustomerOpen(true); break;
+        case "e": handleExportExcel(); break;
+        case "?": setShowShortcuts(true); break;
+        case "/": e.preventDefault(); searchRef.current?.focus(); break;
+        case "escape": setIsAddCustomerOpen(false); setIsActionsOpen(false); setShowShortcuts(false); break;
+      }
+    };
+    document.addEventListener("keydown", h);
+    return () => document.removeEventListener("keydown", h);
+  }, []);
 
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -301,10 +369,35 @@ export default function CustomersPage() {
     else setSelectedIds([]);
   };
 
+  const handleExportExcel = () => {
+    const rows = customers.map(c => ({
+      "Customer Name": c.name,
+      "Mobile": c.mobile,
+      "Email": c.email || "",
+      "Wallet Balance": c.walletBalance || 0,
+      "Total Dues": c.totalDues || 0,
+      "Loyalty Points": c.loyaltyPoints || 0,
+      "Tags": c.tags?.join(", ") || "",
+      "Joined": new Date(c.createdAt).toLocaleDateString()
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Customers");
+    XLSX.writeFile(wb, `customers-${new Date().toISOString().slice(0, 10)}.xlsx`);
+    toast.success("Excel downloaded!");
+  };
+
   const handleBulkWhatsApp = () => {
     if (selectedIds.length === 0) return toast.error("Select customers first");
     toast.success(`Opening Bulk WhatsApp for ${selectedIds.length} customers...`);
-    // Ideally this would open a dialog to type a message and then loop through WA links or use an API
+    const selectedCustomers = customers.filter(c => selectedIds.includes(c.id));
+    selectedCustomers.forEach((c, i) => {
+      setTimeout(() => {
+        const dueText = c.totalDues && c.totalDues > 0 ? `\\nआपका पिछला बकाया (Due): ₹${c.totalDues} है। कृपया जल्द भुगतान करें।` : "";
+        const msg = encodeURIComponent(`नमस्ते ${c.name},\\nRA Seva Point की ओर से संदेश।${dueText}\\n\\nधन्यवाद!`);
+        window.open(`https://wa.me/91${c.mobile}?text=${msg}`, "_blank");
+      }, i * 600);
+    });
   };
 
   const handleImport = () => {
@@ -339,10 +432,7 @@ export default function CustomersPage() {
         subtitle={`${total} registered customers`}
         actions={
           <>
-            <button type="button" className="btn-secondary" onClick={handleImport}>
-              <Upload size={16} /> Import
-            </button>
-            <button type="button" className="btn-secondary">
+            <button type="button" className="btn-secondary" onClick={handleExportExcel}>
               <Download size={16} /> Export
             </button>
             <button type="button" onClick={() => setIsAddCustomerOpen(true)} className="btn-primary">
@@ -364,12 +454,59 @@ export default function CustomersPage() {
         onSuccess={() => fetchCustomers()}
       />
 
+      {/* Analytics Panel */}
+      <div style={{ display: "flex", gap: "10px", margin: "10px 10px", flexWrap: "wrap" }}>
+        <div style={{ flex: 1, minWidth: "150px", background: "#f0f4ff", border: "2px solid #000080", padding: "10px", borderRadius: "4px" }}>
+          <div style={{ fontSize: "11px", color: "#000080", fontWeight: "bold" }}>Total Customers</div>
+          <div style={{ fontSize: "20px", fontWeight: "bold", color: "#333" }}>{stats.totalCustomers}</div>
+        </div>
+        <div style={{ flex: 1, minWidth: "150px", background: "#fff1f0", border: "2px solid #cf1322", padding: "10px", borderRadius: "4px" }}>
+          <div style={{ fontSize: "11px", color: "#cf1322", fontWeight: "bold" }}>Market Udhaar (Dues)</div>
+          <div style={{ fontSize: "20px", fontWeight: "bold", color: "#333" }}>₹{stats.totalDues.toLocaleString("en-IN")}</div>
+        </div>
+        <div style={{ flex: 1, minWidth: "150px", background: "#f6ffed", border: "2px solid #389e0d", padding: "10px", borderRadius: "4px" }}>
+          <div style={{ fontSize: "11px", color: "#389e0d", fontWeight: "bold" }}>Total Wallet Balance</div>
+          <div style={{ fontSize: "20px", fontWeight: "bold", color: "#333" }}>₹{stats.totalWallet.toLocaleString("en-IN")}</div>
+        </div>
+      </div>
+
+      {/* Quick Filters */}
+      <div style={{ display: "flex", gap: "6px", margin: "0 10px 10px", flexWrap: "wrap", borderBottom: "1px solid #ccc", paddingBottom: "10px" }}>
+        {[
+          { key: "ALL", label: "All Customers", color: "#555", bg: "#f0f0f0" },
+          { key: "VIP", label: "VIP ✨", color: "#854d0e", bg: "#fef08a" },
+          { key: "DEFAULTER", label: "Defaulters ⚠️", color: "#991b1b", bg: "#fecaca" },
+          { key: "WALLET", label: "Wallet Active 💰", color: "#166534", bg: "#dcfce7" },
+          { key: "NO_DOCS", label: "Missing Docs 📄", color: "#1e40af", bg: "#dbeafe" }
+        ].map(f => (
+          <button 
+            key={f.key} 
+            onClick={() => { setQuickFilter(f.key); setPage(1); }}
+            style={{ 
+              background: quickFilter === f.key ? f.bg : "#fff",
+              color: quickFilter === f.key ? f.color : "#555",
+              border: `1px solid ${quickFilter === f.key ? f.color : "#ccc"}`,
+              padding: "4px 12px", borderRadius: "12px", fontSize: "11px", fontWeight: "bold", cursor: "pointer",
+              boxShadow: quickFilter === f.key ? "inset 0 2px 4px rgba(0,0,0,0.1)" : "none"
+            }}
+          >
+            {f.label}
+          </button>
+        ))}
+        <button onClick={() => setShowShortcuts(true)} style={{ marginLeft: "auto", background: "#d4d0c8", border: "1px solid #808080", padding: "2px 8px", fontSize: "11px", cursor: "pointer", display: "flex", alignItems: "center", gap: "4px" }}>
+          ⌨ Shortcuts (?)
+        </button>
+      </div>
+
+      {showShortcuts && <ShortcutsHelp onClose={() => setShowShortcuts(false)} />}
+
       {/* Toolbar */}
       <div className="toolbar" style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
         <div className="search-field">
           <Search size={16} />
           <input
             type="text"
+            ref={searchRef}
             placeholder="Search by name, mobile, Aadhaar..."
             className="input-field"
             value={query}

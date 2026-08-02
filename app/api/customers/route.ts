@@ -8,11 +8,12 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const q = searchParams.get("q") || "";
+  const filter = searchParams.get("filter") || "ALL";
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "20");
   const skip = (page - 1) * limit;
 
-  const where = q
+  const baseWhere: any = q
     ? {
         OR: [
           { name: { contains: q, mode: "insensitive" as const } },
@@ -23,6 +24,22 @@ export async function GET(req: NextRequest) {
         ],
       }
     : {};
+    
+  if (filter === "VIP") {
+    baseWhere.tags = { has: "VIP" };
+  } else if (filter === "DEFAULTER") {
+    baseWhere.tags = { has: "Defaulter" };
+  } else if (filter === "WALLET") {
+    baseWhere.walletBalance = { gt: 0 };
+  } else if (filter === "NO_DOCS") {
+    baseWhere.OR = [
+      ...(baseWhere.OR || []),
+    ];
+    baseWhere.aadhaarNumber = null;
+    baseWhere.panNumber = null;
+  }
+  
+  const where = baseWhere;
 
   const [customersData, total] = await Promise.all([
     prisma.customer.findMany({
