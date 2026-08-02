@@ -83,17 +83,17 @@ export async function GET(req: NextRequest) {
     // 5. Get all PAID services within range
     const services = await prisma.service.findMany({
       where: {
-        paymentStatus: "PAID",
+        paymentStatus: { in: ["PAID", "PARTIAL"] },
         createdAt: { gte: startRange },
       },
-      select: { serviceType: true, fees: true },
+      select: { serviceType: true, amountPaid: true },
     });
 
     // 6. Aggregate Service Profits into the existing serviceSalesMap
     for (const srv of services) {
       const current = serviceSalesMap.get(srv.serviceType) || { quantity: 0, profit: 0 };
       current.quantity += 1;
-      current.profit += srv.fees;
+      current.profit += srv.amountPaid;
       serviceSalesMap.set(srv.serviceType, current);
     }
 

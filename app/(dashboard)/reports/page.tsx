@@ -358,7 +358,7 @@ export default function ReportsPage() {
           <div className="text-2xl font-extrabold tracking-tight" style={{ color: "var(--text-primary)" }}>
             {formatCurrency(summary.allTimeRevenue)}
           </div>
-          <p className="text-xs text-slate-400 mt-1">{summary.allTimeInvoices} paid invoices</p>
+          <p className="text-xs text-slate-400 mt-1">{summary.allTimeInvoices} payments recorded</p>
         </div>
 
         <div 
@@ -372,7 +372,7 @@ export default function ReportsPage() {
           <div className="text-2xl font-extrabold tracking-tight" style={{ color: "var(--text-primary)" }}>
             {formatCurrency(summary.monthRevenue)}
           </div>
-          <p className="text-xs text-slate-400 mt-1">{summary.monthInvoices} invoices this month</p>
+          <p className="text-xs text-slate-400 mt-1">{summary.monthInvoices} payments this month</p>
         </div>
 
         <div 
@@ -386,7 +386,7 @@ export default function ReportsPage() {
           <div className="text-2xl font-extrabold tracking-tight" style={{ color: "var(--text-primary)" }}>
             {formatCurrency(summary.todayRevenue)}
           </div>
-          <p className="text-xs text-slate-400 mt-1">{summary.todayInvoices} invoices today</p>
+          <p className="text-xs text-slate-400 mt-1">{summary.todayInvoices} payments today</p>
         </div>
 
         <Link href="/customers" className="glass-card p-6 bg-purple-500/5 cursor-pointer hover:bg-purple-500/10 transition-colors block">

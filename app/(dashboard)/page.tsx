@@ -331,7 +331,7 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
           <div key={p.dataKey} className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full" style={{ background: p.color }} />
             <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>
-              {p.dataKey === "revenue" ? formatCurrency(p.value) : `${p.value} invoices`}
+              {p.dataKey === "revenue" ? formatCurrency(p.value) : `${p.value} transactions`}
             </p>
           </div>
         ))}
@@ -354,7 +354,7 @@ const BarTooltip = ({ active, payload, label }: { active?: boolean; payload?: Ar
       >
         <p className="font-bold text-xs" style={{ color: "var(--text-muted)" }}>{label}</p>
         <p className="font-semibold mt-0.5" style={{ color: "#4f6ef7" }}>
-          {payload[0].value} invoices
+          {payload[0].value} transactions
         </p>
       </div>
     );
