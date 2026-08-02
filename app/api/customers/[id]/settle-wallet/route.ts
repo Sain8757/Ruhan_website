@@ -43,7 +43,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             customerId: customerId,
             invoiceId: invoice.id,
             amount: settleAmount,
-            paymentMode: "WALLET",
+            paymentMode: "CASH",
             notes: "Settled via Wallet Balance",
           }
         });
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
             customerId: customerId,
             serviceId: service.id,
             amount: settleAmount,
-            paymentMode: "WALLET",
+            paymentMode: "CASH",
             notes: "Settled via Wallet Balance",
           }
         });
