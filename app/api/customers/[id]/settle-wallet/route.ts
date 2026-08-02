@@ -37,6 +37,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
           where: { id: invoice.id },
           data: { amountPaid: newPaid, paymentStatus: newStatus }
         });
+
+        await prisma.customerPayment.create({
+          data: {
+            customerId: customerId,
+            invoiceId: invoice.id,
+            amount: settleAmount,
+            paymentMode: "WALLET",
+            notes: "Settled via Wallet Balance",
+          }
+        });
       }
     }
 
@@ -54,6 +64,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         await prisma.service.update({
           where: { id: service.id },
           data: { amountPaid: newPaid, paymentStatus: newStatus }
+        });
+
+        await prisma.customerPayment.create({
+          data: {
+            customerId: customerId,
+            serviceId: service.id,
+            amount: settleAmount,
+            paymentMode: "WALLET",
+            notes: "Settled via Wallet Balance",
+          }
         });
       }
     }
